@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SPRINT · Nata</title>
+<meta name="description" content="SPRINT Durrës — hapur deri vonë. Porosit pizza, suflaqe dhe gatime tradicionale direkt në WhatsApp.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Syne:wght@700;800&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Syne:wght@700;800&display=swap"></noscript>
+<style>
+/* ============================ MOCKUP 4 — "NATA" ==============================
+   Neon dhe qelq (glassmorphism), rrjet bento me pllaka të madhësive të ndryshme,
+   shirit porosie i ngjitur poshtë dhe treguesi "hapur tani" në kohë reale.
+   Niveli i efekteve: NEON + GLASS, i optimizuar për natën dhe delivery.
+   ========================================================================== */
+:root{
+  --red:#FF2E3F; --red-dp:#C10D1C; --gold:#FFC53D; --gold-dp:#E0980A;
+  --bg:#07070B; --glass:rgba(255,255,255,.045); --glass-2:rgba(255,255,255,.075);
+  --stroke:rgba(255,255,255,.12); --txt:#F3F0F6; --muted:#8E8AA0;
+  --glowR:0 0 28px rgba(255,46,63,.55); --glowG:0 0 26px rgba(255,197,61,.5);
+  --display:'Syne',system-ui,sans-serif;
+  --body:'Space Grotesk',system-ui,sans-serif;
+  --max:1230px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);line-height:1.6;
+  overflow-x:clip;-webkit-font-smoothing:antialiased}
+img,svg{max-width:100%;display:block}
+a{color:inherit;text-decoration:none} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.02;letter-spacing:-.02em}
+.wrap{width:min(100% - 2.2rem,var(--max));margin-inline:auto}
+section{position:relative;padding:clamp(3.5rem,8vw,7rem) 0}
+
+/* ---------- blobs ---------- */
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:drift 26s ease-in-out infinite}
+.b1{width:46vw;height:46vw;background:#FF2E3F;top:-14%;left:-10%}
+.b2{width:38vw;height:38vw;background:#FFC53D;bottom:-16%;right:-8%;animation-delay:-9s;opacity:.34}
+.b3{width:30vw;height:30vw;background:#7B1FA2;top:38%;left:52%;animation-delay:-17s;opacity:.28}
+@keyframes drift{33%{transform:translate(6vw,-4vh) scale(1.14)}66%{transform:translate(-5vw,5vh) scale(.9)}}
+.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;
+  background-image:radial-gradient(#fff 1px,transparent 1px);background-size:3px 3px}
+
+/* ---------- glass helper ---------- */
+.glass{background:var(--glass);backdrop-filter:blur(22px) saturate(1.4);
+  -webkit-backdrop-filter:blur(22px) saturate(1.4);border:1px solid var(--stroke);border-radius:24px}
+
+/* ---------- header ---------- */
+header{position:fixed;top:0;left:0;right:0;z-index:90;padding:.9rem 0;transition:.3s}
+header.is-stuck .hd{background:rgba(10,10,16,.72);backdrop-filter:blur(20px);border-color:var(--stroke)}
+.hd{display:flex;align-items:center;gap:1.2rem;padding:.55rem .8rem .55rem 1.1rem;border-radius:20px;
+  border:1px solid transparent;transition:.3s}
+.logo{font-family:var(--display);font-size:1.45rem;letter-spacing:-.03em;display:flex;align-items:center;gap:.55rem}
+.logo .word{white-space:nowrap}
+.logo .n{color:var(--red);text-shadow:var(--glowR)}
+.live{display:inline-flex;align-items:center;gap:.38rem;font-family:var(--body);font-size:.6rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--stroke);border-radius:999px;padding:.22rem .6rem}
+.live i{width:6px;height:6px;border-radius:50%;background:#3ddc84;box-shadow:0 0 10px #3ddc84;animation:blink 2s infinite}
+.live.shut i{background:#ff5a5a;box-shadow:0 0 10px #ff5a5a}
+@keyframes blink{50%{opacity:.35}}
+nav{margin-left:auto;display:flex;gap:1.4rem;align-items:center}
+nav a{font-size:.8rem;font-weight:500;color:#c3bfd4;transition:.25s}
+nav a:hover{color:var(--gold);text-shadow:var(--glowG)}
+.hd-act{display:flex;gap:.5rem;align-items:center}
+.lang{border:1px solid var(--stroke);border-radius:999px;padding:.4rem .72rem;font-size:.7rem;font-weight:700;transition:.25s}
+.lang:hover{border-color:var(--gold);color:var(--gold)}
+.cart-btn{display:flex;align-items:center;gap:.5rem;border-radius:999px;padding:.52rem 1rem;font-size:.76rem;
+  font-weight:700;background:linear-gradient(100deg,var(--red),var(--red-dp));box-shadow:var(--glowR);transition:.25s}
+.cart-btn:hover{transform:translateY(-2px);filter:brightness(1.12)}
+.cart-btn b{background:#fff;color:var(--red-dp);border-radius:999px;min-width:20px;height:20px;
+  display:grid;place-items:center;font-size:.7rem}
+.bump{animation:bump .45s cubic-bezier(.3,1.6,.5,1)}@keyframes bump{40%{transform:scale(1.5)}}
+.burger{display:none;flex-direction:column;gap:5px}
+.burger i{width:23px;height:2px;background:#fff;transition:.3s;display:block}
+body.nav-open .burger i:nth-child(1){transform:translateY(7px) rotate(45deg)}
+body.nav-open .burger i:nth-child(2){opacity:0}
+body.nav-open .burger i:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ---------- hero ---------- */
+.hero{min-height:100svh;display:grid;align-items:center;padding-top:6rem}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:2.5rem;align-items:center}
+.kick{display:inline-flex;align-items:center;gap:.5rem;font-size:.65rem;font-weight:700;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--gold);border:1px solid rgba(255,197,61,.35);border-radius:999px;
+  padding:.42rem 1rem;margin-bottom:1.4rem;background:rgba(255,197,61,.07)}
+h1{font-size:clamp(2.8rem,8vw,6.4rem)}
+h1 .g{background:linear-gradient(100deg,var(--red),var(--gold) 60%,var(--red));background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:slide 7s linear infinite;display:inline-block}
+@keyframes slide{to{background-position:-220% 0}}
+.type{font-family:var(--body);font-size:clamp(.95rem,1.7vw,1.15rem);color:var(--gold);margin-top:.9rem;
+  min-height:1.7em;font-weight:500}
+.type::after{content:'▍';animation:blink 1s step-end infinite;color:var(--red)}
+.hero p.sub{color:#bdb8cc;max-width:44ch;margin:1.1rem 0 2rem;font-weight:400}
+.cta{display:flex;gap:.75rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.95rem 1.7rem;border-radius:999px;font-weight:700;
+  font-size:.82rem;transition:transform .28s,box-shadow .28s,filter .28s}
+.btn-p{background:linear-gradient(100deg,var(--red),var(--red-dp));box-shadow:var(--glowR)}
+.btn-p:hover{transform:translateY(-3px);filter:brightness(1.14)}
+.btn-s{border:1px solid var(--stroke);backdrop-filter:blur(12px)}
+.btn-s:hover{border-color:var(--gold);color:var(--gold);box-shadow:var(--glowG);transform:translateY(-3px)}
+
+.hero-card{padding:1.6rem;display:grid;gap:1rem}
+.hc-top{display:flex;align-items:center;gap:1rem}
+.hc-top svg{width:110px;height:110px;filter:drop-shadow(0 14px 26px rgba(0,0,0,.6));animation:bobf 6s ease-in-out infinite}
+@keyframes bobf{50%{transform:translateY(-10px) rotate(6deg)}}
+.hc-top h3{font-size:1.15rem;margin-bottom:.2rem}
+.hc-top p{font-size:.82rem;color:var(--muted);margin:0}
+.hc-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.hc-meta div{background:var(--glass-2);border:1px solid var(--stroke);border-radius:16px;padding:.75rem .5rem;text-align:center}
+.hc-meta b{display:block;font-family:var(--display);font-size:1.25rem;color:var(--gold)}
+.hc-meta span{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.hc-bar{height:6px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}
+.hc-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--red),var(--gold));
+  width:0;animation:fillb 2.4s .4s cubic-bezier(.2,.9,.3,1) forwards}
+@keyframes fillb{to{width:82%}}
+.hc-note{font-size:.72rem;color:var(--muted);display:flex;justify-content:space-between}
+
+/* ---------- titull ---------- */
+.st{margin-bottom:2.6rem;max-width:58ch}
+.st .k{display:inline-block;font-size:.64rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--red);margin-bottom:.7rem}
+.st h2{font-size:clamp(2rem,5vw,3.7rem)}
+.st p{color:var(--muted);margin-top:.8rem}
+
+/* ---------- bento kategoritë ---------- */
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.cat-card{padding:1.6rem 1.4rem;text-align:left;position:relative;overflow:hidden;
+  background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--stroke);border-radius:24px;
+  transition:transform .4s cubic-bezier(.25,1,.3,1),border-color .35s,box-shadow .35s;
+  transition-delay:calc(var(--i) * 55ms)}
+.cat-card:nth-child(1){grid-column:span 2;grid-row:span 2}
+.cat-card:nth-child(4){grid-column:span 2}
+.cat-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;
+  background:radial-gradient(60% 60% at 30% 0%,rgba(255,46,63,.28),transparent 70%)}
+.cat-card:hover{transform:translateY(-8px);border-color:rgba(255,46,63,.55);box-shadow:0 26px 60px -30px var(--red)}
+.cat-card:hover::after{opacity:1}
+.cat-art{width:78px;height:78px;margin-bottom:1rem;transform:rotate(var(--rot,0deg));
+  transition:transform .5s cubic-bezier(.3,1.4,.4,1);filter:drop-shadow(0 12px 22px rgba(0,0,0,.55))}
+.cat-card:nth-child(1) .cat-art{width:140px;height:140px}
+.cat-card:hover .cat-art{transform:rotate(calc(var(--rot,0deg) + 9deg)) scale(1.12)}
+.cat-card h3{font-size:1.25rem;margin-bottom:.4rem}
+.cat-card:nth-child(1) h3{font-size:1.9rem}
+.cat-card p{font-size:.83rem;color:var(--muted);margin:0}
+
+/* ---------- menuja bento ---------- */
+.menu-bar{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin-bottom:1.8rem}
+.chips{display:flex;gap:.45rem;flex-wrap:wrap;flex:1}
+.chip{border:1px solid var(--stroke);border-radius:999px;padding:.5rem 1.05rem;font-size:.77rem;font-weight:600;
+  color:#b8b3c8;transition:.25s;white-space:nowrap;background:var(--glass)}
+.chip:hover{color:#fff;border-color:var(--gold)}
+.chip.is-on{background:linear-gradient(100deg,var(--red),var(--red-dp));border-color:transparent;color:#fff;box-shadow:var(--glowR)}
+.search{display:flex;align-items:center;gap:.5rem;border:1px solid var(--stroke);border-radius:999px;
+  padding:.46rem 1rem;min-width:200px;background:var(--glass)}
+.search input{background:none;border:0;outline:none;color:#fff;font-size:.85rem;width:100%;font-family:var(--body)}
+.search svg{width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:2}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));grid-auto-rows:250px;gap:.9rem}
+.dish{position:relative;overflow:hidden;border-radius:22px;border:1px solid var(--stroke);background:var(--glass);
+  backdrop-filter:blur(18px);display:flex;flex-direction:column;padding:1rem;
+  transition:transform .4s cubic-bezier(.25,1,.3,1),border-color .35s,box-shadow .35s;
+  transition-delay:calc(var(--i) * 32ms)}
+.dish.wide{grid-column:span 2}
+.dish.tall{grid-row:span 2}
+.dish:hover{transform:translateY(-7px);border-color:rgba(255,197,61,.5);box-shadow:0 24px 55px -30px var(--gold)}
+.dish::before{content:'';position:absolute;width:150px;height:150px;border-radius:50%;filter:blur(50px);
+  background:var(--red);opacity:0;transition:opacity .4s;top:-40px;right:-40px}
+.dish:hover::before{opacity:.4}
+.dish-media{flex:1;display:grid;place-items:center;position:relative;min-height:0}
+.dish-art{max-height:100%;width:auto;max-width:78%;transform:rotate(var(--rot,0deg));transition:transform .5s}
+.dish.wide .dish-art,.dish.tall .dish-art{max-width:64%}
+.dish:hover .dish-art{transform:rotate(var(--rot,0deg)) scale(1.09)}
+.dish-tags{position:absolute;top:0;left:0;display:flex;gap:.3rem;flex-wrap:wrap;z-index:2}
+.tag{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .55rem;border-radius:999px}
+.tag-hot{background:var(--red)} .tag-veg{background:#2fa85a}
+.tag-new{background:var(--gold);color:#1a1200} .tag-top{background:#fff;color:#12101a}
+.dish h3{font-size:.95rem;line-height:1.2;margin-top:.6rem;position:relative;z-index:1}
+.dish .desc{font-size:.76rem;color:var(--muted);margin:.25rem 0 0;display:none}
+.dish.wide .desc,.dish.tall .desc{display:block}
+.dish-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.6rem;position:relative;z-index:1}
+.price{font-family:var(--display);font-size:1.2rem;color:var(--gold);text-shadow:var(--glowG)}
+.add{width:34px;height:34px;border-radius:999px;display:grid;place-items:center;font-size:1.15rem;font-weight:700;
+  background:linear-gradient(100deg,var(--red),var(--red-dp));box-shadow:var(--glowR);transition:.25s;flex-shrink:0}
+.add:hover{transform:scale(1.14) rotate(90deg)}
+.add.is-added{background:#2fa85a;box-shadow:0 0 22px rgba(47,168,90,.6)}
+.menu-empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:3rem 0}
+
+/* ---------- rreth / statistika ---------- */
+.about{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,5vw,4rem);align-items:center}
+.neon-ring{position:relative;aspect-ratio:1;display:grid;place-items:center}
+.neon-ring .r{position:absolute;border-radius:50%;border:2px solid transparent;
+  background:linear-gradient(var(--bg),var(--bg)) padding-box,
+             conic-gradient(var(--red),var(--gold),var(--red)) border-box;animation:spin 18s linear infinite}
+.neon-ring .r1{inset:6%} .neon-ring .r2{inset:20%;animation-duration:26s;animation-direction:reverse;opacity:.6}
+@keyframes spin{to{transform:rotate(360deg)}}
+.neon-ring .mid{width:46%;filter:drop-shadow(0 20px 34px rgba(0,0,0,.7));animation:bobf 7s ease-in-out infinite}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-top:1.8rem}
+.stat{background:var(--glass);border:1px solid var(--stroke);border-radius:18px;padding:1rem 1.1rem;backdrop-filter:blur(16px)}
+.stat b{display:block;font-family:var(--display);font-size:1.9rem;
+  background:linear-gradient(100deg,var(--red),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1}
+.stat span{font-size:.7rem;color:var(--muted)}
+
+/* ---------- review ---------- */
+.revs{display:grid;grid-template-columns:repeat(auto-fit,minmax(275px,1fr));gap:.9rem}
+.review{margin:0;background:var(--glass);border:1px solid var(--stroke);border-radius:22px;padding:1.5rem;
+  backdrop-filter:blur(18px);transition:transform .35s,border-color .35s;transition-delay:calc(var(--i) * 55ms)}
+.review:hover{transform:translateY(-7px);border-color:rgba(255,197,61,.45)}
+.stars{color:var(--gold);letter-spacing:.14em;margin-bottom:.7rem;text-shadow:var(--glowG)}
+.review blockquote{margin:0 0 .9rem;font-size:.93rem;color:#ddd8e8;line-height:1.6}
+.review figcaption{display:flex;justify-content:space-between;font-size:.79rem;
+  border-top:1px solid var(--stroke);padding-top:.7rem}
+.review figcaption span{color:var(--muted);font-size:.67rem;letter-spacing:.1em;text-transform:uppercase}
+
+/* ---------- rezervim ---------- */
+.book{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(2rem,5vw,4rem);align-items:start}
+form.bk{padding:clamp(1.3rem,3vw,2rem);display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.fld{display:grid;gap:.32rem}.fld.full{grid-column:1/-1}
+.fld label{font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fld input,.fld select,.fld textarea{background:rgba(0,0,0,.34);border:1px solid var(--stroke);border-radius:14px;
+  padding:.75rem .9rem;color:#fff;font-family:var(--body);font-size:.92rem;outline:none;transition:.25s;width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,197,61,.14)}
+.fld textarea{resize:vertical;min-height:78px}
+.fld select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+.err{grid-column:1/-1;color:#ff7b7b;font-size:.8rem;display:none}.err.is-on{display:block}
+.bk-act{grid-column:1/-1;display:flex;gap:.65rem;flex-wrap:wrap}
+.wa{display:flex;align-items:center;justify-content:center;gap:.5rem;background:#1FBF63;color:#03210f;
+  border-radius:999px;padding:.9rem 1.4rem;font-weight:700;font-size:.83rem;transition:.25s;flex:1;min-width:210px;
+  box-shadow:0 0 26px rgba(31,191,99,.4)}
+.wa:hover{transform:translateY(-3px);filter:brightness(1.12)}
+.wa.is-disabled{opacity:.35;pointer-events:none;box-shadow:none}
+.mail{border:1px solid var(--stroke);border-radius:999px;padding:.9rem 1.3rem;font-size:.78rem;font-weight:700;transition:.25s}
+.mail:hover{border-color:var(--gold);color:var(--gold)}
+.book-side ul{list-style:none;margin:1.2rem 0 0;padding:0;display:grid;gap:.45rem}
+.book-side li{display:flex;justify-content:space-between;font-size:.86rem;color:var(--muted);
+  border-bottom:1px solid var(--stroke);padding-bottom:.45rem}
+.book-side li b{color:var(--txt);font-weight:500}
+
+/* ---------- kontakt / footer ---------- */
+.contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:.9rem}
+.cbox{padding:1.5rem;transition:.35s}
+.cbox:hover{transform:translateY(-6px);border-color:rgba(255,46,63,.5)}
+.cbox h4{font-family:var(--display);font-size:1.05rem;margin:0 0 .65rem;color:var(--gold)}
+.cbox p{font-size:.89rem;color:#c9c4d8;margin:0}
+.cbox ul{list-style:none;margin:0;padding:0;display:grid;gap:.32rem}
+.cbox li{display:flex;justify-content:space-between;font-size:.81rem;color:var(--muted);gap:1rem}
+.cbox li b{color:#fff;font-weight:500}
+footer{border-top:1px solid var(--stroke);padding:2.4rem 0 7rem}
+.ft{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;align-items:center}
+.ft-soc{display:flex;gap:.5rem}
+.ft-soc a{width:37px;height:37px;border:1px solid var(--stroke);border-radius:999px;display:grid;place-items:center;
+  font-size:.7rem;font-weight:700;transition:.3s}
+.ft-soc a:hover{border-color:var(--red);box-shadow:var(--glowR);transform:translateY(-3px)}
+.ft small{color:var(--muted);font-size:.75rem}
+.note{margin-top:1.2rem;font-size:.67rem;color:#5b5670;border-top:1px solid var(--stroke);padding-top:.9rem;line-height:1.6}
+
+/* ---------- shirit porosie i ngjitur ---------- */
+.orderbar{position:fixed;left:50%;translate:-50% 0;bottom:1rem;z-index:100;width:min(100% - 1.6rem,620px);
+  display:flex;align-items:center;gap:.8rem;padding:.7rem .8rem .7rem 1.2rem;border-radius:999px;
+  background:rgba(14,14,22,.86);backdrop-filter:blur(22px);border:1px solid var(--stroke);
+  box-shadow:0 22px 50px -22px #000;transform:translate(-50%,150%);transition:transform .5s cubic-bezier(.3,1.3,.4,1)}
+body.has-cart .orderbar{transform:translate(-50%,0)}
+.ob-l{display:flex;flex-direction:column;line-height:1.25;flex:1;min-width:0}
+.ob-l b{font-family:var(--display);font-size:1.05rem;color:var(--gold)}
+.ob-l span{font-size:.68rem;color:var(--muted)}
+.ob-btn{display:flex;align-items:center;gap:.45rem;border-radius:999px;padding:.62rem 1.1rem;font-size:.76rem;
+  font-weight:700;white-space:nowrap;transition:.25s}
+.ob-view{border:1px solid var(--stroke)} .ob-view:hover{border-color:var(--gold);color:var(--gold)}
+.ob-wa{background:#1FBF63;color:#03210f;box-shadow:0 0 22px rgba(31,191,99,.45)}
+.ob-wa:hover{transform:translateY(-2px);filter:brightness(1.12)}
+.ob-wa.is-disabled{opacity:.4;pointer-events:none}
+
+/* ---------- shporta ---------- */
+.cart{position:fixed;top:0;right:0;height:100dvh;width:min(410px,100%);z-index:120;
+  background:rgba(12,12,19,.94);backdrop-filter:blur(26px);border-left:1px solid var(--stroke);
+  transform:translateX(102%);transition:transform .5s cubic-bezier(.6,0,.2,1);display:flex;flex-direction:column}
+body.cart-open .cart{transform:none}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:110;opacity:0;visibility:hidden;transition:.4s}
+body.cart-open .scrim{opacity:1;visibility:visible}
+.cart-hd{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.3rem;border-bottom:1px solid var(--stroke)}
+.cart-hd h3{font-size:1.2rem}
+.x{width:33px;height:33px;border-radius:999px;border:1px solid var(--stroke);display:grid;place-items:center;transition:.25s}
+.x:hover{background:var(--red);border-color:var(--red);transform:rotate(90deg)}
+.cart-list{list-style:none;margin:0;padding:1rem 1.3rem;overflow-y:auto;flex:1;display:grid;gap:.6rem;align-content:start}
+.cart-line{display:grid;grid-template-columns:40px 1fr auto auto;gap:.65rem;align-items:center;
+  background:var(--glass);border:1px solid var(--stroke);border-radius:16px;padding:.55rem}
+.cl-img{width:40px;height:40px}
+.cl-name{font-size:.84rem;line-height:1.25}.cl-name em{display:block;font-style:normal;font-size:.71rem;color:var(--muted)}
+.qty{display:flex;align-items:center;gap:.35rem;border:1px solid var(--stroke);border-radius:999px;padding:.08rem .25rem}
+.qty button{width:22px;height:22px;border-radius:999px;display:grid;place-items:center;transition:.2s}
+.qty button:hover{background:var(--red)}
+.qty b{min-width:14px;text-align:center;font-size:.79rem}
+.cl-sum{font-family:var(--display);color:var(--gold);font-size:.94rem}
+.cart-empty{color:var(--muted);text-align:center;padding:3rem 1rem;font-size:.9rem}
+.cart-ft{border-top:1px solid var(--stroke);padding:1.1rem 1.3rem 1.4rem;display:grid;gap:.4rem}
+.row{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
+.row.total{color:var(--txt);font-size:1rem;border-top:1px solid var(--stroke);padding-top:.5rem;margin-top:.25rem}
+.row.total b{font-family:var(--display);font-size:1.5rem;color:var(--gold);text-shadow:var(--glowG)}
+.cart .wa{margin-top:.55rem}
+.cart-note{font-size:.69rem;color:var(--muted);text-align:center;margin:.15rem 0 0}
+.clear{font-size:.69rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.25rem;transition:.2s}
+.clear:hover{color:var(--red)}
+
+[data-reveal]{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.25,1,.3,1),transform .7s cubic-bezier(.25,1,.3,1)}
+[data-reveal].in{opacity:1;transform:none}
+
+@media(max-width:1000px){
+  .bento{grid-template-columns:repeat(2,1fr)}
+  .cat-card:nth-child(1){grid-column:span 2;grid-row:auto}
+  .cat-card:nth-child(4){grid-column:span 2}
+}
+@media(max-width:960px){
+  .hero .wrap{grid-template-columns:1fr}
+  .about,.book{grid-template-columns:1fr}
+  nav{position:fixed;inset:0;background:rgba(7,7,11,.97);backdrop-filter:blur(20px);flex-direction:column;
+    justify-content:center;gap:1.7rem;transform:translateX(100%);transition:transform .45s cubic-bezier(.6,0,.2,1);margin:0}
+  body.nav-open nav{transform:none}
+  nav a{font-family:var(--display);font-size:1.55rem}
+  .burger{display:flex;z-index:95}.hd-act{margin-left:auto}
+  .live{display:none}
+  form.bk{grid-template-columns:1fr}
+  .dish.wide{grid-column:span 1}.dish.tall{grid-row:span 1}
+  .dish.wide .desc,.dish.tall .desc{display:none}
+}
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr 1fr;grid-auto-rows:215px;gap:.6rem}
+  .dish{padding:.7rem}.dish h3{font-size:.82rem}.price{font-size:1rem}
+  .hc-meta{grid-template-columns:repeat(3,1fr)}
+  .orderbar{padding:.6rem .6rem .6rem 1rem;gap:.5rem}
+  .ob-view{display:none}
+}
+
+/* ---- kompaktim i header-it në ekrane të vogla ---- */
+@media(max-width:560px){
+  .logo small,.logo sup{display:none}
+  .cart-btn span[data-i18n]{display:none}
+  .cart-btn{padding:.5rem .75rem}
+  .lang{padding:.36rem .6rem}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="blobs"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+<div class="grain"></div>
+
+<header data-header>
+  <div class="wrap">
+    <div class="hd">
+      <a href="#top" class="logo"><span class="word">SPRI<span class="n">N</span>T</span>
+        <span class="live" id="live"><i></i><span id="liveT">Hapur</span></span></a>
+      <nav data-nav>
+        <a href="#menu" data-i18n="nav_menu"></a>
+        <a href="#about" data-i18n="nav_about"></a>
+        <a href="#revs" data-i18n="nav_reviews"></a>
+        <a href="#book" data-i18n="nav_book"></a>
+        <a href="#contact" data-i18n="nav_contact"></a>
+      </nav>
+      <div class="hd-act">
+        <button class="lang" data-lang-toggle>EN</button>
+        <button class="cart-btn" data-cart-open data-cart-badge>
+          <span data-i18n="cart_title"></span><b data-cart-count>0</b></button>
+        <button class="burger" data-nav-toggle aria-label="Menu"><i></i><i></i><i></i></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <span class="kick" data-i18n="hero_kicker"></span>
+      <h1><span data-i18n="hero_t1"></span> <span class="g" data-i18n="hero_t2"></span></h1>
+      <p class="type" id="typer"></p>
+      <p class="sub" data-i18n="hero_sub"></p>
+      <div class="cta">
+        <a class="btn btn-p" data-wa-href target="_blank" rel="noopener"><span data-i18n="cta_order"></span></a>
+        <a class="btn btn-s" href="#menu"><span data-i18n="cta_menu"></span></a>
+      </div>
+    </div>
+    <div class="hero-card glass">
+      <div class="hc-top">
+        <svg viewBox="0 0 200 200"><use href="#art-burger"/></svg>
+        <div><h3 id="hcT">Dërgesa këtë mbrëmje</h3><p id="hcP">Durrës qytet · Plazh · Currila</p></div>
+      </div>
+      <div class="hc-meta" data-stats></div>
+      <div class="hc-bar"><i></i></div>
+      <div class="hc-note"><span id="hcN1">Kapaciteti i kuzhinës</span><span id="hcN2">82%</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ KATEGORITË (bento) ══════════════ -->
+<section id="cats">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="about_kicker"></span>
+      <h2 data-i18n="about_title"></h2>
+      <p data-i18n="about_body"></p>
+    </div>
+    <div class="bento" data-cat-cards></div>
+  </div>
+</section>
+
+<!-- ══════════════ MENUJA ══════════════ -->
+<section id="menu">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="menu_kicker"></span>
+      <h2 data-i18n="menu_title"></h2>
+      <p data-i18n="menu_sub"></p>
+    </div>
+    <div class="menu-bar">
+      <div class="chips" data-filters></div>
+      <label class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="search" data-search data-i18n-ph="search_ph">
+      </label>
+    </div>
+    <div class="grid" data-menu-grid></div>
+  </div>
+</section>
+
+<!-- ══════════════ RRETH ══════════════ -->
+<section id="about">
+  <div class="wrap about">
+    <div class="neon-ring" data-reveal>
+      <span class="r r1"></span><span class="r r2"></span>
+      <svg class="mid" viewBox="0 0 200 200"><use href="#art-pizzaC"/></svg>
+    </div>
+    <div data-reveal>
+      <span class="k" style="display:inline-block;font-size:.64rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--red)" data-i18n="about_kicker"></span>
+      <h2 style="font-size:clamp(1.9rem,4.4vw,3.2rem);margin:.7rem 0 .9rem" data-i18n="about_title"></h2>
+      <p style="color:var(--muted)" data-i18n="about_body"></p>
+      <div class="stats" data-stats></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ REVIEW ══════════════ -->
+<section id="revs">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="rev_kicker"></span>
+      <h2 data-i18n="rev_title"></h2>
+    </div>
+    <div class="revs" data-reviews></div>
+  </div>
+</section>
+
+<!-- ══════════════ REZERVIM ══════════════ -->
+<section id="book">
+  <div class="wrap book">
+    <div class="book-side" data-reveal>
+      <span class="k" style="display:inline-block;font-size:.64rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--red)" data-i18n="book_kicker"></span>
+      <h2 style="font-size:clamp(1.9rem,4.4vw,3rem);margin:.7rem 0 .9rem" data-i18n="book_title"></h2>
+      <p style="color:var(--muted)" data-i18n="book_sub"></p>
+      <ul data-hours></ul>
+    </div>
+    <form class="bk glass" data-book-form data-reveal novalidate>
+      <div class="fld"><label data-i18n="f_name"></label><input name="name" required></div>
+      <div class="fld"><label data-i18n="f_phone"></label><input name="phone" type="tel" required></div>
+      <div class="fld"><label data-i18n="f_date"></label><input name="date" type="date" required></div>
+      <div class="fld"><label data-i18n="f_time"></label><input name="time" type="time" value="20:00"></div>
+      <div class="fld"><label data-i18n="f_people"></label>
+        <select name="people"><option>1</option><option selected>2</option><option>3</option><option>4</option>
+        <option>5</option><option>6</option><option>8</option><option>10+</option></select></div>
+      <div class="fld"><label data-i18n="f_area"></label>
+        <select name="area"><option data-i18n="f_area_in"></option><option data-i18n="f_area_out"></option>
+        <option data-i18n="f_area_any"></option></select></div>
+      <div class="fld full"><label data-i18n="f_note"></label><textarea name="note"></textarea></div>
+      <p class="err" data-form-error></p>
+      <div class="bk-act">
+        <button type="submit" class="wa"><span data-i18n="f_send"></span></button>
+        <a href="#" class="mail" data-book-email><span data-i18n="f_email"></span></a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ══════════════ KONTAKT ══════════════ -->
+<section id="contact">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="ct_kicker"></span>
+      <h2 data-i18n="ct_title"></h2>
+    </div>
+    <div class="contact" data-reveal>
+      <div class="cbox glass"><h4 data-i18n="ct_addr"></h4><p data-addr></p>
+        <p style="margin-top:.7rem"><a data-map-href target="_blank" rel="noopener" style="color:var(--gold);font-weight:700" data-i18n="ct_map"></a></p></div>
+      <div class="cbox glass"><h4 data-i18n="ct_phone"></h4><p><a data-tel-href data-phone style="font-size:1.08rem;font-weight:700"></a></p>
+        <p style="margin-top:.7rem"><a data-wa-href target="_blank" rel="noopener" style="color:#1FBF63;font-weight:700">WhatsApp →</a></p></div>
+      <div class="cbox glass"><h4 data-i18n="ct_hours"></h4><ul data-hours></ul></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="ft">
+      <div><span class="logo" style="font-size:1.3rem"><span class="word">SPRI<span class="n">N</span>T</span></span>
+        <small style="display:block;color:var(--muted);margin-top:.3rem" data-tagline></small></div>
+      <div class="ft-soc"><a data-soc="ig">IG</a><a data-soc="fb">FB</a><a data-soc="tt">TT</a></div>
+      <small>© <span data-year></span> SPRINT Durrës. <span data-i18n="foot_rights"></span></small>
+    </div>
+    <p class="note"><b>MOCKUP 4 — «NATA».</b> Ilustrimet janë SVG placeholder; menuja, çmimet, review-t dhe kontaktet
+      janë shembuj që zëvendësohen me të dhënat reale të biznesit.</p>
+  </div>
+</footer>
+
+<div class="orderbar">
+  <div class="ob-l"><b data-cart-total>0 L</b><span><span data-cart-count>0</span> <span id="obN">artikuj në shportë</span></span></div>
+  <button class="ob-btn ob-view" data-cart-open data-i18n="cart_title"></button>
+  <a class="ob-btn ob-wa is-disabled" data-cart-send target="_blank" rel="noopener" href="#menu">WhatsApp →</a>
+</div>
+
+<div class="scrim" data-cart-close></div>
+<aside class="cart">
+  <div class="cart-hd"><h3 data-i18n="cart_title"></h3><button class="x" data-cart-close aria-label="Mbyll">✕</button></div>
+  <ul class="cart-list" data-cart-items></ul>
+  <div class="cart-ft">
+    <div class="row"><span data-i18n="cart_sub"></span><span data-cart-sub>0 L</span></div>
+    <div class="row"><span data-i18n="cart_del"></span><span data-cart-del>0 L</span></div>
+    <div class="row total"><span data-i18n="cart_total"></span><b data-cart-total>0 L</b></div>
+    <a class="wa is-disabled" data-cart-send target="_blank" rel="noopener" href="#menu"><span data-i18n="cart_send"></span></a>
+    <p class="cart-note" data-i18n="cart_note"></p>
+    <button class="clear" data-cart-clear data-i18n="cart_clear"></button>
+  </div>
+</aside>
+
+<!--INCLUDE:shared/data.js-->
+<!--INCLUDE:shared/art.js-->
+<!--INCLUDE:shared/app.js-->
+<script>
+document.querySelectorAll('[data-soc]').forEach(a=>{a.target='_blank';a.rel='noopener';
+  a.href={ig:SPRINT.config.social.instagram,fb:SPRINT.config.social.facebook,tt:SPRINT.config.social.tiktok}[a.dataset.soc];});
+
+const TXT={
+  sq:{type:['Pizza në furrë druri.','Suflaqe në 7 minuta.','Tavë kosi si në shtëpi.','Peshk i freskët çdo ditë.'],
+      hcT:'Dërgesa këtë mbrëmje',hcP:'Durrës qytet · Plazh · Currila',
+      cap:'Kapaciteti i kuzhinës',items:'artikuj në shportë',open:'Hapur tani',shut:'Mbyllur'},
+  en:{type:['Wood-fired pizza.','Gyros in 7 minutes.','Tavë kosi like home.','Fresh fish every day.'],
+      hcT:'Delivering tonight',hcP:'Durrës city · Beach · Currila',
+      cap:'Kitchen capacity',items:'items in cart',open:'Open now',shut:'Closed'},
+};
+
+/* ---------- makinë shkrimi ---------- */
+let typeTimer=null;
+function typewriter(l){
+  clearTimeout(typeTimer);
+  const el=document.getElementById('typer'), lines=TXT[l].type;
+  if(SPRINT.reduced){el.textContent=lines[0];return;}
+  let li=0,ci=0,del=false;
+  (function step(){
+    const cur=lines[li];
+    el.textContent=cur.slice(0,ci);
+    if(!del && ci<cur.length){ci++;typeTimer=setTimeout(step,52);}
+    else if(!del){del=true;typeTimer=setTimeout(step,1500);}
+    else if(ci>0){ci--;typeTimer=setTimeout(step,26);}
+    else{del=false;li=(li+1)%lines.length;typeTimer=setTimeout(step,260);}
+  })();
+}
+
+/* ---------- "hapur tani" nga orari ---------- */
+function openNow(){
+  const d=new Date(), day=d.getDay(), h=d.getHours()+d.getMinutes()/60;
+  // E premte(5)/E shtunë(6): 09–02 · E diel(0): 10–24 · të tjerat: 09–24
+  if(day===5||day===6) return h>=9||h<2;
+  if(day===0) return h>=10;
+  return h>=9;
+}
+function localize(l){
+  const t=TXT[l];
+  hcT.textContent=t.hcT; hcP.textContent=t.hcP; hcN1.textContent=t.cap; obN.textContent=t.items;
+  const on=openNow();
+  liveT.textContent=on?t.open:t.shut;
+  document.getElementById('live').classList.toggle('shut',!on);
+  typewriter(l);
+}
+
+/* ---------- karta bento ---------- */
+const tagL={hot:{sq:'Pikante',en:'Spicy'},veg:{sq:'Vegjetarian',en:'Veggie'},new:{sq:'I ri',en:'New'},top:{sq:'Top',en:'Top'}};
+function card(m,i,l){
+  // çdo i 7-ti bëhet i gjerë, çdo i 5-ti i lartë → ritëm bento
+  const cls=(i%7===0?' wide':'')+(i%5===2?' tall':'');
+  const tags=m.tags.length?`<div class="dish-tags">${m.tags.map(t=>`<span class="tag tag-${t}">${tagL[t][l]}</span>`).join('')}</div>`:'';
+  return `<article class="dish${cls}" data-reveal style="--i:${i}">
+    <div class="dish-media">${SPRINT.art(m,'dish-art')}${tags}</div>
+    <h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}</h3>
+    <p class="desc">${SPRINT.esc(m[l==='sq'?'dsq':'den'])}</p>
+    <div class="dish-foot"><span class="price">${SPRINT.money(m.p)}</span>
+      <button class="add" data-add="${m.id}" aria-label="${SPRINT.T('add')}"><span>+</span></button></div>
+  </article>`;
+}
+
+SPRINT.app({
+  card,
+  onLang:localize,
+  onCart:(t)=>{
+    document.querySelectorAll('.ob-wa').forEach(b=>b.classList.toggle('is-disabled',t.count===0));
+  },
+});
+
+/* shtypja e "+" të mos e ndryshojë gjerësinë e butonit */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.add'); if(!b)return;
+  const s=b.querySelector('span'); s.textContent='✓';
+  setTimeout(()=>{s.textContent='+';},1100);
+});
+</script>
+</body>
+</html>

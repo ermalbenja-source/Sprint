@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SPRINT · 5 Mockup për të zgjedhur</title>
+<meta name="description" content="Pesë drejtime dizajni për faqen e SPRINT Fast Food & Pizza, Durrës.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap"></noscript>
+<style>
+:root{
+  --red:#E01E26; --gold:#F0B03C; --ink:#08080A; --pan:#121216; --pan-2:#1B1B21;
+  --cream:#F6F1E7; --muted:#9696A4; --line:rgba(255,255,255,.1);
+  --display:'Anton',Impact,sans-serif; --body:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--cream);font-family:var(--body);line-height:1.65;
+  overflow-x:clip;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1;text-transform:uppercase;letter-spacing:.01em}
+.wrap{width:min(100% - 2.4rem,1220px);margin-inline:auto}
+
+header{padding:clamp(3rem,7vw,5.5rem) 0 2.4rem;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;inset:0;z-index:-1;
+  background:radial-gradient(70% 60% at 20% 0%,rgba(224,30,38,.22),transparent 65%),
+             radial-gradient(50% 50% at 88% 30%,rgba(240,176,60,.14),transparent 65%)}
+.kick{display:inline-flex;align-items:center;gap:.6rem;font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(240,176,60,.35);border-radius:999px;padding:.45rem 1.05rem;margin-bottom:1.4rem}
+.kick i{width:6px;height:6px;border-radius:50%;background:var(--gold);display:block}
+h1{font-size:clamp(2.4rem,7vw,5.4rem)}
+h1 em{font-style:normal;color:var(--red)}
+header p{color:#c2c2ce;max-width:62ch;margin:1.2rem 0 0;font-weight:300}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin-top:2.4rem}
+.legend div{border:1px solid var(--line);border-radius:14px;padding:.9rem 1.05rem;background:var(--pan)}
+.legend b{display:block;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.2rem}
+.legend span{font-size:.82rem;color:var(--muted)}
+
+.cards{display:grid;gap:1.4rem;padding-bottom:5rem}
+.mock{border:1px solid var(--line);border-radius:24px;overflow:hidden;background:var(--pan);
+  display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
+  transition:transform .45s cubic-bezier(.25,1,.3,1),border-color .4s,box-shadow .4s}
+.mock:hover{transform:translateY(-6px);border-color:rgba(224,30,38,.5);box-shadow:0 34px 70px -40px var(--red)}
+.mock:nth-child(even){grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
+.mock:nth-child(even) .shot{order:2}
+
+.shot{position:relative;background:#000;aspect-ratio:16/10;overflow:hidden}
+.shot iframe{position:absolute;top:0;left:0;width:1440px;height:900px;border:0;
+  transform-origin:top left;pointer-events:none;background:#000}
+.shot .veil{position:absolute;inset:0;background:linear-gradient(120deg,rgba(8,8,10,.1),transparent 40%);
+  transition:opacity .4s;pointer-events:none}
+.mock:hover .shot .veil{opacity:0}
+.shot .ph{position:absolute;inset:0;display:grid;place-items:center;color:#4a4a56;font-size:.8rem;letter-spacing:.2em;
+  text-transform:uppercase}
+
+.body{padding:clamp(1.5rem,3vw,2.4rem);display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.no{font-family:var(--display);font-size:2.6rem;color:var(--red);line-height:.9}
+.mock h2{font-size:clamp(1.6rem,3vw,2.4rem)}
+.mock .sub{font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+.mock p{color:#bfbfcc;font-size:.92rem;margin:0;font-weight:300}
+.feat{list-style:none;margin:.2rem 0 0;padding:0;display:grid;gap:.42rem}
+.feat li{font-size:.85rem;color:#d3d3de;display:flex;gap:.6rem;align-items:flex-start}
+.feat li::before{content:'▸';color:var(--red);flex-shrink:0}
+.meta{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem}
+.pill{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);
+  border-radius:999px;padding:.3rem .7rem;color:var(--muted)}
+.pill.hot{border-color:rgba(224,30,38,.5);color:#ff8b8b}
+.pill.calm{border-color:rgba(90,190,120,.45);color:#8ce0a6}
+.open{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:.55rem;
+  background:var(--red);border-radius:999px;padding:.9rem 1.6rem;font-size:.78rem;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;transition:.28s;align-self:flex-start}
+.open:hover{background:#ff3b30;transform:translateY(-2px);box-shadow:0 16px 34px -14px var(--red)}
+
+footer{border-top:1px solid var(--line);padding:2.4rem 0 4rem;color:var(--muted);font-size:.84rem}
+footer b{color:var(--cream)}
+footer ol{padding-left:1.2rem;display:grid;gap:.4rem;margin:.8rem 0 0}
+.warn{border:1px solid rgba(240,176,60,.35);background:rgba(240,176,60,.07);border-radius:16px;
+  padding:1.1rem 1.3rem;margin-top:1.6rem;color:#e4d6b8;font-size:.86rem}
+.warn b{color:var(--gold)}
+
+@media(max-width:900px){
+  .mock,.mock:nth-child(even){grid-template-columns:1fr}
+  .mock:nth-child(even) .shot{order:0}
+}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="kick"><i></i>SPRINT · Durrës · Faza 1</span>
+    <h1>Pesë drejtime.<br><em>Një zgjedhje.</em></h1>
+    <p>Të pesta janë faqe të plota dhe funksionale: menu interaktive me filtra dhe kërkim, shportë që dërgon
+      porosinë e formatuar në WhatsApp, formular rezervimi (WhatsApp + email), dygjuhësi shqip/anglisht dhe
+      përshtatje e plotë për telefon. Ndryshon vetëm gjuha vizuale dhe intensiteti i efekteve.
+      Hapi tjetër: zgjidh njërën, dhe atë e çojmë deri në fund me fotot, menunë dhe të dhënat reale.</p>
+    <div class="legend">
+      <div><b>Çfarë funksionon</b><span>Menu, filtra, kërkim, shportë, WhatsApp, rezervim, EN/SQ.</span></div>
+      <div><b>Çfarë është shembull</b><span>Pjatët, çmimet, review-t, telefoni dhe adresa.</span></div>
+      <div><b>Çfarë mungon</b><span>Fotot reale — rrjetet sociale ishin të bllokuara nga rrjeti.</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap cards" id="cards"></main>
+
+<footer>
+  <div class="wrap">
+    <b>Hapat e radhës</b>
+    <ol>
+      <li>Zgjidh njërin nga të pestat (ose thuaj «hero-n e 1-shit me menunë e 3-shit» — kombinimet janë të mundshme).</li>
+      <li>Më dërgo: logon, fotot/videot, menunë reale me çmime, numrin e telefonit dhe të WhatsApp-it, adresën e saktë dhe linket e profileve.</li>
+      <li>I fus të dhënat reale, publikoj faqen dhe të jap hapat e saktë të DNS-së për domain-in që do të blesh.</li>
+    </ol>
+    <div class="warn"><b>Shënim i rëndësishëm:</b> Instagram, Facebook, TikTok, Google Maps dhe TripAdvisor janë
+      bllokuar nga politika e rrjetit të këtij mjedisi (gabim 403 nga proxy). Prandaj nuk u shkarkuan dot foto,
+      video, menu apo review reale. Të gjitha pamjet janë ilustrime SVG të vizatuara posaçërisht, dhe zëvendësohen
+      me materialet tuaja pa prekur strukturën e faqes.</div>
+  </div>
+</footer>
+
+<script>
+const MOCKS=[
+  {n:'01',f:'1-zjarri.html',t:'Zjarri',s:'Kinematik · Wow maksimal',
+   d:'Errësirë kinematografike me thëngjij që fluturojnë mbi hero, tipografi masive dhe kursor magnetik. Pjata është ylli i skenës.',
+   feat:['Thëngjij të gjallë në canvas dhe dritë e ngrohtë mbi hero',
+         'Kursor magnetik që zmadhohet mbi çdo buton',
+         'Kartat e pjatave me tilt 3D dhe kornizë që ndizet',
+         'Numërues që rriten kur hyjnë në ekran'],
+   pills:[['Efekte të rënda','hot'],['Ideale për brand premium','']]},
+  {n:'02',f:'2-rrota.html',t:'Rrota',s:'Lozonjare · 3D e rëndë',
+   d:'Një rrotë e madhe e kategorive drejton gjithë faqen: klikon një fetë, ajo rrotullohet dhe menuja filtrohet vetë.',
+   feat:['Rrota interaktive e 5 kuzhinave, me rrotullim 720°',
+         'Coverflow 3D për pjatët më të kërkuara',
+         'Kartat përmbysen (flip) dhe tregojnë përbërësit',
+         'Rrota anohet lehtë sipas scroll-it'],
+   pills:[['Më e paharrueshmja','hot'],['Argëtuese për familje','']]},
+  {n:'03',f:'3-tabela.html',t:'Tabela',s:'Artizanale · Elegante dhe e shpejtë',
+   d:'Letër krem, terrakotë dhe ar. Menuja lexohet si një menu e vërtetë restoranti e shtypur — ose kalon në rrjet me një klikim.',
+   feat:['Dy pamje menuje: listë e shtypur ose rrjet kartash',
+         'Ngrohtësi tradicionale, ideale për kuzhinën shqiptare',
+         'Më e lehta dhe më e shpejta për t’u ngarkuar',
+         'Lexueshmëri maksimale edhe për klientë më të moshuar'],
+   pills:[['Efekte të lehta','calm'],['Konvertim i lartë','calm']]},
+  {n:'04',f:'4-nata.html',t:'Nata',s:'Neon & qelq · Delivery',
+   d:'Dritë neoni mbi qelq të errët, rrjet bento me pllaka të madhësive të ndryshme dhe një shirit porosie që të ndjek poshtë ekranit.',
+   feat:['Treguesi «Hapur tani» që llogaritet nga orari real',
+         'Rrjet bento — pjatat kryesore zënë pllaka më të mëdha',
+         'Shirit porosie i ngjitur me totalin dhe WhatsApp',
+         'Makinë shkrimi në hero dhe blobs që lëvizin ngadalë'],
+   pills:[['Efekte mesatare','hot'],['Bën për orare deri vonë','']]},
+  {n:'05',f:'5-editorial.html',t:'Editorial',s:'Premium · I rafinuar',
+   d:'I çelët, i qetë dhe i shtrenjtë në pamje. Tipografi serif e madhe, hapësirë e bardhë dhe një indeks menuje ku pamja e pjatës ndjek kursorin.',
+   feat:['Pamje e pjatës që rrëshqet pas kursorit në menu',
+         'Galeri horizontale me snap për pjatët yje',
+         'Menu si indeks reviste, me numërim dhe çmime serif',
+         'Ndjesi restoranti premium, jo fast food'],
+   pills:[['Efekte të përmbajtura','calm'],['Më e mira për turistë','']]},
+];
+
+const wrap=document.getElementById('cards');
+wrap.innerHTML=MOCKS.map(m=>`
+  <article class="mock">
+    <div class="shot"><span class="ph">${m.t}</span><span class="veil"></span></div>
+    <div class="body">
+      <span class="no">${m.n}</span>
+      <span class="sub">${m.s}</span>
+      <h2>${m.t}</h2>
+      <p>${m.d}</p>
+      <ul class="feat">${m.feat.map(f=>`<li>${f}</li>`).join('')}</ul>
+      <div class="meta">${m.pills.map(([p,c])=>`<span class="pill ${c}">${p}</span>`).join('')}</div>
+      <a class="open" href="${m.f}">Hape mockup-in ${m.n} →</a>
+    </div>
+  </article>`).join('');
+
+/* Miniaturat ngarkohen vetëm kur afrohen në ekran (5 iframe janë të rënda). */
+function fit(box){
+  const f=box.querySelector('iframe'); if(!f)return;
+  f.style.transform='scale('+(box.clientWidth/1440)+')';
+}
+const io=new IntersectionObserver(es=>es.forEach(en=>{
+  if(!en.isIntersecting)return;
+  const box=en.target; io.unobserve(box);
+  const src=MOCKS[[...wrap.children].indexOf(box.closest('.mock'))].f;
+  const f=document.createElement('iframe');
+  f.src=src; f.loading='lazy'; f.setAttribute('scrolling','no'); f.setAttribute('tabindex','-1');
+  f.setAttribute('title','Pamje paraprake');
+  f.addEventListener('load',()=>{box.querySelector('.ph')?.remove();});
+  box.insertBefore(f,box.firstChild); fit(box);
+}),{rootMargin:'320px'});
+document.querySelectorAll('.shot').forEach(s=>io.observe(s));
+addEventListener('resize',()=>document.querySelectorAll('.shot').forEach(fit));
+</script>
+</body>
+</html>

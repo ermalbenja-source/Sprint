@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SPRINT · Rrota</title>
+<meta name="description" content="SPRINT Durrës — zgjidh kuzhinën duke rrotulluar rrotën: pizza, fast food, restorant, tradicionale.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bakbak+One&family=Outfit:wght@300;400;500;600;800&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bakbak+One&family=Outfit:wght@300;400;500;600;800&display=swap"></noscript>
+<style>
+/* ============================ MOCKUP 2 — "RROTA" =============================
+   Lozonjare dhe 3D. Rrota e madhe e kategorive në hero e drejton gjithë faqen,
+   kartat e pjatave përmbysen (flip) dhe të preferuarat rrotullohen në coverflow.
+   Niveli i efekteve: 3D I RËNDË.
+   ========================================================================== */
+:root{
+  --red:#D91E2A; --red-lt:#FF4B3E; --gold:#FFC244; --gold-dk:#C98A18;
+  --ink:#0C0A0B; --pan:#171214; --pan-2:#211719; --cream:#FFF6E9;
+  --muted:#A3949A; --line:rgba(255,255,255,.1);
+  --display:'Bakbak One',Impact,sans-serif;
+  --body:'Outfit',system-ui,sans-serif;
+  --max:1220px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{margin:0;background:var(--ink);color:var(--cream);font-family:var(--body);line-height:1.6;
+  overflow-x:clip;-webkit-font-smoothing:antialiased}
+.strip-outer{overflow:hidden;margin:2rem 0}
+img,svg{max-width:100%;display:block}
+a{color:inherit;text-decoration:none} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1;text-transform:uppercase}
+.wrap{width:min(100% - 2.2rem,var(--max));margin-inline:auto}
+section{position:relative;padding:clamp(4rem,9vw,8rem) 0}
+
+/* ---------- dekor ---------- */
+body::before{content:'';position:fixed;inset:0;z-index:-2;
+  background:radial-gradient(60% 45% at 12% 8%,rgba(217,30,42,.16),transparent 60%),
+             radial-gradient(50% 40% at 92% 82%,rgba(255,194,68,.12),transparent 62%),var(--ink)}
+.dots{position:absolute;inset:0;z-index:-1;opacity:.35;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.1) 1px,transparent 1px);background-size:26px 26px}
+
+/* ---------- header ---------- */
+header{position:fixed;top:0;left:0;right:0;z-index:90;padding:1rem 0;transition:.35s}
+header.is-stuck{background:rgba(12,10,11,.88);backdrop-filter:blur(16px);padding:.55rem 0;
+  box-shadow:0 12px 40px -20px #000}
+.hd{display:flex;align-items:center;gap:1.2rem}
+.logo{font-family:var(--display);font-size:1.75rem;letter-spacing:.02em;display:flex;align-items:baseline;gap:.35rem}
+.logo em{font-style:normal;color:var(--red)}
+.logo small{font-family:var(--body);font-size:.55rem;letter-spacing:.3em;color:var(--muted);text-transform:uppercase}
+nav{margin-left:auto;display:flex;gap:1.5rem;align-items:center}
+nav a{font-size:.8rem;font-weight:500;letter-spacing:.06em;color:#d5c8ce;transition:.25s;position:relative}
+nav a:hover{color:var(--gold);transform:translateY(-1px)}
+.hd-act{display:flex;gap:.55rem;align-items:center}
+.lang{border:1.5px solid var(--line);border-radius:12px;padding:.42rem .7rem;font-size:.7rem;font-weight:600;transition:.25s}
+.lang:hover{border-color:var(--gold);color:var(--gold)}
+.cart-btn{display:flex;align-items:center;gap:.5rem;background:var(--gold);color:#241703;border-radius:14px;
+  padding:.55rem 1rem;font-size:.78rem;font-weight:700;transition:.28s;box-shadow:0 8px 22px -10px var(--gold)}
+.cart-btn:hover{transform:translateY(-2px) rotate(-1.5deg);background:#ffd06a}
+.cart-btn b{background:var(--red);color:#fff;border-radius:8px;min-width:20px;height:20px;display:grid;place-items:center;font-size:.7rem}
+.bump{animation:bump .5s cubic-bezier(.3,1.7,.5,1)}@keyframes bump{40%{transform:scale(1.55) rotate(-8deg)}}
+.burger{display:none;flex-direction:column;gap:5px}.burger i{width:24px;height:2.5px;background:#fff;border-radius:2px;transition:.3s;display:block}
+body.nav-open .burger i:nth-child(1){transform:translateY(7.5px) rotate(45deg)}
+body.nav-open .burger i:nth-child(2){opacity:0}
+body.nav-open .burger i:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
+
+/* ---------- hero + rrota ---------- */
+.hero{min-height:100svh;display:grid;align-items:center;padding-top:5.5rem;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1fr 1.05fr;gap:2.5rem;align-items:center}
+.kick{display:inline-block;background:var(--red);border-radius:10px;padding:.42rem .95rem;font-size:.68rem;
+  font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.3rem;transform:rotate(-2deg)}
+h1{font-size:clamp(3rem,8.5vw,7rem);letter-spacing:-.01em}
+h1 em{font-style:normal;color:var(--gold);display:inline-block;animation:wob 5s ease-in-out infinite}
+@keyframes wob{50%{transform:rotate(-3deg) translateY(-6px)}}
+.hero p.sub{color:#cdbdc4;max-width:44ch;margin:1.3rem 0 2.1rem;font-weight:300;font-size:1.05rem}
+.cta{display:flex;gap:.8rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.95rem 1.7rem;border-radius:16px;font-weight:700;
+  font-size:.82rem;letter-spacing:.05em;transition:transform .3s cubic-bezier(.3,1.4,.5,1),box-shadow .3s}
+.btn-p{background:var(--red);box-shadow:0 12px 30px -12px var(--red)}
+.btn-p:hover{transform:translateY(-4px) rotate(-1.5deg);background:var(--red-lt)}
+.btn-s{border:1.5px solid var(--line)}
+.btn-s:hover{transform:translateY(-4px) rotate(1.5deg);border-color:var(--gold);color:var(--gold)}
+
+.wheel-stage{position:relative;display:grid;justify-items:center;perspective:1200px}
+.wheel-wrap{position:relative;width:min(100%,520px);aspect-ratio:1;
+  transform:rotateX(22deg);transform-style:preserve-3d;transition:transform .6s}
+.wheel{width:100%;height:100%;transition:transform 1s cubic-bezier(.25,1.2,.35,1);filter:drop-shadow(0 40px 50px rgba(0,0,0,.75))}
+.wheel .sec{cursor:pointer;transition:.3s;transform-origin:100px 100px}
+.wheel .sec:hover{filter:brightness(1.25)}
+.wheel .sec.is-on{filter:brightness(1.35) drop-shadow(0 0 10px var(--gold))}
+.wheel .lbl{font-family:var(--display);font-size:9px;fill:#fff;pointer-events:none;letter-spacing:.4px}
+.wheel-hub{position:absolute;top:50%;left:50%;width:31%;aspect-ratio:1;border-radius:50%;background:linear-gradient(160deg,var(--pan-2),#0a0708);
+  border:2px solid var(--gold);display:grid;place-items:center;text-align:center;
+  box-shadow:0 0 0 8px rgba(12,10,11,.9),0 20px 40px rgba(0,0,0,.7);
+  transform:translate(-50%,-50%) translateZ(30px);pointer-events:none}
+.wheel-hub b{font-family:var(--display);font-size:clamp(1rem,2.6vw,1.6rem);color:var(--gold);line-height:1}
+.wheel-hub span{font-size:.52rem;letter-spacing:.24em;color:var(--muted);text-transform:uppercase}
+.needle{position:absolute;top:-2%;left:50%;translate:-50% 0;width:0;height:0;z-index:3;
+  border-left:11px solid transparent;border-right:11px solid transparent;border-top:26px solid var(--gold);
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.7))}
+.wheel-hint{margin-top:1.6rem;text-align:center;font-size:.68rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted)}
+
+/* ---------- shirit ---------- */
+.strip{background:var(--red);padding:.85rem 0;overflow:hidden;display:flex;gap:2rem;white-space:nowrap;
+  transform:rotate(-1.1deg) scale(1.04)}
+.strip-in{display:flex;gap:2rem;animation:mq 28s linear infinite;flex-shrink:0}
+.strip span{font-family:var(--display);font-size:1.15rem;letter-spacing:.04em}
+@keyframes mq{to{transform:translateX(-100%)}}
+
+/* ---------- titull ---------- */
+.st{margin-bottom:2.8rem;max-width:60ch}
+.st .k{display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--gold);background:rgba(255,194,68,.1);border-radius:8px;padding:.34rem .8rem;margin-bottom:.9rem}
+.st h2{font-size:clamp(2rem,5vw,3.8rem)}
+.st p{color:var(--muted);margin-top:.9rem;font-weight:300}
+
+/* ---------- coverflow ---------- */
+.flow{position:relative;perspective:1500px;height:400px;display:grid;place-items:center;margin-bottom:1.4rem;overflow:hidden}
+.flow-track{position:relative;width:100%;height:100%;transform-style:preserve-3d}
+.fc{position:absolute;top:50%;left:50%;width:250px;height:330px;margin:-165px 0 0 -125px;
+  border-radius:24px;background:linear-gradient(165deg,var(--pan-2),var(--pan));border:1px solid var(--line);
+  padding:1.3rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;
+  transition:transform .65s cubic-bezier(.3,1,.35,1),opacity .5s;cursor:pointer;backface-visibility:hidden}
+.fc svg{width:130px;height:130px}
+.fc h3{font-size:1.05rem;line-height:1.15}
+.fc .p{font-family:var(--display);font-size:1.5rem;color:var(--gold);margin-top:auto}
+.fc .mini{background:var(--red);border-radius:10px;padding:.45rem 1rem;font-size:.7rem;font-weight:700}
+.flow-nav{display:flex;gap:.7rem;justify-content:center}
+.flow-nav button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;
+  font-size:1.1rem;transition:.25s}
+.flow-nav button:hover{background:var(--gold);color:#241703;border-color:var(--gold);transform:scale(1.1)}
+
+/* ---------- menuja ---------- */
+#menu{background:linear-gradient(180deg,transparent,rgba(23,18,20,.9) 12%,rgba(23,18,20,.9) 88%,transparent)}
+.menu-bar{display:flex;gap:.9rem;flex-wrap:wrap;align-items:center;margin-bottom:2rem}
+.chips{display:flex;gap:.5rem;flex-wrap:wrap;flex:1}
+.chip{border:1.5px solid var(--line);border-radius:14px;padding:.5rem 1rem;font-size:.78rem;font-weight:600;
+  color:#c6b6bc;transition:.28s;white-space:nowrap}
+.chip:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px)}
+.chip.is-on{background:var(--red);border-color:var(--red);color:#fff;transform:rotate(-1.5deg)}
+.search{display:flex;align-items:center;gap:.5rem;border:1.5px solid var(--line);border-radius:14px;padding:.48rem 1rem;min-width:200px}
+.search input{background:none;border:0;outline:none;color:#fff;font-size:.85rem;width:100%;font-family:var(--body)}
+.search svg{width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:2}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.1rem}
+.dish{perspective:1100px;height:330px;transition-delay:calc(var(--i) * 40ms)}
+.flipper{position:relative;width:100%;height:100%;transform-style:preserve-3d;
+  transition:transform .75s cubic-bezier(.3,1,.35,1)}
+.dish:hover .flipper,.dish.flip .flipper{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:22px;border:1px solid var(--line);
+  background:linear-gradient(165deg,var(--pan-2),var(--pan));padding:1.2rem;display:flex;flex-direction:column;overflow:hidden}
+.face-b{transform:rotateY(180deg);background:linear-gradient(165deg,var(--red),#8c1119);border-color:transparent;
+  justify-content:center;text-align:center;gap:.8rem}
+.face-f .m{flex:1;display:grid;place-items:center;position:relative}
+.face-f .dish-art{width:80%;transform:rotate(var(--rot,0deg));transition:transform .5s}
+.dish:hover .face-f .dish-art{transform:rotate(var(--rot,0deg)) scale(1.06)}
+.face-f h3{font-size:1rem;line-height:1.2;margin-bottom:.35rem}
+.face-f .foot{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.price{font-family:var(--display);font-size:1.35rem;color:var(--gold)}
+.face-b p{font-size:.85rem;line-height:1.55;margin:0;color:#ffe6e8;font-weight:300}
+.face-b h3{font-size:1.1rem}
+.add{background:var(--gold);color:#241703;border-radius:12px;padding:.48rem 1rem;font-size:.72rem;font-weight:700;transition:.25s}
+.add:hover{background:#ffd571;transform:scale(1.05)}
+.add.is-added{background:#4ecb71;color:#04220f}
+.face-b .add{background:#fff;color:var(--red)}
+.dish-tags{position:absolute;top:0;left:0;display:flex;gap:.3rem;flex-wrap:wrap;z-index:2}
+.tag{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .55rem;border-radius:8px}
+.tag-hot{background:var(--red)} .tag-veg{background:#3f9c47} .tag-new{background:var(--gold);color:#241703}
+.tag-top{background:#fff;color:#17110f}
+.menu-empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:3rem 0}
+.flip-hint{font-size:.7rem;color:var(--muted);text-align:center;margin-top:1.4rem;letter-spacing:.14em;text-transform:uppercase}
+
+/* ---------- kategoritë ---------- */
+.cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.cat-card{background:linear-gradient(165deg,var(--pan-2),var(--pan));border:1px solid var(--line);border-radius:22px;
+  padding:1.7rem 1.3rem;text-align:left;transition:transform .45s cubic-bezier(.3,1.2,.4,1),box-shadow .4s;
+  transition-delay:calc(var(--i) * 60ms)}
+.cat-card:hover{transform:translateY(-10px) rotate(-1.5deg);box-shadow:0 26px 50px -24px var(--red)}
+.cat-art{width:76px;height:76px;margin-bottom:1rem;transform:rotate(var(--rot,0deg));transition:transform .5s cubic-bezier(.3,1.5,.4,1)}
+.cat-card:hover .cat-art{transform:rotate(calc(var(--rot,0deg) - 12deg)) scale(1.15)}
+.cat-card h3{font-size:1.25rem;margin-bottom:.4rem}
+.cat-card p{font-size:.82rem;color:var(--muted);margin:0;font-weight:300}
+
+/* ---------- statistikat / rreth ---------- */
+.about{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.orbit{position:relative;aspect-ratio:1;display:grid;place-items:center}
+.orbit .core{width:44%;filter:drop-shadow(0 24px 40px rgba(0,0,0,.7));animation:spin 40s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orbit .sat{position:absolute;width:23%;filter:drop-shadow(0 14px 24px rgba(0,0,0,.6))}
+.orbit .o{position:absolute;inset:8%;border:1px dashed rgba(255,194,68,.2);border-radius:50%;
+  animation:spin 26s linear infinite}
+.orbit .o span{position:absolute;top:-11.5%;left:50%;translate:-50% 0;width:23%;animation:spin 26s linear infinite reverse;display:block}
+.orbit .o2{inset:-6%;animation-duration:38s;animation-direction:reverse}
+.orbit .o2 span{animation:spin 38s linear infinite}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:2rem}
+.stat{background:var(--pan);border:1px solid var(--line);border-radius:18px;padding:1.1rem 1.2rem}
+.stat b{display:block;font-family:var(--display);font-size:2rem;color:var(--gold);line-height:1}
+.stat span{font-size:.72rem;color:var(--muted);letter-spacing:.06em}
+
+/* ---------- review ---------- */
+.revs{display:grid;grid-template-columns:repeat(auto-fit,minmax(275px,1fr));gap:1rem}
+.review{margin:0;background:var(--pan-2);border:1px solid var(--line);border-radius:22px;padding:1.6rem;
+  transition:transform .4s;transition-delay:calc(var(--i) * 60ms)}
+.review:hover{transform:translateY(-8px) rotate(1deg)}
+.stars{color:var(--gold);letter-spacing:.15em;margin-bottom:.8rem}
+.review blockquote{margin:0 0 1rem;font-size:.94rem;color:#e2d3d8;font-weight:300;line-height:1.6}
+.review figcaption{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;
+  border-top:1px dashed var(--line);padding-top:.8rem}
+.review figcaption span{color:var(--muted);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase}
+
+/* ---------- rezervimi ---------- */
+#book{background:var(--pan)}
+.book{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(2rem,5vw,4rem);align-items:start}
+form.bk{background:var(--pan-2);border:1px solid var(--line);border-radius:26px;padding:clamp(1.3rem,3vw,2rem);
+  display:grid;grid-template-columns:1fr 1fr;gap:.95rem}
+.fld{display:grid;gap:.35rem}.fld.full{grid-column:1/-1}
+.fld label{font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.fld input,.fld select,.fld textarea{background:#100c0d;border:1.5px solid var(--line);border-radius:14px;
+  padding:.78rem .95rem;color:#fff;font-family:var(--body);font-size:.92rem;outline:none;transition:.25s;width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--gold)}
+.fld textarea{resize:vertical;min-height:80px}
+.fld select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+.err{grid-column:1/-1;color:#ff8080;font-size:.8rem;display:none}.err.is-on{display:block}
+.bk-act{grid-column:1/-1;display:flex;gap:.7rem;flex-wrap:wrap}
+.wa{display:flex;align-items:center;justify-content:center;gap:.5rem;background:#22c55e;color:#04220f;
+  border-radius:16px;padding:.95rem 1.4rem;font-weight:700;font-size:.84rem;transition:.28s;flex:1;min-width:210px}
+.wa:hover{background:#3ddc75;transform:translateY(-3px)}
+.wa.is-disabled{opacity:.35;pointer-events:none}
+.mail{border:1.5px solid var(--line);border-radius:16px;padding:.95rem 1.3rem;font-size:.78rem;font-weight:600;transition:.25s}
+.mail:hover{border-color:var(--gold);color:var(--gold)}
+.book-side ul{list-style:none;margin:1.2rem 0 0;padding:0;display:grid;gap:.5rem}
+.book-side li{display:flex;justify-content:space-between;font-size:.86rem;color:var(--muted);
+  border-bottom:1px dashed var(--line);padding-bottom:.5rem}
+.book-side li b{color:var(--cream);font-weight:500}
+
+/* ---------- kontakt / footer ---------- */
+.contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.cbox{background:var(--pan-2);border:1px solid var(--line);border-radius:22px;padding:1.5rem;transition:.35s}
+.cbox:hover{transform:translateY(-7px) rotate(-1deg);border-color:var(--gold)}
+.cbox h4{font-family:var(--display);font-size:1.1rem;color:var(--gold);margin:0 0 .7rem;text-transform:uppercase}
+.cbox p{font-size:.9rem;color:#cbbcc2;margin:0}
+.cbox ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
+.cbox li{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);gap:1rem}
+.cbox li b{color:#fff;font-weight:500}
+footer{border-top:1px solid var(--line);padding:2.6rem 0 6rem}
+.ft{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;align-items:center}
+.ft-soc{display:flex;gap:.5rem}
+.ft-soc a{width:38px;height:38px;border:1.5px solid var(--line);border-radius:12px;display:grid;place-items:center;
+  font-size:.72rem;font-weight:700;transition:.3s}
+.ft-soc a:hover{background:var(--gold);color:#241703;border-color:var(--gold);transform:rotate(-8deg)}
+.ft small{color:var(--muted);font-size:.76rem}
+.note{margin-top:1.3rem;font-size:.68rem;color:#645257;border-top:1px dashed var(--line);padding-top:1rem;line-height:1.6}
+
+/* ---------- shporta ---------- */
+.cart{position:fixed;top:0;right:0;height:100dvh;width:min(420px,100%);z-index:120;background:var(--pan);
+  border-left:1px solid var(--line);transform:translateX(102%);transition:transform .5s cubic-bezier(.6,0,.2,1);
+  display:flex;flex-direction:column}
+body.cart-open .cart{transform:none}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(4px);z-index:110;opacity:0;visibility:hidden;transition:.4s}
+body.cart-open .scrim{opacity:1;visibility:visible}
+.cart-hd{display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.4rem;border-bottom:1px solid var(--line)}
+.cart-hd h3{font-size:1.3rem}
+.x{width:34px;height:34px;border-radius:12px;border:1.5px solid var(--line);display:grid;place-items:center;transition:.25s}
+.x:hover{background:var(--red);border-color:var(--red);transform:rotate(90deg)}
+.cart-list{list-style:none;margin:0;padding:1rem 1.4rem;overflow-y:auto;flex:1;display:grid;gap:.7rem;align-content:start}
+.cart-line{display:grid;grid-template-columns:42px 1fr auto auto;gap:.7rem;align-items:center;background:var(--pan-2);
+  border-radius:16px;padding:.6rem}
+.cl-img{width:42px;height:42px}
+.cl-name{font-size:.85rem;line-height:1.25}.cl-name em{display:block;font-style:normal;font-size:.72rem;color:var(--muted)}
+.qty{display:flex;align-items:center;gap:.4rem;border:1.5px solid var(--line);border-radius:10px;padding:.1rem .25rem}
+.qty button{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;transition:.2s}
+.qty button:hover{background:var(--gold);color:#241703}
+.qty b{min-width:14px;text-align:center;font-size:.8rem}
+.cl-sum{font-family:var(--display);color:var(--gold);font-size:.98rem}
+.cart-empty{color:var(--muted);text-align:center;padding:3rem 1rem;font-size:.9rem}
+.cart-ft{border-top:1px solid var(--line);padding:1.2rem 1.4rem 1.5rem;display:grid;gap:.45rem;background:#120e0f}
+.row{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
+.row.total{color:var(--cream);font-size:1rem;border-top:1px dashed var(--line);padding-top:.5rem;margin-top:.3rem}
+.row.total b{font-family:var(--display);font-size:1.6rem;color:var(--gold)}
+.cart-note{font-size:.7rem;color:var(--muted);text-align:center;margin:.2rem 0 0}
+.clear{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:.3rem;transition:.2s}
+.clear:hover{color:var(--red)}
+.cart .wa{margin-top:.6rem;text-transform:uppercase;letter-spacing:.04em}
+
+/* ---------- dock ---------- */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:95;display:none;gap:.45rem;padding:.55rem;
+  background:rgba(12,10,11,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.dock a,.dock button{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.5rem;
+  border-radius:14px;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.dock .d-wa{background:#22c55e;color:#04220f}.dock .d-tel{background:var(--red)}
+.dock .d-cart{background:var(--gold);color:#241703}
+
+[data-reveal]{opacity:0;transform:translateY(28px) scale(.98);transition:opacity .7s cubic-bezier(.3,1,.35,1),transform .7s cubic-bezier(.3,1,.35,1)}
+[data-reveal].in{opacity:1;transform:none}
+
+@media(max-width:980px){
+  .hero .wrap{grid-template-columns:1fr;text-align:center}
+  .hero p.sub{margin-inline:auto}.cta{justify-content:center}
+  .wheel-stage{order:-1}.wheel-wrap{max-width:360px}
+  .about{grid-template-columns:1fr}.book{grid-template-columns:1fr}
+  nav{position:fixed;inset:0;background:rgba(12,10,11,.97);backdrop-filter:blur(18px);flex-direction:column;
+    justify-content:center;gap:1.8rem;transform:translateX(100%);transition:transform .45s cubic-bezier(.6,0,.2,1);margin:0}
+  body.nav-open nav{transform:none}
+  nav a{font-family:var(--display);font-size:1.6rem}
+  .burger{display:flex;z-index:95}.hd-act{margin-left:auto}
+  .dock{display:flex}.stats{grid-template-columns:1fr 1fr}
+  form.bk{grid-template-columns:1fr}
+  .logo small{display:none}
+  .flow{height:340px}.fc{width:200px;height:280px;margin:-140px 0 0 -100px}.fc svg{width:100px;height:100px}
+}
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr 1fr;gap:.65rem}
+  .dish{height:260px}.face{padding:.75rem}.face-f h3{font-size:.85rem}.price{font-size:1.1rem}
+  .add{padding:.38rem .7rem;font-size:.63rem}
+}
+
+/* ---- kompaktim i header-it në ekrane të vogla ---- */
+@media(max-width:560px){
+  .logo small,.logo sup{display:none}
+  .cart-btn span[data-i18n]{display:none}
+  .cart-btn{padding:.5rem .75rem}
+  .lang{padding:.36rem .6rem}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header data-header>
+  <div class="wrap hd">
+    <a href="#top" class="logo">SPR<em>I</em>NT <small data-tagline></small></a>
+    <nav data-nav>
+      <a href="#menu" data-i18n="nav_menu">Menuja</a>
+      <a href="#about" data-i18n="nav_about">Rreth Nesh</a>
+      <a href="#revs" data-i18n="nav_reviews">Vlerësime</a>
+      <a href="#book" data-i18n="nav_book">Rezervo</a>
+      <a href="#contact" data-i18n="nav_contact">Kontakt</a>
+    </nav>
+    <div class="hd-act">
+      <button class="lang" data-lang-toggle>EN</button>
+      <button class="cart-btn" data-cart-open data-cart-badge>
+        <span data-i18n="cart_title">Porosia</span><b data-cart-count>0</b></button>
+      <button class="burger" data-nav-toggle aria-label="Menu"><i></i><i></i><i></i></button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════ HERO + RROTA ══════════════ -->
+<section class="hero" id="top">
+  <span class="dots"></span>
+  <div class="wrap">
+    <div>
+      <span class="kick" data-i18n="hero_kicker">Durrës · Që nga 2013</span>
+      <h1><span data-i18n="hero_t1">Shija që</span> <em data-i18n="hero_t2">nuk pret</em></h1>
+      <p class="sub" data-i18n="hero_sub"></p>
+      <div class="cta">
+        <a class="btn btn-p" href="#menu"><span data-i18n="cta_menu">Shiko Menunë</span></a>
+        <a class="btn btn-s" data-tel-href><span data-i18n="cta_call">Telefono</span></a>
+      </div>
+    </div>
+    <div class="wheel-stage">
+      <div class="wheel-wrap" id="ww">
+        <span class="needle"></span>
+        <svg class="wheel" id="wheel" viewBox="0 0 200 200"></svg>
+        <div class="wheel-hub"><b id="hubT">SPRINT</b><span id="hubS">Durrës</span></div>
+      </div>
+      <span class="wheel-hint" id="wHint">↻ Kliko një fetë për të zgjedhur kuzhinën</span>
+    </div>
+  </div>
+</section>
+
+<div class="strip-outer"><div class="strip"><div class="strip-in" id="s1"></div><div class="strip-in" id="s2"></div></div></div>
+
+<!-- ══════════════ TË PREFERUARAT (coverflow) ══════════════ -->
+<section id="best">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="rev_kicker">Më të kërkuarat</span>
+      <h2 id="bestT">Yjet e kuzhinës sonë</h2>
+    </div>
+    <div class="flow"><div class="flow-track" id="flow"></div></div>
+    <div class="flow-nav">
+      <button id="fPrev" aria-label="Prapa">‹</button>
+      <button id="fNext" aria-label="Përpara">›</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ KATEGORITË ══════════════ -->
+<section id="cats">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="about_kicker">Historia jonë</span>
+      <h2 data-i18n="about_title">Katër kuzhina. Një pasion.</h2>
+      <p data-i18n="about_body"></p>
+    </div>
+    <div class="cats" data-cat-cards></div>
+  </div>
+</section>
+
+<!-- ══════════════ MENUJA ══════════════ -->
+<section id="menu">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="menu_kicker">Menuja Interaktive</span>
+      <h2 data-i18n="menu_title">Zgjidh. Shto. Dërgo.</h2>
+      <p data-i18n="menu_sub"></p>
+    </div>
+    <div class="menu-bar">
+      <div class="chips" data-filters></div>
+      <label class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="search" data-search data-i18n-ph="search_ph">
+      </label>
+    </div>
+    <div class="grid" data-menu-grid></div>
+    <p class="flip-hint" id="flipHint">↻ Kalo mbi kartë (ose prek) për përbërësit</p>
+  </div>
+</section>
+
+<!-- ══════════════ RRETH ══════════════ -->
+<section id="about">
+  <div class="wrap about">
+    <div class="orbit" data-reveal>
+      <svg class="core" viewBox="0 0 200 200"><use href="#art-pizza"/></svg>
+      <span class="o"><span><svg viewBox="0 0 200 200"><use href="#art-burger"/></svg></span></span>
+      <span class="o o2"><span><svg viewBox="0 0 200 200"><use href="#art-tave"/></svg></span></span>
+    </div>
+    <div data-reveal>
+      <span class="k" style="display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);background:rgba(255,194,68,.1);border-radius:8px;padding:.34rem .8rem" data-i18n="about_kicker"></span>
+      <h2 style="font-size:clamp(1.9rem,4.4vw,3.2rem);margin:.9rem 0 1rem" data-i18n="about_title"></h2>
+      <p style="color:var(--muted);font-weight:300" data-i18n="about_body"></p>
+      <div class="stats" data-stats></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ REVIEW ══════════════ -->
+<section id="revs">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="rev_kicker"></span>
+      <h2 data-i18n="rev_title">4.8 nga 5 yje</h2>
+    </div>
+    <div class="revs" data-reviews></div>
+  </div>
+</section>
+
+<!-- ══════════════ REZERVIMI ══════════════ -->
+<section id="book">
+  <div class="wrap book">
+    <div class="book-side" data-reveal>
+      <span class="k" style="display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);background:rgba(255,194,68,.1);border-radius:8px;padding:.34rem .8rem" data-i18n="book_kicker"></span>
+      <h2 style="font-size:clamp(1.9rem,4.4vw,3rem);margin:.9rem 0 1rem" data-i18n="book_title"></h2>
+      <p style="color:var(--muted);font-weight:300" data-i18n="book_sub"></p>
+      <ul data-hours></ul>
+    </div>
+    <form class="bk" data-book-form data-reveal novalidate>
+      <div class="fld"><label data-i18n="f_name"></label><input name="name" required></div>
+      <div class="fld"><label data-i18n="f_phone"></label><input name="phone" type="tel" required></div>
+      <div class="fld"><label data-i18n="f_date"></label><input name="date" type="date" required></div>
+      <div class="fld"><label data-i18n="f_time"></label><input name="time" type="time" value="20:00"></div>
+      <div class="fld"><label data-i18n="f_people"></label>
+        <select name="people"><option>1</option><option selected>2</option><option>3</option><option>4</option>
+        <option>5</option><option>6</option><option>8</option><option>10+</option></select></div>
+      <div class="fld"><label data-i18n="f_area"></label>
+        <select name="area"><option data-i18n="f_area_in"></option><option data-i18n="f_area_out"></option>
+        <option data-i18n="f_area_any"></option></select></div>
+      <div class="fld full"><label data-i18n="f_note"></label><textarea name="note"></textarea></div>
+      <p class="err" data-form-error></p>
+      <div class="bk-act">
+        <button type="submit" class="wa"><span data-i18n="f_send"></span></button>
+        <a href="#" class="mail" data-book-email><span data-i18n="f_email"></span></a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ══════════════ KONTAKT ══════════════ -->
+<section id="contact">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="ct_kicker"></span>
+      <h2 data-i18n="ct_title"></h2>
+    </div>
+    <div class="contact" data-reveal>
+      <div class="cbox"><h4 data-i18n="ct_addr"></h4><p data-addr></p>
+        <p style="margin-top:.7rem"><a data-map-href target="_blank" rel="noopener" style="color:var(--gold);font-weight:600" data-i18n="ct_map"></a></p></div>
+      <div class="cbox"><h4 data-i18n="ct_phone"></h4><p><a data-tel-href data-phone style="font-size:1.1rem;font-weight:600"></a></p>
+        <p style="margin-top:.7rem"><a data-wa-href target="_blank" rel="noopener" style="color:#22c55e;font-weight:600">WhatsApp →</a></p></div>
+      <div class="cbox"><h4 data-i18n="ct_hours"></h4><ul data-hours></ul></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="ft">
+      <div><span class="logo" style="font-size:1.4rem">SPR<em>I</em>NT</span>
+        <small style="display:block;color:var(--muted);margin-top:.3rem" data-tagline></small></div>
+      <div class="ft-soc"><a data-soc="ig">IG</a><a data-soc="fb">FB</a><a data-soc="tt">TT</a></div>
+      <small>© <span data-year></span> SPRINT Durrës. <span data-i18n="foot_rights"></span></small>
+    </div>
+    <p class="note"><b>MOCKUP 2 — «RROTA».</b> Ilustrimet janë SVG placeholder; menuja, çmimet, review-t dhe kontaktet
+      janë shembuj që zëvendësohen me të dhënat reale të biznesit.</p>
+  </div>
+</footer>
+
+<div class="scrim" data-cart-close></div>
+<aside class="cart">
+  <div class="cart-hd"><h3 data-i18n="cart_title"></h3><button class="x" data-cart-close aria-label="Mbyll">✕</button></div>
+  <ul class="cart-list" data-cart-items></ul>
+  <div class="cart-ft">
+    <div class="row"><span data-i18n="cart_sub"></span><span data-cart-sub>0 L</span></div>
+    <div class="row"><span data-i18n="cart_del"></span><span data-cart-del>0 L</span></div>
+    <div class="row total"><span data-i18n="cart_total"></span><b data-cart-total>0 L</b></div>
+    <a class="wa is-disabled" data-cart-send target="_blank" rel="noopener" href="#menu"><span data-i18n="cart_send"></span></a>
+    <p class="cart-note" data-i18n="cart_note"></p>
+    <button class="clear" data-cart-clear data-i18n="cart_clear"></button>
+  </div>
+</aside>
+
+<div class="dock">
+  <a class="d-tel" data-tel-href><span data-i18n="cta_call"></span></a>
+  <a class="d-wa" data-wa-href target="_blank" rel="noopener">WhatsApp</a>
+  <button class="d-cart" data-cart-open data-cart-badge><span data-i18n="cart_title"></span><b data-cart-count>0</b></button>
+</div>
+
+<!--INCLUDE:shared/data.js-->
+<!--INCLUDE:shared/art.js-->
+<!--INCLUDE:shared/app.js-->
+<script>
+document.querySelectorAll('[data-soc]').forEach(a=>{a.target='_blank';a.rel='noopener';
+  a.href={ig:SPRINT.config.social.instagram,fb:SPRINT.config.social.facebook,tt:SPRINT.config.social.tiktok}[a.dataset.soc];});
+
+/* ---------- shiriti ---------- */
+{const w=['PIZZA','SUFLAQE','TAVË KOSI','BURGER XL','FËRGESË','PESHK I FRESKËT','BYREK','TRILEÇE'];
+ const h=w.map(x=>`<span>${x}</span><span>●</span>`).join(''); s1.innerHTML=h; s2.innerHTML=h;}
+
+/* ---------- RROTA e kategorive ---------- */
+const WHEEL_COLORS=['#D91E2A','#E8641F','#C99A1E','#8E2F3C','#A8541B'];
+let wheelAngle=0, activeCat='all';
+function buildWheel(lang){
+  const cats=SPRINT.categories, n=cats.length, step=360/n, R=98, cx=100, cy=100;
+  const pol=(a,r)=>[cx+r*Math.cos((a-90)*Math.PI/180), cy+r*Math.sin((a-90)*Math.PI/180)];
+  let out='';
+  cats.forEach((c,i)=>{
+    const a0=i*step, a1=(i+1)*step;
+    const [x0,y0]=pol(a0,R), [x1,y1]=pol(a1,R);
+    out+=`<path class="sec" data-sec="${c.id}" data-i="${i}"
+      d="M${cx} ${cy} L${x0.toFixed(2)} ${y0.toFixed(2)} A${R} ${R} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z"
+      fill="${WHEEL_COLORS[i%WHEEL_COLORS.length]}" stroke="rgba(0,0,0,.35)" stroke-width="1"/>`;
+  });
+  cats.forEach((c,i)=>{
+    const mid=i*step+step/2, [lx,ly]=pol(mid,R*0.78);
+    const flip=(mid>90&&mid<270)?180:0;                 // mbaje tekstin të lexueshëm
+    const label=(c[lang==='sq'?'sq':'en']||'').toUpperCase();
+    out+=`<g transform="translate(${lx.toFixed(2)},${ly.toFixed(2)}) rotate(${mid+flip})" pointer-events="none">
+      <text class="lbl" text-anchor="middle" dy="3">${label.length>13?label.slice(0,12)+'…':label}</text></g>`;
+    const [ax,ay]=pol(mid,R*0.5);
+    out+=`<g transform="translate(${ax.toFixed(2)},${ay.toFixed(2)})" pointer-events="none">
+      <svg x="-15" y="-15" width="30" height="30" viewBox="0 0 200 200"><use href="#art-${c.art}"/></svg></g>`;
+  });
+  out+=`<circle cx="100" cy="100" r="98" fill="none" stroke="#FFC244" stroke-width="2.5"/>`;
+  document.getElementById('wheel').innerHTML=out;
+  document.querySelectorAll('.sec').forEach(p=>p.addEventListener('click',()=>spinTo(p.dataset.sec)));
+}
+function spinTo(catId){
+  const cats=SPRINT.categories, n=cats.length, step=360/n;
+  const i=cats.findIndex(c=>c.id===catId); if(i<0)return;
+  const target=-(i*step+step/2);
+  const cur=wheelAngle%360;
+  let delta=((target-cur)%360+360)%360;
+  wheelAngle+= delta + 720;               // dy rrotullime shtesë për efekt
+  document.getElementById('wheel').style.transform=`rotate(${wheelAngle}deg)`;
+  document.querySelectorAll('.sec').forEach(p=>p.classList.toggle('is-on',p.dataset.sec===catId));
+  const c=cats[i], lang=SPRINT.getLang();
+  document.getElementById('hubT').textContent=c[lang==='sq'?'sq':'en'];
+  document.getElementById('hubS').textContent=lang==='sq'?'e zgjedhur':'selected';
+  activeCat=catId;
+  if(window.__app){ window.__app.state.cat=catId; window.__app.rerenderFilters(); window.__app.renderMenu(); }
+  setTimeout(()=>document.getElementById('menu').scrollIntoView({behavior:SPRINT.reduced?'auto':'smooth'}),620);
+}
+
+/* ---------- coverflow ---------- */
+let flowIdx=0, flowItems=[];
+function buildFlow(){
+  const lang=SPRINT.getLang();
+  flowItems=SPRINT.menu.filter(m=>m.tags.includes('top'));
+  const el=document.getElementById('flow');
+  el.innerHTML=flowItems.map((m,i)=>`
+    <div class="fc" data-f="${i}">
+      ${SPRINT.art(m,'')}
+      <h3>${SPRINT.esc(m[lang==='sq'?'sq':'en'])}</h3>
+      <span class="p">${SPRINT.money(m.p)}</span>
+      <button class="mini" data-add="${m.id}">${SPRINT.T('add')}</button>
+    </div>`).join('');
+  el.querySelectorAll('[data-f]').forEach(c=>c.addEventListener('click',e=>{
+    if(e.target.closest('[data-add]'))return; flowIdx=+c.dataset.f; layoutFlow();}));
+  el.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
+    window.__app && window.__app.add(b.dataset.add,b);}));
+  layoutFlow();
+}
+function layoutFlow(){
+  document.querySelectorAll('.fc').forEach((c,i)=>{
+    const d=i-flowIdx, ad=Math.abs(d);
+    c.style.transform=`translateX(${d*160}px) translateZ(${-ad*190}px) rotateY(${-d*32}deg) scale(${1-ad*.06})`;
+    c.style.opacity=ad>2?0:1; c.style.zIndex=100-ad;
+    c.style.pointerEvents=ad>2?'none':'auto';
+  });
+}
+document.getElementById('fPrev').onclick=()=>{flowIdx=Math.max(0,flowIdx-1);layoutFlow();};
+document.getElementById('fNext').onclick=()=>{flowIdx=Math.min(flowItems.length-1,flowIdx+1);layoutFlow();};
+
+/* ---------- karta e pjatës (flip) ---------- */
+const tagL={hot:{sq:'Pikante',en:'Spicy'},veg:{sq:'Vegjetarian',en:'Veggie'},new:{sq:'I ri',en:'New'},top:{sq:'Top',en:'Top'}};
+function card(m,i,l){
+  return `<article class="dish" data-reveal style="--i:${i}">
+    <div class="flipper">
+      <div class="face face-f">
+        <div class="m">${SPRINT.art(m,'dish-art')}
+          ${m.tags.length?`<div class="dish-tags">${m.tags.map(t=>`<span class="tag tag-${t}">${tagL[t][l]}</span>`).join('')}</div>`:''}
+        </div>
+        <h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}</h3>
+        <div class="foot"><span class="price">${SPRINT.money(m.p)}</span>
+          <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')}</span></button></div>
+      </div>
+      <div class="face face-b">
+        <h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}</h3>
+        <p>${SPRINT.esc(m[l==='sq'?'dsq':'den'])}</p>
+        <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')} · ${SPRINT.money(m.p)}</span></button>
+      </div>
+    </div></article>`;
+}
+
+/* ---------- nis ---------- */
+const app=SPRINT.app({
+  card,
+  onLang:(l)=>{
+    buildWheel(l); buildFlow();
+    document.getElementById('wHint').textContent = l==='sq'
+      ? '↻ Kliko një fetë për të zgjedhur kuzhinën' : '↻ Click a slice to pick a kitchen';
+    document.getElementById('flipHint').textContent = l==='sq'
+      ? '↻ Kalo mbi kartë (ose prek) për përbërësit' : '↻ Hover a card (or tap) for the ingredients';
+    document.getElementById('bestT').textContent = l==='sq' ? 'Yjet e kuzhinës sonë' : 'The stars of our kitchen';
+    if(activeCat!=='all'){document.querySelectorAll('.sec').forEach(p=>p.classList.toggle('is-on',p.dataset.sec===activeCat));}
+  },
+  onMenu:(grid)=>{
+    // prekja në celular: kthe kartën
+    grid.querySelectorAll('.dish').forEach(d=>d.addEventListener('click',e=>{
+      if(e.target.closest('[data-add]'))return;
+      if(matchMedia('(hover:none)').matches) d.classList.toggle('flip');
+    }));
+  },
+});
+window.__app={state:app.state,renderMenu:app.renderMenu,
+  rerenderFilters:()=>{document.querySelectorAll('[data-chip]').forEach(b=>
+    b.classList.toggle('is-on',b.dataset.chip===app.state.cat));},
+  add:(id,btn)=>{const b=document.querySelector(`[data-menu-grid] [data-add="${id}"]`);
+    if(b){b.click();}else{app.state.cart[id]=(app.state.cart[id]||0)+1;
+      localStorage.setItem('sprint-cart',JSON.stringify(app.state.cart));app.renderCart();
+      if(btn){const o=btn.textContent;btn.textContent=SPRINT.T('added');setTimeout(()=>btn.textContent=o,1100);}}}
+};
+
+/* ---------- rrota: rrotullim me scroll ---------- */
+if(!SPRINT.reduced){
+  const ww=document.getElementById('ww');
+  addEventListener('scroll',()=>{
+    const y=Math.min(window.scrollY,900);
+    ww.style.transform=`rotateX(${22-y/70}deg) rotateZ(${y/26}deg)`;
+  },{passive:true});
+}
+</script>
+</body>
+</html>
