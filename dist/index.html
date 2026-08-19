@@ -24,7 +24,7 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1;text-
 
 header{padding:clamp(3rem,7vw,5.5rem) 0 2.4rem;position:relative;overflow:hidden}
 header::before{content:'';position:absolute;inset:0;z-index:-1;
-  background:radial-gradient(70% 60% at 20% 0%,rgba(224,30,38,.22),transparent 65%),
+  background:radial-gradient(70% 60% at 20% 0%,rgba(224,123,30,.22),transparent 65%),
              radial-gradient(50% 50% at 88% 30%,rgba(240,176,60,.14),transparent 65%)}
 .kick{display:inline-flex;align-items:center;gap:.6rem;font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
   color:var(--gold);border:1px solid rgba(240,176,60,.35);border-radius:999px;padding:.45rem 1.05rem;margin-bottom:1.4rem}
@@ -42,7 +42,7 @@ header p{color:#c2c2ce;max-width:62ch;margin:1.2rem 0 0;font-weight:300}
 .mock{border:1px solid var(--line);border-radius:24px;overflow:hidden;background:var(--pan);
   display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
   transition:transform .45s cubic-bezier(.25,1,.3,1),border-color .4s,box-shadow .4s}
-.mock:hover{transform:translateY(-6px);border-color:rgba(224,30,38,.5);box-shadow:0 34px 70px -40px var(--red)}
+.mock:hover{transform:translateY(-6px);border-color:rgba(224,123,30,.5);box-shadow:0 34px 70px -40px var(--red)}
 .mock:nth-child(even){grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
 .mock:nth-child(even) .shot{order:2}
 
@@ -66,7 +66,7 @@ header p{color:#c2c2ce;max-width:62ch;margin:1.2rem 0 0;font-weight:300}
 .meta{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem}
 .pill{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);
   border-radius:999px;padding:.3rem .7rem;color:var(--muted)}
-.pill.hot{border-color:rgba(224,30,38,.5);color:#ff8b8b}
+.pill.hot{border-color:rgba(224,123,30,.5);color:#ff8b8b}
 .pill.calm{border-color:rgba(90,190,120,.45);color:#8ce0a6}
 .open{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:.55rem;
   background:var(--red);border-radius:999px;padding:.9rem 1.6rem;font-size:.78rem;font-weight:600;
@@ -96,11 +96,12 @@ footer ol{padding-left:1.2rem;display:grid;gap:.4rem;margin:.8rem 0 0}
     <p>Të pesta janë faqe të plota dhe funksionale: menu interaktive me filtra dhe kërkim, shportë që dërgon
       porosinë e formatuar në WhatsApp, formular rezervimi (WhatsApp + email), dygjuhësi shqip/anglisht dhe
       përshtatje e plotë për telefon. Ndryshon vetëm gjuha vizuale dhe intensiteti i efekteve.
-      Hapi tjetër: zgjidh njërën, dhe atë e çojmë deri në fund me fotot, menunë dhe të dhënat reale.</p>
+      Menuja, çmimet, numri i telefonit dhe ngjyrat janë tashmë ato të vërteta — provo t'i shtosh diçka
+      në shportë dhe ta dërgosh.</p>
     <div class="legend">
-      <div><b>Çfarë funksionon</b><span>Menu, filtra, kërkim, shportë, WhatsApp, rezervim, EN/SQ.</span></div>
-      <div><b>Çfarë është shembull</b><span>Pjatët, çmimet, review-t, telefoni dhe adresa.</span></div>
-      <div><b>Çfarë mungon</b><span>Fotot reale — rrjetet sociale ishin të bllokuara nga rrjeti.</span></div>
+      <div><b>Reale tashmë</b><span>Menuja me 122 artikuj e çmime, numri 069 666 7000, Instagrami dhe ngjyrat e brand-it.</span></div>
+      <div><b>Pret konfirmim</b><span>Adresa, orari i plotë, tarifa e dërgesës dhe një email.</span></div>
+      <div><b>Mungon ende</b><span>Fotot si skedarë dhe review reale nga Google.</span></div>
     </div>
   </div>
 </header>
@@ -112,13 +113,13 @@ footer ol{padding-left:1.2rem;display:grid;gap:.4rem;margin:.8rem 0 0}
     <b>Hapat e radhës</b>
     <ol>
       <li>Zgjidh njërin nga të pestat (ose thuaj «hero-n e 1-shit me menunë e 3-shit» — kombinimet janë të mundshme).</li>
-      <li>Më dërgo: logon, fotot/videot, menunë reale me çmime, numrin e telefonit dhe të WhatsApp-it, adresën e saktë dhe linket e profileve.</li>
+      <li>Më dërgo si skedarë: logon, fotot dhe videot e pjatave e të ambientit, review reale nga Google, adresën e saktë, orarin e plotë dhe tarifën e dërgesës.</li>
       <li>I fus të dhënat reale, publikoj faqen dhe të jap hapat e saktë të DNS-së për domain-in që do të blesh.</li>
     </ol>
-    <div class="warn"><b>Shënim i rëndësishëm:</b> Instagram, Facebook, TikTok, Google Maps dhe TripAdvisor janë
-      bllokuar nga politika e rrjetit të këtij mjedisi (gabim 403 nga proxy). Prandaj nuk u shkarkuan dot foto,
-      video, menu apo review reale. Të gjitha pamjet janë ilustrime SVG të vizatuara posaçërisht, dhe zëvendësohen
-      me materialet tuaja pa prekur strukturën e faqes.</div>
+    <div class="warn"><b>Dy gjëra për t'u mbajtur mend:</b> pamjet e pjatave janë ende ilustrime SVG të
+      vizatuara posaçërisht — rrjetet sociale mbeten të bllokuara nga rrjeti i këtij mjedisi, ndaj fotot duhen
+      dërguar si skedarë. Dhe review-t janë tekst vendmbajtës: duhen zëvendësuar me vlerësime reale nga Google
+      para se faqja të dalë online.</div>
   </div>
 </footer>
 

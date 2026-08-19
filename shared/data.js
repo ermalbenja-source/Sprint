@@ -1,10 +1,12 @@
 /* ============================================================================
-   SPRINT — Fast Food & Pizza, Durrës
+   SPRINT — Fast Food & Pizza · Restaurant, Durrës
    TË DHËNAT QENDRORE — ndrysho VETËM këtë skedar për menunë, çmimet, kontaktet.
    Pas çdo ndryshimi: `node build.js` për të rigjeneruar faqet në dist/.
 
-   ⚠️  VLERAT E SHËNUARA ME  // TODO:REAL  JANË SHEMBUJ.
-       Zëvendësoji me të dhënat reale të biznesit.
+   MENUJA DHE ÇMIMET janë transkriptuar nga menuja zyrtare e postuar në
+   Instagram (@sprint_restorant_fast_pizza).
+   Fushat e shënuara me  // TODO:REAL  presin ende konfirmim.
+   Përshkrimet e pjatave janë tekst i propozuar — konfirmoji ose ndryshoji.
    ========================================================================== */
 
 window.SPRINT = (function () {
@@ -13,209 +15,342 @@ window.SPRINT = (function () {
     tagline: { sq: 'Fast Food & Pizza · Restorant', en: 'Fast Food & Pizza · Restaurant' },
     city: 'Durrës',
 
-    // TODO:REAL — numri i vërtetë i telefonit
-    phone: '+355 69 000 0000',
-    phoneHref: '+35569000000',
+    phone: '069 666 7000',
+    phoneHref: '+355696667000',
+    whatsapp: '355696667000',
 
-    // TODO:REAL — numri i WhatsApp në format ndërkombëtar PA '+' dhe PA hapësira
-    whatsapp: '35569000000',
+    // TODO:REAL — email ku do të vijë kopja e rezervimit
+    email: '',
 
-    // TODO:REAL — email ku vjen kopja e rezervimit
-    email: 'info@sprintdurres.al',
+    // TODO:REAL — adresa e saktë e lokalit
+    address: { sq: 'Durrës, Shqipëri', en: 'Durrës, Albania' },
 
-    // TODO:REAL — adresa e saktë
-    address: { sq: 'Rruga Taulantia, Durrës, Shqipëri', en: 'Taulantia Street, Durrës, Albania' },
-
-    // TODO:REAL — koordinatat e sakta për hartën
+    // TODO:REAL — koordinatat e sakta (Google Maps → Share → kopjo koordinatat)
     geo: { lat: 41.3236, lng: 19.4432 },
 
     hours: {
-      sq: [['E Hënë – E Enjte', '09:00 – 24:00'], ['E Premte – E Shtunë', '09:00 – 02:00'], ['E Diel', '10:00 – 24:00']],
-      en: [['Monday – Thursday', '09:00 – 24:00'], ['Friday – Saturday', '09:00 – 02:00'], ['Sunday', '10:00 – 24:00']],
+      // TODO:REAL — konfirmo orarin e hapjes dhe të mbylljes
+      sq: [['Çdo ditë', '09:00 – 23:00'], ['Gatime tradicionale', '09:00 – 15:00'], ['Delivery', 'Pyet në WhatsApp']],
+      en: [['Every day', '09:00 – 23:00'], ['Traditional dishes', '09:00 – 15:00'], ['Delivery', 'Ask on WhatsApp']],
     },
 
     social: {
-      // TODO:REAL — linket e sakta të profileve
-      instagram: 'https://www.instagram.com/',
-      facebook: 'https://www.facebook.com/',
-      tiktok: 'https://www.tiktok.com/',
+      instagram: 'https://www.instagram.com/sprint_restorant_fast_pizza/',
+      facebook: '',   // TODO:REAL — linku i faqes në Facebook, nëse ka
+      tiktok: '',     // TODO:REAL — linku i profilit në TikTok, nëse ka
+    },
+
+    // Salla e eventeve — nga postimi «Për çdo event tuaj jemi pranë jush!»
+    events: {
+      sq: 'Salla jonë pritëse është e hapur për ditëlindje, darka pune dhe festa familjare.',
+      en: 'Our function room hosts birthdays, business dinners and family celebrations.',
     },
 
     currency: 'L',
-    deliveryFee: 100,
-    freeDeliveryOver: 1500,
+    // deliveryFee: null → shporta shfaq «Sipas zonës» në vend të një shifre të pasaktë.
+    deliveryFee: null,          // TODO:REAL — vendos shifrën kur ta konfirmosh tarifën
+    freeDeliveryOver: null,
   };
 
   /* --------------------------------------------------------------------------
-     KATEGORITË — katër shtyllat e biznesit
+     KATEGORITË — gjashtë shtyllat, sipas menusë zyrtare
      -------------------------------------------------------------------------- */
   const categories = [
-    { id: 'pizza',   art: 'pizza',  sq: 'Pizza',        en: 'Pizza',
-      dsq: 'Brumë 48 orë, furrë druri, mozzarella fiordilatte.',
-      den: '48-hour dough, wood-fired oven, fiordilatte mozzarella.' },
-    { id: 'fast',    art: 'burger', sq: 'Fast Food',    en: 'Fast Food',
-      dsq: 'Suflaqe, burger dhe krokante — gati për 7 minuta.',
-      den: 'Gyros, burgers and crispy classics — ready in 7 minutes.' },
-    { id: 'rest',    art: 'steak',  sq: 'Restorant',    en: 'Restaurant',
-      dsq: 'Mish në skarë, peshk i freskët, pasta italiane.',
-      den: 'Grilled meats, fresh fish, Italian pasta.' },
-    { id: 'trad',    art: 'tave',   sq: 'Tradicionale', en: 'Traditional',
-      dsq: 'Recetat e gjyshes — tavë kosi, fërgesë, byrek.',
-      den: "Grandma's recipes — tavë kosi, fërgesë, byrek." },
-    { id: 'dolce',   art: 'dessert',sq: 'Ëmbëlsira & Pije', en: 'Desserts & Drinks',
-      dsq: 'Trileçe, bakllava dhe pije të ftohta.',
-      den: 'Trileçe, baklava and cold drinks.' },
+    { id:'pizza', art:'pizza', sq:'Pizza', en:'Pizza',
+      dsq:'Nga Margarita te Pica Sprint — pesëmbëdhjetë pica dhe fokaçe.',
+      den:'From the Margherita to the Pizza Sprint — fifteen pizzas and focaccias.' },
+    { id:'fast', art:'gyros', sq:'Fast Food', en:'Fast Food',
+      dsq:'Sufllaqe, doner, burger dhe sanduiçë me brumë pice.',
+      den:'Gyros, doner, burgers and pizza-dough sandwiches.' },
+    { id:'rest', art:'steak', sq:'Restorant', en:'Restaurant',
+      dsq:'Pasta, rizoto, mish në zgarë dhe peshk i freskët.',
+      den:'Pasta, risotto, grilled meats and fresh fish.' },
+    { id:'trad', art:'tave', sq:'Tradicionale', en:'Traditional',
+      dsq:'Tavat dhe gatimet e ditës — çdo ditë nga 09:00 deri 15:00.',
+      den:'Clay-pot bakes and dishes of the day — daily from 09:00 to 15:00.' },
+    { id:'starter', art:'salad', sq:'Sallata & Supa', en:'Salads & Soups',
+      dsq:'Sallata të freskëta, supa dhe shoqëruese për tavolinën.',
+      den:'Fresh salads, soups and sides for the table.' },
+    { id:'pije', art:'drink', sq:'Pije', en:'Drinks',
+      dsq:'Kafe, pije freskuese, birra dhe verë.',
+      den:'Coffee, soft drinks, beer and wine.' },
   ];
 
   /* --------------------------------------------------------------------------
-     MENUJA — TODO:REAL zëvendëso me menunë e vërtetë me çmimet e sakta
-     tags: 'hot' (pikante) | 'veg' | 'new' | 'top' (më i shituri)
+     MENUJA — transkriptuar nga menuja zyrtare
+     tags: 'hot' (pikante) · 'veg' · 'new' · 'top' (i spikatur)
+     unit: teksti pas çmimit, p.sh. '/copë'
+     note: shënim i vogël mbi pjatën, p.sh. orari
      -------------------------------------------------------------------------- */
   const menu = [
-    // ---- PIZZA ----
-    { id:'p1', c:'pizza', art:'pizza', sq:'Margherita', en:'Margherita', p:500,
-      dsq:'Salcë domateje San Marzano, mozzarella, borzilok i freskët.',
-      den:'San Marzano tomato, mozzarella, fresh basil.', tags:['veg'] },
-    { id:'p2', c:'pizza', art:'pizzaC', sq:'Prosciutto e Funghi', en:'Prosciutto e Funghi', p:700,
-      dsq:'Proshutë cotto, kërpudha shampinjon, mozzarella.',
-      den:'Cooked ham, champignon mushrooms, mozzarella.', tags:[] },
-    { id:'p3', c:'pizza', art:'pizzaC', sq:'Capricciosa', en:'Capricciosa', p:750,
-      dsq:'Proshutë, kërpudha, ullinj, angjinare, vezë.',
-      den:'Ham, mushrooms, olives, artichokes, egg.', tags:['top'] },
-    { id:'p4', c:'pizza', art:'pizzaW', sq:'Quattro Formaggi', en:'Four Cheese', p:800,
-      dsq:'Mozzarella, gorgonzola, parmixhan, djathë i bardhë vendi.',
-      den:'Mozzarella, gorgonzola, parmesan, local white cheese.', tags:['veg'] },
-    { id:'p5', c:'pizza', art:'pizza', sq:'Diavola', en:'Diavola', p:750,
-      dsq:'Sallam pikant, spec djegës, mozzarella, vaj ulliri.',
-      den:'Spicy salami, chilli, mozzarella, olive oil.', tags:['hot'] },
-    { id:'p6', c:'pizza', art:'pizzaC', sq:'Sprint Special', en:'Sprint Special', p:900,
-      dsq:'Mish viçi, sallam, proshutë, kërpudha, spec, qepë, dopio djathë.',
-      den:'Beef, salami, ham, mushrooms, peppers, onion, double cheese.', tags:['top','new'] },
-    { id:'p7', c:'pizza', art:'pizzaV', sq:'Vegetariane', en:'Vegetarian', p:650,
-      dsq:'Perime sezonale në skarë, mozzarella, rukola.',
-      den:'Grilled seasonal vegetables, mozzarella, rocket.', tags:['veg'] },
-    { id:'p8', c:'pizza', art:'pizzaV', sq:'Tonno e Cipolla', en:'Tuna & Onion', p:750,
-      dsq:'Ton, qepë e kuqe, ullinj të zinj, origano.',
-      den:'Tuna, red onion, black olives, oregano.', tags:[] },
+    /* ─────────────── PIZZA ─────────────── */
+    { id:'pz01', c:'pizza', art:'pizzaW', sq:'Fokaçe', en:'Focaccia', p:150,
+      dsq:'Bukë pice e ngrohtë me vaj ulliri.', den:'Warm pizza bread with olive oil.', tags:['veg'] },
+    { id:'pz02', c:'pizza', art:'pizzaW', sq:'Fokaçe Bruskete', en:'Bruschetta Focaccia', p:250,
+      dsq:'Fokaçe me domate të freskëta dhe hudhër.', den:'Focaccia with fresh tomato and garlic.', tags:['veg'] },
+    { id:'pz03', c:'pizza', art:'pizza', sq:'Pica Margarita', en:'Pizza Margherita', p:320,
+      dsq:'Salcë domateje dhe djathë — klasikja.', den:'Tomato sauce and cheese — the classic.', tags:['veg'] },
+    { id:'pz04', c:'pizza', art:'pizzaC', sq:'Pica me Proshutë Viçi', en:'Beef Ham Pizza', p:370,
+      dsq:'Proshutë viçi mbi bazën e shtëpisë.', den:'Beef ham on the house base.', tags:[] },
+    { id:'pz05', c:'pizza', art:'pizzaW', sq:'Pica 4 Djathërat', en:'Four Cheese Pizza', p:480,
+      dsq:'Katër djathëra të shkrirë.', den:'Four melted cheeses.', tags:['veg'] },
+    { id:'pz06', c:'pizza', art:'pizzaV', sq:'Pica Vegjetariane', en:'Vegetarian Pizza', p:400,
+      dsq:'Perime sezonale mbi salcë domateje dhe djathë.', den:'Seasonal vegetables on tomato and cheese.', tags:['veg'] },
+    { id:'pz07', c:'pizza', art:'pizzaC', sq:'Pica Delicioza', en:'Pizza Deliziosa', p:580,
+      dsq:'Përbërës të pasur — pyet kamarierin për sot.', den:'A rich topping — ask the waiter about today’s.', tags:[] },
+    { id:'pz08', c:'pizza', art:'pizzaC', sq:'Pica Kapriçoza', en:'Pizza Capricciosa', p:480,
+      dsq:'Proshutë, kërpudha dhe ullinj.', den:'Ham, mushrooms and olives.', tags:['top'] },
+    { id:'pz09', c:'pizza', art:'pizza', sq:'Pica Diavola', en:'Pizza Diavola', p:480,
+      dsq:'Sallam pikant dhe spec djegës.', den:'Spicy salami and chilli.', tags:['hot'] },
+    { id:'pz10', c:'pizza', art:'pizzaV', sq:'Pica me Ton & Qepë', en:'Tuna & Onion Pizza', p:450,
+      dsq:'Ton dhe qepë e freskët.', den:'Tuna and fresh onion.', tags:[] },
+    { id:'pz11', c:'pizza', art:'pizzaC', sq:'Pica Milano', en:'Pizza Milano', p:480,
+      dsq:'Kombinim italian me sallam dhe djathë.', den:'An Italian combination of salami and cheese.', tags:[] },
+    { id:'pz12', c:'pizza', art:'pizzaC', sq:'Pica Amerikane', en:'American Pizza', p:470,
+      dsq:'Sallam, wudy dhe djathë i bollshëm.', den:'Salami, frankfurter and plenty of cheese.', tags:[] },
+    { id:'pz13', c:'pizza', art:'pizzaC', sq:'Pica 4 Stinët', en:'Four Seasons Pizza', p:500,
+      dsq:'Katër çerekë, katër shije.', den:'Four quarters, four toppings.', tags:[] },
+    { id:'pz14', c:'pizza', art:'pizzaC', sq:'Pica me Fileto Pule', en:'Chicken Fillet Pizza', p:480,
+      dsq:'Fileto pule në copa mbi djathë.', den:'Chicken fillet strips over cheese.', tags:[] },
+    { id:'pz15', c:'pizza', art:'pizzaC', sq:'Pica Sprint', en:'Pizza Sprint', p:680,
+      dsq:'Specialiteti i shtëpisë — pica jonë më e plotë.', den:'The house speciality — our most loaded pizza.', tags:['top','new'] },
 
-    // ---- FAST FOOD ----
-    { id:'f1', c:'fast', art:'gyros', sq:'Suflaqe Pule', en:'Chicken Gyros', p:300,
-      dsq:'Pulë e marinuar, patate, domate, qepë, salcë e bardhë.',
-      den:'Marinated chicken, fries, tomato, onion, white sauce.', tags:['top'] },
-    { id:'f2', c:'fast', art:'gyros', sq:'Suflaqe Viçi', en:'Beef Gyros', p:350,
-      dsq:'Viç në gyros, patate, perime të freskëta, salcë e shtëpisë.',
-      den:'Beef gyros, fries, fresh vegetables, house sauce.', tags:[] },
-    { id:'f3', c:'fast', art:'burger', sq:'Hamburger', en:'Hamburger', p:350,
-      dsq:'Kotoletë viçi 150g, sallatë, domate, qepë, turshi.',
-      den:'150g beef patty, lettuce, tomato, onion, pickles.', tags:[] },
-    { id:'f4', c:'fast', art:'burger', sq:'Cheeseburger', en:'Cheeseburger', p:400,
-      dsq:'Kotoletë viçi, çedar i shkrirë, salcë Sprint.',
-      den:'Beef patty, melted cheddar, Sprint sauce.', tags:[] },
-    { id:'f5', c:'fast', art:'burger', sq:'Sprint Burger XL', en:'Sprint Burger XL', p:600,
-      dsq:'Dopio kotoletë 300g, dopio çedar, bacon, qepë e karamelizuar.',
-      den:'Double 300g patty, double cheddar, bacon, caramelised onion.', tags:['top','new'] },
-    { id:'f6', c:'fast', art:'gyros', sq:'Kebab në Pite', en:'Kebab in Pita', p:400,
-      dsq:'Kebab i bërë në shtëpi, pite e ngrohtë, salcë kosi.',
-      den:'House-made kebab, warm pita, yoghurt sauce.', tags:[] },
-    { id:'f7', c:'fast', art:'fries', sq:'Patate të Skuqura', en:'French Fries', p:200,
-      dsq:'Patate të freskëta, kripë deti, rozmarinë.',
-      den:'Fresh-cut potatoes, sea salt, rosemary.', tags:['veg'] },
-    { id:'f8', c:'fast', art:'wings', sq:'Krahë Pule Pikant', en:'Spicy Chicken Wings', p:500,
-      dsq:'8 copë krahë në salcë buffalo, me salcë blu.',
-      den:'8 wings in buffalo sauce, with blue cheese dip.', tags:['hot'] },
-    { id:'f9', c:'fast', art:'wings', sq:'Crispy Strips', en:'Crispy Strips', p:550,
-      dsq:'Fileto pule krokante, patate, dy salca për zgjedhje.',
-      den:'Crispy chicken fillets, fries, two dips of choice.', tags:[] },
+    /* ─────────────── FAST FOOD ─────────────── */
+    { id:'ff01', c:'fast', art:'gyros', sq:'Sufllaqe', en:'Gyros', p:250,
+      dsq:'Pita e mbushur me mish, patate dhe salcë.', den:'Pita filled with meat, fries and sauce.', tags:['top'] },
+    { id:'ff02', c:'fast', art:'gyros', sq:'Sufllaqe Dopio Pitë', en:'Double-Pita Gyros', p:280,
+      dsq:'E njëjta sufllaqe, me dy pita.', den:'The same gyros, with two pitas.', tags:[] },
+    { id:'ff03', c:'fast', art:'gyros', sq:'Sufllaqe Wudy', en:'Frankfurter Gyros', p:250,
+      dsq:'Sufllaqe me wudy dhe patate.', den:'Gyros with frankfurter and fries.', tags:[] },
+    { id:'ff04', c:'fast', art:'gyros', sq:'Sufllaqe e Hapur', en:'Open Gyros', p:450,
+      dsq:'Në pjatë, me porcion të plotë mishi.', den:'On a plate, with a full portion of meat.', tags:[] },
+    { id:'ff05', c:'fast', art:'gyros', sq:'Doner', en:'Doner', p:250,
+      dsq:'Doner i prerë nga hosti, në pitë.', den:'Doner carved from the spit, in pita.', tags:[] },
+    { id:'ff06', c:'fast', art:'gyros', sq:'Doner me Brumë Pice', en:'Doner in Pizza Dough', p:320,
+      dsq:'Doner i mbështjellë në brumë pice.', den:'Doner wrapped in pizza dough.', tags:[] },
+    { id:'ff07', c:'fast', art:'sandwich', sq:'Hot Dog', en:'Hot Dog', p:250,
+      dsq:'Wudy në bukë të gjatë me salca.', den:'Frankfurter in a long roll with sauces.', tags:[] },
+    { id:'ff08', c:'fast', art:'sandwich', sq:'Sanduiç', en:'Sandwich', p:200,
+      dsq:'Sanduiçi klasik i shtëpisë.', den:'The classic house sandwich.', tags:[] },
+    { id:'ff09', c:'fast', art:'burger', sq:'Hamburger Tradicional', en:'Traditional Hamburger', p:200,
+      dsq:'Kotoletë, perime të freskëta dhe salcë.', den:'Patty, fresh vegetables and sauce.', tags:['top'] },
+    { id:'ff10', c:'fast', art:'sandwich', sq:'Tost', en:'Toastie', p:120,
+      dsq:'Tost i ngrohtë me djathë dhe proshutë.', den:'Warm toastie with cheese and ham.', tags:[] },
+    { id:'ff11', c:'fast', art:'sandwich', sq:'Club Sanduiç', en:'Club Sandwich', p:300,
+      dsq:'Tre kate, me pulë dhe perime.', den:'Three layers, with chicken and vegetables.', tags:[] },
+    { id:'ff12', c:'fast', art:'wings', sq:'Chicken Fingers', en:'Chicken Fingers', p:250,
+      dsq:'Fileto pule krokante.', den:'Crispy chicken fillet strips.', tags:[] },
+    { id:'ff13', c:'fast', art:'wings', sq:'Chicken Nuggets', en:'Chicken Nuggets', p:250,
+      dsq:'Nagets pule me salcë për zgjedhje.', den:'Chicken nuggets with a dip of your choice.', tags:[] },
+    { id:'ff14', c:'fast', art:'steak', sq:'Shishqebap Pule', en:'Chicken Skewer', p:120, unit:'/copë',
+      dsq:'Hell pule në zgarë.', den:'Chicken skewer off the grill.', tags:[] },
+    { id:'ff15', c:'fast', art:'steak', sq:'Shishqebap Derri', en:'Pork Skewer', p:100, unit:'/copë',
+      dsq:'Hell derri në zgarë.', den:'Pork skewer off the grill.', tags:[] },
+    { id:'ff16', c:'fast', art:'steak', sq:'Llukank Derri', en:'Pork Sausage', p:100, unit:'/copë',
+      dsq:'Llukanka vendi në zgarë.', den:'Local sausage off the grill.', tags:[] },
+    { id:'ff17', c:'fast', art:'steak', sq:'Mikse Mishi', en:'Mixed Grill', p:1200,
+      dsq:'Pjatë e madhe me mishra të ndryshëm — për ta ndarë.', den:'A large platter of assorted grilled meats — made to share.', tags:['top'] },
 
-    // ---- RESTORANT ----
-    { id:'r1', c:'rest', art:'steak', sq:'Biftek Viçi me Salcë Kërpudhash', en:'Beef Steak, Mushroom Sauce', p:1200,
-      dsq:'Biftek 300g, salcë kremi me kërpudha, patate rustike.',
-      den:'300g steak, creamy mushroom sauce, rustic potatoes.', tags:['top'] },
-    { id:'r2', c:'rest', art:'steak', sq:'Fileto Pule në Zjarr', en:'Flame-Grilled Chicken Fillet', p:800,
-      dsq:'Fileto pule e marinuar, perime në skarë, limon.',
-      den:'Marinated chicken fillet, grilled vegetables, lemon.', tags:[] },
-    { id:'r3', c:'rest', art:'fish', sq:'Koce e Freskët në Skarë', en:'Grilled Sea Bream', p:1500,
-      dsq:'Peshk i ditës nga Adriatiku, vaj ulliri, hudhër, majdanoz.',
-      den:'Catch of the day from the Adriatic, olive oil, garlic, parsley.', tags:['top'] },
-    { id:'r4', c:'rest', art:'pasta', sq:'Spageti Carbonara', en:'Spaghetti Carbonara', p:600,
-      dsq:'Guanciale, veza, pecorino romano, piper i zi.',
-      den:'Guanciale, egg, pecorino romano, black pepper.', tags:[] },
-    { id:'r5', c:'rest', art:'pasta', sq:'Penne Arrabiata', en:'Penne Arrabbiata', p:550,
-      dsq:'Domate e freskët, hudhër, spec djegës, borzilok.',
-      den:'Fresh tomato, garlic, chilli, basil.', tags:['hot','veg'] },
-    { id:'r6', c:'rest', art:'pasta', sq:'Rizoto me Fruta Deti', en:'Seafood Risotto', p:900,
-      dsq:'Oriz carnaroli, midhje, karkaleca, kalamar, verë e bardhë.',
-      den:'Carnaroli rice, mussels, prawns, squid, white wine.', tags:[] },
-    { id:'r7', c:'rest', art:'salad', sq:'Sallatë Caesar', en:'Caesar Salad', p:550,
-      dsq:'Marule, pulë në skarë, krutona, parmixhan, salcë Caesar.',
-      den:'Romaine, grilled chicken, croutons, parmesan, Caesar dressing.', tags:[] },
-    { id:'r8', c:'rest', art:'salad', sq:'Sallatë Greke', en:'Greek Salad', p:450,
-      dsq:'Domate, kastravec, feta, ullinj kalamata, origano.',
-      den:'Tomato, cucumber, feta, kalamata olives, oregano.', tags:['veg'] },
+    /* ─────────────── PICERI · sanduiçë me brumë pice ─────────────── */
+    { id:'sp01', c:'fast', art:'sandwich', sq:'Sanduiç me Sallam', en:'Salami Sandwich', p:250,
+      dsq:'Me brumë pice, i pjekur në furrë.', den:'In pizza dough, baked in the oven.', tags:[] },
+    { id:'sp02', c:'fast', art:'sandwich', sq:'Sanduiç Pikant', en:'Spicy Sandwich', p:250,
+      dsq:'Me brumë pice dhe sallam pikant.', den:'In pizza dough with spicy salami.', tags:['hot'] },
+    { id:'sp03', c:'fast', art:'sandwich', sq:'Sanduiç me Proshutë Viçi', en:'Beef Ham Sandwich', p:250,
+      dsq:'Me brumë pice dhe proshutë viçi.', den:'In pizza dough with beef ham.', tags:[] },
+    { id:'sp04', c:'fast', art:'sandwich', sq:'Sanduiç me Wudy', en:'Frankfurter Sandwich', p:250,
+      dsq:'Me brumë pice dhe wudy.', den:'In pizza dough with frankfurter.', tags:[] },
+    { id:'sp05', c:'fast', art:'sandwich', sq:'Sanduiç me Ton', en:'Tuna Sandwich', p:250,
+      dsq:'Me brumë pice dhe ton.', den:'In pizza dough with tuna.', tags:[] },
+    { id:'sp06', c:'fast', art:'sandwich', sq:'Sanduiç me Ton & Sallam Pikant', en:'Tuna & Spicy Salami Sandwich', p:300,
+      dsq:'Ton dhe sallam pikant në brumë pice.', den:'Tuna and spicy salami in pizza dough.', tags:['hot'] },
+    { id:'sp07', c:'fast', art:'sandwich', sq:'Sanduiç Fshati', en:'Village Sandwich', p:250,
+      dsq:'Me produkte vendi.', den:'Made with local produce.', tags:[] },
+    { id:'sp08', c:'fast', art:'sandwich', sq:'Sanduiç Miks', en:'Mixed Sandwich', p:300,
+      dsq:'Kombinimi ynë i plotë në brumë pice.', den:'Our full combination in pizza dough.', tags:[] },
+    { id:'sp09', c:'fast', art:'sandwich', sq:'Sanduiç Vegjetarian', en:'Vegetarian Sandwich', p:220,
+      dsq:'Vetëm perime dhe djathë.', den:'Vegetables and cheese only.', tags:['veg'] },
+    { id:'sp10', c:'fast', art:'sandwich', sq:'Sanduiç me Proshutë & Kërpudha', en:'Ham & Mushroom Sandwich', p:250,
+      dsq:'Proshutë dhe kërpudha në brumë pice.', den:'Ham and mushrooms in pizza dough.', tags:[] },
+    { id:'sp11', c:'fast', art:'sandwich', sq:'Sanduiç Pikant & Kërpudha', en:'Spicy & Mushroom Sandwich', p:250,
+      dsq:'Sallam pikant dhe kërpudha.', den:'Spicy salami and mushrooms.', tags:['hot'] },
 
-    // ---- TRADICIONALE ----
-    { id:'t1', c:'trad', art:'tave', sq:'Tavë Kosi', en:'Tavë Kosi (Baked Lamb & Yoghurt)', p:700,
-      dsq:'Mish qengji, kos i trashë, oriz, vezë — pjekur në tavë balte.',
-      den:'Lamb, thick yoghurt, rice, egg — baked in a clay dish.', tags:['top'] },
-    { id:'t2', c:'trad', art:'tave', sq:'Fërgesë Tirane', en:'Fërgesë Tirane', p:650,
-      dsq:'Spec i pjekur, domate, gjizë, mish viçi — në tigan balte.',
-      den:'Roasted peppers, tomato, curd cheese, beef — in a clay pan.', tags:['top'] },
-    { id:'t3', c:'trad', art:'byrek', sq:'Byrek me Spinaq', en:'Spinach Byrek', p:200,
-      dsq:'Petë e hapur me dorë, spinaq, gjizë vendi.',
-      den:'Hand-rolled filo, spinach, local curd cheese.', tags:['veg'] },
-    { id:'t4', c:'trad', art:'tave', sq:'Qofte të Fërguara', en:'Fried Meatballs', p:550,
-      dsq:'Qofte viçi me mendër, qepë dhe erëza tradicionale.',
-      den:'Beef meatballs with mint, onion and traditional spices.', tags:[] },
-    { id:'t5', c:'trad', art:'tave', sq:'Japrak me Gjethe Rrushi', en:'Stuffed Vine Leaves', p:600,
-      dsq:'Gjethe rrushi të mbushura me oriz e mish, salcë kosi.',
-      den:'Vine leaves stuffed with rice and meat, yoghurt sauce.', tags:[] },
-    { id:'t6', c:'trad', art:'tave', sq:'Speca me Gjizë', en:'Peppers with Curd Cheese', p:500,
-      dsq:'Speca të pjekur të mbushur me gjizë vendi dhe vezë.',
-      den:'Roasted peppers stuffed with local curd cheese and egg.', tags:['veg'] },
-    { id:'t7', c:'trad', art:'byrek', sq:'Pite me Mish', en:'Meat Pie', p:350,
-      dsq:'Petë shtëpie, mish viçi i grirë, qepë.',
-      den:'Homemade filo, minced beef, onion.', tags:[] },
-    { id:'t8', c:'trad', art:'fish', sq:'Supë Peshku', en:'Fish Soup', p:700,
-      dsq:'Peshk i Adriatikut, perime, limon — receta e bregdetit.',
-      den:'Adriatic fish, vegetables, lemon — a coastal recipe.', tags:[] },
+    /* ─────────────── RESTORANT · pasta dhe rizoto ─────────────── */
+    { id:'pa01', c:'rest', art:'pasta', sq:'Linguini me Fruta Deti', en:'Seafood Linguine', p:600,
+      dsq:'Fruta deti të freskëta mbi linguini.', den:'Fresh seafood over linguine.', tags:['top'] },
+    { id:'pa02', c:'rest', art:'pasta', sq:'Linguini me Pomodorini & Karkaleca', en:'Linguine, Cherry Tomato & Prawns', p:600,
+      dsq:'Karkaleca dhe domate qershi.', den:'Prawns and cherry tomatoes.', tags:[] },
+    { id:'pa03', c:'rest', art:'pasta', sq:'Linguini Bolognese', en:'Linguine Bolognese', p:350,
+      dsq:'Salcë mishi e zier gjatë.', den:'Slow-cooked meat sauce.', tags:[] },
+    { id:'pa04', c:'rest', art:'pasta', sq:'Linguini me Salcë ose Gjalpë', en:'Linguine with Sauce or Butter', p:250,
+      dsq:'E thjeshtë, sipas dëshirës.', den:'Simple, however you like it.', tags:['veg'] },
+    { id:'pa05', c:'rest', art:'pasta', sq:'Pene me Pana & Proshutë', en:'Penne with Cream & Ham', p:350,
+      dsq:'Krem i lehtë dhe proshutë.', den:'Light cream and ham.', tags:[] },
+    { id:'pa06', c:'rest', art:'pasta', sq:'Rizoto me Fruta Deti', en:'Seafood Risotto', p:600,
+      dsq:'Oriz i gatuar me fruta deti.', den:'Rice cooked with seafood.', tags:[] },
+    { id:'pa07', c:'rest', art:'pasta', sq:'Rizoto me Kungull & Karkaleca', en:'Courgette & Prawn Risotto', p:600,
+      dsq:'Kungull i njomë dhe karkaleca.', den:'Courgette and prawns.', tags:[] },
 
-    // ---- ËMBËLSIRA & PIJE ----
-    { id:'d1', c:'dolce', art:'dessert', sq:'Trileçe', en:'Trileçe', p:300,
-      dsq:'Tre qumështrat, karamel i bërë në shtëpi.',
-      den:'Three-milk cake with homemade caramel.', tags:['top','veg'] },
-    { id:'d2', c:'dolce', art:'dessert', sq:'Tiramisu', en:'Tiramisu', p:350,
-      dsq:'Mascarpone, savoiardi, kafe espresso, kakao.',
-      den:'Mascarpone, savoiardi, espresso, cocoa.', tags:['veg'] },
-    { id:'d3', c:'dolce', art:'dessert', sq:'Bakllava', en:'Baklava', p:250,
-      dsq:'Petë të holla, arra, sherbet mjalti.',
-      den:'Thin filo, walnuts, honey syrup.', tags:['veg'] },
-    { id:'d4', c:'dolce', art:'drink', sq:'Coca-Cola 0.33L', en:'Coca-Cola 0.33L', p:150,
-      dsq:'E ftohtë akull.', den:'Ice cold.', tags:['veg'] },
-    { id:'d5', c:'dolce', art:'drink', sq:'Ujë 0.5L', en:'Water 0.5L', p:100,
-      dsq:'Ujë natyral i pijshëm.', den:'Still natural water.', tags:['veg'] },
-    { id:'d6', c:'dolce', art:'drink', sq:'Birrë Korça 0.33L', en:'Korça Beer 0.33L', p:250,
-      dsq:'Birra klasike shqiptare.', den:'The classic Albanian lager.', tags:['veg'] },
-    { id:'d7', c:'dolce', art:'drink', sq:'Espresso', en:'Espresso', p:100,
-      dsq:'Kafe italiane, e pjekur çdo javë.', den:'Italian coffee, roasted weekly.', tags:['veg'] },
+    /* ─────────────── RESTORANT · pjata kryesore ─────────────── */
+    { id:'pk01', c:'rest', art:'steak', sq:'Fileto Pule me Garniturë', en:'Chicken Fillet with Garnish', p:500,
+      dsq:'Fileto pule me garniturë sezonale.', den:'Chicken fillet with a seasonal garnish.', tags:[] },
+    { id:'pk02', c:'rest', art:'steak', sq:'Fileto Pule me Pana & Kërpudha', en:'Chicken Fillet, Cream & Mushrooms', p:600,
+      dsq:'Salcë kremi me kërpudha.', den:'Creamy mushroom sauce.', tags:[] },
+    { id:'pk03', c:'rest', art:'steak', sq:'Biftek Viçi', en:'Beef Steak', p:800,
+      dsq:'Biftek viçi në zgarë.', den:'Grilled beef steak.', tags:['top'] },
+    { id:'pk04', c:'rest', art:'steak', sq:'Bërxollë Viçi', en:'Beef Chop', p:800,
+      dsq:'Bërxollë me kockë, në zgarë.', den:'Bone-in chop, off the grill.', tags:[] },
+    { id:'pk05', c:'rest', art:'steak', sq:'Mish Qengji në Zgarë', en:'Grilled Lamb', p:900,
+      dsq:'Qengj i njomë në zgarë.', den:'Tender lamb off the grill.', tags:['top'] },
+    { id:'pk06', c:'rest', art:'fish', sq:'Karkaleca në Zgarë', en:'Grilled Prawns', p:800,
+      dsq:'Karkaleca të freskëta me limon.', den:'Fresh prawns with lemon.', tags:[] },
+    { id:'pk07', c:'rest', art:'fish', sq:'Friturë Mikse', en:'Mixed Fried Seafood', p:650,
+      dsq:'Peshk e fruta deti të skuqura.', den:'Fried fish and seafood.', tags:[] },
+    { id:'pk08', c:'rest', art:'fish', sq:'Koce / Levrek në Zgarë', en:'Grilled Sea Bream / Sea Bass', p:700,
+      dsq:'Peshk i freskët me perime në zgarë.', den:'Fresh fish with grilled vegetables.', tags:['top'] },
+
+    /* ─────────────── TRADICIONALE ─────────────── */
+    { id:'tr01', c:'trad', art:'tave', sq:'Tavë Dheu', en:'Tavë Dheu', p:400, note:'09:00–15:00',
+      dsq:'Pjekur në tavë balte, si dikur.', den:'Baked in a clay dish, the old way.', tags:['top'] },
+    { id:'tr02', c:'trad', art:'tave', sq:'Tavë Balte', en:'Clay-Pot Bake', p:400, note:'09:00–15:00',
+      dsq:'Gatim i ngadaltë në tavë balte.', den:'Slow-cooked in a clay pot.', tags:[] },
+    { id:'tr03', c:'trad', art:'tave', sq:'Tavë Kosi', en:'Tavë Kosi', p:400, note:'09:00–15:00',
+      dsq:'Mish, oriz dhe kos i trashë në furrë.', den:'Meat, rice and thick yoghurt, oven-baked.', tags:['top'] },
+    { id:'tr04', c:'trad', art:'tave', sq:'Pilaf', en:'Pilaf', p:100, note:'09:00–15:00',
+      dsq:'Oriz i gatuar në lëng mishi.', den:'Rice cooked in meat stock.', tags:[] },
+    { id:'tr05', c:'trad', art:'tave', sq:'Qofte Shtëpie', en:'House Meatballs', p:50, unit:'/copë', note:'09:00–15:00',
+      dsq:'Qofte të fërguara, receta e shtëpisë.', den:'Fried meatballs, the house recipe.', tags:[] },
+    { id:'tr06', c:'trad', art:'soup', sq:'Paçe Koke', en:'Paçe Koke', p:250, note:'09:00–15:00',
+      dsq:'Supa tradicionale e mëngjesit.', den:'The traditional morning soup.', tags:[] },
+    { id:'tr07', c:'trad', art:'tave', sq:'Tasqebap', en:'Tasqebap', p:300, note:'09:00–15:00',
+      dsq:'Mish i zier ngadalë me qepë.', den:'Slowly braised meat with onion.', tags:[] },
+    { id:'tr08', c:'trad', art:'tave', sq:'Lazanja', en:'Lasagne', p:350,
+      dsq:'Petë, salcë mishi dhe beshamel.', den:'Pasta sheets, meat sauce and béchamel.', tags:[] },
+    { id:'tr09', c:'trad', art:'tave', sq:'Pastice', en:'Pastiçio', p:250,
+      dsq:'Makarona të pjekura në furrë.', den:'Oven-baked pasta.', tags:[] },
+    { id:'tr10', c:'trad', art:'tave', sq:'Musaka', en:'Moussaka', p:300,
+      dsq:'Shtresa patatesh, mishi dhe beshameli.', den:'Layers of potato, meat and béchamel.', tags:[] },
+    { id:'tr11', c:'trad', art:'tave', sq:'Tavë Kosi me Mish Qengji', en:'Tavë Kosi with Lamb', p:500,
+      dsq:'Versioni me mish qengji.', den:'The version made with lamb.', tags:['top'] },
+    { id:'tr12', c:'trad', art:'tave', sq:'Speca të Mbushura', en:'Stuffed Peppers', p:250,
+      dsq:'Speca të mbushur me oriz dhe erëza.', den:'Peppers stuffed with rice and herbs.', tags:['veg'] },
+    { id:'tr13', c:'trad', art:'tave', sq:'Patëllxhanë të Mbushur', en:'Stuffed Aubergines', p:300,
+      dsq:'Patëllxhanë të pjekur e të mbushur.', den:'Roasted and stuffed aubergines.', tags:['veg'] },
+    { id:'tr14', c:'trad', art:'tave', sq:'Turli me Mish', en:'Turli with Meat', p:300,
+      dsq:'Perime të pjekura bashkë me mish.', den:'Vegetables baked together with meat.', tags:[] },
+    { id:'tr15', c:'trad', art:'soup', sq:'Fasule Jani', en:'Bean Stew', p:150,
+      dsq:'Fasule të ziera me perime.', den:'Beans stewed with vegetables.', tags:['veg'] },
+    { id:'tr16', c:'trad', art:'soup', sq:'Fasule me Mish', en:'Beans with Meat', p:300,
+      dsq:'Fasule të ziera me mish.', den:'Beans stewed with meat.', tags:[] },
+    { id:'tr17', c:'trad', art:'soup', sq:'Kos Shtëpie', en:'House Yoghurt', p:80,
+      dsq:'Kos i trashë, i bërë në shtëpi.', den:'Thick, house-made yoghurt.', tags:['veg'] },
+
+    /* ─────────────── SALLATA ─────────────── */
+    { id:'sl01', c:'starter', art:'salad', sq:'Sallatë Greke', en:'Greek Salad', p:300,
+      dsq:'Domate, kastravec, ullinj dhe djathë.', den:'Tomato, cucumber, olives and cheese.', tags:['veg','top'] },
+    { id:'sl02', c:'starter', art:'salad', sq:'Sallatë Mikse', en:'Mixed Salad', p:300,
+      dsq:'Perime të freskëta të stinës.', den:'Fresh seasonal vegetables.', tags:['veg'] },
+    { id:'sl03', c:'starter', art:'salad', sq:'Sallatë me Rukola', en:'Rocket Salad', p:350,
+      dsq:'Rukolë, domate qershi dhe djathë i thekur.', den:'Rocket, cherry tomatoes and shaved cheese.', tags:['veg'] },
+    { id:'sl04', c:'starter', art:'salad', sq:'Sallatë Cezar', en:'Caesar Salad', p:350,
+      dsq:'Marule, pulë, krutona dhe salcë Cezar.', den:'Romaine, chicken, croutons and Caesar dressing.', tags:[] },
+    { id:'sl05', c:'starter', art:'salad', sq:'Sallatë Turshi', en:'Pickle Salad', p:200,
+      dsq:'Turshi shtëpie të përziera.', den:'Assorted house pickles.', tags:['veg'] },
+    { id:'sl06', c:'starter', art:'salad', sq:'Perime në Zgarë', en:'Grilled Vegetables', p:300,
+      dsq:'Perime sezonale në zgarë me vaj ulliri.', den:'Seasonal vegetables grilled with olive oil.', tags:['veg'] },
+    { id:'sl07', c:'starter', art:'salad', sq:'Perime në Avull', en:'Steamed Vegetables', p:300,
+      dsq:'Perime të ziera në avull.', den:'Lightly steamed vegetables.', tags:['veg'] },
+
+    /* ─────────────── SUPA ─────────────── */
+    { id:'su01', c:'starter', art:'soup', sq:'Supë me Perime', en:'Vegetable Soup', p:200,
+      dsq:'Supë e lehtë me perime të stinës.', den:'A light soup of seasonal vegetables.', tags:['veg'] },
+    { id:'su02', c:'starter', art:'soup', sq:'Supë Pule', en:'Chicken Soup', p:250,
+      dsq:'Lëng pule i gatuar në shtëpi.', den:'House-made chicken broth.', tags:[] },
+    { id:'su03', c:'starter', art:'soup', sq:'Supë Peshku', en:'Fish Soup', p:300,
+      dsq:'Supë peshku sipas recetës së bregdetit.', den:'Fish soup, the coastal way.', tags:[] },
+
+    /* ─────────────── SHOQËRUESE ─────────────── */
+    { id:'sh01', c:'starter', art:'meze', sq:'Fokaçe Bruskete (shoqëruese)', en:'Bruschetta Focaccia (side)', p:150,
+      dsq:'Porcion shoqërues për tavolinën.', den:'A side portion for the table.', tags:['veg'] },
+    { id:'sh02', c:'starter', art:'byrek', sq:'Bukë Misri me Shëllirë', en:'Cornbread with Brine Cheese', p:100,
+      dsq:'Bukë misri dhe djathë shëllire.', den:'Cornbread with brined cheese.', tags:['veg'] },
+    { id:'sh03', c:'starter', art:'meze', sq:'Djathë i Bardhë', en:'White Cheese', p:150,
+      dsq:'Djathë i bardhë vendi.', den:'Local white cheese.', tags:['veg'] },
+    { id:'sh04', c:'starter', art:'meze', sq:'Djathë Kaçkavall', en:'Kaçkavall Cheese', p:200,
+      dsq:'Kaçkavall i prerë në feta.', den:'Sliced kaçkavall cheese.', tags:['veg'] },
+    { id:'sh05', c:'starter', art:'meze', sq:'Ullinj të Marinuar', en:'Marinated Olives', p:150,
+      dsq:'Ullinj vendi të marinuar.', den:'Marinated local olives.', tags:['veg'] },
+    { id:'sh06', c:'starter', art:'fries', sq:'Patate të Skuqura', en:'French Fries', p:150,
+      dsq:'Patate të skuqura, të kripura sa duhet.', den:'Fries, salted just right.', tags:['veg'] },
+    { id:'sh07', c:'starter', art:'meze', sq:'Xaxiq', en:'Tzatziki', p:150,
+      dsq:'Kos me kastravec dhe hudhër.', den:'Yoghurt with cucumber and garlic.', tags:['veg'] },
+
+    /* ─────────────── BAR · të ngrohta ─────────────── */
+    { id:'bt01', c:'pije', art:'coffee', sq:'Kafe', en:'Coffee', p:70,
+      dsq:'Espreso italiane.', den:'Italian espresso.', tags:['veg'] },
+    { id:'bt02', c:'pije', art:'coffee', sq:'Makijato', en:'Macchiato', p:80,
+      dsq:'Espreso me pak qumësht.', den:'Espresso with a little milk.', tags:['veg'] },
+    { id:'bt03', c:'pije', art:'coffee', sq:'Çaj i Ngrohtë', en:'Hot Tea', p:60,
+      dsq:'Çaj i ngrohtë me limon.', den:'Hot tea with lemon.', tags:['veg'] },
+    { id:'bt04', c:'pije', art:'coffee', sq:'Kapuçino me Kafe', en:'Cappuccino with Coffee', p:120,
+      dsq:'Kapuçino mbi bazë espreso.', den:'Cappuccino on an espresso base.', tags:['veg'] },
+    { id:'bt05', c:'pije', art:'coffee', sq:'Kapuçino me Bustinë', en:'Sachet Cappuccino', p:150,
+      dsq:'Kapuçino me bustinë.', den:'Cappuccino made from a sachet.', tags:['veg'] },
+    { id:'bt06', c:'pije', art:'coffee', sq:'Kakao', en:'Hot Chocolate', p:150,
+      dsq:'Kakao e ngrohtë.', den:'Warm cocoa.', tags:['veg'] },
+    { id:'bt07', c:'pije', art:'coffee', sq:'Kakao e Vogël', en:'Small Hot Chocolate', p:80,
+      dsq:'Porcion i vogël kakaoje.', den:'A small portion of cocoa.', tags:['veg'] },
+    { id:'bt08', c:'pije', art:'coffee', sq:'Çokollatë e Zezë', en:'Dark Chocolate', p:150,
+      dsq:'Çokollatë e zezë e ngrohtë.', den:'Warm dark chocolate.', tags:['veg'] },
+    { id:'bt09', c:'pije', art:'coffee', sq:'Çokollatë e Bardhë', en:'White Chocolate', p:150,
+      dsq:'Çokollatë e bardhë e ngrohtë.', den:'Warm white chocolate.', tags:['veg'] },
+    { id:'bt10', c:'pije', art:'coffee', sq:'Salep', en:'Salep', p:120,
+      dsq:'Pija e ngrohtë e dimrit.', den:'The warm winter drink.', tags:['veg'] },
+
+    /* ─────────────── PIJE FRESKUESE ─────────────── */
+    { id:'pf01', c:'pije', art:'drink', sq:'Bravo', en:'Bravo Juice', p:150,
+      dsq:'Lëng frutash i ftohtë.', den:'Chilled fruit juice.', tags:['veg'] },
+    { id:'pf02', c:'pije', art:'drink', sq:'Fanta', en:'Fanta', p:150, dsq:'E ftohtë akull.', den:'Ice cold.', tags:['veg'] },
+    { id:'pf03', c:'pije', art:'drink', sq:'Coca-Cola', en:'Coca-Cola', p:150, dsq:'E ftohtë akull.', den:'Ice cold.', tags:['veg'] },
+    { id:'pf04', c:'pije', art:'drink', sq:'Çaj i Ftohtë', en:'Iced Tea', p:150, dsq:'Me limon ose pjeshkë.', den:'Lemon or peach.', tags:['veg'] },
+    { id:'pf05', c:'pije', art:'drink', sq:'Lemon / Orange Soda', en:'Lemon / Orange Soda', p:150, dsq:'Sodë me limon ose portokall.', den:'Lemon or orange soda.', tags:['veg'] },
+    { id:'pf06', c:'pije', art:'drink', sq:'Schweppes', en:'Schweppes', p:120, dsq:'Tonik i hidhur.', den:'Bitter tonic.', tags:['veg'] },
+    { id:'pf07', c:'pije', art:'drink', sq:'B52', en:'B52', p:150, dsq:'Pije energjike.', den:'Energy drink.', tags:['veg'] },
+    { id:'pf08', c:'pije', art:'drink', sq:'Golden Eagle', en:'Golden Eagle', p:150, dsq:'Pije energjike.', den:'Energy drink.', tags:['veg'] },
+    { id:'pf09', c:'pije', art:'drink', sq:'Red Bull', en:'Red Bull', p:250, dsq:'Pije energjike.', den:'Energy drink.', tags:['veg'] },
+    { id:'pf10', c:'pije', art:'drink', sq:'Bitter', en:'Bitter', p:70, dsq:'Aperitiv pa alkool.', den:'Non-alcoholic aperitif.', tags:['veg'] },
+    { id:'pf11', c:'pije', art:'drink', sq:'Crodino', en:'Crodino', p:150, dsq:'Aperitiv italian pa alkool.', den:'Italian non-alcoholic aperitif.', tags:['veg'] },
+    { id:'pf12', c:'pije', art:'drink', sq:'Suko', en:'Suko', p:70, dsq:'Lëng frutash.', den:'Fruit juice.', tags:['veg'] },
+    { id:'pf13', c:'pije', art:'drink', sq:'Ujë 0.5L', en:'Water 0.5L', p:60, dsq:'Ujë natyral.', den:'Still water.', tags:['veg'] },
+
+    /* ─────────────── ALKOOLIKE ─────────────── */
+    { id:'al01', c:'pije', art:'drink', sq:'Raki', en:'Raki', p:70,
+      dsq:'Raki vendi, gota.', den:'Local raki, by the glass.', tags:['veg'] },
+    { id:'al02', c:'pije', art:'drink', sq:'Gotë Verë e Bardhë / e Kuqe', en:'Glass of White / Red Wine', p:200,
+      dsq:'Verë e shtëpisë, gota.', den:'House wine, by the glass.', tags:['veg'] },
+    { id:'al03', c:'pije', art:'beer', sq:'Heineken', en:'Heineken', p:200, dsq:'Birrë e ftohtë.', den:'Cold beer.', tags:['veg'] },
+    { id:'al04', c:'pije', art:'beer', sq:'Peroni', en:'Peroni', p:150, dsq:'Birrë italiane.', den:'Italian lager.', tags:['veg'] },
+    { id:'al05', c:'pije', art:'beer', sq:'Korça', en:'Korça', p:150, dsq:'Birra klasike shqiptare.', den:'The classic Albanian lager.', tags:['veg','top'] },
+    { id:'al06', c:'pije', art:'beer', sq:'Paulaner', en:'Paulaner', p:300, dsq:'Birrë gjermane gruri.', den:'German wheat beer.', tags:['veg'] },
+    { id:'al07', c:'pije', art:'beer', sq:'Bavaria 0 Alkool', en:'Bavaria 0.0', p:150, dsq:'Birrë pa alkool.', den:'Alcohol-free beer.', tags:['veg'] },
   ];
 
   /* --------------------------------------------------------------------------
-     REVIEW — TODO:REAL zëvendëso me review reale nga Google / Facebook
+     ⚠️ REVIEW — TODO:REAL
+     Këto NUK janë review reale, janë tekst vendmbajtës. Zëvendësoji me review
+     të vërteta nga Google ose Facebook PARA se faqja të dalë online.
      -------------------------------------------------------------------------- */
   const reviews = [
-    { n:'Erisa M.',   s:5, src:'Google',   sq:'Pica më e mirë në Durrës, pa diskutim. Brumi i lehtë dhe shërbimi super i shpejtë.', en:'Best pizza in Durrës, no question. Light dough and lightning-fast service.' },
-    { n:'Andi K.',    s:5, src:'Google',   sq:'Tava e kosit si te gjyshja. Erdha për suflaqe, u ktheva për restorantin.', en:'Tavë kosi just like grandma made. Came for the gyros, stayed for the restaurant.' },
-    { n:'Marco R.',   s:5, src:'Facebook', sq:'Vendi ku ha çdo herë që zbres nga trageti. Cilësi italiane, çmim shqiptar.', en:'My first stop every time I get off the ferry. Italian quality, Albanian prices.' },
-    { n:'Fatjona B.', s:5, src:'Google',   sq:'Porosita në WhatsApp dhe erdhi për 20 minuta, akoma e nxehtë. Sprint Burger XL është bombë.', en:'Ordered on WhatsApp, arrived in 20 minutes still hot. The Sprint Burger XL is unreal.' },
-    { n:'Klodian S.', s:5, src:'Google',   sq:'Fërgesa dhe koca në skarë — nivel restoranti, me çmim fast food.', en:'Fërgesë and grilled sea bream — restaurant level at fast-food prices.' },
-    { n:'Anna P.',    s:5, src:'Facebook', sq:'Ambient i pastër, stafi shumë i sjellshëm, porcione bujare. E rekomandoj!', en:'Clean space, very friendly staff, generous portions. Highly recommend!' },
+    { n:'—', s:5, src:'Vendmbajtës', sq:'Këtu vjen review-ja e parë reale nga Google.', en:'The first real Google review goes here.' },
+    { n:'—', s:5, src:'Vendmbajtës', sq:'Këtu vjen review-ja e dytë reale nga Google.', en:'The second real Google review goes here.' },
+    { n:'—', s:5, src:'Vendmbajtës', sq:'Këtu vjen një review nga Facebook ose Instagram.', en:'A Facebook or Instagram review goes here.' },
   ];
 
   const stats = [
-    { v:'12+',  sq:'Vite përvojë',       en:'Years of experience' },
-    { v:'40+',  sq:'Pjata në menu',       en:'Dishes on the menu' },
-    { v:'4.8',  sq:'Vlerësimi mesatar',   en:'Average rating' },
-    { v:'25\'', sq:'Dërgesë mesatare',    en:'Average delivery' },
+    { v:'120+', sq:'Pjata në menu',        en:'Dishes on the menu' },
+    { v:'4',    sq:'Kuzhina nën një çati', en:'Kitchens under one roof' },
+    { v:'15',   sq:'Pica dhe fokaçe',      en:'Pizzas and focaccias' },
+    { v:'30+',  sq:'Pije në bar',          en:'Drinks at the bar' },
   ];
 
   /* --------------------------------------------------------------------------
@@ -229,11 +364,11 @@ window.SPRINT = (function () {
     nav_contact:  { sq:'Kontakt',     en:'Contact' },
     nav_book:     { sq:'Rezervo',     en:'Book' },
 
-    hero_kicker:  { sq:'Durrës · Që nga 2013', en:'Durrës · Since 2013' },
+    hero_kicker:  { sq:'Durrës · Fast Food & Pizza · Restorant', en:'Durrës · Fast Food & Pizza · Restaurant' },
     hero_t1:      { sq:'Shija që',    en:'Flavour that' },
     hero_t2:      { sq:'nuk pret',    en:"won't wait" },
-    hero_sub:     { sq:'Pizza në furrë druri, fast food i porsabërë dhe gatime tradicionale shqiptare — të gjitha nën një çati, në zemër të Durrësit.',
-                    en:'Wood-fired pizza, made-to-order fast food and traditional Albanian cooking — all under one roof, in the heart of Durrës.' },
+    hero_sub:     { sq:'Pica në furrë, sufllaqe e doner, skarë dhe peshk i freskët, dhe tavat tradicionale çdo mëngjes — mbi 120 pjata nën një çati, në Durrës.',
+                    en:'Oven-baked pizza, gyros and doner, grilled meats and fresh fish, and traditional clay-pot bakes every morning — over 120 dishes under one roof, in Durrës.' },
     cta_order:    { sq:'Porosit në WhatsApp', en:'Order on WhatsApp' },
     cta_menu:     { sq:'Shiko Menunë',  en:'Explore the Menu' },
     cta_call:     { sq:'Telefono Tani', en:'Call Now' },
@@ -254,6 +389,7 @@ window.SPRINT = (function () {
     cart_sub:     { sq:'Nëntotali',   en:'Subtotal' },
     cart_del:     { sq:'Dërgesa',     en:'Delivery' },
     cart_free:    { sq:'FALAS',       en:'FREE' },
+    cart_zone:    { sq:'Sipas zonës', en:'By area' },
     cart_total:   { sq:'Totali',      en:'Total' },
     cart_send:    { sq:'Dërgo porosinë në WhatsApp', en:'Send order on WhatsApp' },
     cart_note:    { sq:'Do të hapet WhatsApp me porosinë të gatshme. Ti shtyp vetëm «Dërgo».',
@@ -261,12 +397,13 @@ window.SPRINT = (function () {
     cart_clear:   { sq:'Pastro',      en:'Clear' },
 
     about_kicker: { sq:'Historia jonë', en:'Our story' },
-    about_title:  { sq:'Katër kuzhina. Një pasion.', en:'Four kitchens. One passion.' },
-    about_body:   { sq:'Sprint nisi si një dritare e vogël suflaqesh pranë bregut të Durrësit. Sot është furrë druri, skarë restoranti dhe kuzhinë tradicionale në të njëjtën ndërtesë — sepse besojmë se një darkë e mirë nuk duhet të të detyrojë të zgjedhësh.',
-                    en:'Sprint began as a small gyros window near the Durrës seafront. Today it is a wood-fired oven, a restaurant grill and a traditional kitchen in the same building — because a good dinner should never force you to choose.' },
+    about_title:  { sq:'Katër kuzhina. Një adresë.', en:'Four kitchens. One address.' },
+    about_body:   { sq:'Në SPRINT nuk të duhet të zgjedhësh. Në mëngjes dalin tavat e baltës dhe gatimet e ditës, gjatë gjithë ditës punojnë furra e picës dhe banaku i sufllaqes, dhe në darkë skara nxjerr biftekun, qengjin dhe peshkun e freskët. E njëjta kuzhinë, e njëjta tavolinë.',
+                    en:'At SPRINT you never have to choose. Mornings bring the clay-pot bakes and the dishes of the day; the pizza oven and the gyros counter run all day; and at night the grill turns out steak, lamb and fresh fish. One kitchen, one table.' },
+    about_events: { sq:'Evente',      en:'Events' },
 
     rev_kicker:   { sq:'Çfarë thonë klientët', en:'What guests say' },
-    rev_title:    { sq:'4.8 nga 5 yje',  en:'4.8 out of 5 stars' },
+    rev_title:    { sq:'Vlerësimet tuaja',  en:'Your reviews' },
 
     book_kicker:  { sq:'Rezervim', en:'Reservation' },
     book_title:   { sq:'Rezervo tavolinën tënde', en:'Reserve your table' },
@@ -280,6 +417,7 @@ window.SPRINT = (function () {
     f_area:       { sq:'Ambienti',    en:'Seating' },
     f_area_in:    { sq:'Brenda',      en:'Indoor' },
     f_area_out:   { sq:'Jashtë (terracë)', en:'Outdoor (terrace)' },
+    f_area_ev:    { sq:'Salla e eventeve', en:'Function room' },
     f_area_any:   { sq:'S\'ka rëndësi', en:'No preference' },
     f_note:       { sq:'Shënim (ditëlindje, alergji, karrige fëmijësh…)', en:'Note (birthday, allergies, high chair…)' },
     f_send:       { sq:'Dërgo rezervimin në WhatsApp', en:'Send reservation on WhatsApp' },
@@ -297,6 +435,8 @@ window.SPRINT = (function () {
     scroll:       { sq:'Zbrit',       en:'Scroll' },
     b_delivery:   { sq:'Dërgesë',     en:'Delivery' },
     b_dishes:     { sq:'Pjata',       en:'Dishes' },
+    b_pizzas:     { sq:'Pica',        en:'Pizzas' },
+    b_kitchens:   { sq:'Kuzhina',     en:'Kitchens' },
     b_rating:     { sq:'Vlerësim',    en:'Rating' },
     lang_label:   { sq:'EN',          en:'SQ' },
   };
@@ -304,18 +444,21 @@ window.SPRINT = (function () {
   /* --------------------------------------------------------------------------
      NDIHMËSA
      -------------------------------------------------------------------------- */
+  menu.forEach((m) => { m.tags = m.tags || []; m.dsq = m.dsq || ''; m.den = m.den || ''; });
+
   let lang = 'sq';
   const setLang = (l) => { lang = l; };
   const getLang = () => lang;
   const T  = (k) => (t[k] ? t[k][lang] : k);
-  const L  = (o, base) => o[base + (lang === 'sq' ? 'sq' : 'en')] ?? o[lang] ?? '';
   const money = (n) => n.toLocaleString('sq-AL') + ' ' + config.currency;
+  /** Çmimi siç shfaqet, bashkë me njësinë nëse pjata shitet me copë. */
+  const price = (m) => money(m.p) + (m.unit ? ' ' + m.unit : '');
 
   const waLink = (text) => 'https://wa.me/' + config.whatsapp + '?text=' + encodeURIComponent(text);
   const mailLink = (subject, body) =>
-    'mailto:' + config.email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    'mailto:' + (config.email || '') + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
   const mapLink = () =>
     'https://www.google.com/maps/search/?api=1&query=' + config.geo.lat + ',' + config.geo.lng;
 
-  return { config, categories, menu, reviews, stats, t, T, L, setLang, getLang, money, waLink, mailLink, mapLink };
+  return { config, categories, menu, reviews, stats, t, T, setLang, getLang, money, price, waLink, mailLink, mapLink };
 })();

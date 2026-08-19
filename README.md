@@ -21,9 +21,9 @@ Kombinimet janë të mundshme — p.sh. hero-ja e nr. 1 me menunë e nr. 3.
 
 ## Çfarë funksionon në të pesta
 
-- **Menu interaktive** — filtra sipas 5 kategorive (Pizza, Fast Food, Restorant, Tradicionale, Ëmbëlsira & Pije), kërkim i drejtpërdrejtë dhe etiketa (pikante, vegjetarian, i ri, më i shituri).
-- **Shportë → WhatsApp** — klienti shton pjata, sheh nëntotalin, dërgesën (falas mbi 1 500 L) dhe totalin, pastaj me një klikim hapet WhatsApp me porosinë e formatuar gati. Shporta ruhet edhe nëse mbyll faqen.
-- **Rezervim tavolinash** — emër, telefon, datë, orë, persona, ambient dhe shënim. Dërgohet në WhatsApp; butoni i dytë dërgon të njëjtin rezervim me email si kopje rezervë.
+- **Menu interaktive** — 122 artikuj në 6 kategori (Pizza, Fast Food, Restorant, Tradicionale, Sallata & Supa, Pije), me filtra, kërkim të drejtpërdrejtë dhe etiketa (pikante, vegjetarian, i ri, i spikatur).
+- **Shportë → WhatsApp** — klienti shton pjata, sheh nëntotalin dhe totalin, pastaj me një klikim hapet WhatsApp me porosinë e formatuar gati te numri 069 666 7000. Shporta ruhet edhe nëse mbyll faqen.
+- **Rezervim tavolinash** — emër, telefon, datë, orë, persona, ambient (brenda, terracë ose salla e eventeve) dhe shënim. Dërgohet në WhatsApp; kur të vendoset një email, shfaqet edhe butoni për kopjen me email.
 - **Telefonatë me një prekje** — çdo numër është link `tel:`, plus shirit i ngjitur poshtë në telefon.
 - **Dygjuhësh shqip / anglisht** — një buton, gjithë faqja ndërron, zgjedhja ruhet.
 - **Mobile i plotë** — të gjitha të testuara në iPhone, pa scroll horizontal.
@@ -31,19 +31,36 @@ Kombinimet janë të mundshme — p.sh. hero-ja e nr. 1 me menunë e nr. 3.
 
 ---
 
-## ⚠️ Materialet reale mungojnë — dhe pse
+## Gjendja e të dhënave
 
-Instagram, Facebook, TikTok, Google Maps, TripAdvisor dhe Wolt janë **të bllokuara nga politika
-e rrjetit të këtij mjedisi** (proxy-ja kthen `403` për çdo kërkesë drejt tyre). Prandaj nuk u
-shkarkuan dot foto, video, menuja apo review-t reale të biznesit.
+| Çfarë | Gjendja |
+|-------|---------|
+| **Menuja — 122 artikuj me çmime** | ✅ Reale, transkriptuar nga menuja zyrtare në Instagram |
+| **Numri i telefonit / WhatsApp** | ✅ Real — 069 666 7000 |
+| **Instagram** | ✅ Real — [@sprint_restorant_fast_pizza](https://www.instagram.com/sprint_restorant_fast_pizza/) |
+| **Ngjyrat e brand-it** | ✅ Portokalli · e zezë · krem, nxjerrë nga menuja dhe logoja |
+| **Salla e eventeve** | ✅ E shtuar te rezervimi dhe te «Rreth Nesh» |
+| **Fotot e pjatave dhe ambientit** | ⛔ Ende ilustrime SVG — presin skedarët origjinalë |
+| **Adresa e saktë dhe koordinatat** | ⛔ `TODO:REAL` te `shared/data.js` |
+| **Orari i hapjes / mbylljes** | ⛔ `TODO:REAL` — vetëm 09:00–15:00 për tavat është i konfirmuar |
+| **Tarifa e dërgesës** | ⛔ Shporta shfaq «Sipas zonës» derisa ta konfirmosh |
+| **Email për rezervime** | ⛔ Butoni i email-it fshihet vetë derisa të vendoset një adresë |
+| **Review-t** | ⛔ Tekst vendmbajtës — **duhen zëvendësuar para se faqja të dalë online** |
 
-Nga kërkimi doli vetëm një gjurmë publike: një postim Instagram me titullin
-*"Menu SPRINT Restorant, fast food and Pizza! #durres"* — por përmbajtja e tij nuk u hap dot.
+### Pse mungojnë ende fotot
 
-**Çfarë është vendosur në vend të tyre:** ilustrime SVG të vizatuara posaçërisht (pizza në 4
-variante, burger, suflaqe, patate, krahë, biftek, peshk, pasta, sallatë, tavë balte, byrek,
-ëmbëlsirë, pije), një menu shembull realiste shqiptare me 40 pjata, dhe review shembull.
-Të gjitha janë të shënuara me `// TODO:REAL` dhe zëvendësohen pa prekur strukturën.
+Instagram, Facebook, TikTok, Google Maps dhe TripAdvisor janë **të bllokuara nga politika e
+rrjetit të këtij mjedisi** (proxy-ja kthen `403`). Menuja u fut duke u lexuar nga pamjet e
+ekranit të dërguara nga pronari; fotot, megjithatë, duhen si skedarë për t'u vendosur në
+`assets/`. Deri atëherë përdoren ilustrime SVG të vizatuara posaçërisht për këtë projekt
+(21 lloje: pica në katër variante, sufllaqe, sanduiç, burger, biftek, peshk, pasta, sallatë,
+supë, tavë balte, byrek, meze, kafe, birrë, pije).
+
+### ⚠️ Review-t
+
+`reviews` te `shared/data.js` përmban tekst vendmbajtës, **jo** review reale. Zëvendësoje me
+review të vërteta nga Google ose Facebook para publikimit — mos e lër faqen të dalë online me
+vlerësime të shpikura.
 
 ---
 
@@ -54,37 +71,42 @@ Gjithçka rri në **një skedar të vetëm**: `shared/data.js`.
 ### 1. Kontaktet dhe brand-i
 
 ```js
-phone: '+355 69 000 0000',      // numri i vërtetë, siç shfaqet
-phoneHref: '+35569000000',      // i njëjti numër, pa hapësira (për butonin telefono)
-whatsapp: '35569000000',        // ndërkombëtar, PA '+' dhe PA hapësira
-email: 'info@sprintdurres.al',  // ku vjen kopja e rezervimit
-address: { sq: '…', en: '…' },
-geo: { lat: 41.3236, lng: 19.4432 },   // për butonin "Hape në Google Maps"
-social: { instagram: '…', facebook: '…', tiktok: '…' },
+phone: '069 666 7000',          // ✅ real
+phoneHref: '+355696667000',     // ✅ real
+whatsapp: '355696667000',       // ✅ real — ndërkombëtar, PA '+' dhe PA hapësira
+email: '',                      // ⛔ vendose dhe butoni i email-it shfaqet vetë
+address: { sq: '…', en: '…' },  // ⛔ adresa e saktë
+geo: { lat: 41.3236, lng: 19.4432 },   // ⛔ koordinatat nga Google Maps
+deliveryFee: null,              // ⛔ null → shporta shfaq «Sipas zonës»
 ```
+
+Linket sociale që lihen bosh **fshihen vetvetiu** nga footer-i — nuk mbetet asnjë ikonë e vdekur.
 
 ### 2. Menuja
 
 Çdo pjatë është një rresht:
 
 ```js
-{ id:'p1', c:'pizza', art:'pizza', sq:'Margherita', en:'Margherita', p:500,
-  dsq:'Përshkrimi shqip.', den:'English description.', tags:['veg'] },
+{ id:'pz03', c:'pizza', art:'pizza', sq:'Pica Margarita', en:'Pizza Margherita', p:320,
+  dsq:'Salcë domateje dhe djathë — klasikja.', den:'Tomato sauce and cheese — the classic.', tags:['veg'] },
 ```
 
-- `c` — kategoria: `pizza` · `fast` · `rest` · `trad` · `dolce`
+- `c` — kategoria: `pizza` · `fast` · `rest` · `trad` · `starter` · `pije`
 - `p` — çmimi në lekë (vetëm numër)
 - `tags` — `hot` (pikante) · `veg` · `new` · `top` (më i shituri)
-- `art` — cili ilustrim përdoret: `pizza` `pizzaV` `pizzaW` `pizzaC` `burger` `gyros` `fries`
-  `wings` `steak` `fish` `pasta` `salad` `tave` `byrek` `dessert` `drink`
+- `unit` — teksti pas çmimit kur pjata shitet me copë, p.sh. `'/copë'`
+- `note` — shënim i vogël pranë emrit, p.sh. `'09:00–15:00'`
+- `art` — cili ilustrim përdoret: `pizza` `pizzaV` `pizzaW` `pizzaC` `burger` `gyros` `sandwich`
+  `fries` `wings` `steak` `fish` `pasta` `salad` `soup` `tave` `byrek` `meze` `coffee` `beer`
+  `dessert` `drink`
 
 ### 3. Fotot reale (kur t'i keni)
 
-1. Vendosini në `assets/dishes/` — p.sh. `assets/dishes/p1.jpg`
+1. Vendosini në `assets/dishes/` — p.sh. `assets/dishes/pz03.jpg`
 2. Shtoni fushën `img` te pjata:
 
 ```js
-{ id:'p1', c:'pizza', art:'pizza', img:'assets/dishes/p1.jpg', sq:'Margherita', … }
+{ id:'pz03', c:'pizza', art:'pizza', img:'assets/dishes/pz03.jpg', sq:'Pica Margarita', … }
 ```
 
 Faqja e përdor automatikisht foton; nëse `img` mungon, kthehet te ilustrimi SVG.
@@ -165,9 +187,9 @@ merr edhe `.com` nëse është i lirë dhe ridrejtoje te `.al`.
 ## Hapat e radhës
 
 1. **Zgjidh mockup-in** (ose kombinimin që të pëlqen).
-2. **Dërgo materialet:** logon në PNG/SVG, foto e video të pjatave dhe ambientit, menunë reale
-   me çmime, numrin e telefonit dhe të WhatsApp-it, adresën e saktë, orarin dhe linket e profileve.
-3. I fus të dhënat, publikoj faqen dhe të jap hapat e sakta të DNS-së për domain-in.
+2. **Dërgo si skedarë:** logon (PNG ose SVG), fotot dhe videot e pjatave dhe të ambientit,
+   review reale nga Google, adresën e saktë, orarin e plotë, tarifën e dërgesës dhe një email.
+3. I fus, publikoj faqen dhe të jap hapat e sakta të DNS-së për domain-in.
 
 ### Opsionale, më vonë
 

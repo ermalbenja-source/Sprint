@@ -16,10 +16,10 @@
    Niveli i efekteve: NEON + GLASS, i optimizuar për natën dhe delivery.
    ========================================================================== */
 :root{
-  --red:#FF2E3F; --red-dp:#C10D1C; --gold:#FFC53D; --gold-dp:#E0980A;
+  --red:#FF9526; --red-dp:#B85C06; --gold:#FFC53D; --gold-dp:#E0980A;
   --bg:#07070B; --glass:rgba(255,255,255,.045); --glass-2:rgba(255,255,255,.075);
   --stroke:rgba(255,255,255,.12); --txt:#F3F0F6; --muted:#8E8AA0;
-  --glowR:0 0 28px rgba(255,46,63,.55); --glowG:0 0 26px rgba(255,197,61,.5);
+  --glowR:0 0 28px rgba(255,149,38,.55); --glowG:0 0 26px rgba(255,197,61,.5);
   --display:'Syne',system-ui,sans-serif;
   --body:'Space Grotesk',system-ui,sans-serif;
   --max:1230px;
@@ -37,9 +37,9 @@ section{position:relative;padding:clamp(3.5rem,8vw,7rem) 0}
 /* ---------- blobs ---------- */
 .blobs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
 .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:drift 26s ease-in-out infinite}
-.b1{width:46vw;height:46vw;background:#FF2E3F;top:-14%;left:-10%}
+.b1{width:46vw;height:46vw;background:#FF9526;top:-14%;left:-10%}
 .b2{width:38vw;height:38vw;background:#FFC53D;bottom:-16%;right:-8%;animation-delay:-9s;opacity:.34}
-.b3{width:30vw;height:30vw;background:#7B1FA2;top:38%;left:52%;animation-delay:-17s;opacity:.28}
+.b3{width:30vw;height:30vw;background:#C2650A;top:38%;left:52%;animation-delay:-17s;opacity:.3}
 @keyframes drift{33%{transform:translate(6vw,-4vh) scale(1.14)}66%{transform:translate(-5vw,5vh) scale(.9)}}
 .grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;
   background-image:radial-gradient(#fff 1px,transparent 1px);background-size:3px 3px}
@@ -107,15 +107,11 @@ h1 .g{background:linear-gradient(100deg,var(--red),var(--gold) 60%,var(--red));b
 @keyframes bobf{50%{transform:translateY(-10px) rotate(6deg)}}
 .hc-top h3{font-size:1.15rem;margin-bottom:.2rem}
 .hc-top p{font-size:.82rem;color:var(--muted);margin:0}
-.hc-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.hc-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
 .hc-meta div{background:var(--glass-2);border:1px solid var(--stroke);border-radius:16px;padding:.75rem .5rem;text-align:center}
 .hc-meta b{display:block;font-family:var(--display);font-size:1.25rem;color:var(--gold)}
 .hc-meta span{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.hc-bar{height:6px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}
-.hc-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--red),var(--gold));
-  width:0;animation:fillb 2.4s .4s cubic-bezier(.2,.9,.3,1) forwards}
-@keyframes fillb{to{width:82%}}
-.hc-note{font-size:.72rem;color:var(--muted);display:flex;justify-content:space-between}
+.hc-events{font-size:.82rem;color:var(--muted);margin:0;border-top:1px solid var(--stroke);padding-top:.9rem}
 
 /* ---------- titull ---------- */
 .st{margin-bottom:2.6rem;max-width:58ch}
@@ -133,8 +129,8 @@ h1 .g{background:linear-gradient(100deg,var(--red),var(--gold) 60%,var(--red));b
 .cat-card:nth-child(1){grid-column:span 2;grid-row:span 2}
 .cat-card:nth-child(4){grid-column:span 2}
 .cat-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;
-  background:radial-gradient(60% 60% at 30% 0%,rgba(255,46,63,.28),transparent 70%)}
-.cat-card:hover{transform:translateY(-8px);border-color:rgba(255,46,63,.55);box-shadow:0 26px 60px -30px var(--red)}
+  background:radial-gradient(60% 60% at 30% 0%,rgba(255,149,38,.28),transparent 70%)}
+.cat-card:hover{transform:translateY(-8px);border-color:rgba(255,149,38,.55);box-shadow:0 26px 60px -30px var(--red)}
 .cat-card:hover::after{opacity:1}
 .cat-art{width:78px;height:78px;margin-bottom:1rem;transform:rotate(var(--rot,0deg));
   transition:transform .5s cubic-bezier(.3,1.4,.4,1);filter:drop-shadow(0 12px 22px rgba(0,0,0,.55))}
@@ -240,7 +236,7 @@ form.bk{padding:clamp(1.3rem,3vw,2rem);display:grid;grid-template-columns:1fr 1f
 /* ---------- kontakt / footer ---------- */
 .contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:.9rem}
 .cbox{padding:1.5rem;transition:.35s}
-.cbox:hover{transform:translateY(-6px);border-color:rgba(255,46,63,.5)}
+.cbox:hover{transform:translateY(-6px);border-color:rgba(255,149,38,.5)}
 .cbox h4{font-family:var(--display);font-size:1.05rem;margin:0 0 .65rem;color:var(--gold)}
 .cbox p{font-size:.89rem;color:#c9c4d8;margin:0}
 .cbox ul{list-style:none;margin:0;padding:0;display:grid;gap:.32rem}
@@ -326,7 +322,7 @@ body.cart-open .scrim{opacity:1;visibility:visible}
 @media(max-width:480px){
   .grid{grid-template-columns:1fr 1fr;grid-auto-rows:215px;gap:.6rem}
   .dish{padding:.7rem}.dish h3{font-size:.82rem}.price{font-size:1rem}
-  .hc-meta{grid-template-columns:repeat(3,1fr)}
+  .hc-meta{grid-template-columns:repeat(2,1fr)}
   .orderbar{padding:.6rem .6rem .6rem 1rem;gap:.5rem}
   .ob-view{display:none}
 }
@@ -338,6 +334,14 @@ body.cart-open .scrim{opacity:1;visibility:visible}
   .cart-btn{padding:.5rem .75rem}
   .lang{padding:.36rem .6rem}
 }
+
+/* ---- shënimi i orarit mbi pjatë (p.sh. 09:00–15:00) ---- */
+.note{font-style:normal;font-size:.62em;font-weight:600;letter-spacing:.06em;
+  opacity:.75;white-space:nowrap;vertical-align:middle}
+
+.cart-btn,.btn-p,.add,.tag-hot,.chip.is-on{color:#1B0D02}
+.cart-btn b{color:#B85C06}
+
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -383,12 +387,11 @@ body.cart-open .scrim{opacity:1;visibility:visible}
     </div>
     <div class="hero-card glass">
       <div class="hc-top">
-        <svg viewBox="0 0 200 200"><use href="#art-burger"/></svg>
+        <svg viewBox="0 0 200 200"><use href="#art-tave"/></svg>
         <div><h3 id="hcT">Dërgesa këtë mbrëmje</h3><p id="hcP">Durrës qytet · Plazh · Currila</p></div>
       </div>
       <div class="hc-meta" data-stats></div>
-      <div class="hc-bar"><i></i></div>
-      <div class="hc-note"><span id="hcN1">Kapaciteti i kuzhinës</span><span id="hcN2">82%</span></div>
+      <p class="hc-events" id="hcEv"></p>
     </div>
   </div>
 </section>
@@ -535,16 +538,14 @@ body.cart-open .scrim{opacity:1;visibility:visible}
 <!--INCLUDE:shared/art.js-->
 <!--INCLUDE:shared/app.js-->
 <script>
-document.querySelectorAll('[data-soc]').forEach(a=>{a.target='_blank';a.rel='noopener';
-  a.href={ig:SPRINT.config.social.instagram,fb:SPRINT.config.social.facebook,tt:SPRINT.config.social.tiktok}[a.dataset.soc];});
 
 const TXT={
   sq:{type:['Pizza në furrë druri.','Suflaqe në 7 minuta.','Tavë kosi si në shtëpi.','Peshk i freskët çdo ditë.'],
-      hcT:'Dërgesa këtë mbrëmje',hcP:'Durrës qytet · Plazh · Currila',
-      cap:'Kapaciteti i kuzhinës',items:'artikuj në shportë',open:'Hapur tani',shut:'Mbyllur'},
+      hcT:'Salla e eventeve',hcP:'Ditëlindje, darka pune dhe festa familjare',
+      items:'artikuj në shportë',open:'Hapur tani',shut:'Mbyllur'},
   en:{type:['Wood-fired pizza.','Gyros in 7 minutes.','Tavë kosi like home.','Fresh fish every day.'],
-      hcT:'Delivering tonight',hcP:'Durrës city · Beach · Currila',
-      cap:'Kitchen capacity',items:'items in cart',open:'Open now',shut:'Closed'},
+      hcT:'Our function room',hcP:'Birthdays, business dinners and family celebrations',
+      items:'items in cart',open:'Open now',shut:'Closed'},
 };
 
 /* ---------- makinë shkrimi ---------- */
@@ -574,7 +575,8 @@ function openNow(){
 }
 function localize(l){
   const t=TXT[l];
-  hcT.textContent=t.hcT; hcP.textContent=t.hcP; hcN1.textContent=t.cap; obN.textContent=t.items;
+  hcT.textContent=t.hcT; hcP.textContent=t.hcP; obN.textContent=t.items;
+  hcEv.textContent=SPRINT.config.events[l];
   const on=openNow();
   liveT.textContent=on?t.open:t.shut;
   document.getElementById('live').classList.toggle('shut',!on);
@@ -589,9 +591,9 @@ function card(m,i,l){
   const tags=m.tags.length?`<div class="dish-tags">${m.tags.map(t=>`<span class="tag tag-${t}">${tagL[t][l]}</span>`).join('')}</div>`:'';
   return `<article class="dish${cls}" data-reveal style="--i:${i}">
     <div class="dish-media">${SPRINT.art(m,'dish-art')}${tags}</div>
-    <h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}</h3>
+    <h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}${m.note?` <em class="note">${m.note}</em>`:''}</h3>
     <p class="desc">${SPRINT.esc(m[l==='sq'?'dsq':'den'])}</p>
-    <div class="dish-foot"><span class="price">${SPRINT.money(m.p)}</span>
+    <div class="dish-foot"><span class="price">${SPRINT.price(m)}</span>
       <button class="add" data-add="${m.id}" aria-label="${SPRINT.T('add')}"><span>+</span></button></div>
   </article>`;
 }

@@ -16,7 +16,7 @@
    Niveli i efekteve: 3D I RËNDË.
    ========================================================================== */
 :root{
-  --red:#D91E2A; --red-lt:#FF4B3E; --gold:#FFC244; --gold-dk:#C98A18;
+  --red:#DE7F1C; --red-lt:#FFA33F; --gold:#FFC244; --gold-dk:#C98A18;
   --ink:#0C0A0B; --pan:#171214; --pan-2:#211719; --cream:#FFF6E9;
   --muted:#A3949A; --line:rgba(255,255,255,.1);
   --display:'Bakbak One',Impact,sans-serif;
@@ -36,7 +36,7 @@ section{position:relative;padding:clamp(4rem,9vw,8rem) 0}
 
 /* ---------- dekor ---------- */
 body::before{content:'';position:fixed;inset:0;z-index:-2;
-  background:radial-gradient(60% 45% at 12% 8%,rgba(217,30,42,.16),transparent 60%),
+  background:radial-gradient(60% 45% at 12% 8%,rgba(222,127,28,.16),transparent 60%),
              radial-gradient(50% 40% at 92% 82%,rgba(255,194,68,.12),transparent 62%),var(--ink)}
 .dots{position:absolute;inset:0;z-index:-1;opacity:.35;pointer-events:none;
   background-image:radial-gradient(rgba(255,255,255,.1) 1px,transparent 1px);background-size:26px 26px}
@@ -151,7 +151,7 @@ h1 em{font-style:normal;color:var(--gold);display:inline-block;animation:wob 5s 
 .dish:hover .flipper,.dish.flip .flipper{transform:rotateY(180deg)}
 .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:22px;border:1px solid var(--line);
   background:linear-gradient(165deg,var(--pan-2),var(--pan));padding:1.2rem;display:flex;flex-direction:column;overflow:hidden}
-.face-b{transform:rotateY(180deg);background:linear-gradient(165deg,var(--red),#8c1119);border-color:transparent;
+.face-b{transform:rotateY(180deg);background:linear-gradient(165deg,#241A14,#120C0A);border-color:var(--gold);
   justify-content:center;text-align:center;gap:.8rem}
 .face-f .m{flex:1;display:grid;place-items:center;position:relative}
 .face-f .dish-art{width:80%;transform:rotate(var(--rot,0deg));transition:transform .5s}
@@ -159,12 +159,12 @@ h1 em{font-style:normal;color:var(--gold);display:inline-block;animation:wob 5s 
 .face-f h3{font-size:1rem;line-height:1.2;margin-bottom:.35rem}
 .face-f .foot{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
 .price{font-family:var(--display);font-size:1.35rem;color:var(--gold)}
-.face-b p{font-size:.85rem;line-height:1.55;margin:0;color:#ffe6e8;font-weight:300}
+.face-b p{font-size:.85rem;line-height:1.55;margin:0;color:#EADFCF;font-weight:300}
 .face-b h3{font-size:1.1rem}
 .add{background:var(--gold);color:#241703;border-radius:12px;padding:.48rem 1rem;font-size:.72rem;font-weight:700;transition:.25s}
 .add:hover{background:#ffd571;transform:scale(1.05)}
 .add.is-added{background:#4ecb71;color:#04220f}
-.face-b .add{background:#fff;color:var(--red)}
+.face-b .add{background:var(--gold);color:#241703}
 .dish-tags{position:absolute;top:0;left:0;display:flex;gap:.3rem;flex-wrap:wrap;z-index:2}
 .tag{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .55rem;border-radius:8px}
 .tag-hot{background:var(--red)} .tag-veg{background:#3f9c47} .tag-new{background:var(--gold);color:#241703}
@@ -324,6 +324,13 @@ body.cart-open .scrim{opacity:1;visibility:visible}
   .cart-btn{padding:.5rem .75rem}
   .lang{padding:.36rem .6rem}
 }
+
+/* ---- shënimi i orarit mbi pjatë (p.sh. 09:00–15:00) ---- */
+.note{font-style:normal;font-size:.62em;font-weight:600;letter-spacing:.06em;
+  opacity:.75;white-space:nowrap;vertical-align:middle}
+
+.btn-p,.chip.is-on,.dock .d-tel,.tag-hot{color:#1B0D02}
+
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -533,15 +540,13 @@ body.cart-open .scrim{opacity:1;visibility:visible}
 <!--INCLUDE:shared/art.js-->
 <!--INCLUDE:shared/app.js-->
 <script>
-document.querySelectorAll('[data-soc]').forEach(a=>{a.target='_blank';a.rel='noopener';
-  a.href={ig:SPRINT.config.social.instagram,fb:SPRINT.config.social.facebook,tt:SPRINT.config.social.tiktok}[a.dataset.soc];});
 
 /* ---------- shiriti ---------- */
 {const w=['PIZZA','SUFLAQE','TAVË KOSI','BURGER XL','FËRGESË','PESHK I FRESKËT','BYREK','TRILEÇE'];
  const h=w.map(x=>`<span>${x}</span><span>●</span>`).join(''); s1.innerHTML=h; s2.innerHTML=h;}
 
 /* ---------- RROTA e kategorive ---------- */
-const WHEEL_COLORS=['#D91E2A','#E8641F','#C99A1E','#8E2F3C','#A8541B'];
+const WHEEL_COLORS=['#E07B1E','#B85B12','#F0A93A','#8A4A10','#CE8A26'];
 let wheelAngle=0, activeCat='all';
 function buildWheel(lang){
   const cats=SPRINT.categories, n=cats.length, step=360/n, R=98, cx=100, cy=100;
@@ -595,7 +600,7 @@ function buildFlow(){
     <div class="fc" data-f="${i}">
       ${SPRINT.art(m,'')}
       <h3>${SPRINT.esc(m[lang==='sq'?'sq':'en'])}</h3>
-      <span class="p">${SPRINT.money(m.p)}</span>
+      <span class="p">${SPRINT.price(m)}</span>
       <button class="mini" data-add="${m.id}">${SPRINT.T('add')}</button>
     </div>`).join('');
   el.querySelectorAll('[data-f]').forEach(c=>c.addEventListener('click',e=>{
@@ -624,14 +629,14 @@ function card(m,i,l){
         <div class="m">${SPRINT.art(m,'dish-art')}
           ${m.tags.length?`<div class="dish-tags">${m.tags.map(t=>`<span class="tag tag-${t}">${tagL[t][l]}</span>`).join('')}</div>`:''}
         </div>
-        <h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}</h3>
-        <div class="foot"><span class="price">${SPRINT.money(m.p)}</span>
+        <h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}${m.note?` <em class="note">${m.note}</em>`:''}</h3>
+        <div class="foot"><span class="price">${SPRINT.price(m)}</span>
           <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')}</span></button></div>
       </div>
       <div class="face face-b">
         <h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}</h3>
         <p>${SPRINT.esc(m[l==='sq'?'dsq':'den'])}</p>
-        <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')} · ${SPRINT.money(m.p)}</span></button>
+        <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')} · ${SPRINT.price(m)}</span></button>
       </div>
     </div></article>`;
 }

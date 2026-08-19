@@ -67,6 +67,13 @@
           : `Hello SPRINT! 👋 I'd like to place an order.`);
       });
       $$('[data-year]').forEach((e) => { e.textContent = new Date().getFullYear(); });
+      // Rrjetet sociale: fshihi ato që nuk i kemi ende.
+      $$('[data-soc]').forEach((a) => {
+        const url = S.config.social[{ ig:'instagram', fb:'facebook', tt:'tiktok' }[a.dataset.soc]] || '';
+        if (!url) { a.hidden = true; a.style.display = 'none'; return; }
+        a.hidden = false; a.style.removeProperty('display');
+        a.href = url; a.target = '_blank'; a.rel = 'noopener';
+      });
       if (opts.onStatic) opts.onStatic(l);
       revealScan();
     }
@@ -132,10 +139,10 @@
             `<span class="tag tag-${t}">${esc(tagLabel[t][l])}</span>`).join('')}</div>` : ''}
         </div>
         <div class="dish-body">
-          <h3>${esc(m[l === 'sq' ? 'sq' : 'en'])}</h3>
+          <h3>${esc(m[l === 'sq' ? 'sq' : 'en'])}${m.note ? ` <em class="note">${esc(m.note)}</em>` : ''}</h3>
           <p>${esc(m[l === 'sq' ? 'dsq' : 'den'])}</p>
           <div class="dish-foot">
-            <span class="price">${S.money(m.p)}</span>
+            <span class="price">${S.price(m)}</span>
             <button class="add" data-add="${m.id}"><span data-i18n="add">${S.T('add')}</span></button>
           </div>
         </div>
@@ -192,8 +199,20 @@
     function totals() {
       const lines = cartLines();
       const sub = lines.reduce((a, b) => a + b.sum, 0);
-      const del = sub === 0 ? 0 : (sub >= S.config.freeDeliveryOver ? 0 : S.config.deliveryFee);
-      return { lines, sub, del, total: sub + del, count: lines.reduce((a, b) => a + b.q, 0) };
+      const fee = S.config.deliveryFee;
+      const free = S.config.freeDeliveryOver;
+      // fee === null → tarifa nuk është konfirmuar ende; shfaqet «Sipas zonës»
+      const known = typeof fee === 'number';
+      const del = !known || sub === 0 ? 0
+        : (typeof free === 'number' && sub >= free ? 0 : fee);
+      return { lines, sub, del, known, total: sub + del, count: lines.reduce((a, b) => a + b.q, 0) };
+    }
+
+    /** Teksti i rreshtit të dërgesës, sipas asaj që dimë vërtet. */
+    function deliveryLabel(t) {
+      if (!t.known) return S.T('cart_zone');
+      if (t.sub > 0 && t.del === 0) return S.T('cart_free');
+      return S.money(t.del);
     }
 
     function renderCart() {
@@ -209,7 +228,7 @@
         box.innerHTML = t.lines.length ? t.lines.map((li) => `
           <li class="cart-line">
             <span class="cl-art">${S.art(li.m, 'cl-img')}</span>
-            <span class="cl-name">${esc(li.m[l === 'sq' ? 'sq' : 'en'])}<em>${S.money(li.m.p)}</em></span>
+            <span class="cl-name">${esc(li.m[l === 'sq' ? 'sq' : 'en'])}<em>${S.price(li.m)}</em></span>
             <span class="qty">
               <button data-q="-1" data-id="${li.m.id}" aria-label="-">−</button>
               <b>${li.q}</b>
@@ -223,7 +242,7 @@
       }
       const set = (sel, v) => $$(sel).forEach((e) => { e.textContent = v; });
       set('[data-cart-sub]', S.money(t.sub));
-      set('[data-cart-del]', t.del === 0 && t.sub > 0 ? S.T('cart_free') : S.money(t.del));
+      set('[data-cart-del]', deliveryLabel(t));
       set('[data-cart-total]', S.money(t.total));
 
       $$('[data-cart-send]').forEach((btn) => {
@@ -241,10 +260,11 @@
         : `🍕 *NEW ORDER — SPRINT Durrës*\n`;
       const lines = t.lines.map((li) =>
         `• ${li.q}× ${li.m[l === 'sq' ? 'sq' : 'en']} — ${S.money(li.sum)}`).join('\n');
+      const sums = `\n\n${S.T('cart_sub')}: ${S.money(t.sub)}\n${S.T('cart_del')}: ${deliveryLabel(t)}\n*${S.T('cart_total')}: ${S.money(t.total)}*`;
       const foot = l === 'sq'
-        ? `\n\n${S.T('cart_sub')}: ${S.money(t.sub)}\n${S.T('cart_del')}: ${t.del === 0 ? S.T('cart_free') : S.money(t.del)}\n*${S.T('cart_total')}: ${S.money(t.total)}*\n\n📍 Adresa ime: \n📞 Numri im: \n⏰ E dua për orën: `
-        : `\n\n${S.T('cart_sub')}: ${S.money(t.sub)}\n${S.T('cart_del')}: ${t.del === 0 ? S.T('cart_free') : S.money(t.del)}\n*${S.T('cart_total')}: ${S.money(t.total)}*\n\n📍 My address: \n📞 My number: \n⏰ Wanted for: `;
-      return head + lines + foot;
+        ? `\n\n📍 Adresa ime: \n📞 Numri im: \n⏰ E dua për orën: `
+        : `\n\n📍 My address: \n📞 My number: \n⏰ Wanted for: `;
+      return head + lines + sums + foot;
     }
 
     /* ---------------- rezervimi ---------------- */
@@ -257,6 +277,20 @@
 
     function initBooking() {
       const form = $('[data-book-form]'); if (!form) return;
+
+      // Salla e eventeve është një ambient real i lokalit — shtoje te zgjedhjet.
+      const areaSel = form.querySelector('[name=area]');
+      if (areaSel && !areaSel.querySelector('[data-i18n="f_area_ev"]')) {
+        const opt = document.createElement('option');
+        opt.dataset.i18n = 'f_area_ev';
+        opt.textContent = S.T('f_area_ev');
+        areaSel.insertBefore(opt, areaSel.options[areaSel.options.length - 1]);
+      }
+      // Butoni i email-it ka kuptim vetëm nëse kemi një adresë.
+      if (!S.config.email) {
+        const mb = form.querySelector('[data-book-email]');
+        if (mb) mb.remove();
+      }
       const dateEl = form.querySelector('[name=date]');
       if (dateEl) {
         const today = new Date().toISOString().slice(0, 10);

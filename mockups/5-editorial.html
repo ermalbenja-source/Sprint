@@ -16,7 +16,7 @@
    pamja e pjatës e ndjek kursorin. Niveli i efekteve: I RAFINUAR, jo i zhurmshëm.
    ========================================================================== */
 :root{
-  --red:#C3122A; --red-dk:#8E0A1D; --gold:#A98032; --ink:#131211; --ink-2:#4B4642;
+  --red:#A9640F; --red-dk:#7A4708; --gold:#8A6A22; --ink:#131211; --ink-2:#4B4642;
   --paper:#FFFDF9; --paper-2:#F4F0E8; --line:#E2DBCE; --muted:#8B837A;
   --serif:'Fraunces',Georgia,serif;
   --sans:'Inter Tight',system-ui,sans-serif;
@@ -301,6 +301,13 @@ body.cart-open .scrim{opacity:1;visibility:visible}
   .cart-btn{padding:.5rem .75rem}
   .lang{padding:.36rem .6rem}
 }
+
+/* ---- shënimi i orarit mbi pjatë (p.sh. 09:00–15:00) ---- */
+.note{font-style:normal;font-size:.62em;font-weight:600;letter-spacing:.06em;
+  opacity:.75;white-space:nowrap;vertical-align:middle}
+
+.note{color:var(--gold);border:1px solid currentColor;border-radius:999px;padding:.1rem .45rem;font-size:.58rem;letter-spacing:.1em}
+
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -496,8 +503,6 @@ body.cart-open .scrim{opacity:1;visibility:visible}
 <!--INCLUDE:shared/art.js-->
 <!--INCLUDE:shared/app.js-->
 <script>
-document.querySelectorAll('[data-soc]').forEach(a=>{a.target='_blank';a.rel='noopener';
-  a.href={ig:SPRINT.config.social.instagram,fb:SPRINT.config.social.facebook,tt:SPRINT.config.social.tiktok}[a.dataset.soc];});
 
 const TXT={
   sq:{galT:'Pjatët që na bënë emër',galH:'← Rrëshqit →',figc:'Katër kuzhina',
@@ -521,7 +526,7 @@ function buildGal(l){
       ${SPRINT.art(m,'')}
       <span class="n">${SPRINT.esc(m[l==='sq'?'sq':'en'])}</span>
       <span class="d">${SPRINT.esc(m[l==='sq'?'dsq':'den'])}</span>
-      <span class="b"><span class="p">${SPRINT.money(m.p)}</span>
+      <span class="b"><span class="p">${SPRINT.price(m)}</span>
         <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')}</span></button></span>
     </article>`).join('');
 }
@@ -539,9 +544,9 @@ function card(m,i,l){
   const tags=m.tags.length?`<span class="dish-tags">${m.tags.map(t=>`<span class="tag tag-${t}">${tagL[t][l]}</span>`).join('')}</span>`:'';
   return `<article class="dish" data-reveal style="--i:${i}" data-peek="${m.art}">
     <span class="num">${String(i+1).padStart(2,'0')}</span>
-    <span class="nm"><h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}</h3>${tags}
+    <span class="nm"><h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}</h3>${m.note?`<em class="note">${m.note}</em>`:''}${tags}
       <span class="desc">${SPRINT.esc(m[l==='sq'?'dsq':'den'])}</span></span>
-    <span class="price">${SPRINT.money(m.p)}</span>
+    <span class="price">${SPRINT.price(m)}</span>
     <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')}</span></button>
   </article>`;
 }
@@ -557,7 +562,7 @@ const app=SPRINT.app({
       app.renderMenu();
       document.getElementById('menu').scrollIntoView({behavior:SPRINT.reduced?'auto':'smooth'});
     }));
-    document.querySelectorAll('#gal [data-add]').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#galTrack [data-add]').forEach(b=>b.addEventListener('click',()=>{
       const grid=document.querySelector(`[data-menu-grid] [data-add="${b.dataset.add}"]`);
       if(grid){grid.click();}
       const s=b.querySelector('span'), o=s.textContent;

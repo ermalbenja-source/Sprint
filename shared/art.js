@@ -310,6 +310,98 @@ ${S('byrek', `
   <g fill="#fff" opacity=".8"><circle cx="86" cy="104" r="3"/><circle cx="112" cy="112" r="2.6"/></g>
 `)}
 
+${S('soup', `
+  <ellipse cx="100" cy="178" rx="72" ry="10" fill="rgba(0,0,0,.16)"/>
+  <ellipse cx="100" cy="132" rx="86" ry="26" fill="url(#g-plate)"/>
+  <path d="M30 96h140c0 34-28 58-70 58s-70-24-70-58z" fill="#f3ece0"/>
+  <path d="M30 96h140c0 9-2 17-5 25H35c-3-8-5-16-5-25z" fill="#e2d8c8"/>
+  <ellipse cx="100" cy="96" rx="70" ry="22" fill="#fdfaf3"/>
+  <ellipse cx="100" cy="96" rx="60" ry="17" fill="#e2802a"/>
+  <ellipse cx="100" cy="95" rx="54" ry="14" fill="#f09338"/>
+  <g fill="#fff" opacity=".85">
+    <path d="M70 94c10-7 22-3 24 4-11 6-23 3-24-4z"/>
+    <path d="M112 100c9-6 20-2 22 4-10 5-21 2-22-4z"/>
+  </g>
+  <g fill="#4f9c3f">
+    <circle cx="92" cy="90" r="4"/><circle cx="106" cy="96" r="3.6"/><circle cx="84" cy="99" r="3.2"/>
+    <circle cx="118" cy="90" r="3"/><circle cx="99" cy="103" r="3"/>
+  </g>
+  <g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".4" fill="none">
+    <path d="M80 62c-6-8 6-12 0-20"/><path d="M100 56c-6-8 6-12 0-20"/><path d="M120 62c-6-8 6-12 0-20"/>
+  </g>
+`)}
+
+${S('sandwich', `
+  <ellipse cx="100" cy="176" rx="72" ry="10" fill="rgba(0,0,0,.16)"/>
+  <path d="M24 118c0-30 34-52 76-52s76 22 76 52z" fill="url(#g-crust)"/>
+  <path d="M24 118c0-30 34-52 76-52s76 22 76 52z" fill="none" stroke="#c08b3c" stroke-width="2"/>
+  <g fill="#fff3d6" opacity=".8">
+    <ellipse cx="70" cy="92" rx="4.6" ry="3" transform="rotate(-14 70 92)"/>
+    <ellipse cx="104" cy="82" rx="4.6" ry="3" transform="rotate(10 104 82)"/>
+    <ellipse cx="136" cy="98" rx="4.4" ry="2.8" transform="rotate(-6 136 98)"/>
+  </g>
+  <path d="M20 120h160c0 8-6 11-14 11H34c-8 0-14-3-14-11z" fill="#eccd93"/>
+  <path d="M18 130c16-7 30 6 46-1s30 8 46 1 30 6 46-2c8 9 4 15-6 15H26c-10 0-14-6-8-13z" fill="#5aa640"/>
+  <path d="M22 142h156c6 0 8 10-2 12H26c-10-2-10-12-4-12z" fill="#d94b3a"/>
+  <path d="M20 154h160c0 12-8 18-20 18H40c-12 0-20-6-20-18z" fill="#dda75a"/>
+  <path d="M116 66l14-30 8 4-12 30z" fill="#a1512f"/>
+`)}
+
+${S('coffee', `
+  <ellipse cx="96" cy="180" rx="60" ry="9" fill="rgba(0,0,0,.16)"/>
+  <ellipse cx="96" cy="166" rx="72" ry="16" fill="url(#g-plate)"/>
+  <ellipse cx="96" cy="164" rx="56" ry="11" fill="#e8dfd0"/>
+  <path d="M46 84h100l-8 62c-1 12-11 20-24 20H78c-13 0-23-8-24-20z" fill="#fbf7ef"/>
+  <path d="M46 84h100l-2 16H48z" fill="#eee7da"/>
+  <ellipse cx="96" cy="84" rx="50" ry="13" fill="#fdfbf6"/>
+  <ellipse cx="96" cy="84" rx="42" ry="10" fill="#5b3418"/>
+  <ellipse cx="96" cy="83" rx="34" ry="8" fill="#8a5628"/>
+  <path d="M74 82c8-5 18-2 20 4-9 5-19 2-20-4z" fill="#e8d9bf" opacity=".9"/>
+  <path d="M146 96c22-6 32 8 28 22-4 13-20 18-32 14l3-12c7 2 15 0 17-6 2-7-5-11-16-7z" fill="#fbf7ef"/>
+  <g stroke="#c9b89c" stroke-width="3" stroke-linecap="round" opacity=".55" fill="none">
+    <path d="M80 54c-6-8 6-12 0-20"/><path d="M100 48c-6-8 6-12 0-20"/><path d="M118 54c-6-8 6-12 0-20"/>
+  </g>
+`)}
+
+${S('beer', `
+  <ellipse cx="100" cy="182" rx="50" ry="8" fill="rgba(0,0,0,.16)"/>
+  <path d="M62 62h74v100c0 10-8 18-18 18H80c-10 0-18-8-18-18z" fill="#d9e6ee" opacity=".45"/>
+  <path d="M68 78h62v82c0 7-6 12-13 12H81c-7 0-13-5-13-12z" fill="#e8a51c"/>
+  <path d="M68 78h62v14H68z" fill="#f3bd40"/>
+  <path d="M60 52c0-10 10-16 22-14 6-8 20-8 26 0 12-4 24 3 24 13 0 9-8 15-20 15H78c-11 0-18-6-18-14z" fill="#fffdf7"/>
+  <path d="M60 52c8 8 24 10 40 10s32-2 40-10c0 10-8 16-20 16H78c-11 0-18-6-18-16z" fill="#f0ece0"/>
+  <path d="M136 92c22-4 30 10 26 24-4 13-18 18-28 14l3-13c6 2 13 0 15-6 2-6-5-9-14-6z" fill="#d9e6ee" opacity=".55"/>
+  <g fill="#fff" opacity=".45">
+    <rect x="80" y="102" width="7" height="50" rx="3.5"/>
+  </g>
+  <g fill="#fff" opacity=".3">
+    <circle cx="110" cy="112" r="4.5"/><circle cx="118" cy="134" r="3.4"/><circle cx="102" cy="146" r="3"/>
+  </g>
+`)}
+
+${S('meze', `
+  <ellipse cx="100" cy="176" rx="76" ry="10" fill="rgba(0,0,0,.16)"/>
+  <ellipse cx="100" cy="112" rx="86" ry="54" fill="url(#g-plate)"/>
+  <ellipse cx="100" cy="112" rx="72" ry="43" fill="none" stroke="#ded4c3" stroke-width="2"/>
+  <g fill="#fdf6e4" stroke="#e8dcc0" stroke-width="1.5">
+    <rect x="46" y="82" width="34" height="26" rx="3" transform="rotate(-8 46 82)"/>
+    <rect x="52" y="106" width="32" height="24" rx="3" transform="rotate(6 52 106)"/>
+  </g>
+  <g fill="#f2d98c" stroke="#dcc06a" stroke-width="1.5">
+    <rect x="96" y="76" width="32" height="22" rx="3" transform="rotate(10 96 76)"/>
+    <rect x="104" y="100" width="30" height="21" rx="3" transform="rotate(-6 104 100)"/>
+  </g>
+  <g fill="#3d4a2a">
+    <ellipse cx="146" cy="92" rx="9" ry="7" transform="rotate(-18 146 92)"/>
+    <ellipse cx="152" cy="112" rx="8.4" ry="6.4" transform="rotate(14 152 112)"/>
+    <ellipse cx="136" cy="126" rx="8" ry="6" transform="rotate(-8 136 126)"/>
+  </g>
+  <g fill="#7d9e43">
+    <ellipse cx="120" cy="132" rx="8" ry="6"/><ellipse cx="70" cy="136" rx="7.5" ry="5.6"/>
+  </g>
+  <g fill="#3f8f3a"><path d="M86 128c9-8 21-6 24 1-9 7-20 7-24-1z"/></g>
+`)}
+
 ${S('dessert', `
   <ellipse cx="100" cy="180" rx="70" ry="10" fill="rgba(0,0,0,.16)"/>
   <ellipse cx="100" cy="146" rx="82" ry="30" fill="url(#g-plate)"/>
