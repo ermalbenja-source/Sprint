@@ -1,0 +1,333 @@
+<title>Pesë Drejtime për SPRINT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Karla:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap">
+
+<style>
+/* ============================================================================
+   Fletët e porosisë — çdo drejtim dizajni është një fletë kuzhine e numëruar.
+   Paleta ndjek brand-in real: portokalli, e zezë dhe krem.
+   ========================================================================== */
+:root{
+  --ground:#EDE7DD; --card:#FFFCF6; --card-2:#F5F0E5;
+  --ink:#1A1512; --ink-2:#574E46; --faint:#8B8177;
+  --rule:#D6CCBC; --perf:#EDE7DD;
+  --brand:#A85E10; --brand-ink:#7C430A; --gold:#8A6A22;
+  --ok:#3F7A4E;
+  --display:'Archivo Black',Impact,sans-serif;
+  --mono:'Space Mono',ui-monospace,monospace;
+  --body:'Karla',system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#100D0B; --card:#1B1613; --card-2:#221B17;
+    --ink:#F2EBE0; --ink-2:#B5A99B; --faint:#7E7266;
+    --rule:#332A23; --perf:#100D0B;
+    --brand:#F0983A; --brand-ink:#FFB25E; --gold:#D9AC4E;
+    --ok:#6BC183;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#100D0B; --card:#1B1613; --card-2:#221B17;
+  --ink:#F2EBE0; --ink-2:#B5A99B; --faint:#7E7266;
+  --rule:#332A23; --perf:#100D0B;
+  --brand:#F0983A; --brand-ink:#FFB25E; --gold:#D9AC4E;
+  --ok:#6BC183;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--body);font-size:16px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+code{font-family:var(--mono);font-size:.88em;background:var(--card-2);padding:.06em .34em;border-radius:3px}
+:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:3px}
+.wrap{width:min(100% - 2.2rem,860px);margin-inline:auto}
+
+/* ---------- kokë dokete ---------- */
+.head{padding:clamp(2.6rem,7vw,4.6rem) 0 0}
+.docket{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--faint);display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;
+  border-bottom:1px solid var(--rule);padding-bottom:.7rem;
+}
+.docket b{color:var(--ink-2);font-weight:700}
+h1{
+  font-family:var(--display);font-weight:400;
+  font-size:clamp(2.1rem,7.2vw,4rem);line-height:.98;letter-spacing:-.02em;
+  margin:1.5rem 0 0;text-wrap:balance;
+}
+h1 em{font-style:normal;color:var(--brand)}
+.lede{max-width:60ch;color:var(--ink-2);margin:1.1rem 0 0;font-size:1.02rem}
+
+/* ---------- tre kutitë e statusit ---------- */
+.status{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:2.2rem;
+}
+.status div{background:var(--card);padding:1rem 1.15rem}
+.status dt{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  margin:0 0 .3rem;
+}
+.status div:nth-child(1) dt{color:var(--ok)}
+.status div:nth-child(2) dt{color:var(--gold)}
+.status div:nth-child(3) dt{color:var(--brand)}
+.status dd{margin:0;font-size:.88rem;color:var(--ink-2)}
+
+/* ---------- fletët ---------- */
+.tickets{display:grid;gap:1.5rem;padding:2.8rem 0 1rem;margin:0;list-style:none}
+.ticket{
+  position:relative;background:var(--card);border:1px solid var(--rule);
+  padding:1.7rem 1.5rem 1.5rem;
+}
+/* buza e shqyer sipër, si fletë kuzhine */
+.ticket::before{
+  content:'';position:absolute;left:-1px;right:-1px;top:-7px;height:8px;
+  background:repeating-radial-gradient(circle at 6px 8px,var(--perf) 0 6px,transparent 6px 12px);
+}
+.t-top{
+  display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;
+  border-bottom:1px dashed var(--rule);padding-bottom:.9rem;
+}
+.t-no{
+  font-family:var(--mono);font-weight:700;font-size:.72rem;letter-spacing:.2em;
+  color:var(--brand);border:1px solid currentColor;padding:.2rem .55rem;
+}
+.t-name{font-family:var(--display);font-weight:400;font-size:clamp(1.5rem,4.4vw,2.15rem);
+  letter-spacing:-.015em;margin:0;line-height:1}
+.t-char{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);margin-left:auto;
+}
+.t-body{margin:1rem 0 0;color:var(--ink-2);max-width:62ch}
+
+.t-specs{
+  list-style:none;margin:1.1rem 0 0;padding:0;display:grid;gap:.55rem;
+  font-size:.9rem;
+}
+.t-specs li{display:grid;grid-template-columns:1.1rem 1fr;gap:.55rem;align-items:baseline}
+.t-specs li::before{content:'—';font-family:var(--mono);color:var(--brand);font-size:.8rem}
+.t-foot{
+  display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+  border-top:1px dashed var(--rule);margin-top:1.3rem;padding-top:1.1rem;
+}
+.t-meta{
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--faint);display:flex;gap:.5rem 1rem;flex-wrap:wrap;
+}
+.t-meta span{white-space:nowrap}
+.t-meta .lvl-3::before{content:'●●●  '}
+.t-meta .lvl-2::before{content:'●●○  '}
+.t-meta .lvl-1::before{content:'●○○  '}
+.open{
+  margin-left:auto;display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--brand);color:#FFF9F0;text-decoration:none;
+  font-family:var(--mono);font-weight:700;font-size:.74rem;letter-spacing:.12em;
+  text-transform:uppercase;padding:.72rem 1.25rem;
+  transition:background .22s ease,transform .22s ease;
+}
+.open:hover{background:var(--brand-ink);transform:translateY(-2px)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .open{color:#20100A}
+}
+:root[data-theme="dark"] .open{color:#20100A}
+
+/* ---------- fund ---------- */
+.foot{padding:2.4rem 0 4.5rem}
+.foot h2{font-family:var(--display);font-weight:400;font-size:1.3rem;letter-spacing:-.01em;margin:0 0 1rem}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:.85rem;counter-reset:s}
+.steps li{
+  display:grid;grid-template-columns:1.9rem 1fr;gap:.7rem;align-items:baseline;
+  color:var(--ink-2);font-size:.94rem;counter-increment:s;
+}
+.steps li::before{
+  content:counter(s,decimal-leading-zero);
+  font-family:var(--mono);font-size:.72rem;color:var(--brand);letter-spacing:.1em;
+}
+.steps b{color:var(--ink)}
+.blocked{
+  border:1px solid var(--rule);border-left:3px solid var(--gold);
+  background:var(--card-2);padding:1.1rem 1.25rem;margin-top:2rem;
+  font-size:.9rem;color:var(--ink-2);
+}
+.blocked b{
+  display:block;font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;
+}
+.sig{
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);border-top:1px solid var(--rule);margin-top:2rem;padding-top:1rem;
+  display:flex;gap:.5rem 1.4rem;flex-wrap:wrap;
+}
+
+@media (max-width:560px){
+  .t-char{margin-left:0;width:100%}
+  .open{margin-left:0;width:100%;justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+</style>
+
+<header class="head">
+  <div class="wrap">
+    <p class="docket">
+      <span><b>Klienti</b> SPRINT Fast Food &amp; Pizza</span>
+      <span><b>Vendi</b> Durrës</span>
+      <span><b>Faza</b> 01 · Mockup me të dhëna reale</span>
+      <span><b>Fletë</b> 5</span>
+    </p>
+    <h1>Pesë drejtime.<br><em>Një zgjedhje.</em></h1>
+    <p class="lede">Të pesta mbajnë tani menunë tuaj të vërtetë — 122 artikuj me çmimet e sakta, numrin
+      069 666 7000 dhe ngjyrat portokalli-zi-krem të brand-it. Provo menunë, shto diçka në shportë,
+      shtyp «Dërgo në WhatsApp» dhe shiko porosinë e formatuar; provo edhe butonin EN. Ndryshon vetëm
+      gjuha vizuale dhe sa larg shkojnë efektet.</p>
+
+    <dl class="status">
+      <div><dt>Reale tashmë</dt>
+        <dd>Menuja me 122 artikuj e çmime, numri 069 666 7000, Instagrami dhe ngjyrat e brand-it.</dd></div>
+      <div><dt>Pret konfirmim</dt>
+        <dd>Adresa e saktë, orari i plotë, tarifa e dërgesës dhe një email për rezervimet.</dd></div>
+      <div><dt>Mungon ende</dt>
+        <dd>Fotot si skedarë dhe review reale nga Google.</dd></div>
+    </dl>
+  </div>
+</header>
+
+<main class="wrap">
+  <ul class="tickets">
+
+    <li class="ticket">
+      <div class="t-top">
+        <span class="t-no">Nr. 01</span>
+        <h2 class="t-name">Zjarri</h2>
+        <span class="t-char">Kinematik</span>
+      </div>
+      <p class="t-body">Errësirë kinematografike me thëngjij portokalli që ngjiten ngadalë mbi hero dhe
+        një dritë të ngrohtë nga poshtë, sikur furra të ishte jashtë kuadrit. Tipografia është masive
+        dhe pjata rri në qendër si ylli i skenës.</p>
+      <ul class="t-specs">
+        <li>Thëngjij të gjallë në canvas, të përshtatur sipas gjerësisë së ekranit</li>
+        <li>Kursor magnetik që zmadhohet mbi çdo buton dhe link</li>
+        <li>Kartat e pjatave anohen në 3D dhe u ndizet korniza</li>
+        <li>Numëruesit rriten kur hyjnë në ekran — 122 pjata, 15 pica, 4 kuzhina</li>
+      </ul>
+      <div class="t-foot">
+        <span class="t-meta"><span class="lvl-3">Efekte maksimale</span><span>Brand premium</span></span>
+        <a class="open" href="https://claude.ai/code/artifact/f1b69e9c-3a5e-4997-b09b-13bfd46f47f4" target="_blank" rel="noopener">Hap nr. 01</a>
+      </div>
+    </li>
+
+    <li class="ticket">
+      <div class="t-top">
+        <span class="t-no">Nr. 02</span>
+        <h2 class="t-name">Rrota</h2>
+        <span class="t-char">Lozonjare</span>
+      </div>
+      <p class="t-body">Një rrotë e madhe e ndarë në gjashtë feta drejton gjithë faqen. Klikon fetën
+        «Tradicionale», ajo rrotullohet dy herë rreth vetes, ndalet te zgjedhja jote dhe menuja poshtë
+        filtrohet vetë. Është drejtimi që njerëzit e mbajnë mend dhe ua tregojnë të tjerëve.</p>
+      <ul class="t-specs">
+        <li>Rrota interaktive e gjashtë kategorive, me rrotullim 720°</li>
+        <li>Coverflow 3D për pjatët e spikatura</li>
+        <li>Kartat përmbysen dhe tregojnë përbërësit — me prekje në telefon</li>
+        <li>Rrota anohet lehtë ndërsa zbret faqja</li>
+      </ul>
+      <div class="t-foot">
+        <span class="t-meta"><span class="lvl-3">3D e rëndë</span><span>Klientë familjarë</span></span>
+        <a class="open" href="https://claude.ai/code/artifact/95a73837-1f6a-4ec4-a417-7c94ead485d8" target="_blank" rel="noopener">Hap nr. 02</a>
+      </div>
+    </li>
+
+    <li class="ticket">
+      <div class="t-top">
+        <span class="t-no">Nr. 03</span>
+        <h2 class="t-name">Tabela</h2>
+        <span class="t-char">Artizanale</span>
+      </div>
+      <p class="t-body">Letër krem, terrakotë dhe ar. Menuja lexohet si një menu e vërtetë restoranti
+        e shtypur, në dy kolona — dhe kthehet në rrjet kartash me një klikim. Është drejtimi më i
+        ngrohtë për tavat dhe gatimet e ditës, dhe më i lehti për t'u lexuar nga kushdo.</p>
+      <ul class="t-specs">
+        <li>Dy pamje menuje: listë e shtypur ose rrjet kartash</li>
+        <li>Më e shpejta për t'u ngarkuar nga të pestat</li>
+        <li>Kontrast i lartë — 122 artikujt lexohen edhe në diell</li>
+        <li>Ngrohtësi që i shkon tavës së kosit dhe fërgesës, jo vetëm picës</li>
+      </ul>
+      <div class="t-foot">
+        <span class="t-meta"><span class="lvl-1">Efekte të lehta</span><span>Konvertim i lartë</span></span>
+        <a class="open" href="https://claude.ai/code/artifact/e0740962-05e0-4de1-bc54-a43587b679a4" target="_blank" rel="noopener">Hap nr. 03</a>
+      </div>
+    </li>
+
+    <li class="ticket">
+      <div class="t-top">
+        <span class="t-no">Nr. 04</span>
+        <h2 class="t-name">Nata</h2>
+        <span class="t-char">Neon &amp; qelq</span>
+      </div>
+      <p class="t-body">Dritë neoni mbi qelq të errët, me pllaka bento të madhësive të ndryshme ku
+        pjatat e spikatura zënë më shumë hapësirë. Faqja di vetë nëse jeni hapur në atë moment, dhe
+        totali i porosisë të ndjek në një shirit poshtë ekranit derisa ta dërgosh.</p>
+      <ul class="t-specs">
+        <li>Treguesi «Hapur tani» që llogaritet nga orari real i biznesit</li>
+        <li>Rrjet bento — pjatat e spikatura zënë pllaka më të mëdha</li>
+        <li>Shirit porosie i ngjitur, me totalin dhe WhatsApp-in gjithnjë brenda gishtit</li>
+        <li>Salla e eventeve në hero, plus makinë shkrimi dhe drita që lëvizin ngadalë</li>
+      </ul>
+      <div class="t-foot">
+        <span class="t-meta"><span class="lvl-2">Efekte mesatare</span><span>Orare deri vonë</span></span>
+        <a class="open" href="https://claude.ai/code/artifact/a157510c-7e0f-4b49-b25b-6edad73ecd38" target="_blank" rel="noopener">Hap nr. 04</a>
+      </div>
+    </li>
+
+    <li class="ticket">
+      <div class="t-top">
+        <span class="t-no">Nr. 05</span>
+        <h2 class="t-name">Editorial</h2>
+        <span class="t-char">Premium</span>
+      </div>
+      <p class="t-body">I çelët, i qetë dhe i shtrenjtë në pamje — si faqe reviste gastronomike.
+        Menuja është një indeks i numëruar, dhe ndërsa kalon mbi çdo pjatë, pamja e saj rrëshqet
+        pas kursorit. Ky është drejtimi që të ngre nga «fast food» në «restorant».</p>
+      <ul class="t-specs">
+        <li>Pamja e pjatës ndjek kursorin gjatë leximit të menusë</li>
+        <li>Galeri horizontale me snap për pjatët e spikatura</li>
+        <li>Menu si indeks reviste — 122 rreshta të numëruar me çmime serif</li>
+        <li>Gjuha vizuale që u flet turistëve që zbresin nga trageti</li>
+      </ul>
+      <div class="t-foot">
+        <span class="t-meta"><span class="lvl-1">Efekte të përmbajtura</span><span>Turistë &amp; darka</span></span>
+        <a class="open" href="https://claude.ai/code/artifact/0001b551-801c-4575-8ad4-ef5a095429e8" target="_blank" rel="noopener">Hap nr. 05</a>
+      </div>
+    </li>
+
+  </ul>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <h2>Hapi tjetër</h2>
+    <ol class="steps">
+      <li><b>Zgjidh një fletë</b> — ose thuaj një kombinim, p.sh. «hero-ja e 01-shit me menunë e 03-shit».
+        Të gjitha ndajnë të njëjtën bazë, ndaj kombinimet janë punë e shpejtë.</li>
+      <li><b>Dërgo si skedarë</b> — logon, fotot dhe videot e pjatave e të ambientit, review reale nga
+        Google, adresën e saktë, orarin e plotë dhe tarifën e dërgesës.</li>
+      <li><b>Publikimi</b> — i fus të dhënat që mbeten, e ngre faqen te Netlify ose Vercel dhe të jap
+        rekordet e sakta të DNS-së për domain-in që do të blesh.</li>
+    </ol>
+
+    <p class="blocked"><b>Dy gjëra për t'u mbajtur mend</b>
+      Pamjet e pjatave janë ende ilustrime SVG të vizatuara posaçërisht — rrjetet sociale mbeten të
+      bllokuara nga rrjeti i këtij mjedisi (gabim 403), ndaj fotot duhen dërguar si skedarë për t'u
+      vendosur te <code>assets/</code>. Dhe review-t janë tekst vendmbajtës: duhen zëvendësuar me
+      vlerësime reale nga Google para se faqja të dalë online.</p>
+
+    <p class="sig">
+      <span>Repo · ermalbenja-source/Sprint</span>
+      <span>Degë · claude/sprint-fast-food-website-k69ip4</span>
+      <span>Të dhënat · shared/data.js</span>
+    </p>
+  </div>
+</footer>

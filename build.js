@@ -65,6 +65,9 @@ for (const f of files) {
   const src = fs.readFileSync(path.join(root, 'mockups', f), 'utf8');
   fs.writeFileSync(path.join(artDir, f), toArtifact(inline(src, path.join(root, 'mockups'))));
 }
+// faqja e zgjedhjes për publikim (lidhje drejt 5 URL-ve, pa iframe)
+const artIdx = path.join(root, 'src', 'artifact-index.html');
+if (fs.existsSync(artIdx)) fs.copyFileSync(artIdx, path.join(artDir, 'index.html'));
 console.log('  ✓ dist/artifact/  (variantet për publikim)');
 
 // kopjo assets nëse ekzistojnë foto reale
