@@ -42,6 +42,31 @@ for (const f of files) {
   n++;
 }
 
+
+/* --------------------------------------------------------------------------
+   Variantet për publikim si Artifact.
+   Platforma e Artifact-eve e mbështjell vetë skedarin me <!doctype>/<head>/<body>,
+   ndaj këtu heqim mbështjellësin tonë dhe lëmë <title>, fontet, <style> e trupin.
+   -------------------------------------------------------------------------- */
+function toArtifact(html) {
+  const title = (html.match(/<title>[\s\S]*?<\/title>/i) || [''])[0];
+  const links = (html.match(/<link[^>]*>/gi) || [])
+    .filter((l) => /fonts\.(googleapis|gstatic)\.com/.test(l)).join('\n');
+  const noscript = (html.match(/<noscript>[\s\S]*?<\/noscript>/i) || [''])[0];
+  const styles = (html.match(/<style>[\s\S]*?<\/style>/gi) || []).join('\n');
+  const body = (html.match(/<body[^>]*>([\s\S]*?)<\/body>/i) || [, ''])[1];
+  return [title, links, noscript, styles, body].filter(Boolean).join('\n');
+}
+
+const artDir = path.join(outDir, 'artifact');
+fs.mkdirSync(artDir, { recursive: true });
+for (const f of files) {
+  if (f === '_index.html') continue;   // faqja e zgjedhjes ka variantin e vet
+  const src = fs.readFileSync(path.join(root, 'mockups', f), 'utf8');
+  fs.writeFileSync(path.join(artDir, f), toArtifact(inline(src, path.join(root, 'mockups'))));
+}
+console.log('  ✓ dist/artifact/  (variantet për publikim)');
+
 // kopjo assets nëse ekzistojnë foto reale
 const assets = path.join(root, 'assets');
 if (fs.existsSync(assets)) {

@@ -1,0 +1,1650 @@
+<title>SPRINT · Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,900;1,9..144,300&family=Inter+Tight:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,900;1,9..144,300&family=Inter+Tight:wght@300;400;500;600&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,900;1,9..144,300&family=Inter+Tight:wght@300;400;500;600&display=swap"></noscript>
+<style>
+/* ========================== MOCKUP 5 — "EDITORIAL" ===========================
+   Premium dhe i çelët, si revistë gastronomike. Tipografi serif e madhe,
+   hapësirë e bardhë, galeri me scroll horizontal dhe një indeks menuje ku
+   pamja e pjatës e ndjek kursorin. Niveli i efekteve: I RAFINUAR, jo i zhurmshëm.
+   ========================================================================== */
+:root{
+  --red:#C3122A; --red-dk:#8E0A1D; --gold:#A98032; --ink:#131211; --ink-2:#4B4642;
+  --paper:#FFFDF9; --paper-2:#F4F0E8; --line:#E2DBCE; --muted:#8B837A;
+  --serif:'Fraunces',Georgia,serif;
+  --sans:'Inter Tight',system-ui,sans-serif;
+  --max:1260px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.62;
+  overflow-x:clip;-webkit-font-smoothing:antialiased}
+img,svg{max-width:100%;display:block}
+a{color:inherit;text-decoration:none} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+h1,h2,h3{font-family:var(--serif);font-weight:900;margin:0;line-height:1.02;letter-spacing:-.025em}
+.wrap{width:min(100% - 2.4rem,var(--max));margin-inline:auto}
+section{position:relative;padding:clamp(4rem,9vw,8rem) 0}
+.rule{height:1px;background:var(--line)}
+
+/* ---------- header ---------- */
+header{position:fixed;top:0;left:0;right:0;z-index:90;padding:1.1rem 0;transition:.35s;
+  border-bottom:1px solid transparent;mix-blend-mode:normal}
+header.is-stuck{background:rgba(255,253,249,.93);backdrop-filter:blur(16px);border-bottom-color:var(--line);padding:.6rem 0}
+.hd{display:flex;align-items:center;gap:1.4rem}
+.logo{font-family:var(--serif);font-weight:900;font-size:1.5rem;letter-spacing:-.04em;line-height:1}
+.logo sup{font-family:var(--sans);font-weight:500;font-size:.45rem;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--muted);vertical-align:super;margin-left:.35rem}
+nav{margin-left:auto;display:flex;gap:1.7rem;align-items:center}
+nav a{font-size:.79rem;font-weight:500;letter-spacing:.02em;color:var(--ink-2);position:relative}
+nav a::after{content:'';position:absolute;left:0;bottom:-3px;height:1px;width:0;background:var(--red);transition:width .35s cubic-bezier(.3,1,.35,1)}
+nav a:hover::after{width:100%}
+.hd-act{display:flex;gap:.55rem;align-items:center}
+.lang{border:1px solid var(--line);border-radius:999px;padding:.36rem .7rem;font-size:.68rem;font-weight:600;
+  letter-spacing:.1em;color:var(--ink-2);transition:.25s}
+.lang:hover{border-color:var(--ink);color:var(--ink)}
+.cart-btn{display:flex;align-items:center;gap:.5rem;background:var(--ink);color:var(--paper);border-radius:999px;
+  padding:.5rem 1rem;font-size:.75rem;font-weight:600;transition:.25s}
+.cart-btn:hover{background:var(--red)}
+.cart-btn b{background:var(--paper);color:var(--ink);border-radius:999px;min-width:19px;height:19px;
+  display:grid;place-items:center;font-size:.68rem}
+.bump{animation:bump .45s ease}@keyframes bump{40%{transform:scale(1.4)}}
+.burger{display:none;flex-direction:column;gap:5px}
+.burger i{width:22px;height:1.6px;background:var(--ink);transition:.3s;display:block}
+body.nav-open .burger i:nth-child(1){transform:translateY(6.6px) rotate(45deg)}
+body.nav-open .burger i:nth-child(2){opacity:0}
+body.nav-open .burger i:nth-child(3){transform:translateY(-6.6px) rotate(-45deg)}
+
+/* ---------- hero editorial ---------- */
+.hero{padding-top:8rem;padding-bottom:2rem}
+.masthead{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+  border-bottom:1px solid var(--line);padding-bottom:.8rem;margin-bottom:2.6rem;flex-wrap:wrap}
+.masthead span{font-size:.66rem;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:clamp(3rem,10vw,8.6rem);text-align:center}
+h1 .it{font-style:italic;font-weight:300;color:var(--red)}
+.hero-sub{display:grid;grid-template-columns:1fr auto 1fr;gap:2rem;align-items:center;margin-top:2rem}
+.hero-sub p{font-size:.98rem;color:var(--ink-2);max-width:34ch;margin:0}
+.hero-sub p.r{text-align:right;margin-left:auto}
+.hero-mark{width:110px;height:110px;flex-shrink:0}
+.hero-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);margin-top:3rem}
+.hero-strip a{background:var(--paper);padding:1.4rem 1rem;display:grid;gap:.6rem;place-items:center;text-align:center;
+  transition:background .35s}
+.hero-strip a:hover{background:var(--paper-2)}
+.hero-strip svg{width:60px;height:60px;transform:rotate(var(--rot,0deg));transition:transform .45s cubic-bezier(.3,1.4,.4,1)}
+.hero-strip a:hover svg{transform:rotate(var(--rot,0deg)) scale(1.16)}
+.hero-strip b{font-family:var(--serif);font-weight:600;font-size:.92rem}
+.cta{display:flex;gap:.7rem;justify-content:center;margin-top:2.4rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.55rem;padding:.92rem 1.9rem;border-radius:999px;
+  font-weight:600;font-size:.82rem;transition:transform .3s cubic-bezier(.3,1.2,.4,1),background .3s,color .3s}
+.btn-p{background:var(--red);color:var(--paper)}
+.btn-p:hover{background:var(--red-dk);transform:translateY(-3px)}
+.btn-s{border:1px solid var(--ink)}
+.btn-s:hover{background:var(--ink);color:var(--paper);transform:translateY(-3px)}
+
+/* ---------- galeri horizontale ---------- */
+.gal-head{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;margin-bottom:1.6rem;flex-wrap:wrap}
+.gal{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:1rem;
+  scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.gal::-webkit-scrollbar{height:6px}
+.gal::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}
+.gcard{flex:0 0 300px;scroll-snap-align:start;border:1px solid var(--line);background:var(--paper-2);
+  border-radius:4px;padding:1.6rem 1.4rem;display:grid;gap:.7rem;transition:transform .4s cubic-bezier(.3,1,.35,1),background .35s}
+.gcard:hover{transform:translateY(-8px);background:var(--paper)}
+.gcard svg{width:100%;max-width:170px;margin-inline:auto;transform:rotate(var(--rot,0deg));transition:transform .5s}
+.gcard:hover svg{transform:rotate(var(--rot,0deg)) scale(1.07)}
+.gcard .n{font-family:var(--serif);font-weight:600;font-size:1.1rem}
+.gcard .d{font-size:.8rem;color:var(--muted)}
+.gcard .b{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  border-top:1px solid var(--line);padding-top:.7rem;margin-top:.2rem}
+.gcard .p{font-family:var(--serif);font-weight:900;font-size:1.15rem;color:var(--red)}
+
+/* ---------- titull seksioni ---------- */
+.st{display:grid;gap:.7rem;margin-bottom:2.8rem;max-width:62ch}
+.st .k{font-size:.65rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--red)}
+.st h2{font-size:clamp(2rem,5.4vw,4.2rem)}
+.st p{color:var(--muted);margin:0}
+.st.mid{text-align:center;margin-inline:auto;justify-items:center}
+
+/* ---------- indeksi i menusë ---------- */
+#menu{background:var(--paper-2)}
+.menu-bar{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin-bottom:1.8rem;
+  border-bottom:1px solid var(--line);padding-bottom:1.1rem}
+.chips{display:flex;gap:1.1rem;flex-wrap:wrap;flex:1}
+.chip{font-size:.82rem;font-weight:500;color:var(--muted);transition:.25s;position:relative;padding-bottom:.2rem;white-space:nowrap}
+.chip::after{content:'';position:absolute;left:0;bottom:0;height:1.5px;width:0;background:var(--red);transition:width .3s}
+.chip:hover{color:var(--ink)}
+.chip.is-on{color:var(--red);font-weight:600}
+.chip.is-on::after{width:100%}
+.search{display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--line);padding:.3rem .1rem;min-width:190px}
+.search input{background:none;border:0;outline:none;font-size:.85rem;width:100%;font-family:var(--sans);color:var(--ink)}
+.search svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2}
+
+.grid{display:grid;gap:0}
+.dish{display:grid;grid-template-columns:2.2rem 1fr auto auto;gap:1.2rem;align-items:baseline;
+  padding:1.15rem .4rem;border-bottom:1px solid var(--line);position:relative;cursor:default;
+  transition:background .3s,padding-left .35s;transition-delay:calc(var(--i) * 22ms)}
+.dish:hover{background:var(--paper);padding-left:1rem}
+.dish .num{font-family:var(--serif);font-size:.78rem;color:var(--muted);font-weight:600}
+.dish .nm{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;min-width:0}
+.dish h3{font-family:var(--serif);font-weight:600;font-size:1.18rem;letter-spacing:-.01em}
+.dish .desc{display:block;font-size:.83rem;color:var(--muted);width:100%;margin-top:.15rem}
+.dish .price{font-family:var(--serif);font-weight:900;font-size:1.12rem;color:var(--red);white-space:nowrap}
+.add{border:1px solid var(--line);border-radius:999px;padding:.36rem .95rem;font-size:.72rem;font-weight:600;
+  transition:.25s;white-space:nowrap}
+.add:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.add.is-added{background:#2E7D4F;color:#fff;border-color:#2E7D4F}
+.dish-tags{display:flex;gap:.35rem}
+.tag{font-size:.56rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.15rem .45rem;
+  border:1px solid currentColor;border-radius:999px}
+.tag-hot{color:var(--red)} .tag-veg{color:#2E7D4F} .tag-new{color:var(--gold)} .tag-top{color:var(--ink)}
+.menu-empty{text-align:center;color:var(--muted);padding:3rem 0}
+
+/* pamje që ndjek kursorin */
+#peek{position:fixed;top:0;left:0;width:210px;height:210px;z-index:80;pointer-events:none;opacity:0;
+  transition:opacity .3s;background:var(--paper);border:1px solid var(--line);border-radius:6px;
+  box-shadow:0 26px 54px -26px rgba(30,20,10,.45);display:grid;place-items:center;padding:1rem;
+  translate:-50% -50%}
+#peek.on{opacity:1}
+#peek svg{width:100%;height:100%}
+@media(hover:none),(pointer:coarse){#peek{display:none}}
+
+/* ---------- rreth ---------- */
+.about{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,6vw,5rem);align-items:center}
+.about-fig{border:1px solid var(--line);padding:2.4rem;display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;
+  place-items:center;background:var(--paper-2);position:relative}
+.about-fig svg{width:100%;max-width:140px}
+.about-fig figcaption{position:absolute;bottom:-.8rem;left:50%;translate:-50% 0;background:var(--paper);
+  padding:0 .9rem;font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.lead{font-family:var(--serif);font-size:clamp(1.1rem,1.9vw,1.4rem);font-weight:300;line-height:1.5;color:var(--ink-2)}
+.dropcap::first-letter{font-family:var(--serif);font-weight:900;font-size:3.6em;float:left;line-height:.78;
+  margin:.06em .12em 0 0;color:var(--red)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:2.2rem;
+  border-top:1px solid var(--line);padding-top:1.4rem}
+.stat b{display:block;font-family:var(--serif);font-weight:900;font-size:1.9rem;line-height:1}
+.stat span{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- review ---------- */
+.revs{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:0;
+  border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.review{margin:0;padding:1.9rem 1.7rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  transition:background .35s;transition-delay:calc(var(--i) * 55ms)}
+.review:hover{background:var(--paper-2)}
+.stars{color:var(--gold);letter-spacing:.16em;font-size:.85rem;margin-bottom:.8rem}
+.review blockquote{margin:0 0 1.1rem;font-family:var(--serif);font-weight:300;font-size:1.05rem;
+  line-height:1.55;color:var(--ink)}
+.review figcaption{display:flex;justify-content:space-between;font-size:.78rem;color:var(--ink-2)}
+.review figcaption span{color:var(--muted);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase}
+
+/* ---------- rezervim ---------- */
+#book{background:var(--ink);color:var(--paper)}
+#book .st .k{color:#D9A94B} #book .st p{color:#9d958c}
+.book{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(2rem,5vw,4.5rem);align-items:start}
+form.bk{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
+.fld{display:grid;gap:.3rem}.fld.full{grid-column:1/-1}
+.fld label{font-size:.63rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#948b81}
+.fld input,.fld select,.fld textarea{background:transparent;border:0;border-bottom:1px solid #3d3833;
+  padding:.6rem .1rem;color:var(--paper);font-family:var(--sans);font-size:1rem;outline:none;transition:.25s;width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-bottom-color:#D9A94B}
+.fld textarea{resize:vertical;min-height:60px}
+.fld select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#948b81 50%),linear-gradient(135deg,#948b81 50%,transparent 50%);
+  background-position:calc(100% - 10px) 55%,calc(100% - 5px) 55%;background-size:5px 5px;background-repeat:no-repeat}
+.fld select option{background:var(--ink)}
+.fld input[type=date],.fld input[type=time]{color-scheme:dark}
+.err{grid-column:1/-1;color:#ff8f8f;font-size:.8rem;display:none}.err.is-on{display:block}
+.bk-act{grid-column:1/-1;display:flex;gap:.7rem;flex-wrap:wrap;margin-top:.6rem}
+.wa{display:flex;align-items:center;justify-content:center;gap:.5rem;background:#128C4B;color:#fff;
+  border-radius:999px;padding:.9rem 1.5rem;font-weight:600;font-size:.83rem;transition:.25s;flex:1;min-width:215px}
+.wa:hover{background:#16a558;transform:translateY(-2px)}
+.wa.is-disabled{opacity:.35;pointer-events:none}
+.mail{border:1px solid #3d3833;border-radius:999px;padding:.9rem 1.4rem;font-size:.78rem;font-weight:600;transition:.25s}
+.mail:hover{border-color:#D9A94B;color:#D9A94B}
+.book-side ul{list-style:none;margin:1.4rem 0 0;padding:0;display:grid;gap:.5rem}
+.book-side li{display:flex;justify-content:space-between;font-size:.86rem;color:#9d958c;
+  border-bottom:1px solid #2e2a26;padding-bottom:.5rem}
+.book-side li b{color:var(--paper);font-weight:500}
+
+/* ---------- kontakt / footer ---------- */
+.contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0;
+  border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.cbox{padding:1.8rem 1.6rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);transition:background .3s}
+.cbox:hover{background:var(--paper-2)}
+.cbox h4{font-family:var(--serif);font-weight:600;font-size:1.05rem;margin:0 0 .7rem}
+.cbox p{font-size:.9rem;color:var(--ink-2);margin:0}
+.cbox ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
+.cbox li{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);gap:1rem}
+.cbox li b{color:var(--ink);font-weight:500}
+footer{border-top:1px solid var(--line);padding:2.4rem 0 6rem}
+.ft{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;align-items:center}
+.ft-soc{display:flex;gap:1.1rem}
+.ft-soc a{font-size:.72rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);
+  border-bottom:1px solid transparent;transition:.25s}
+.ft-soc a:hover{color:var(--red);border-bottom-color:var(--red)}
+.ft small{color:var(--muted);font-size:.75rem}
+.note{margin-top:1.3rem;font-size:.67rem;color:#a49a8e;border-top:1px solid var(--line);padding-top:.9rem;line-height:1.6}
+
+/* ---------- shporta ---------- */
+.cart{position:fixed;top:0;right:0;height:100dvh;width:min(415px,100%);z-index:120;background:var(--paper);
+  border-left:1px solid var(--line);transform:translateX(102%);transition:transform .5s cubic-bezier(.6,0,.2,1);
+  display:flex;flex-direction:column;box-shadow:-24px 0 70px -40px rgba(30,20,10,.5)}
+body.cart-open .cart{transform:none}
+.scrim{position:fixed;inset:0;background:rgba(19,18,17,.4);backdrop-filter:blur(3px);z-index:110;opacity:0;visibility:hidden;transition:.4s}
+body.cart-open .scrim{opacity:1;visibility:visible}
+.cart-hd{display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.5rem;border-bottom:1px solid var(--line)}
+.cart-hd h3{font-size:1.3rem;font-weight:600}
+.x{width:32px;height:32px;border-radius:999px;border:1px solid var(--line);display:grid;place-items:center;transition:.25s}
+.x:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.cart-list{list-style:none;margin:0;padding:.6rem 1.5rem;overflow-y:auto;flex:1;display:grid;align-content:start}
+.cart-line{display:grid;grid-template-columns:38px 1fr auto auto;gap:.7rem;align-items:center;
+  border-bottom:1px solid var(--line);padding:.75rem 0}
+.cl-img{width:38px;height:38px}
+.cl-name{font-size:.86rem;line-height:1.25;font-family:var(--serif);font-weight:600}
+.cl-name em{display:block;font-style:normal;font-size:.71rem;color:var(--muted);font-family:var(--sans);font-weight:400}
+.qty{display:flex;align-items:center;gap:.4rem;border:1px solid var(--line);border-radius:999px;padding:.08rem .28rem}
+.qty button{width:21px;height:21px;border-radius:999px;display:grid;place-items:center;transition:.2s}
+.qty button:hover{background:var(--ink);color:var(--paper)}
+.qty b{min-width:14px;text-align:center;font-size:.79rem}
+.cl-sum{font-family:var(--serif);font-weight:900;color:var(--red);font-size:.94rem}
+.cart-empty{color:var(--muted);text-align:center;padding:3rem 1rem;font-size:.9rem}
+.cart-ft{border-top:1px solid var(--line);padding:1.2rem 1.5rem 1.5rem;display:grid;gap:.42rem;background:var(--paper-2)}
+.row{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
+.row.total{color:var(--ink);font-size:1rem;border-top:1px solid var(--line);padding-top:.55rem;margin-top:.3rem}
+.row.total b{font-family:var(--serif);font-weight:900;font-size:1.5rem;color:var(--red)}
+.cart .wa{margin-top:.6rem}
+.cart-note{font-size:.69rem;color:var(--muted);text-align:center;margin:.15rem 0 0}
+.clear{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:.25rem;transition:.2s}
+.clear:hover{color:var(--red)}
+
+/* ---------- dock ---------- */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:95;display:none;gap:1px;background:var(--line);
+  border-top:1px solid var(--line)}
+.dock a,.dock button{flex:1;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.95rem;
+  font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--paper)}
+.dock .d-wa{background:#128C4B;color:#fff}.dock .d-tel{background:var(--red);color:#fff}
+.dock .d-cart{background:var(--ink);color:var(--paper)}
+
+[data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .8s cubic-bezier(.25,1,.3,1),transform .8s cubic-bezier(.25,1,.3,1)}
+[data-reveal].in{opacity:1;transform:none}
+
+@media(max-width:960px){
+  .hero-sub{grid-template-columns:1fr;text-align:center;justify-items:center;gap:1.2rem}
+  .hero-sub p.r{text-align:center;margin:0}
+  .hero-strip{grid-template-columns:repeat(2,1fr)}
+  .hero-strip a:last-child{grid-column:span 2}
+  .about,.book{grid-template-columns:1fr}
+  nav{position:fixed;inset:0;background:var(--paper);flex-direction:column;justify-content:center;gap:1.7rem;
+    transform:translateX(100%);transition:transform .45s cubic-bezier(.6,0,.2,1);margin:0}
+  body.nav-open nav{transform:none}
+  nav a{font-family:var(--serif);font-size:1.8rem;font-weight:600}
+  .burger{display:flex;z-index:95}.hd-act{margin-left:auto}
+  .dock{display:flex}.stats{grid-template-columns:1fr 1fr;gap:1rem}
+  form.bk{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .dish{grid-template-columns:1fr auto;gap:.5rem .8rem;padding:1rem .2rem}
+  .dish .num{display:none}
+  .dish .add{grid-column:2;justify-self:end}
+  .dish .price{grid-column:1;grid-row:2}
+  .dish .nm{grid-column:1/-1}
+}
+
+/* ---- kompaktim i header-it në ekrane të vogla ---- */
+@media(max-width:560px){
+  .logo small,.logo sup{display:none}
+  .cart-btn span[data-i18n]{display:none}
+  .cart-btn{padding:.5rem .75rem}
+  .lang{padding:.36rem .6rem}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
+</style>
+
+
+<div id="peek"></div>
+
+<header data-header>
+  <div class="wrap hd">
+    <a href="#top" class="logo">SPRINT<sup>Durrës</sup></a>
+    <nav data-nav>
+      <a href="#menu" data-i18n="nav_menu"></a>
+      <a href="#about" data-i18n="nav_about"></a>
+      <a href="#revs" data-i18n="nav_reviews"></a>
+      <a href="#book" data-i18n="nav_book"></a>
+      <a href="#contact" data-i18n="nav_contact"></a>
+    </nav>
+    <div class="hd-act">
+      <button class="lang" data-lang-toggle>EN</button>
+      <button class="cart-btn" data-cart-open data-cart-badge>
+        <span data-i18n="cart_title"></span><b data-cart-count>0</b></button>
+      <button class="burger" data-nav-toggle aria-label="Menu"><i></i><i></i><i></i></button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="masthead">
+      <span data-i18n="hero_kicker"></span>
+      <span id="mhC">Pizza · Fast Food · Restorant · Tradicionale</span>
+      <span data-addr></span>
+    </div>
+    <h1><span data-i18n="hero_t1"></span> <span class="it" data-i18n="hero_t2"></span></h1>
+    <div class="hero-sub">
+      <p data-i18n="hero_sub"></p>
+      <svg class="hero-mark" viewBox="0 0 200 200"><use href="#art-pizzaC"/></svg>
+      <p class="r" id="mhR">Furrë druri, skarë restoranti dhe recetat e gjyshes — në një adresë të vetme,
+        dy hapa nga bregu i Durrësit.</p>
+    </div>
+    <div class="cta">
+      <a class="btn btn-p" href="#menu"><span data-i18n="cta_menu"></span></a>
+      <a class="btn btn-s" data-tel-href><span data-i18n="cta_call"></span></a>
+    </div>
+    <div class="hero-strip" id="strip"></div>
+  </div>
+</section>
+
+<!-- ══════════════ GALERIA ══════════════ -->
+<section id="gal-sec">
+  <div class="wrap">
+    <div class="gal-head">
+      <div class="st" style="margin:0">
+        <span class="k" data-i18n="rev_kicker"></span>
+        <h2 id="galT">Pjatët që na bënë emër</h2>
+      </div>
+      <span style="font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)" id="galH">← Rrëshqit →</span>
+    </div>
+    <div class="gal" id="galTrack"></div>
+  </div>
+</section>
+
+<!-- ══════════════ MENUJA ══════════════ -->
+<section id="menu">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="menu_kicker"></span>
+      <h2 data-i18n="menu_title"></h2>
+      <p data-i18n="menu_sub"></p>
+    </div>
+    <div class="menu-bar">
+      <div class="chips" data-filters></div>
+      <label class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="search" data-search data-i18n-ph="search_ph">
+      </label>
+    </div>
+    <div class="grid" data-menu-grid></div>
+  </div>
+</section>
+
+<!-- ══════════════ RRETH ══════════════ -->
+<section id="about">
+  <div class="wrap about">
+    <figure class="about-fig" data-reveal style="margin:0">
+      <svg viewBox="0 0 200 200"><use href="#art-tave"/></svg>
+      <svg viewBox="0 0 200 200"><use href="#art-fish"/></svg>
+      <svg viewBox="0 0 200 200"><use href="#art-pasta"/></svg>
+      <svg viewBox="0 0 200 200"><use href="#art-byrek"/></svg>
+      <figcaption id="figc">Katër kuzhina</figcaption>
+    </figure>
+    <div data-reveal>
+      <span class="k" style="font-size:.65rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--red)" data-i18n="about_kicker"></span>
+      <h2 style="font-size:clamp(2rem,4.6vw,3.4rem);margin:.8rem 0 1.1rem" data-i18n="about_title"></h2>
+      <p class="lead dropcap" data-i18n="about_body"></p>
+      <div class="stats" data-stats></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ REVIEW ══════════════ -->
+<section id="revs" style="background:var(--paper-2)">
+  <div class="wrap">
+    <div class="st mid" data-reveal>
+      <span class="k" data-i18n="rev_kicker"></span>
+      <h2 data-i18n="rev_title"></h2>
+    </div>
+    <div class="revs" data-reviews></div>
+  </div>
+</section>
+
+<!-- ══════════════ REZERVIM ══════════════ -->
+<section id="book">
+  <div class="wrap book">
+    <div class="book-side" data-reveal>
+      <span class="k" style="font-size:.65rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:#D9A94B" data-i18n="book_kicker"></span>
+      <h2 style="font-size:clamp(2rem,4.6vw,3.2rem);margin:.8rem 0 1rem;color:var(--paper)" data-i18n="book_title"></h2>
+      <p style="color:#9d958c" data-i18n="book_sub"></p>
+      <ul data-hours></ul>
+    </div>
+    <form class="bk" data-book-form data-reveal novalidate>
+      <div class="fld"><label data-i18n="f_name"></label><input name="name" required></div>
+      <div class="fld"><label data-i18n="f_phone"></label><input name="phone" type="tel" required></div>
+      <div class="fld"><label data-i18n="f_date"></label><input name="date" type="date" required></div>
+      <div class="fld"><label data-i18n="f_time"></label><input name="time" type="time" value="20:00"></div>
+      <div class="fld"><label data-i18n="f_people"></label>
+        <select name="people"><option>1</option><option selected>2</option><option>3</option><option>4</option>
+        <option>5</option><option>6</option><option>8</option><option>10+</option></select></div>
+      <div class="fld"><label data-i18n="f_area"></label>
+        <select name="area"><option data-i18n="f_area_in"></option><option data-i18n="f_area_out"></option>
+        <option data-i18n="f_area_any"></option></select></div>
+      <div class="fld full"><label data-i18n="f_note"></label><textarea name="note"></textarea></div>
+      <p class="err" data-form-error></p>
+      <div class="bk-act">
+        <button type="submit" class="wa"><span data-i18n="f_send"></span></button>
+        <a href="#" class="mail" data-book-email><span data-i18n="f_email"></span></a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ══════════════ KONTAKT ══════════════ -->
+<section id="contact">
+  <div class="wrap">
+    <div class="st" data-reveal>
+      <span class="k" data-i18n="ct_kicker"></span>
+      <h2 data-i18n="ct_title"></h2>
+    </div>
+    <div class="contact" data-reveal>
+      <div class="cbox"><h4 data-i18n="ct_addr"></h4><p data-addr></p>
+        <p style="margin-top:.7rem"><a data-map-href target="_blank" rel="noopener" style="color:var(--red);font-weight:600;border-bottom:1px solid" data-i18n="ct_map"></a></p></div>
+      <div class="cbox"><h4 data-i18n="ct_phone"></h4><p><a data-tel-href data-phone style="font-size:1.06rem;font-weight:600"></a></p>
+        <p style="margin-top:.7rem"><a data-wa-href target="_blank" rel="noopener" style="color:#128C4B;font-weight:600;border-bottom:1px solid">WhatsApp →</a></p></div>
+      <div class="cbox"><h4 data-i18n="ct_hours"></h4><ul data-hours></ul></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="ft">
+      <a href="#top" class="logo">SPRINT<sup data-tagline></sup></a>
+      <div class="ft-soc"><a data-soc="ig">Instagram</a><a data-soc="fb">Facebook</a><a data-soc="tt">TikTok</a></div>
+      <small>© <span data-year></span> SPRINT Durrës. <span data-i18n="foot_rights"></span></small>
+    </div>
+    <p class="note"><b>MOCKUP 5 — «EDITORIAL».</b> Ilustrimet janë SVG placeholder; menuja, çmimet, review-t dhe
+      kontaktet janë shembuj që zëvendësohen me të dhënat reale të biznesit.</p>
+  </div>
+</footer>
+
+<div class="scrim" data-cart-close></div>
+<aside class="cart">
+  <div class="cart-hd"><h3 data-i18n="cart_title"></h3><button class="x" data-cart-close aria-label="Mbyll">✕</button></div>
+  <ul class="cart-list" data-cart-items></ul>
+  <div class="cart-ft">
+    <div class="row"><span data-i18n="cart_sub"></span><span data-cart-sub>0 L</span></div>
+    <div class="row"><span data-i18n="cart_del"></span><span data-cart-del>0 L</span></div>
+    <div class="row total"><span data-i18n="cart_total"></span><b data-cart-total>0 L</b></div>
+    <a class="wa is-disabled" data-cart-send target="_blank" rel="noopener" href="#menu"><span data-i18n="cart_send"></span></a>
+    <p class="cart-note" data-i18n="cart_note"></p>
+    <button class="clear" data-cart-clear data-i18n="cart_clear"></button>
+  </div>
+</aside>
+
+<div class="dock">
+  <a class="d-tel" data-tel-href><span data-i18n="cta_call"></span></a>
+  <a class="d-wa" data-wa-href target="_blank" rel="noopener">WhatsApp</a>
+  <button class="d-cart" data-cart-open data-cart-badge><span data-i18n="cart_title"></span> <b data-cart-count>0</b></button>
+</div>
+
+<script>
+/* ============================================================================
+   SPRINT — Fast Food & Pizza, Durrës
+   TË DHËNAT QENDRORE — ndrysho VETËM këtë skedar për menunë, çmimet, kontaktet.
+   Pas çdo ndryshimi: `node build.js` për të rigjeneruar faqet në dist/.
+
+   ⚠️  VLERAT E SHËNUARA ME  // TODO:REAL  JANË SHEMBUJ.
+       Zëvendësoji me të dhënat reale të biznesit.
+   ========================================================================== */
+
+window.SPRINT = (function () {
+  const config = {
+    brand: 'SPRINT',
+    tagline: { sq: 'Fast Food & Pizza · Restorant', en: 'Fast Food & Pizza · Restaurant' },
+    city: 'Durrës',
+
+    // TODO:REAL — numri i vërtetë i telefonit
+    phone: '+355 69 000 0000',
+    phoneHref: '+35569000000',
+
+    // TODO:REAL — numri i WhatsApp në format ndërkombëtar PA '+' dhe PA hapësira
+    whatsapp: '35569000000',
+
+    // TODO:REAL — email ku vjen kopja e rezervimit
+    email: 'info@sprintdurres.al',
+
+    // TODO:REAL — adresa e saktë
+    address: { sq: 'Rruga Taulantia, Durrës, Shqipëri', en: 'Taulantia Street, Durrës, Albania' },
+
+    // TODO:REAL — koordinatat e sakta për hartën
+    geo: { lat: 41.3236, lng: 19.4432 },
+
+    hours: {
+      sq: [['E Hënë – E Enjte', '09:00 – 24:00'], ['E Premte – E Shtunë', '09:00 – 02:00'], ['E Diel', '10:00 – 24:00']],
+      en: [['Monday – Thursday', '09:00 – 24:00'], ['Friday – Saturday', '09:00 – 02:00'], ['Sunday', '10:00 – 24:00']],
+    },
+
+    social: {
+      // TODO:REAL — linket e sakta të profileve
+      instagram: 'https://www.instagram.com/',
+      facebook: 'https://www.facebook.com/',
+      tiktok: 'https://www.tiktok.com/',
+    },
+
+    currency: 'L',
+    deliveryFee: 100,
+    freeDeliveryOver: 1500,
+  };
+
+  /* --------------------------------------------------------------------------
+     KATEGORITË — katër shtyllat e biznesit
+     -------------------------------------------------------------------------- */
+  const categories = [
+    { id: 'pizza',   art: 'pizza',  sq: 'Pizza',        en: 'Pizza',
+      dsq: 'Brumë 48 orë, furrë druri, mozzarella fiordilatte.',
+      den: '48-hour dough, wood-fired oven, fiordilatte mozzarella.' },
+    { id: 'fast',    art: 'burger', sq: 'Fast Food',    en: 'Fast Food',
+      dsq: 'Suflaqe, burger dhe krokante — gati për 7 minuta.',
+      den: 'Gyros, burgers and crispy classics — ready in 7 minutes.' },
+    { id: 'rest',    art: 'steak',  sq: 'Restorant',    en: 'Restaurant',
+      dsq: 'Mish në skarë, peshk i freskët, pasta italiane.',
+      den: 'Grilled meats, fresh fish, Italian pasta.' },
+    { id: 'trad',    art: 'tave',   sq: 'Tradicionale', en: 'Traditional',
+      dsq: 'Recetat e gjyshes — tavë kosi, fërgesë, byrek.',
+      den: "Grandma's recipes — tavë kosi, fërgesë, byrek." },
+    { id: 'dolce',   art: 'dessert',sq: 'Ëmbëlsira & Pije', en: 'Desserts & Drinks',
+      dsq: 'Trileçe, bakllava dhe pije të ftohta.',
+      den: 'Trileçe, baklava and cold drinks.' },
+  ];
+
+  /* --------------------------------------------------------------------------
+     MENUJA — TODO:REAL zëvendëso me menunë e vërtetë me çmimet e sakta
+     tags: 'hot' (pikante) | 'veg' | 'new' | 'top' (më i shituri)
+     -------------------------------------------------------------------------- */
+  const menu = [
+    // ---- PIZZA ----
+    { id:'p1', c:'pizza', art:'pizza', sq:'Margherita', en:'Margherita', p:500,
+      dsq:'Salcë domateje San Marzano, mozzarella, borzilok i freskët.',
+      den:'San Marzano tomato, mozzarella, fresh basil.', tags:['veg'] },
+    { id:'p2', c:'pizza', art:'pizzaC', sq:'Prosciutto e Funghi', en:'Prosciutto e Funghi', p:700,
+      dsq:'Proshutë cotto, kërpudha shampinjon, mozzarella.',
+      den:'Cooked ham, champignon mushrooms, mozzarella.', tags:[] },
+    { id:'p3', c:'pizza', art:'pizzaC', sq:'Capricciosa', en:'Capricciosa', p:750,
+      dsq:'Proshutë, kërpudha, ullinj, angjinare, vezë.',
+      den:'Ham, mushrooms, olives, artichokes, egg.', tags:['top'] },
+    { id:'p4', c:'pizza', art:'pizzaW', sq:'Quattro Formaggi', en:'Four Cheese', p:800,
+      dsq:'Mozzarella, gorgonzola, parmixhan, djathë i bardhë vendi.',
+      den:'Mozzarella, gorgonzola, parmesan, local white cheese.', tags:['veg'] },
+    { id:'p5', c:'pizza', art:'pizza', sq:'Diavola', en:'Diavola', p:750,
+      dsq:'Sallam pikant, spec djegës, mozzarella, vaj ulliri.',
+      den:'Spicy salami, chilli, mozzarella, olive oil.', tags:['hot'] },
+    { id:'p6', c:'pizza', art:'pizzaC', sq:'Sprint Special', en:'Sprint Special', p:900,
+      dsq:'Mish viçi, sallam, proshutë, kërpudha, spec, qepë, dopio djathë.',
+      den:'Beef, salami, ham, mushrooms, peppers, onion, double cheese.', tags:['top','new'] },
+    { id:'p7', c:'pizza', art:'pizzaV', sq:'Vegetariane', en:'Vegetarian', p:650,
+      dsq:'Perime sezonale në skarë, mozzarella, rukola.',
+      den:'Grilled seasonal vegetables, mozzarella, rocket.', tags:['veg'] },
+    { id:'p8', c:'pizza', art:'pizzaV', sq:'Tonno e Cipolla', en:'Tuna & Onion', p:750,
+      dsq:'Ton, qepë e kuqe, ullinj të zinj, origano.',
+      den:'Tuna, red onion, black olives, oregano.', tags:[] },
+
+    // ---- FAST FOOD ----
+    { id:'f1', c:'fast', art:'gyros', sq:'Suflaqe Pule', en:'Chicken Gyros', p:300,
+      dsq:'Pulë e marinuar, patate, domate, qepë, salcë e bardhë.',
+      den:'Marinated chicken, fries, tomato, onion, white sauce.', tags:['top'] },
+    { id:'f2', c:'fast', art:'gyros', sq:'Suflaqe Viçi', en:'Beef Gyros', p:350,
+      dsq:'Viç në gyros, patate, perime të freskëta, salcë e shtëpisë.',
+      den:'Beef gyros, fries, fresh vegetables, house sauce.', tags:[] },
+    { id:'f3', c:'fast', art:'burger', sq:'Hamburger', en:'Hamburger', p:350,
+      dsq:'Kotoletë viçi 150g, sallatë, domate, qepë, turshi.',
+      den:'150g beef patty, lettuce, tomato, onion, pickles.', tags:[] },
+    { id:'f4', c:'fast', art:'burger', sq:'Cheeseburger', en:'Cheeseburger', p:400,
+      dsq:'Kotoletë viçi, çedar i shkrirë, salcë Sprint.',
+      den:'Beef patty, melted cheddar, Sprint sauce.', tags:[] },
+    { id:'f5', c:'fast', art:'burger', sq:'Sprint Burger XL', en:'Sprint Burger XL', p:600,
+      dsq:'Dopio kotoletë 300g, dopio çedar, bacon, qepë e karamelizuar.',
+      den:'Double 300g patty, double cheddar, bacon, caramelised onion.', tags:['top','new'] },
+    { id:'f6', c:'fast', art:'gyros', sq:'Kebab në Pite', en:'Kebab in Pita', p:400,
+      dsq:'Kebab i bërë në shtëpi, pite e ngrohtë, salcë kosi.',
+      den:'House-made kebab, warm pita, yoghurt sauce.', tags:[] },
+    { id:'f7', c:'fast', art:'fries', sq:'Patate të Skuqura', en:'French Fries', p:200,
+      dsq:'Patate të freskëta, kripë deti, rozmarinë.',
+      den:'Fresh-cut potatoes, sea salt, rosemary.', tags:['veg'] },
+    { id:'f8', c:'fast', art:'wings', sq:'Krahë Pule Pikant', en:'Spicy Chicken Wings', p:500,
+      dsq:'8 copë krahë në salcë buffalo, me salcë blu.',
+      den:'8 wings in buffalo sauce, with blue cheese dip.', tags:['hot'] },
+    { id:'f9', c:'fast', art:'wings', sq:'Crispy Strips', en:'Crispy Strips', p:550,
+      dsq:'Fileto pule krokante, patate, dy salca për zgjedhje.',
+      den:'Crispy chicken fillets, fries, two dips of choice.', tags:[] },
+
+    // ---- RESTORANT ----
+    { id:'r1', c:'rest', art:'steak', sq:'Biftek Viçi me Salcë Kërpudhash', en:'Beef Steak, Mushroom Sauce', p:1200,
+      dsq:'Biftek 300g, salcë kremi me kërpudha, patate rustike.',
+      den:'300g steak, creamy mushroom sauce, rustic potatoes.', tags:['top'] },
+    { id:'r2', c:'rest', art:'steak', sq:'Fileto Pule në Zjarr', en:'Flame-Grilled Chicken Fillet', p:800,
+      dsq:'Fileto pule e marinuar, perime në skarë, limon.',
+      den:'Marinated chicken fillet, grilled vegetables, lemon.', tags:[] },
+    { id:'r3', c:'rest', art:'fish', sq:'Koce e Freskët në Skarë', en:'Grilled Sea Bream', p:1500,
+      dsq:'Peshk i ditës nga Adriatiku, vaj ulliri, hudhër, majdanoz.',
+      den:'Catch of the day from the Adriatic, olive oil, garlic, parsley.', tags:['top'] },
+    { id:'r4', c:'rest', art:'pasta', sq:'Spageti Carbonara', en:'Spaghetti Carbonara', p:600,
+      dsq:'Guanciale, veza, pecorino romano, piper i zi.',
+      den:'Guanciale, egg, pecorino romano, black pepper.', tags:[] },
+    { id:'r5', c:'rest', art:'pasta', sq:'Penne Arrabiata', en:'Penne Arrabbiata', p:550,
+      dsq:'Domate e freskët, hudhër, spec djegës, borzilok.',
+      den:'Fresh tomato, garlic, chilli, basil.', tags:['hot','veg'] },
+    { id:'r6', c:'rest', art:'pasta', sq:'Rizoto me Fruta Deti', en:'Seafood Risotto', p:900,
+      dsq:'Oriz carnaroli, midhje, karkaleca, kalamar, verë e bardhë.',
+      den:'Carnaroli rice, mussels, prawns, squid, white wine.', tags:[] },
+    { id:'r7', c:'rest', art:'salad', sq:'Sallatë Caesar', en:'Caesar Salad', p:550,
+      dsq:'Marule, pulë në skarë, krutona, parmixhan, salcë Caesar.',
+      den:'Romaine, grilled chicken, croutons, parmesan, Caesar dressing.', tags:[] },
+    { id:'r8', c:'rest', art:'salad', sq:'Sallatë Greke', en:'Greek Salad', p:450,
+      dsq:'Domate, kastravec, feta, ullinj kalamata, origano.',
+      den:'Tomato, cucumber, feta, kalamata olives, oregano.', tags:['veg'] },
+
+    // ---- TRADICIONALE ----
+    { id:'t1', c:'trad', art:'tave', sq:'Tavë Kosi', en:'Tavë Kosi (Baked Lamb & Yoghurt)', p:700,
+      dsq:'Mish qengji, kos i trashë, oriz, vezë — pjekur në tavë balte.',
+      den:'Lamb, thick yoghurt, rice, egg — baked in a clay dish.', tags:['top'] },
+    { id:'t2', c:'trad', art:'tave', sq:'Fërgesë Tirane', en:'Fërgesë Tirane', p:650,
+      dsq:'Spec i pjekur, domate, gjizë, mish viçi — në tigan balte.',
+      den:'Roasted peppers, tomato, curd cheese, beef — in a clay pan.', tags:['top'] },
+    { id:'t3', c:'trad', art:'byrek', sq:'Byrek me Spinaq', en:'Spinach Byrek', p:200,
+      dsq:'Petë e hapur me dorë, spinaq, gjizë vendi.',
+      den:'Hand-rolled filo, spinach, local curd cheese.', tags:['veg'] },
+    { id:'t4', c:'trad', art:'tave', sq:'Qofte të Fërguara', en:'Fried Meatballs', p:550,
+      dsq:'Qofte viçi me mendër, qepë dhe erëza tradicionale.',
+      den:'Beef meatballs with mint, onion and traditional spices.', tags:[] },
+    { id:'t5', c:'trad', art:'tave', sq:'Japrak me Gjethe Rrushi', en:'Stuffed Vine Leaves', p:600,
+      dsq:'Gjethe rrushi të mbushura me oriz e mish, salcë kosi.',
+      den:'Vine leaves stuffed with rice and meat, yoghurt sauce.', tags:[] },
+    { id:'t6', c:'trad', art:'tave', sq:'Speca me Gjizë', en:'Peppers with Curd Cheese', p:500,
+      dsq:'Speca të pjekur të mbushur me gjizë vendi dhe vezë.',
+      den:'Roasted peppers stuffed with local curd cheese and egg.', tags:['veg'] },
+    { id:'t7', c:'trad', art:'byrek', sq:'Pite me Mish', en:'Meat Pie', p:350,
+      dsq:'Petë shtëpie, mish viçi i grirë, qepë.',
+      den:'Homemade filo, minced beef, onion.', tags:[] },
+    { id:'t8', c:'trad', art:'fish', sq:'Supë Peshku', en:'Fish Soup', p:700,
+      dsq:'Peshk i Adriatikut, perime, limon — receta e bregdetit.',
+      den:'Adriatic fish, vegetables, lemon — a coastal recipe.', tags:[] },
+
+    // ---- ËMBËLSIRA & PIJE ----
+    { id:'d1', c:'dolce', art:'dessert', sq:'Trileçe', en:'Trileçe', p:300,
+      dsq:'Tre qumështrat, karamel i bërë në shtëpi.',
+      den:'Three-milk cake with homemade caramel.', tags:['top','veg'] },
+    { id:'d2', c:'dolce', art:'dessert', sq:'Tiramisu', en:'Tiramisu', p:350,
+      dsq:'Mascarpone, savoiardi, kafe espresso, kakao.',
+      den:'Mascarpone, savoiardi, espresso, cocoa.', tags:['veg'] },
+    { id:'d3', c:'dolce', art:'dessert', sq:'Bakllava', en:'Baklava', p:250,
+      dsq:'Petë të holla, arra, sherbet mjalti.',
+      den:'Thin filo, walnuts, honey syrup.', tags:['veg'] },
+    { id:'d4', c:'dolce', art:'drink', sq:'Coca-Cola 0.33L', en:'Coca-Cola 0.33L', p:150,
+      dsq:'E ftohtë akull.', den:'Ice cold.', tags:['veg'] },
+    { id:'d5', c:'dolce', art:'drink', sq:'Ujë 0.5L', en:'Water 0.5L', p:100,
+      dsq:'Ujë natyral i pijshëm.', den:'Still natural water.', tags:['veg'] },
+    { id:'d6', c:'dolce', art:'drink', sq:'Birrë Korça 0.33L', en:'Korça Beer 0.33L', p:250,
+      dsq:'Birra klasike shqiptare.', den:'The classic Albanian lager.', tags:['veg'] },
+    { id:'d7', c:'dolce', art:'drink', sq:'Espresso', en:'Espresso', p:100,
+      dsq:'Kafe italiane, e pjekur çdo javë.', den:'Italian coffee, roasted weekly.', tags:['veg'] },
+  ];
+
+  /* --------------------------------------------------------------------------
+     REVIEW — TODO:REAL zëvendëso me review reale nga Google / Facebook
+     -------------------------------------------------------------------------- */
+  const reviews = [
+    { n:'Erisa M.',   s:5, src:'Google',   sq:'Pica më e mirë në Durrës, pa diskutim. Brumi i lehtë dhe shërbimi super i shpejtë.', en:'Best pizza in Durrës, no question. Light dough and lightning-fast service.' },
+    { n:'Andi K.',    s:5, src:'Google',   sq:'Tava e kosit si te gjyshja. Erdha për suflaqe, u ktheva për restorantin.', en:'Tavë kosi just like grandma made. Came for the gyros, stayed for the restaurant.' },
+    { n:'Marco R.',   s:5, src:'Facebook', sq:'Vendi ku ha çdo herë që zbres nga trageti. Cilësi italiane, çmim shqiptar.', en:'My first stop every time I get off the ferry. Italian quality, Albanian prices.' },
+    { n:'Fatjona B.', s:5, src:'Google',   sq:'Porosita në WhatsApp dhe erdhi për 20 minuta, akoma e nxehtë. Sprint Burger XL është bombë.', en:'Ordered on WhatsApp, arrived in 20 minutes still hot. The Sprint Burger XL is unreal.' },
+    { n:'Klodian S.', s:5, src:'Google',   sq:'Fërgesa dhe koca në skarë — nivel restoranti, me çmim fast food.', en:'Fërgesë and grilled sea bream — restaurant level at fast-food prices.' },
+    { n:'Anna P.',    s:5, src:'Facebook', sq:'Ambient i pastër, stafi shumë i sjellshëm, porcione bujare. E rekomandoj!', en:'Clean space, very friendly staff, generous portions. Highly recommend!' },
+  ];
+
+  const stats = [
+    { v:'12+',  sq:'Vite përvojë',       en:'Years of experience' },
+    { v:'40+',  sq:'Pjata në menu',       en:'Dishes on the menu' },
+    { v:'4.8',  sq:'Vlerësimi mesatar',   en:'Average rating' },
+    { v:'25\'', sq:'Dërgesë mesatare',    en:'Average delivery' },
+  ];
+
+  /* --------------------------------------------------------------------------
+     PËRKTHIMET
+     -------------------------------------------------------------------------- */
+  const t = {
+    nav_home:     { sq:'Kreu',        en:'Home' },
+    nav_menu:     { sq:'Menuja',      en:'Menu' },
+    nav_about:    { sq:'Rreth Nesh',  en:'About' },
+    nav_reviews:  { sq:'Vlerësime',   en:'Reviews' },
+    nav_contact:  { sq:'Kontakt',     en:'Contact' },
+    nav_book:     { sq:'Rezervo',     en:'Book' },
+
+    hero_kicker:  { sq:'Durrës · Që nga 2013', en:'Durrës · Since 2013' },
+    hero_t1:      { sq:'Shija që',    en:'Flavour that' },
+    hero_t2:      { sq:'nuk pret',    en:"won't wait" },
+    hero_sub:     { sq:'Pizza në furrë druri, fast food i porsabërë dhe gatime tradicionale shqiptare — të gjitha nën një çati, në zemër të Durrësit.',
+                    en:'Wood-fired pizza, made-to-order fast food and traditional Albanian cooking — all under one roof, in the heart of Durrës.' },
+    cta_order:    { sq:'Porosit në WhatsApp', en:'Order on WhatsApp' },
+    cta_menu:     { sq:'Shiko Menunë',  en:'Explore the Menu' },
+    cta_call:     { sq:'Telefono Tani', en:'Call Now' },
+    cta_book:     { sq:'Rezervo Tavolinë', en:'Book a Table' },
+
+    menu_kicker:  { sq:'Menuja Interaktive', en:'Interactive Menu' },
+    menu_title:   { sq:'Zgjidh. Shto. Dërgo.', en:'Pick. Add. Send.' },
+    menu_sub:     { sq:'Ndërto porosinë tënde dhe dërgoje me një klikim në WhatsApp — pa aplikacione, pa regjistrim.',
+                    en:'Build your order and send it to WhatsApp in one tap — no apps, no sign-up.' },
+    menu_all:     { sq:'Të gjitha',   en:'All' },
+    search_ph:    { sq:'Kërko pjatë…', en:'Search a dish…' },
+    add:          { sq:'Shto',        en:'Add' },
+    added:        { sq:'U shtua ✓',   en:'Added ✓' },
+    empty:        { sq:'Asnjë pjatë nuk përputhet me kërkimin.', en:'No dishes match your search.' },
+
+    cart_title:   { sq:'Porosia jote', en:'Your order' },
+    cart_empty:   { sq:'Shporta është bosh. Shto diçka të shijshme!', en:'Your cart is empty. Add something delicious!' },
+    cart_sub:     { sq:'Nëntotali',   en:'Subtotal' },
+    cart_del:     { sq:'Dërgesa',     en:'Delivery' },
+    cart_free:    { sq:'FALAS',       en:'FREE' },
+    cart_total:   { sq:'Totali',      en:'Total' },
+    cart_send:    { sq:'Dërgo porosinë në WhatsApp', en:'Send order on WhatsApp' },
+    cart_note:    { sq:'Do të hapet WhatsApp me porosinë të gatshme. Ti shtyp vetëm «Dërgo».',
+                    en:'WhatsApp opens with your order pre-filled. You just hit «Send».' },
+    cart_clear:   { sq:'Pastro',      en:'Clear' },
+
+    about_kicker: { sq:'Historia jonë', en:'Our story' },
+    about_title:  { sq:'Katër kuzhina. Një pasion.', en:'Four kitchens. One passion.' },
+    about_body:   { sq:'Sprint nisi si një dritare e vogël suflaqesh pranë bregut të Durrësit. Sot është furrë druri, skarë restoranti dhe kuzhinë tradicionale në të njëjtën ndërtesë — sepse besojmë se një darkë e mirë nuk duhet të të detyrojë të zgjedhësh.',
+                    en:'Sprint began as a small gyros window near the Durrës seafront. Today it is a wood-fired oven, a restaurant grill and a traditional kitchen in the same building — because a good dinner should never force you to choose.' },
+
+    rev_kicker:   { sq:'Çfarë thonë klientët', en:'What guests say' },
+    rev_title:    { sq:'4.8 nga 5 yje',  en:'4.8 out of 5 stars' },
+
+    book_kicker:  { sq:'Rezervim', en:'Reservation' },
+    book_title:   { sq:'Rezervo tavolinën tënde', en:'Reserve your table' },
+    book_sub:     { sq:'Plotëso formularin — njoftimi vjen direkt në WhatsApp-in tonë dhe konfirmohet brenda pak minutash.',
+                    en:'Fill in the form — the request lands straight in our WhatsApp and is confirmed within minutes.' },
+    f_name:       { sq:'Emri dhe mbiemri', en:'Full name' },
+    f_phone:      { sq:'Numri i telefonit', en:'Phone number' },
+    f_date:       { sq:'Data',        en:'Date' },
+    f_time:       { sq:'Ora',         en:'Time' },
+    f_people:     { sq:'Persona',     en:'Guests' },
+    f_area:       { sq:'Ambienti',    en:'Seating' },
+    f_area_in:    { sq:'Brenda',      en:'Indoor' },
+    f_area_out:   { sq:'Jashtë (terracë)', en:'Outdoor (terrace)' },
+    f_area_any:   { sq:'S\'ka rëndësi', en:'No preference' },
+    f_note:       { sq:'Shënim (ditëlindje, alergji, karrige fëmijësh…)', en:'Note (birthday, allergies, high chair…)' },
+    f_send:       { sq:'Dërgo rezervimin në WhatsApp', en:'Send reservation on WhatsApp' },
+    f_email:      { sq:'Dërgo edhe me email', en:'Send by email too' },
+    f_req:        { sq:'Plotëso emrin, telefonin dhe datën.', en:'Please fill in name, phone and date.' },
+
+    ct_kicker:    { sq:'Na gjeni',    en:'Find us' },
+    ct_title:     { sq:'Jemi këtu, në Durrës', en:'We are here, in Durrës' },
+    ct_hours:     { sq:'Orari',       en:'Opening hours' },
+    ct_addr:      { sq:'Adresa',      en:'Address' },
+    ct_phone:     { sq:'Telefoni',    en:'Phone' },
+    ct_map:       { sq:'Hape në Google Maps', en:'Open in Google Maps' },
+
+    foot_rights:  { sq:'Të gjitha të drejtat e rezervuara.', en:'All rights reserved.' },
+    scroll:       { sq:'Zbrit',       en:'Scroll' },
+    b_delivery:   { sq:'Dërgesë',     en:'Delivery' },
+    b_dishes:     { sq:'Pjata',       en:'Dishes' },
+    b_rating:     { sq:'Vlerësim',    en:'Rating' },
+    lang_label:   { sq:'EN',          en:'SQ' },
+  };
+
+  /* --------------------------------------------------------------------------
+     NDIHMËSA
+     -------------------------------------------------------------------------- */
+  let lang = 'sq';
+  const setLang = (l) => { lang = l; };
+  const getLang = () => lang;
+  const T  = (k) => (t[k] ? t[k][lang] : k);
+  const L  = (o, base) => o[base + (lang === 'sq' ? 'sq' : 'en')] ?? o[lang] ?? '';
+  const money = (n) => n.toLocaleString('sq-AL') + ' ' + config.currency;
+
+  const waLink = (text) => 'https://wa.me/' + config.whatsapp + '?text=' + encodeURIComponent(text);
+  const mailLink = (subject, body) =>
+    'mailto:' + config.email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  const mapLink = () =>
+    'https://www.google.com/maps/search/?api=1&query=' + config.geo.lat + ',' + config.geo.lng;
+
+  return { config, categories, menu, reviews, stats, t, T, L, setLang, getLang, money, waLink, mailLink, mapLink };
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Ilustrimet e pjatave (SVG i pastër, pa varësi nga interneti).
+   Këto janë ART PLACEHOLDER. Kur të keni fotot reale:
+     1) vendosini në /assets/dishes/<id>.jpg
+     2) te data.js shtoni fushën  img:'assets/dishes/p1.jpg'  te pjata
+     3) SPRINT.art() i përdor automatikisht fotot nëse ekziston `img`.
+   ========================================================================== */
+(function () {
+  const S = (id, body) =>
+    `<symbol id="art-${id}" viewBox="0 0 200 200">${body}</symbol>`;
+
+  // paleta e përbashkët e ilustrimeve
+  const sprite = `
+<svg id="sprint-art-sprite" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+<defs>
+  <radialGradient id="g-plate" cx="38%" cy="30%">
+    <stop offset="0" stop-color="#fffdf8"/><stop offset="1" stop-color="#e6ddcd"/>
+  </radialGradient>
+  <radialGradient id="g-crust" cx="40%" cy="32%">
+    <stop offset="0" stop-color="#f2c987"/><stop offset=".7" stop-color="#dfa75a"/><stop offset="1" stop-color="#c98a3f"/>
+  </radialGradient>
+  <linearGradient id="g-meat" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8a4a2e"/><stop offset="1" stop-color="#5a2c19"/>
+  </linearGradient>
+  <linearGradient id="g-gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#f7d17a"/><stop offset="1" stop-color="#d19b32"/>
+  </linearGradient>
+</defs>
+
+${S('pizza', `
+  <ellipse cx="100" cy="176" rx="74" ry="10" fill="rgba(0,0,0,.16)"/>
+  <circle cx="100" cy="98" r="82" fill="url(#g-crust)"/>
+  <circle cx="100" cy="98" r="82" fill="none" stroke="#b87a33" stroke-width="2" opacity=".55"/>
+  <circle cx="100" cy="98" r="68" fill="#c9392b"/>
+  <circle cx="100" cy="98" r="68" fill="none" stroke="#a82a1e" stroke-width="1.5" opacity=".6"/>
+  <g fill="#f6dd9c" opacity=".95">
+    <ellipse cx="76" cy="72" rx="17" ry="12" transform="rotate(-18 76 72)"/>
+    <ellipse cx="126" cy="82" rx="15" ry="11" transform="rotate(24 126 82)"/>
+    <ellipse cx="92" cy="124" rx="19" ry="12" transform="rotate(8 92 124)"/>
+    <ellipse cx="132" cy="126" rx="13" ry="10" transform="rotate(-30 132 126)"/>
+    <ellipse cx="62" cy="106" rx="12" ry="9"/>
+  </g>
+  <g fill="#a3221a">
+    <circle cx="72" cy="94" r="10"/><circle cx="118" cy="62" r="9"/>
+    <circle cx="140" cy="104" r="9.5"/><circle cx="104" cy="140" r="9"/>
+    <circle cx="66" cy="134" r="7.5"/><circle cx="104" cy="92" r="8"/>
+  </g>
+  <g fill="#3f8f3a">
+    <path d="M86 60c8-9 20-9 24-2-8 8-19 9-24 2z"/>
+    <path d="M128 138c9-7 20-4 22 3-9 5-19 3-22-3z"/>
+    <path d="M52 84c7-8 17-8 21-2-7 7-17 8-21 2z"/>
+  </g>
+  <path d="M100 16a82 82 0 0 1 58 24" fill="none" stroke="#ffe9c2" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+`)}
+
+${S('pizzaV', `
+  <ellipse cx="100" cy="176" rx="74" ry="10" fill="rgba(0,0,0,.16)"/>
+  <circle cx="100" cy="98" r="82" fill="url(#g-crust)"/>
+  <circle cx="100" cy="98" r="68" fill="#b8402c"/>
+  <g fill="#f6dd9c" opacity=".9">
+    <ellipse cx="82" cy="76" rx="16" ry="11" transform="rotate(-14 82 76)"/>
+    <ellipse cx="122" cy="118" rx="15" ry="11" transform="rotate(22 122 118)"/>
+    <ellipse cx="70" cy="120" rx="13" ry="10"/>
+  </g>
+  <g fill="#4f9c3f">
+    <rect x="60" y="86" width="26" height="9" rx="4.5" transform="rotate(-24 60 86)"/>
+    <rect x="104" y="66" width="28" height="9" rx="4.5" transform="rotate(16 104 66)"/>
+    <rect x="88" y="126" width="26" height="9" rx="4.5" transform="rotate(-8 88 126)"/>
+  </g>
+  <g fill="#e8792a">
+    <rect x="112" y="92" width="24" height="8" rx="4" transform="rotate(38 112 92)"/>
+    <rect x="66" y="106" width="22" height="8" rx="4" transform="rotate(-40 66 106)"/>
+  </g>
+  <g fill="#6b4a8f" opacity=".85">
+    <ellipse cx="100" cy="98" rx="12" ry="9"/><ellipse cx="132" cy="82" rx="10" ry="8"/>
+    <ellipse cx="78" cy="142" rx="9" ry="7"/>
+  </g>
+  <g fill="#2f6f2c"><circle cx="118" cy="140" r="5"/><circle cx="56" cy="94" r="4.4"/></g>
+  <path d="M100 16a82 82 0 0 1 58 24" fill="none" stroke="#ffe9c2" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+`)}
+
+${S('pizzaW', `
+  <ellipse cx="100" cy="176" rx="74" ry="10" fill="rgba(0,0,0,.16)"/>
+  <circle cx="100" cy="98" r="82" fill="url(#g-crust)"/>
+  <circle cx="100" cy="98" r="68" fill="#f7e6bd"/>
+  <g fill="#fff6dd">
+    <ellipse cx="78" cy="76" rx="22" ry="16" transform="rotate(-16 78 76)"/>
+    <ellipse cx="126" cy="88" rx="20" ry="15" transform="rotate(20 126 88)"/>
+    <ellipse cx="92" cy="128" rx="24" ry="16"/>
+    <ellipse cx="134" cy="130" rx="17" ry="13" transform="rotate(-24 134 130)"/>
+    <ellipse cx="60" cy="112" rx="15" ry="12"/>
+  </g>
+  <g fill="#dfc07a" opacity=".8">
+    <ellipse cx="100" cy="96" rx="18" ry="12" transform="rotate(10 100 96)"/>
+    <ellipse cx="70" cy="140" rx="13" ry="9"/>
+  </g>
+  <g fill="#8fa6c4" opacity=".55">
+    <circle cx="86" cy="92" r="4"/><circle cx="118" cy="112" r="3.4"/><circle cx="104" cy="70" r="3"/>
+    <circle cx="140" cy="106" r="3"/><circle cx="72" cy="118" r="2.8"/>
+  </g>
+  <g fill="#3f8f3a"><path d="M108 138c9-8 21-6 24 1-9 7-20 7-24-1z"/></g>
+  <path d="M100 16a82 82 0 0 1 58 24" fill="none" stroke="#ffe9c2" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+`)}
+
+${S('pizzaC', `
+  <ellipse cx="100" cy="176" rx="74" ry="10" fill="rgba(0,0,0,.16)"/>
+  <circle cx="100" cy="98" r="82" fill="url(#g-crust)"/>
+  <circle cx="100" cy="98" r="68" fill="#bf3222"/>
+  <g fill="#f6dd9c" opacity=".9">
+    <ellipse cx="74" cy="80" rx="16" ry="11" transform="rotate(-18 74 80)"/>
+    <ellipse cx="128" cy="108" rx="15" ry="11" transform="rotate(24 128 108)"/>
+    <ellipse cx="96" cy="134" rx="16" ry="10"/>
+  </g>
+  <g fill="#f0c9a8">
+    <path d="M92 62c14-6 30-2 32 8-14 7-30 4-32-8z"/>
+    <path d="M60 112c14-7 30-2 31 8-14 7-29 3-31-8z"/>
+  </g>
+  <g fill="#8c6b4a">
+    <path d="M118 74c9-4 18 1 17 8-9 5-18 1-17-8z"/>
+    <path d="M74 100c9-4 18 1 17 8-9 5-18 1-17-8z"/>
+    <path d="M126 132c8-4 17 1 16 8-9 4-17 0-16-8z"/>
+  </g>
+  <g fill="#2f3b26"><ellipse cx="106" cy="96" rx="8" ry="6"/><ellipse cx="86" cy="120" rx="7" ry="5.4"/>
+    <ellipse cx="140" cy="92" rx="7" ry="5.4"/><ellipse cx="64" cy="132" rx="6.4" ry="5"/></g>
+  <g fill="#f5d33f"><circle cx="112" cy="118" r="9"/><circle cx="112" cy="118" r="9" fill="none" stroke="#fff" stroke-width="4" opacity=".55"/></g>
+  <path d="M100 16a82 82 0 0 1 58 24" fill="none" stroke="#ffe9c2" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+`)}
+
+${S('burger', `
+  <ellipse cx="100" cy="178" rx="70" ry="9" fill="rgba(0,0,0,.16)"/>
+  <path d="M28 88c0-34 32-58 72-58s72 24 72 58z" fill="#e5a75a"/>
+  <path d="M28 88c0-34 32-58 72-58s72 24 72 58z" fill="url(#g-crust)"/>
+  <g fill="#fff3d6" opacity=".85">
+    <ellipse cx="76" cy="56" rx="5" ry="3.2" transform="rotate(-16 76 56)"/>
+    <ellipse cx="106" cy="46" rx="5" ry="3.2" transform="rotate(12 106 46)"/>
+    <ellipse cx="132" cy="64" rx="5" ry="3.2" transform="rotate(-8 132 64)"/>
+    <ellipse cx="56" cy="74" rx="4.4" ry="3" transform="rotate(20 56 74)"/>
+    <ellipse cx="100" cy="70" rx="4.6" ry="3" transform="rotate(-4 100 70)"/>
+  </g>
+  <path d="M24 90h152c0 9-6 12-14 12H38c-8 0-14-3-14-12z" fill="#e8c98d"/>
+  <path d="M22 100c14-8 28 6 42-2s28 8 42 0 28 6 42-2c8 10 4 16-6 16H30c-10 0-14-6-8-12z" fill="#5aa640"/>
+  <rect x="26" y="112" width="148" height="22" rx="10" fill="url(#g-meat)"/>
+  <path d="M30 118c22-6 44 6 66 0s44 8 74 2" fill="none" stroke="#7a3d24" stroke-width="3" opacity=".5"/>
+  <path d="M30 132c16 14 30-4 44 6s26-8 40 2 30-6 44 4c-6 6-14 6-24 6H50c-12 0-18-4-20-18z" fill="#f2b229"/>
+  <path d="M26 148h148c10 0 14 22-8 24H34c-22-2-18-24-8-24z" fill="#dda75a"/>
+`)}
+
+${S('gyros', `
+  <ellipse cx="100" cy="180" rx="56" ry="8" fill="rgba(0,0,0,.16)"/>
+  <path d="M64 24h72l22 118c2 12-8 24-22 24H64c-14 0-24-12-22-24z" fill="#f0e6d2"/>
+  <path d="M64 24h72l10 54H54z" fill="#e8dcc2"/>
+  <path d="M70 30h60l16 96c2 10-6 20-18 20H72c-12 0-20-10-18-20z" fill="url(#g-crust)"/>
+  <path d="M74 34h52l6 30H68z" fill="#f5d9a8"/>
+  <g>
+    <path d="M78 44c10-6 22-2 26 6-10 6-22 3-26-6z" fill="#5aa640"/>
+    <ellipse cx="118" cy="50" rx="12" ry="8" fill="#d33c2c"/>
+    <rect x="80" y="58" width="40" height="9" rx="4" fill="url(#g-meat)" transform="rotate(-8 80 58)"/>
+    <rect x="98" y="66" width="36" height="8" rx="4" fill="#a1512f" transform="rotate(9 98 66)"/>
+    <rect x="76" y="72" width="30" height="7" rx="3.5" fill="#f2c14e" transform="rotate(-4 76 72)"/>
+  </g>
+  <path d="M62 96h76" stroke="#cf9a4d" stroke-width="3" opacity=".5" stroke-linecap="round"/>
+  <path d="M60 120h80" stroke="#cf9a4d" stroke-width="3" opacity=".4" stroke-linecap="round"/>
+  <path d="M136 24l24 12-18 118c-2 12-12 12-16 8z" fill="rgba(0,0,0,.07)"/>
+`)}
+
+${S('fries', `
+  <ellipse cx="100" cy="180" rx="58" ry="8" fill="rgba(0,0,0,.16)"/>
+  <g fill="url(#g-gold)" stroke="#c08b28" stroke-width="1.5">
+    <rect x="66" y="34" width="14" height="80" rx="5" transform="rotate(-13 66 34)"/>
+    <rect x="88" y="24" width="14" height="92" rx="5" transform="rotate(-3 88 24)"/>
+    <rect x="110" y="30" width="14" height="86" rx="5" transform="rotate(9 110 30)"/>
+    <rect x="128" y="46" width="13" height="70" rx="5" transform="rotate(19 128 46)"/>
+    <rect x="54" y="54" width="13" height="66" rx="5" transform="rotate(-22 54 54)"/>
+  </g>
+  <path d="M56 96h88l-10 66c-1 8-7 12-14 12H80c-7 0-13-4-14-12z" fill="#d92b2b"/>
+  <path d="M56 96h88l-3 20H59z" fill="#b81f1f"/>
+  <path d="M78 128h44v10H78z" fill="#fff" opacity=".85"/>
+  <text x="100" y="152" text-anchor="middle" font-family="Arial Black,Arial" font-size="17" fill="#fff" opacity=".9">SPRINT</text>
+`)}
+
+${S('wings', `
+  <ellipse cx="100" cy="178" rx="72" ry="10" fill="rgba(0,0,0,.16)"/>
+  <ellipse cx="100" cy="108" rx="82" ry="62" fill="url(#g-plate)"/>
+  <ellipse cx="100" cy="108" rx="70" ry="51" fill="none" stroke="#ded4c3" stroke-width="2"/>
+  <g fill="#b8481f">
+    <path d="M56 88c14-14 34-12 40 2 5 13-6 26-22 26S44 100 56 88z"/>
+    <path d="M104 74c16-10 34-4 36 10 2 14-12 24-27 21s-24-22-9-31z"/>
+    <path d="M78 124c16-8 33 0 34 14 1 13-14 21-28 16s-20-23-6-30z"/>
+    <path d="M126 108c14-6 28 2 28 15 0 12-13 19-25 14s-16-24-3-29z"/>
+  </g>
+  <g fill="#e0682c" opacity=".7">
+    <ellipse cx="70" cy="98" rx="12" ry="7" transform="rotate(-20 70 98)"/>
+    <ellipse cx="122" cy="86" rx="12" ry="7" transform="rotate(16 122 86)"/>
+    <ellipse cx="96" cy="134" rx="11" ry="6"/>
+  </g>
+  <circle cx="152" cy="66" r="18" fill="#fbf6ea" stroke="#e2d6bd" stroke-width="2"/>
+  <circle cx="152" cy="66" r="12" fill="#f4efdd"/>
+  <g fill="#4f9c3f"><circle cx="60" cy="140" r="4"/><circle cx="140" cy="142" r="3.4"/></g>
+`)}
+
+${S('steak', `
+  <ellipse cx="100" cy="180" rx="74" ry="10" fill="rgba(0,0,0,.16)"/>
+  <ellipse cx="100" cy="106" rx="84" ry="64" fill="url(#g-plate)"/>
+  <ellipse cx="100" cy="106" rx="71" ry="52" fill="none" stroke="#ded4c3" stroke-width="2"/>
+  <path d="M52 96c6-24 34-34 58-28 22 6 34 24 30 42-4 20-30 30-54 26S46 116 52 96z" fill="url(#g-meat)"/>
+  <g stroke="#31160c" stroke-width="4" stroke-linecap="round" opacity=".55">
+    <path d="M60 90l52 14"/><path d="M56 106l54 14"/><path d="M60 122l48 12"/>
+  </g>
+  <path d="M52 96c6-24 34-34 58-28" fill="none" stroke="#a9613c" stroke-width="4" opacity=".6"/>
+  <g fill="#c9a13f" opacity=".9">
+    <ellipse cx="146" cy="92" rx="15" ry="12" transform="rotate(-14 146 92)"/>
+    <ellipse cx="152" cy="116" rx="13" ry="10" transform="rotate(18 152 116)"/>
+    <ellipse cx="132" cy="132" rx="12" ry="9"/>
+  </g>
+  <g fill="#3f8f3a">
+    <path d="M74 142c10-8 22-6 26 1-9 7-21 7-26-1z"/>
+    <path d="M120 60c9-8 21-6 24 1-8 7-20 7-24-1z"/>
+  </g>
+`)}
+
+${S('fish', `
+  <ellipse cx="100" cy="180" rx="74" ry="10" fill="rgba(0,0,0,.16)"/>
+  <ellipse cx="100" cy="106" rx="84" ry="64" fill="url(#g-plate)"/>
+  <ellipse cx="100" cy="106" rx="71" ry="52" fill="none" stroke="#ded4c3" stroke-width="2"/>
+  <path d="M42 106c22-30 62-38 92-24 12 6 20 14 24 24-4 10-12 18-24 24-30 14-70 6-92-24z" fill="#b9c6cf"/>
+  <path d="M42 106c22-30 62-38 92-24 12 6 20 14 24 24-30 6-86 8-116 0z" fill="#d6e0e6"/>
+  <path d="M158 106l24-22v44z" fill="#a9b8c2"/>
+  <path d="M96 78c-4-14 4-24 12-26 2 12-2 22-12 26z" fill="#a9b8c2"/>
+  <circle cx="66" cy="100" r="6" fill="#2b3540"/><circle cx="68" cy="98" r="2" fill="#fff"/>
+  <g stroke="#93a5b1" stroke-width="2" opacity=".8" fill="none">
+    <path d="M88 92c8 8 8 20 0 28"/><path d="M106 88c9 10 9 24 0 34"/><path d="M124 88c9 10 9 24 0 34"/>
+  </g>
+  <g><circle cx="148" cy="142" r="15" fill="#f5d33f"/><path d="M148 127a15 15 0 0 1 0 30z" fill="#ffe98a"/>
+     <circle cx="148" cy="142" r="15" fill="none" stroke="#d9b425" stroke-width="2"/></g>
+  <path d="M52 142c10-9 24-6 28 2-11 7-24 5-28-2z" fill="#3f8f3a"/>
+`)}
+
+${S('pasta', `
+  <ellipse cx="100" cy="180" rx="74" ry="10" fill="rgba(0,0,0,.16)"/>
+  <ellipse cx="100" cy="106" rx="84" ry="64" fill="url(#g-plate)"/>
+  <ellipse cx="100" cy="106" rx="71" ry="52" fill="none" stroke="#ded4c3" stroke-width="2"/>
+  <ellipse cx="100" cy="106" rx="58" ry="42" fill="#f0cf7e"/>
+  <g fill="none" stroke="#e0b957" stroke-width="5" stroke-linecap="round" opacity=".95">
+    <path d="M56 100c14-16 40-20 62-10s34 26 24 34"/>
+    <path d="M52 114c18 14 46 18 68 8s28-24 20-30"/>
+    <path d="M70 84c22-8 48-2 62 12"/>
+    <path d="M64 128c22 8 48 4 62-8"/>
+  </g>
+  <g fill="#c9392b">
+    <ellipse cx="88" cy="96" rx="12" ry="9" transform="rotate(-16 88 96)"/>
+    <ellipse cx="122" cy="112" rx="11" ry="8" transform="rotate(20 122 112)"/>
+    <ellipse cx="100" cy="126" rx="9" ry="7"/>
+  </g>
+  <g fill="#3f8f3a"><path d="M104 82c8-8 20-7 23 0-8 7-19 7-23 0z"/></g>
+  <g fill="#fff8e6" opacity=".9"><circle cx="72" cy="120" r="3"/><circle cx="134" cy="94" r="2.6"/><circle cx="110" cy="140" r="2.6"/></g>
+`)}
+
+${S('salad', `
+  <ellipse cx="100" cy="182" rx="64" ry="9" fill="rgba(0,0,0,.16)"/>
+  <path d="M34 90h132c0 44-26 76-66 76S34 134 34 90z" fill="#f0e9db"/>
+  <path d="M34 90h132c0 10-2 19-5 27H39c-3-8-5-17-5-27z" fill="#e2d8c4"/>
+  <ellipse cx="100" cy="90" rx="66" ry="20" fill="#fbf7ee"/>
+  <g fill="#4f9c3f">
+    <path d="M52 88c10-20 34-26 46-16 10 9 2 26-14 30s-38 2-32-14z"/>
+    <path d="M110 74c14-14 38-12 44 2 5 13-12 24-30 22s-25-14-14-24z"/>
+    <path d="M72 100c14-8 32-4 36 6 3 9-12 16-28 13s-20-14-8-19z"/>
+  </g>
+  <g fill="#6fbf55" opacity=".8">
+    <path d="M62 78c8-10 20-12 26-6-7 8-19 11-26 6z"/>
+    <path d="M126 92c9-8 21-8 25-1-8 7-20 8-25 1z"/>
+  </g>
+  <g fill="#d33c2c"><circle cx="92" cy="82" r="9"/><circle cx="130" cy="96" r="7.5"/><circle cx="66" cy="98" r="7"/></g>
+  <g fill="#fff" opacity=".95">
+    <rect x="104" y="100" width="14" height="12" rx="2" transform="rotate(12 104 100)"/>
+    <rect x="78" y="96" width="12" height="11" rx="2" transform="rotate(-18 78 96)"/>
+  </g>
+  <g fill="#2f2f2f"><circle cx="116" cy="84" r="5"/><circle cx="84" cy="106" r="4.4"/></g>
+`)}
+
+${S('tave', `
+  <ellipse cx="100" cy="178" rx="76" ry="10" fill="rgba(0,0,0,.16)"/>
+  <path d="M22 96h156c0 42-30 72-78 72S22 138 22 96z" fill="#a85a35"/>
+  <path d="M22 96h156c0 12-2 22-7 32H29c-5-10-7-20-7-32z" fill="#8e4626"/>
+  <ellipse cx="100" cy="96" rx="78" ry="26" fill="#c06a3d"/>
+  <ellipse cx="100" cy="96" rx="66" ry="20" fill="#e8c98d"/>
+  <ellipse cx="100" cy="95" rx="60" ry="17" fill="#f2dcae"/>
+  <g fill="#dcae6a" opacity=".9">
+    <ellipse cx="76" cy="92" rx="17" ry="7"/><ellipse cx="120" cy="98" rx="15" ry="6"/>
+    <ellipse cx="100" cy="88" rx="12" ry="5"/>
+  </g>
+  <g fill="#c98b45" opacity=".7"><circle cx="88" cy="100" r="4"/><circle cx="130" cy="90" r="3.4"/><circle cx="64" cy="99" r="3.4"/></g>
+  <path d="M12 104c0-8 4-12 10-12v18c-6 0-10-2-10-6z" fill="#8e4626"/>
+  <path d="M188 104c0-8-4-12-10-12v18c6 0 10-2 10-6z" fill="#8e4626"/>
+  <g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".35" fill="none">
+    <path d="M78 60c-6-8 6-12 0-20"/><path d="M100 54c-6-8 6-12 0-20"/><path d="M122 60c-6-8 6-12 0-20"/>
+  </g>
+`)}
+
+${S('byrek', `
+  <ellipse cx="100" cy="176" rx="70" ry="10" fill="rgba(0,0,0,.16)"/>
+  <ellipse cx="100" cy="120" rx="84" ry="46" fill="url(#g-plate)"/>
+  <path d="M100 40l64 96H36z" fill="url(#g-crust)"/>
+  <path d="M100 40l64 96H36z" fill="none" stroke="#c08b3c" stroke-width="2"/>
+  <path d="M100 58l48 72H52z" fill="#f3d59a"/>
+  <path d="M100 76l34 46H66z" fill="#6aa84f" opacity=".85"/>
+  <g stroke="#d9a44f" stroke-width="2.5" opacity=".65" fill="none">
+    <path d="M46 128h108"/><path d="M56 114h88"/><path d="M66 100h68"/>
+  </g>
+  <path d="M100 40l64 96" stroke="#fce6bb" stroke-width="4" opacity=".7" fill="none"/>
+  <g fill="#fff" opacity=".8"><circle cx="86" cy="104" r="3"/><circle cx="112" cy="112" r="2.6"/></g>
+`)}
+
+${S('dessert', `
+  <ellipse cx="100" cy="180" rx="70" ry="10" fill="rgba(0,0,0,.16)"/>
+  <ellipse cx="100" cy="146" rx="82" ry="30" fill="url(#g-plate)"/>
+  <path d="M46 68h108v66c0 8-6 14-14 14H60c-8 0-14-6-14-14z" fill="#f6e3bd"/>
+  <path d="M46 68h108v18H46z" fill="#fff6e2"/>
+  <path d="M46 96h108v14H46z" fill="#e8c98d"/>
+  <path d="M46 118h108v14H46z" fill="#fff6e2"/>
+  <path d="M46 60c0-10 24-16 54-16s54 6 54 16-24 14-54 14-54-4-54-14z" fill="#c98a3f"/>
+  <path d="M46 60c0-10 24-16 54-16s54 6 54 16c-14 10-94 10-108 0z" fill="#e0a75a"/>
+  <path d="M46 62c14 8 94 8 108 0v10c-14 8-94 8-108 0z" fill="#b9762f"/>
+  <g fill="#fff" opacity=".9">
+    <circle cx="76" cy="52" r="6"/><circle cx="124" cy="50" r="5"/>
+  </g>
+  <circle cx="100" cy="46" r="9" fill="#d33c2c"/>
+  <path d="M100 37c4-6 10-6 12-2-4 5-9 5-12 2z" fill="#3f8f3a"/>
+`)}
+
+${S('drink', `
+  <ellipse cx="100" cy="182" rx="46" ry="8" fill="rgba(0,0,0,.16)"/>
+  <path d="M62 44h76l-10 118c-1 9-8 16-17 16H89c-9 0-16-7-17-16z" fill="#d9e6ee" opacity=".55"/>
+  <path d="M66 78h68l-8 84c-1 7-6 12-13 12H87c-7 0-12-5-13-12z" fill="#c0392b"/>
+  <path d="M66 78h68l-2 20H68z" fill="#e05548"/>
+  <ellipse cx="100" cy="46" rx="38" ry="9" fill="#eef5fa" opacity=".8"/>
+  <rect x="106" y="8" width="9" height="56" rx="4" fill="#f4f0e6" transform="rotate(11 106 8)"/>
+  <g fill="#fff" opacity=".55">
+    <rect x="76" y="92" width="7" height="52" rx="3.5"/>
+  </g>
+  <g fill="#fff" opacity=".28">
+    <circle cx="112" cy="110" r="5"/><circle cx="120" cy="132" r="3.6"/><circle cx="104" cy="146" r="3"/>
+  </g>
+  <ellipse cx="100" cy="46" rx="30" ry="6" fill="#fff" opacity=".5"/>
+`)}
+</svg>`;
+
+  function inject() {
+    if (document.getElementById('sprint-art-sprite')) return;
+    const d = document.createElement('div');
+    d.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    d.innerHTML = sprite;
+    document.body.insertBefore(d, document.body.firstChild);
+  }
+
+  /**
+   * Kthen HTML-në e ilustrimit për një pjatë/kategori.
+   * Nëse pjata ka `img` (foto reale), përdor foton; ndryshe SVG-në.
+   */
+  function art(item, cls) {
+    const k = (item && item.art) || 'pizza';
+    const alt = (item && (item.sq || item.en)) || '';
+    if (item && item.img) {
+      return `<img class="${cls || 'art'}" src="${item.img}" alt="${alt}" loading="lazy" decoding="async">`;
+    }
+    let hsh = 0; const key = (item && item.id) || k;
+    for (let i = 0; i < key.length; i++) hsh = (hsh * 31 + key.charCodeAt(i)) | 0;
+    const rot = ((hsh % 9) - 4) * 3.5; // −14° … +14°
+    return `<svg class="${cls || 'art'}" style="--rot:${rot}deg" viewBox="0 0 200 200" role="img" aria-label="${alt}"><use href="#art-${k}"/></svg>`;
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
+  else inject();
+
+  window.SPRINT = window.SPRINT || {};
+  window.SPRINT.art = art;
+  window.SPRINT.injectArt = inject;
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Motori i përbashkët i faqes.
+   Mban logjikën identike në të 5 mockup-et; pamja vjen nga CSS-ja e secilit.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const $  = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function app(opts) {
+    opts = opts || {};
+    const state = {
+      cat: 'all',
+      q: '',
+      cart: {},          // id -> qty
+      lang: localStorage.getItem('sprint-lang') || 'sq',
+    };
+    S.setLang(state.lang);
+
+    /* ---------------- i18n ---------------- */
+    function applyI18n() {
+      S.setLang(state.lang);
+      document.documentElement.lang = state.lang;
+      $$('[data-i18n]').forEach((el) => { el.textContent = S.T(el.dataset.i18n); });
+      $$('[data-i18n-ph]').forEach((el) => { el.placeholder = S.T(el.dataset.i18nPh); });
+      $$('[data-i18n-html]').forEach((el) => { el.innerHTML = S.T(el.dataset.i18nHtml); });
+      $$('[data-lang-toggle]').forEach((el) => { el.textContent = state.lang === 'sq' ? 'EN' : 'SQ'; });
+      if (opts.onLang) opts.onLang(state.lang);
+    }
+    function toggleLang() {
+      state.lang = state.lang === 'sq' ? 'en' : 'sq';
+      localStorage.setItem('sprint-lang', state.lang);
+      applyI18n(); renderFilters(); renderMenu(); renderCart(); renderStatic();
+    }
+
+    /* ---------------- pjesë statike (kategori, review, orar) ---------------- */
+    function renderStatic() {
+      const l = state.lang;
+      // kartat e kategorive
+      const catWrap = $('[data-cat-cards]');
+      if (catWrap) {
+        catWrap.innerHTML = S.categories.map((c, i) => (opts.catCard || defaultCatCard)(c, i, l)).join('');
+        bindCatCards();
+      }
+      // review
+      const revWrap = $('[data-reviews]');
+      if (revWrap) revWrap.innerHTML = S.reviews.map((r, i) => (opts.review || defaultReview)(r, i, l)).join('');
+      // statistika
+      const stWrap = $('[data-stats]');
+      if (stWrap) stWrap.innerHTML = S.stats.map((s) => (opts.stat || defaultStat)(s, l)).join('');
+      // orari
+      const hWrap = $('[data-hours]');
+      if (hWrap) hWrap.innerHTML = S.config.hours[l].map(([d, h]) =>
+        `<li><span>${esc(d)}</span><b>${esc(h)}</b></li>`).join('');
+      // adresa / kontakt
+      $$('[data-addr]').forEach((e) => { e.textContent = S.config.address[l]; });
+      $$('[data-tagline]').forEach((e) => { e.textContent = S.config.tagline[l]; });
+      $$('[data-phone]').forEach((e) => { e.textContent = S.config.phone; });
+      $$('[data-tel-href]').forEach((e) => { e.href = 'tel:' + S.config.phoneHref; });
+      $$('[data-map-href]').forEach((e) => { e.href = S.mapLink(); });
+      $$('[data-wa-href]').forEach((e) => {
+        e.href = S.waLink(state.lang === 'sq'
+          ? `Përshëndetje SPRINT! 👋 Dua të bëj një porosi.`
+          : `Hello SPRINT! 👋 I'd like to place an order.`);
+      });
+      $$('[data-year]').forEach((e) => { e.textContent = new Date().getFullYear(); });
+      if (opts.onStatic) opts.onStatic(l);
+      revealScan();
+    }
+
+    const defaultCatCard = (c, i, l) => `
+      <button class="cat-card" data-reveal data-cat-jump="${c.id}" style="--i:${i}">
+        ${S.art({ art: c.art, sq: c[l === 'sq' ? 'sq' : 'en'] }, 'cat-art')}
+        <h3>${esc(c[l === 'sq' ? 'sq' : 'en'])}</h3>
+        <p>${esc(c[l === 'sq' ? 'dsq' : 'den'])}</p>
+      </button>`;
+
+    const defaultReview = (r, i, l) => `
+      <figure class="review" data-reveal style="--i:${i}">
+        <div class="stars">${'★'.repeat(r.s)}</div>
+        <blockquote>${esc(r[l === 'sq' ? 'sq' : 'en'])}</blockquote>
+        <figcaption><b>${esc(r.n)}</b><span>${esc(r.src)}</span></figcaption>
+      </figure>`;
+
+    const defaultStat = (s, l) => `
+      <div class="stat"><b>${esc(s.v)}</b><span>${esc(s[l === 'sq' ? 'sq' : 'en'])}</span></div>`;
+
+    function bindCatCards() {
+      $$('[data-cat-jump]').forEach((b) => b.addEventListener('click', () => {
+        state.cat = b.dataset.catJump; state.q = '';
+        const si = $('[data-search]'); if (si) si.value = '';
+        renderFilters(); renderMenu();
+        const m = $('#menu'); if (m) m.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      }));
+    }
+
+    /* ---------------- filtrat ---------------- */
+    function renderFilters() {
+      const wrap = $('[data-filters]'); if (!wrap) return;
+      const l = state.lang;
+      const items = [{ id: 'all', label: S.T('menu_all'), art: 'pizza' }]
+        .concat(S.categories.map((c) => ({ id: c.id, label: c[l === 'sq' ? 'sq' : 'en'], art: c.art })));
+      wrap.innerHTML = items.map((c) => `
+        <button class="chip${state.cat === c.id ? ' is-on' : ''}" data-chip="${c.id}">
+          <span>${esc(c.label)}</span>
+        </button>`).join('');
+      $$('[data-chip]', wrap).forEach((b) => b.addEventListener('click', () => {
+        state.cat = b.dataset.chip; renderFilters(); renderMenu();
+      }));
+    }
+
+    /* ---------------- menuja ---------------- */
+    const tagLabel = { hot:{sq:'Pikante',en:'Spicy'}, veg:{sq:'Vegjetarian',en:'Veggie'},
+                       new:{sq:'I ri',en:'New'}, top:{sq:'Më i shituri',en:'Bestseller'} };
+
+    function filtered() {
+      const q = state.q.trim().toLowerCase();
+      return S.menu.filter((m) => {
+        if (state.cat !== 'all' && m.c !== state.cat) return false;
+        if (!q) return true;
+        return (m.sq + ' ' + m.en + ' ' + m.dsq + ' ' + m.den).toLowerCase().includes(q);
+      });
+    }
+
+    const defaultCard = (m, i, l) => `
+      <article class="dish" data-reveal style="--i:${i}" data-dish="${m.id}">
+        <div class="dish-media">${S.art(m, 'dish-art')}
+          ${m.tags.length ? `<div class="dish-tags">${m.tags.map((t) =>
+            `<span class="tag tag-${t}">${esc(tagLabel[t][l])}</span>`).join('')}</div>` : ''}
+        </div>
+        <div class="dish-body">
+          <h3>${esc(m[l === 'sq' ? 'sq' : 'en'])}</h3>
+          <p>${esc(m[l === 'sq' ? 'dsq' : 'den'])}</p>
+          <div class="dish-foot">
+            <span class="price">${S.money(m.p)}</span>
+            <button class="add" data-add="${m.id}"><span data-i18n="add">${S.T('add')}</span></button>
+          </div>
+        </div>
+      </article>`;
+
+    function renderMenu() {
+      const grid = $('[data-menu-grid]'); if (!grid) return;
+      const l = state.lang, list = filtered();
+      grid.innerHTML = list.length
+        ? list.map((m, i) => (opts.card || defaultCard)(m, i, l)).join('')
+        : `<p class="menu-empty">${esc(S.T('empty'))}</p>`;
+      $$('[data-add]', grid).forEach((b) => b.addEventListener('click', (e) => {
+        e.stopPropagation(); addToCart(b.dataset.add, b);
+      }));
+      if (opts.onMenu) opts.onMenu(grid, list);
+      revealScan();
+    }
+
+    /* ---------------- shporta ---------------- */
+    function addToCart(id, btn) {
+      state.cart[id] = (state.cart[id] || 0) + 1;
+      saveCart(); renderCart();
+      if (btn) {
+        const span = btn.querySelector('span');
+        const old = span.textContent;
+        span.textContent = S.T('added');
+        btn.classList.add('is-added');
+        setTimeout(() => { span.textContent = old; btn.classList.remove('is-added'); }, 1100);
+      }
+      bump();
+    }
+    function setQty(id, d) {
+      state.cart[id] = (state.cart[id] || 0) + d;
+      if (state.cart[id] <= 0) delete state.cart[id];
+      saveCart(); renderCart();
+    }
+    function clearCart() { state.cart = {}; saveCart(); renderCart(); }
+    function saveCart() { try { localStorage.setItem('sprint-cart', JSON.stringify(state.cart)); } catch (e) {} }
+    function loadCart() {
+      try { state.cart = JSON.parse(localStorage.getItem('sprint-cart')) || {}; } catch (e) { state.cart = {}; }
+    }
+    function bump() {
+      $$('[data-cart-count]').forEach((el) => {
+        el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+      });
+    }
+
+    function cartLines() {
+      return Object.keys(state.cart).map((id) => {
+        const m = S.menu.find((x) => x.id === id);
+        return m ? { m, q: state.cart[id], sum: m.p * state.cart[id] } : null;
+      }).filter(Boolean);
+    }
+    function totals() {
+      const lines = cartLines();
+      const sub = lines.reduce((a, b) => a + b.sum, 0);
+      const del = sub === 0 ? 0 : (sub >= S.config.freeDeliveryOver ? 0 : S.config.deliveryFee);
+      return { lines, sub, del, total: sub + del, count: lines.reduce((a, b) => a + b.q, 0) };
+    }
+
+    function renderCart() {
+      const l = state.lang, t = totals();
+      $$('[data-cart-count]').forEach((e) => {
+        e.textContent = t.count;
+        e.closest('[data-cart-badge]')?.classList.toggle('is-empty', t.count === 0);
+      });
+      document.body.classList.toggle('has-cart', t.count > 0);
+
+      const box = $('[data-cart-items]');
+      if (box) {
+        box.innerHTML = t.lines.length ? t.lines.map((li) => `
+          <li class="cart-line">
+            <span class="cl-art">${S.art(li.m, 'cl-img')}</span>
+            <span class="cl-name">${esc(li.m[l === 'sq' ? 'sq' : 'en'])}<em>${S.money(li.m.p)}</em></span>
+            <span class="qty">
+              <button data-q="-1" data-id="${li.m.id}" aria-label="-">−</button>
+              <b>${li.q}</b>
+              <button data-q="1" data-id="${li.m.id}" aria-label="+">+</button>
+            </span>
+            <span class="cl-sum">${S.money(li.sum)}</span>
+          </li>`).join('')
+          : `<li class="cart-empty">${esc(S.T('cart_empty'))}</li>`;
+        $$('[data-q]', box).forEach((b) => b.addEventListener('click', () =>
+          setQty(b.dataset.id, parseInt(b.dataset.q, 10))));
+      }
+      const set = (sel, v) => $$(sel).forEach((e) => { e.textContent = v; });
+      set('[data-cart-sub]', S.money(t.sub));
+      set('[data-cart-del]', t.del === 0 && t.sub > 0 ? S.T('cart_free') : S.money(t.del));
+      set('[data-cart-total]', S.money(t.total));
+
+      $$('[data-cart-send]').forEach((btn) => {
+        btn.classList.toggle('is-disabled', t.count === 0);
+        btn.setAttribute('aria-disabled', t.count === 0 ? 'true' : 'false');
+        btn.href = t.count === 0 ? '#menu' : S.waLink(orderMessage());
+      });
+      if (opts.onCart) opts.onCart(t);
+    }
+
+    function orderMessage() {
+      const l = state.lang, t = totals();
+      const head = l === 'sq'
+        ? `🍕 *POROSI E RE — SPRINT Durrës*\n`
+        : `🍕 *NEW ORDER — SPRINT Durrës*\n`;
+      const lines = t.lines.map((li) =>
+        `• ${li.q}× ${li.m[l === 'sq' ? 'sq' : 'en']} — ${S.money(li.sum)}`).join('\n');
+      const foot = l === 'sq'
+        ? `\n\n${S.T('cart_sub')}: ${S.money(t.sub)}\n${S.T('cart_del')}: ${t.del === 0 ? S.T('cart_free') : S.money(t.del)}\n*${S.T('cart_total')}: ${S.money(t.total)}*\n\n📍 Adresa ime: \n📞 Numri im: \n⏰ E dua për orën: `
+        : `\n\n${S.T('cart_sub')}: ${S.money(t.sub)}\n${S.T('cart_del')}: ${t.del === 0 ? S.T('cart_free') : S.money(t.del)}\n*${S.T('cart_total')}: ${S.money(t.total)}*\n\n📍 My address: \n📞 My number: \n⏰ Wanted for: `;
+      return head + lines + foot;
+    }
+
+    /* ---------------- rezervimi ---------------- */
+    function bookMessage(d) {
+      const l = state.lang;
+      return l === 'sq'
+        ? `📅 *REZERVIM I RI — SPRINT Durrës*\n\n👤 Emri: ${d.name}\n📞 Telefon: ${d.phone}\n🗓️ Data: ${d.date}\n🕐 Ora: ${d.time}\n👥 Persona: ${d.people}\n🪑 Ambienti: ${d.area}\n📝 Shënim: ${d.note || '—'}\n\nJu lutem konfirmoni. Faleminderit!`
+        : `📅 *NEW RESERVATION — SPRINT Durrës*\n\n👤 Name: ${d.name}\n📞 Phone: ${d.phone}\n🗓️ Date: ${d.date}\n🕐 Time: ${d.time}\n👥 Guests: ${d.people}\n🪑 Seating: ${d.area}\n📝 Note: ${d.note || '—'}\n\nPlease confirm. Thank you!`;
+    }
+
+    function initBooking() {
+      const form = $('[data-book-form]'); if (!form) return;
+      const dateEl = form.querySelector('[name=date]');
+      if (dateEl) {
+        const today = new Date().toISOString().slice(0, 10);
+        dateEl.min = today; if (!dateEl.value) dateEl.value = today;
+      }
+      const read = () => {
+        const f = new FormData(form);
+        const areaSel = form.querySelector('[name=area]');
+        return {
+          name: (f.get('name') || '').trim(),
+          phone: (f.get('phone') || '').trim(),
+          date: f.get('date') || '',
+          time: f.get('time') || '',
+          people: f.get('people') || '2',
+          area: areaSel ? areaSel.options[areaSel.selectedIndex].text : '',
+          note: (f.get('note') || '').trim(),
+        };
+      };
+      const valid = (d) => d.name && d.phone && d.date;
+      const err = form.querySelector('[data-form-error]');
+      const show = (msg) => { if (err) { err.textContent = msg; err.classList.toggle('is-on', !!msg); } };
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const d = read();
+        if (!valid(d)) { show(S.T('f_req')); return; }
+        show('');
+        form.classList.add('is-sent');
+        window.open(S.waLink(bookMessage(d)), '_blank', 'noopener');
+      });
+
+      const mailBtn = form.querySelector('[data-book-email]');
+      if (mailBtn) mailBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const d = read();
+        if (!valid(d)) { show(S.T('f_req')); return; }
+        show('');
+        const subj = state.lang === 'sq'
+          ? `Rezervim — ${d.name} — ${d.date} ${d.time}`
+          : `Reservation — ${d.name} — ${d.date} ${d.time}`;
+        window.location.href = S.mailLink(subj, bookMessage(d).replace(/\*/g, ''));
+      });
+    }
+
+    /* ---------------- zbulimi në scroll ---------------- */
+    let io;
+    function revealScan() {
+      if (reduced) { $$('[data-reveal]').forEach((e) => e.classList.add('in')); return; }
+      if (!io) {
+        io = new IntersectionObserver((ents) => ents.forEach((en) => {
+          if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+        }), { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+      }
+      $$('[data-reveal]:not(.in)').forEach((e) => io.observe(e));
+    }
+
+    /* ---------------- nis ---------------- */
+    function init() {
+      loadCart();
+      applyI18n(); renderStatic(); renderFilters(); renderMenu(); renderCart(); initBooking();
+
+      $$('[data-lang-toggle]').forEach((b) => b.addEventListener('click', toggleLang));
+      const si = $('[data-search]');
+      if (si) si.addEventListener('input', () => { state.q = si.value; renderMenu(); });
+      $$('[data-cart-clear]').forEach((b) => b.addEventListener('click', clearCart));
+
+      // panelin e shportës
+      $$('[data-cart-open]').forEach((b) => b.addEventListener('click', () =>
+        document.body.classList.add('cart-open')));
+      $$('[data-cart-close]').forEach((b) => b.addEventListener('click', () =>
+        document.body.classList.remove('cart-open')));
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') document.body.classList.remove('cart-open', 'nav-open');
+      });
+      $$('[data-nav-toggle]').forEach((b) => b.addEventListener('click', () =>
+        document.body.classList.toggle('nav-open')));
+      $$('[data-nav] a').forEach((a) => a.addEventListener('click', () =>
+        document.body.classList.remove('nav-open')));
+
+      // header i ngjitur
+      const hdr = $('[data-header]');
+      if (hdr) {
+        const onScroll = () => hdr.classList.toggle('is-stuck', window.scrollY > 24);
+        onScroll(); addEventListener('scroll', onScroll, { passive: true });
+      }
+      if (opts.onReady) opts.onReady({ state, renderMenu, renderCart, totals, revealScan });
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+
+    return { state, renderMenu, renderCart, totals, revealScan, toggleLang };
+  }
+
+  S.app = app;
+  S.$ = $; S.$$ = $$; S.esc = esc; S.reduced = reduced;
+})();
+
+</script>
+<script>
+document.querySelectorAll('[data-soc]').forEach(a=>{a.target='_blank';a.rel='noopener';
+  a.href={ig:SPRINT.config.social.instagram,fb:SPRINT.config.social.facebook,tt:SPRINT.config.social.tiktok}[a.dataset.soc];});
+
+const TXT={
+  sq:{galT:'Pjatët që na bënë emër',galH:'← Rrëshqit →',figc:'Katër kuzhina',
+      mhR:'Furrë druri, skarë restoranti dhe recetat e gjyshes — në një adresë të vetme, dy hapa nga bregu i Durrësit.'},
+  en:{galT:'The dishes that made our name',galH:'← Swipe →',figc:'Four kitchens',
+      mhR:'A wood-fired oven, a restaurant grill and grandma’s recipes — at one address, two steps from the Durrës shore.'},
+};
+
+/* ---------- shiriti i kategorive në hero ---------- */
+function buildStrip(l){
+  document.getElementById('strip').innerHTML=SPRINT.categories.map(c=>`
+    <a href="#menu" data-cat-jump="${c.id}">${SPRINT.art({art:c.art,sq:c[l==='sq'?'sq':'en']},'')}
+      <b>${SPRINT.esc(c[l==='sq'?'sq':'en'])}</b></a>`).join('');
+}
+
+/* ---------- galeria horizontale ---------- */
+function buildGal(l){
+  const items=SPRINT.menu.filter(m=>m.tags.includes('top')||m.tags.includes('new'));
+  document.getElementById('galTrack').innerHTML=items.map(m=>`
+    <article class="gcard">
+      ${SPRINT.art(m,'')}
+      <span class="n">${SPRINT.esc(m[l==='sq'?'sq':'en'])}</span>
+      <span class="d">${SPRINT.esc(m[l==='sq'?'dsq':'den'])}</span>
+      <span class="b"><span class="p">${SPRINT.money(m.p)}</span>
+        <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')}</span></button></span>
+    </article>`).join('');
+}
+
+function localize(l){
+  const t=TXT[l];
+  galT.textContent=t.galT; galH.textContent=t.galH; figc.textContent=t.figc; mhR.textContent=t.mhR;
+  mhC.textContent=SPRINT.categories.map(c=>c[l==='sq'?'sq':'en']).slice(0,4).join(' · ');
+  buildStrip(l); buildGal(l);
+}
+
+/* ---------- indeksi i menusë ---------- */
+const tagL={hot:{sq:'Pikante',en:'Spicy'},veg:{sq:'Vegjetarian',en:'Veggie'},new:{sq:'I ri',en:'New'},top:{sq:'Top',en:'Top'}};
+function card(m,i,l){
+  const tags=m.tags.length?`<span class="dish-tags">${m.tags.map(t=>`<span class="tag tag-${t}">${tagL[t][l]}</span>`).join('')}</span>`:'';
+  return `<article class="dish" data-reveal style="--i:${i}" data-peek="${m.art}">
+    <span class="num">${String(i+1).padStart(2,'0')}</span>
+    <span class="nm"><h3>${SPRINT.esc(m[l==='sq'?'sq':'en'])}</h3>${tags}
+      <span class="desc">${SPRINT.esc(m[l==='sq'?'dsq':'den'])}</span></span>
+    <span class="price">${SPRINT.money(m.p)}</span>
+    <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')}</span></button>
+  </article>`;
+}
+
+const app=SPRINT.app({
+  card,
+  onLang:localize,
+  onStatic:()=>{
+    // shiriti i kategorive përdor të njëjtin sjellje si kartat
+    document.querySelectorAll('#strip [data-cat-jump]').forEach(a=>a.addEventListener('click',e=>{
+      e.preventDefault(); app.state.cat=a.dataset.catJump;
+      document.querySelectorAll('[data-chip]').forEach(b=>b.classList.toggle('is-on',b.dataset.chip===app.state.cat));
+      app.renderMenu();
+      document.getElementById('menu').scrollIntoView({behavior:SPRINT.reduced?'auto':'smooth'});
+    }));
+    document.querySelectorAll('#gal [data-add]').forEach(b=>b.addEventListener('click',()=>{
+      const grid=document.querySelector(`[data-menu-grid] [data-add="${b.dataset.add}"]`);
+      if(grid){grid.click();}
+      const s=b.querySelector('span'), o=s.textContent;
+      s.textContent=SPRINT.T('added'); b.classList.add('is-added');
+      setTimeout(()=>{s.textContent=o;b.classList.remove('is-added');},1100);
+    }));
+  },
+  onMenu:initPeek,
+});
+
+/* ---------- pamja që ndjek kursorin ---------- */
+function initPeek(grid){
+  if(SPRINT.reduced||!matchMedia('(hover:hover)').matches)return;
+  const peek=document.getElementById('peek');
+  let raf=null,tx=0,ty=0,cx=0,cy=0,on=false;
+  function loop(){
+    cx+=(tx-cx)*.16; cy+=(ty-cy)*.16;
+    peek.style.transform=`translate(${cx}px,${cy}px)`;
+    raf = on ? requestAnimationFrame(loop) : null;   // ndalo kur nuk shfaqet
+  }
+  if(!initPeek.bound){                                // lidhe vetëm një herë
+    initPeek.bound=true;
+    addEventListener('pointermove',e=>{tx=e.clientX+130;ty=e.clientY;},{passive:true});
+  }
+  grid.querySelectorAll('[data-peek]').forEach(d=>{
+    d.addEventListener('pointerenter',e=>{
+      peek.innerHTML=`<svg viewBox="0 0 200 200"><use href="#art-${d.dataset.peek}"/></svg>`;
+      if(!on){ cx=e.clientX+130; cy=e.clientY; }      // pa fluturim nga këndi
+      tx=e.clientX+130; ty=e.clientY;
+      peek.classList.add('on'); on=true;
+      if(!raf) raf=requestAnimationFrame(loop);
+    });
+    d.addEventListener('pointerleave',()=>{peek.classList.remove('on');on=false;});
+  });
+}
+</script>
