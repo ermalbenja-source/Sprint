@@ -529,6 +529,22 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   });
 
+  $('#copyBtn').addEventListener('click', async () => {
+    const text = JSON.stringify(draft, null, 2);
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Kopja u vendos në clipboard.', 'ok');
+    } catch (e) {
+      // Disa shfletues e lejojnë kopjimin vetëm nga një fushë teksti.
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.cssText = 'position:fixed;top:-9999px';
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand && document.execCommand('copy');
+      ta.remove();
+      toast(ok ? 'Kopja u vendos në clipboard.' : 'Kopjimi nuk u lejua nga shfletuesi.', ok ? 'ok' : 'err');
+    }
+  });
+
   $('#impBtn').addEventListener('click', () => $('#impFile').click());
   $('#impFile').addEventListener('change', (e) => {
     const file = e.target.files[0]; if (!file) return;

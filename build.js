@@ -83,6 +83,8 @@ for (const f of mocks) {
 // faqja zyrtare edhe si artifact, për ta parë pa e publikuar në domain
 fs.writeFileSync(path.join(artDir, 'site.html'),
   toArtifact(fs.readFileSync(path.join(outDir, 'index.html'), 'utf8')));
+fs.writeFileSync(path.join(artDir, 'admin.html'),
+  toArtifact(fs.readFileSync(path.join(outDir, 'admin', 'index.html'), 'utf8')));
 // faqja e zgjedhjes për publikim (lidhje drejt URL-ve, pa iframe)
 const artIdx = path.join(root, 'src', 'artifact-index.html');
 if (fs.existsSync(artIdx)) fs.copyFileSync(artIdx, path.join(artDir, 'index.html'));
