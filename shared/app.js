@@ -253,17 +253,34 @@
       if (opts.onCart) opts.onCart(t);
     }
 
-    function orderMessage() {
+    function orderMessage(extra) {
       const l = state.lang, t = totals();
+      extra = extra || null;
       const head = l === 'sq'
         ? `🍕 *POROSI E RE — SPRINT Durrës*\n`
         : `🍕 *NEW ORDER — SPRINT Durrës*\n`;
       const lines = t.lines.map((li) =>
         `• ${li.q}× ${li.m[l === 'sq' ? 'sq' : 'en']} — ${S.money(li.sum)}`).join('\n');
       const sums = `\n\n${S.T('cart_sub')}: ${S.money(t.sub)}\n${S.T('cart_del')}: ${deliveryLabel(t)}\n*${S.T('cart_total')}: ${S.money(t.total)}*`;
-      const foot = l === 'sq'
-        ? `\n\n📍 Adresa ime: \n📞 Numri im: \n⏰ E dua për orën: `
-        : `\n\n📍 My address: \n📞 My number: \n⏰ Wanted for: `;
+      let foot;
+      if (extra) {
+        const isDel = extra.kind === 'delivery';
+        foot = l === 'sq'
+          ? `\n\n🧾 Porosia nr. *${extra.number}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
+            (isDel ? `\n📍 ${extra.address}` : `\n🏃 Marr vetë në lokal`) +
+            `\n⏰ ${extra.wantedAt === 'asap' ? 'Sa më shpejt' : 'Për orën ' + extra.wantedAt}` +
+            `\n💵 ${extra.payment === 'cash' ? 'Me para në dorë' : 'Me kartë'}` +
+            (extra.note ? `\n📝 ${extra.note}` : '')
+          : `\n\n🧾 Order no. *${extra.number}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
+            (isDel ? `\n📍 ${extra.address}` : `\n🏃 Collecting in person`) +
+            `\n⏰ ${extra.wantedAt === 'asap' ? 'As soon as possible' : 'For ' + extra.wantedAt}` +
+            `\n💵 ${extra.payment === 'cash' ? 'Cash on delivery' : 'Card'}` +
+            (extra.note ? `\n📝 ${extra.note}` : '');
+      } else {
+        foot = l === 'sq'
+          ? `\n\n📍 Adresa ime: \n📞 Numri im: \n⏰ E dua për orën: `
+          : `\n\n📍 My address: \n📞 My number: \n⏰ Wanted for: `;
+      }
       return head + lines + sums + foot;
     }
 
@@ -313,11 +330,21 @@
       const err = form.querySelector('[data-form-error]');
       const show = (msg) => { if (err) { err.textContent = msg; err.classList.toggle('is-on', !!msg); } };
 
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const d = read();
         if (!valid(d)) { show(S.T('f_req')); return; }
         show('');
+        const btn = form.querySelector('[type=submit]');
+        const label = btn ? btn.innerHTML : '';
+        if (btn) { btn.disabled = true; btn.textContent = '…'; }
+        try {
+          if (opts.onBooking) await opts.onBooking(d);
+        } catch (err) {
+          show(err.message || 'Rezervimi nuk u regjistrua dot.');
+        } finally {
+          if (btn) { btn.disabled = false; btn.innerHTML = label; }
+        }
         form.classList.add('is-sent');
         window.open(S.waLink(bookMessage(d)), '_blank', 'noopener');
       });
@@ -356,6 +383,16 @@
       const si = $('[data-search]');
       if (si) si.addEventListener('input', () => { state.q = si.value; renderMenu(); });
       $$('[data-cart-clear]').forEach((b) => b.addEventListener('click', clearCart));
+
+      // Kur faqja ka një hap arke, butoni i shportës e hap atë në vend që të
+      // kalojë drejt e në WhatsApp — kështu porosia regjistrohet përpara.
+      if (opts.checkout) {
+        $$('[data-cart-send]').forEach((b) => b.addEventListener('click', (e) => {
+          if (b.classList.contains('is-disabled')) return;
+          e.preventDefault();
+          opts.checkout(totals(), orderMessage);
+        }));
+      }
 
       // panelin e shportës
       $$('[data-cart-open]').forEach((b) => b.addEventListener('click', () =>

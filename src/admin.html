@@ -185,6 +185,78 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
   background:var(--pan-3);padding:.1em .4em;border-radius:5px}
 .steps-ol{padding-left:1.2rem;margin:.6rem 0 0;display:grid;gap:.4rem;font-size:.86rem;color:var(--muted)}
 
+
+/* ---------- numri mbi skedë ---------- */
+.tabn{display:none;background:var(--bad);color:#fff;border-radius:999px;min-width:19px;
+  padding:0 .32rem;font-size:.68rem;font-weight:700;margin-left:.35rem;
+  line-height:19px;text-align:center;vertical-align:middle}
+.tabn.on{display:inline-block;animation:tabpulse 1.6s ease-in-out infinite}
+@keyframes tabpulse{50%{transform:scale(1.14)}}
+
+/* ---------- statistikat e ditës ---------- */
+.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem}
+.statbox{background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.8rem .95rem}
+.statbox b{display:block;font-family:var(--display);font-size:1.6rem;line-height:1.1;
+  font-variant-numeric:tabular-nums}
+.statbox span{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- filtrat ---------- */
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;flex:1}
+.chip{border:1.5px solid var(--line);border-radius:11px;padding:.42rem .85rem;font-size:.8rem;
+  font-weight:600;color:var(--muted);transition:.2s;white-space:nowrap}
+.chip:hover{color:var(--txt);border-color:var(--brand)}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#1B0D02}
+.chip em{font-style:normal;opacity:.75;margin-left:.28rem}
+
+/* ---------- kartat e porosive ---------- */
+.orders{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));align-items:start}
+.ord{background:var(--pan);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  display:grid;transition:border-color .25s}
+.ord.s-new{border-color:rgba(230,178,60,.65);box-shadow:0 0 0 1px rgba(230,178,60,.28)}
+.ord.late{border-color:rgba(229,84,75,.7)}
+.ord-hd{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.75rem .9rem;
+  background:var(--pan-2);border-bottom:1px solid var(--line)}
+.ord-no{font-family:var(--display);font-size:1.25rem;letter-spacing:.02em}
+.badge{font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.22rem .55rem;border-radius:999px;border:1px solid currentColor}
+.b-new{color:var(--warn)} .b-accepted{color:#7EC8FF} .b-preparing{color:var(--brand-lt)}
+.b-ready{color:var(--ok)} .b-delivering{color:#C79BFF} .b-done{color:var(--muted)}
+.b-cancelled{color:var(--bad)}
+.b-kind{color:var(--muted)}
+.clock{margin-left:auto;font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums;
+  letter-spacing:.02em}
+.clock.warn{color:var(--warn)} .clock.late{color:var(--bad)} .clock.ok{color:var(--ok)}
+.ord-bd{padding:.85rem .9rem;display:grid;gap:.7rem}
+.ord-who{display:grid;gap:.25rem;font-size:.88rem}
+.ord-who b{font-weight:600}
+.ord-who a{color:var(--gold);text-decoration:none}
+.ord-who .adr{color:var(--muted);font-size:.83rem}
+.ord-items{display:grid;gap:.2rem;font-size:.85rem;border-top:1px dashed var(--line);
+  border-bottom:1px dashed var(--line);padding:.6rem 0}
+.ord-items .r{display:flex;justify-content:space-between;gap:.8rem}
+.ord-items .q{color:var(--brand-lt);font-weight:700;margin-right:.35rem}
+.ord-tot{display:flex;justify-content:space-between;align-items:baseline;font-size:.86rem;color:var(--muted)}
+.ord-tot b{font-family:var(--display);font-size:1.4rem;color:var(--gold)}
+.ord-note{background:rgba(230,178,60,.1);border:1px solid rgba(230,178,60,.35);border-radius:10px;
+  padding:.5rem .65rem;font-size:.83rem;color:#f0d193}
+.ord-act{display:flex;gap:.45rem;flex-wrap:wrap;padding:.7rem .9rem;background:#0F0B0C;
+  border-top:1px solid var(--line)}
+.ord-act .btn{flex:1;min-width:96px}
+.ord-meta{font-size:.72rem;color:var(--muted);display:flex;gap:.7rem;flex-wrap:wrap}
+
+/* ---------- zgjedhja e kohës së përgatitjes ---------- */
+.prep{display:grid;gap:.5rem;padding:.7rem .9rem;background:#0F0B0C;border-top:1px solid var(--line)}
+.prep-row{display:flex;gap:.4rem;flex-wrap:wrap}
+.prep-row button{border:1.5px solid var(--line);border-radius:10px;padding:.45rem .8rem;
+  font-size:.82rem;font-weight:600;transition:.2s;flex:1}
+.prep-row button:hover{border-color:var(--brand);color:var(--brand-lt)}
+.prep p{margin:0;font-size:.75rem;color:var(--muted)}
+
+@media(max-width:720px){
+  .orders{grid-template-columns:1fr}
+  .statrow{grid-template-columns:1fr 1fr}
+}
+
 /* ---------- njoftimi ---------- */
 #toast{position:fixed;left:50%;bottom:1.4rem;translate:-50% 0;z-index:100;
   background:var(--pan-2);border:1px solid var(--line);border-radius:13px;padding:.75rem 1.2rem;
@@ -250,7 +322,9 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
           <button class="btn btn-g btn-sm" id="outBtn">Dil</button></span>
       </div>
       <nav class="tabs">
-        <button class="tab on" data-tab="menu">Menuja</button>
+        <button class="tab on" data-tab="ord">Porositë <b class="tabn" id="tabNew"></b></button>
+        <button class="tab" data-tab="book">Rezervimet <b class="tabn" id="tabBook"></b></button>
+        <button class="tab" data-tab="menu">Menuja</button>
         <button class="tab" data-tab="cats">Kategoritë</button>
         <button class="tab" data-tab="set">Cilësimet</button>
         <button class="tab" data-tab="rev">Vlerësimet</button>
@@ -260,8 +334,30 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
   </header>
 
   <main class="wrap">
+    <!-- ─────── POROSITË ─────── -->
+    <section class="view" id="v-ord">
+      <div class="msg warn" id="demoMsg"></div>
+      <div class="statrow" id="ordStats"></div>
+      <div class="tools">
+        <div class="chips" id="ordChips"></div>
+        <div class="f" style="width:170px"><input id="ordDay" type="date" aria-label="Dita"></div>
+        <button class="btn btn-g btn-sm" id="soundBtn" aria-pressed="true">🔔 Zilja</button>
+        <button class="btn btn-g btn-sm" id="ordRefresh">Rifresko</button>
+      </div>
+      <div class="orders" id="ordList"></div>
+    </section>
+
+    <!-- ─────── REZERVIMET ─────── -->
+    <section class="view hide" id="v-book">
+      <div class="tools">
+        <div class="chips" id="bkChips"></div>
+        <button class="btn btn-g btn-sm" id="bkRefresh">Rifresko</button>
+      </div>
+      <div class="orders" id="bkList"></div>
+    </section>
+
     <!-- ─────── MENUJA ─────── -->
-    <section class="view" id="v-menu">
+    <section class="view hide" id="v-menu">
       <div class="tools">
         <div class="f search"><input id="q" type="search" placeholder="Kërko pjatë…"></div>
         <div class="f"><select id="catFilter"></select></div>

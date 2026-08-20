@@ -109,6 +109,7 @@
       ? 'Po punon pa Supabase: ndryshimet ruhen vetëm në këtë shfletues dhe NUK i shohin klientët. Lidh Supabase sipas hapave më poshtë.'
       : 'I lidhur me Supabase. Çdo ndryshim që ruan del menjëherë në faqe.';
     loadData();
+    startOrderBoard();
   }
 
   $('#loginForm').addEventListener('submit', async (e) => {
@@ -230,6 +231,397 @@
   }
   $('#bulkUp').addEventListener('click', () => bulk(1));
   $('#bulkDown').addEventListener('click', () => bulk(-1));
+
+
+  /* ══════════════════ POROSITË ══════════════════ */
+  const ORD = {
+    day: new Date().toISOString().slice(0, 10),
+    filter: 'active',
+    list: [],
+    seen: new Set(),
+    sound: localStorage.getItem('sprint-sound') !== 'off',
+    tick: null, poll: null, firstLoad: true,
+  };
+
+  const ST_SQ = {
+    new:'E re', accepted:'Pranuar', preparing:'Në përgatitje', ready:'Gati',
+    delivering:'Në rrugë', done:'Përfunduar', cancelled:'Anuluar',
+  };
+  const ACTIVE = ['new','accepted','preparing','ready','delivering'];
+  const NEXT_OF = (o) => ({
+    accepted:'preparing', preparing:'ready',
+    ready: o.kind === 'delivery' ? 'delivering' : 'done',
+    delivering:'done',
+  })[o.status];
+  const NEXT_LABEL = (o) => ({
+    accepted:'Filloi përgatitja', preparing:'Gati', 
+    ready: o.kind === 'delivery' ? 'Nisi dërgesa' : 'U dorëzua',
+    delivering:'U dorëzua',
+  })[o.status];
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const mmss = (ms) => { const t = Math.max(0, Math.round(ms / 1000));
+    return pad(Math.floor(t / 60)) + ':' + pad(t % 60); };
+  const money = (n) => (Number(n) || 0).toLocaleString('sq-AL') + ' L';
+  const hhmm = (iso) => { const d = new Date(iso); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+
+  /* ---------- zilja për porosi të re ---------- */
+  let audioCtx;
+  function beep() {
+    if (!ORD.sound) return;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.18].forEach((delay, i) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'sine'; o.frequency.value = i ? 1046 : 784;
+        g.gain.setValueAtTime(0.0001, audioCtx.currentTime + delay);
+        g.gain.exponentialRampToValueAtTime(0.28, audioCtx.currentTime + delay + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + delay + 0.3);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(audioCtx.currentTime + delay); o.stop(audioCtx.currentTime + delay + 0.32);
+      });
+    } catch (e) {}
+  }
+
+  /* ---------- porosi shembull, vetëm në modin lokal ---------- */
+  function demoOrders() {
+    const now = Date.now();
+    const pick = (i) => draft.menu[i] || draft.menu[0];
+    const line = (i, q) => ({ id: pick(i).id, name: pick(i).sq, qty: q, price: pick(i).p, sum: pick(i).p * q });
+    return [
+      { id:'demo1', number:1042, token:'demo1', status:'new', kind:'delivery', demo:true,
+        customer_name:'Klient shembull', phone:'069 000 0001',
+        address:'Rruga Taulantia 12, kati 3', note:'Pa qepë',
+        items:[line(14,1), line(16,2)], subtotal:1180, delivery_fee:0, total:1180,
+        payment:'cash', wanted_at:'asap', lang:'sq',
+        created_at:new Date(now - 2*60000).toISOString() },
+      { id:'demo2', number:1041, token:'demo2', status:'preparing', kind:'pickup', demo:true,
+        customer_name:'Klient shembull', phone:'069 000 0002', address:null, note:null,
+        items:[line(30,1), line(2,1)], subtotal:570, delivery_fee:0, total:570,
+        payment:'card', wanted_at:'asap', lang:'sq', prep_minutes:20,
+        accepted_at:new Date(now - 14*60000).toISOString(),
+        created_at:new Date(now - 16*60000).toISOString() },
+      { id:'demo3', number:1040, token:'demo3', status:'delivering', kind:'delivery', demo:true,
+        customer_name:'Klient shembull', phone:'069 000 0003',
+        address:'Lagjja 13, pallati 4', note:null,
+        items:[line(45,2)], subtotal:1600, delivery_fee:0, total:1600,
+        payment:'cash', wanted_at:'asap', lang:'sq', prep_minutes:25,
+        accepted_at:new Date(now - 34*60000).toISOString(),
+        created_at:new Date(now - 36*60000).toISOString() },
+    ];
+  }
+
+  /* ---------- ngarkimi ---------- */
+  async function loadOrders(silent) {
+    const from = new Date(ORD.day + 'T00:00:00').toISOString();
+    const to = new Date(new Date(ORD.day + 'T00:00:00').getTime() + 864e5).toISOString();
+    let list = [];
+    try { list = (await store.fetchOrders({ from, to })) || []; }
+    catch (e) { if (!silent) toast('Porositë nuk u lexuan: ' + e.message, 'err'); }
+
+    if (localMode && !list.length && ORD.day === new Date().toISOString().slice(0, 10)) {
+      list = demoOrders();
+    }
+    $('#demoMsg').classList.toggle('on', list.some((o) => o.demo));
+    $('#demoMsg').textContent = 'Këto janë porosi shembull për ta parë tabelën në punë. '
+      + 'Sapo të lidhet Supabase, këtu shfaqen porositë e vërteta të klientëve.';
+
+    // zilja kur mbërrin një porosi e re
+    const fresh = list.filter((o) => o.status === 'new' && !ORD.seen.has(o.id));
+    list.forEach((o) => ORD.seen.add(o.id));
+    if (!ORD.firstLoad && fresh.length) { beep(); flashTitle(fresh.length); }
+    ORD.firstLoad = false;
+
+    ORD.list = list;
+    renderOrders();
+  }
+
+  let titleT;
+  function flashTitle(n) {
+    clearInterval(titleT);
+    const base = 'SPRINT · Paneli i menaxhimit';
+    let on = true, left = 12;
+    titleT = setInterval(() => {
+      document.title = on ? `(${n}) POROSI E RE` : base;
+      on = !on;
+      if (--left <= 0) { clearInterval(titleT); document.title = base; }
+    }, 700);
+  }
+
+  /* ---------- kohëmatësi ---------- */
+  function clockOf(o) {
+    if (o.status === 'done' || o.status === 'cancelled') {
+      const end = o.done_at ? new Date(o.done_at) : new Date(o.updated_at || o.created_at);
+      return { txt: mmss(end - new Date(o.created_at)), cls: '', late: false };
+    }
+    if (o.accepted_at && o.prep_minutes) {
+      const left = new Date(o.accepted_at).getTime() + o.prep_minutes * 60000 - Date.now();
+      return { txt: (left < 0 ? '+' : '') + mmss(Math.abs(left)),
+               cls: left < 0 ? 'late' : (left < 5 * 60000 ? 'warn' : 'ok'), late: left < 0 };
+    }
+    const el = Date.now() - new Date(o.created_at).getTime();
+    return { txt: mmss(el), cls: el > 6 * 60000 ? 'late' : el > 3 * 60000 ? 'warn' : '', late: el > 6 * 60000 };
+  }
+
+  function tickClocks() {
+    ORD.list.forEach((o) => {
+      const el = document.querySelector(`[data-clock="${o.id}"]`);
+      if (!el) return;
+      const c = clockOf(o);
+      el.textContent = c.txt;
+      el.className = 'clock ' + c.cls;
+      el.closest('.ord').classList.toggle('late', c.late && o.status !== 'done');
+    });
+  }
+
+  /* ---------- pamja ---------- */
+  function ordFiltered() {
+    if (ORD.filter === 'all') return ORD.list;
+    if (ORD.filter === 'active') return ORD.list.filter((o) => ACTIVE.includes(o.status));
+    return ORD.list.filter((o) => o.status === ORD.filter);
+  }
+
+  function renderOrderStats() {
+    const l = ORD.list;
+    const paid = l.filter((o) => o.status !== 'cancelled');
+    const revenue = paid.reduce((a, o) => a + (Number(o.total) || 0), 0);
+    const accepted = l.filter((o) => o.accepted_at);
+    const avgAccept = accepted.length
+      ? accepted.reduce((a, o) => a + (new Date(o.accepted_at) - new Date(o.created_at)), 0) / accepted.length
+      : 0;
+    const open = l.filter((o) => ACTIVE.includes(o.status)).length;
+    $('#ordStats').innerHTML = `
+      <div class="statbox"><b>${l.length}</b><span>Porosi</span></div>
+      <div class="statbox"><b style="color:var(--gold)">${money(revenue)}</b><span>Xhiro</span></div>
+      <div class="statbox"><b style="color:${open ? 'var(--warn)' : 'var(--ok)'}">${open}</b><span>Në punë</span></div>
+      <div class="statbox"><b>${avgAccept ? mmss(avgAccept) : '—'}</b><span>Koha e pranimit</span></div>`;
+  }
+
+  function renderOrderChips() {
+    const c = (id, label) => {
+      const n = id === 'all' ? ORD.list.length
+        : id === 'active' ? ORD.list.filter((o) => ACTIVE.includes(o.status)).length
+        : ORD.list.filter((o) => o.status === id).length;
+      return `<button class="chip${ORD.filter === id ? ' on' : ''}" data-ochip="${id}">${label}<em>${n}</em></button>`;
+    };
+    $('#ordChips').innerHTML = [
+      c('active', 'Në punë'), c('new', 'Të reja'), c('preparing', 'Në përgatitje'),
+      c('ready', 'Gati'), c('delivering', 'Në rrugë'), c('done', 'Përfunduar'), c('all', 'Të gjitha'),
+    ].join('');
+    $$('[data-ochip]').forEach((b) => b.addEventListener('click', () => {
+      ORD.filter = b.dataset.ochip; renderOrders();
+    }));
+    const nNew = ORD.list.filter((o) => o.status === 'new').length;
+    const tab = $('#tabNew');
+    tab.textContent = nNew; tab.classList.toggle('on', nNew > 0);
+  }
+
+  function orderCard(o) {
+    const c = clockOf(o);
+    const items = (Array.isArray(o.items) ? o.items : []).map((it) =>
+      `<div class="r"><span><span class="q">${it.qty}×</span>${esc(it.name)}</span>
+       <span>${money(it.sum)}</span></div>`).join('');
+    const wa = 'https://wa.me/' + String(o.phone).replace(/\D/g, '').replace(/^0/, '355');
+    const maps = o.address
+      ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(o.address) : '';
+    const next = NEXT_OF(o);
+
+    let actions = '';
+    if (o.status === 'new') {
+      actions = `<div class="prep">
+        <p>Sa minuta duhen? Klienti e sheh kohën te ndjekja e porosisë.</p>
+        <div class="prep-row">${[10,15,20,30,45,60].map((m) =>
+          `<button data-accept="${o.id}" data-min="${m}">${m}′</button>`).join('')}</div>
+        <div class="prep-row"><button class="btn btn-d" data-cancel="${o.id}"
+          style="flex:1">Refuzo porosinë</button></div>
+      </div>`;
+    } else if (next) {
+      actions = `<div class="ord-act">
+        <button class="btn btn-p" data-next="${o.id}" data-to="${next}">${NEXT_LABEL(o)}</button>
+        <button class="btn btn-d btn-sm" data-cancel="${o.id}">Anulo</button>
+      </div>`;
+    } else {
+      actions = `<div class="ord-act">
+        <button class="btn btn-g btn-sm" data-reopen="${o.id}">Rikthe në punë</button>
+      </div>`;
+    }
+
+    return `<article class="ord s-${o.status}${c.late ? ' late' : ''}" data-ord="${o.id}">
+      <div class="ord-hd">
+        <span class="ord-no">#${o.number}</span>
+        <span class="badge b-${o.status}">${ST_SQ[o.status]}</span>
+        <span class="badge b-kind">${o.kind === 'pickup' ? 'Marr vetë' : 'Dërgesë'}</span>
+        <span class="clock ${c.cls}" data-clock="${o.id}">${c.txt}</span>
+      </div>
+      <div class="ord-bd">
+        <div class="ord-who">
+          <b>${esc(o.customer_name)}</b>
+          <a href="tel:${esc(String(o.phone).replace(/\s/g, ''))}">${esc(o.phone)}</a>
+          ${o.address ? `<span class="adr"><a href="${maps}" target="_blank" rel="noopener">${esc(o.address)}</a></span>` : ''}
+        </div>
+        <div class="ord-items">${items}</div>
+        ${o.note ? `<div class="ord-note">📝 ${esc(o.note)}</div>` : ''}
+        <div class="ord-tot">
+          <span>${o.payment === 'card' ? 'Me kartë' : 'Para në dorë'}
+            ${Number(o.delivery_fee) ? ' · dërgesa ' + money(o.delivery_fee) : ''}</span>
+          <b>${money(o.total)}</b>
+        </div>
+        <div class="ord-meta">
+          <span>Mbërriti ${hhmm(o.created_at)}</span>
+          ${o.wanted_at && o.wanted_at !== 'asap' ? `<span>Për orën ${esc(o.wanted_at)}</span>` : '<span>Sa më shpejt</span>'}
+          ${o.prep_minutes ? `<span>${o.prep_minutes}′ përgatitje</span>` : ''}
+          <a href="${wa}" target="_blank" rel="noopener">WhatsApp klientit →</a>
+        </div>
+      </div>
+      ${actions}
+    </article>`;
+  }
+
+  function renderOrders() {
+    renderOrderStats(); renderOrderChips();
+    const list = ordFiltered();
+    $('#ordList').innerHTML = list.length ? list.map(orderCard).join('')
+      : '<p class="empty">Asnjë porosi këtu.</p>';
+
+    $$('[data-accept]').forEach((b) => b.addEventListener('click', () =>
+      setStatus(b.dataset.accept, 'accepted', { prep_minutes: +b.dataset.min,
+        accepted_at: new Date().toISOString() })));
+    $$('[data-next]').forEach((b) => b.addEventListener('click', () => {
+      const to = b.dataset.to;
+      const patch = to === 'ready' ? { ready_at: new Date().toISOString() }
+        : to === 'done' ? { done_at: new Date().toISOString() } : {};
+      setStatus(b.dataset.next, to, patch);
+    }));
+    $$('[data-cancel]').forEach((b) => b.addEventListener('click', () => {
+      const why = prompt('Arsyeja e anulimit (opsionale):');
+      if (why === null) return;
+      setStatus(b.dataset.cancel, 'cancelled', { cancel_reason: why || null });
+    }));
+    $$('[data-reopen]').forEach((b) => b.addEventListener('click', () =>
+      setStatus(b.dataset.reopen, 'preparing', { done_at: null })));
+  }
+
+  async function setStatus(id, status, patch) {
+    const o = ORD.list.find((x) => x.id === id); if (!o) return;
+    const before = Object.assign({}, o);
+    Object.assign(o, patch, { status });        // përgjigje e menjëhershme
+    renderOrders();
+    try {
+      if (!o.demo) await store.updateOrder(id, Object.assign({ status }, patch));
+    } catch (e) {
+      Object.assign(o, before); renderOrders();
+      toast('Nuk u ruajt: ' + e.message, 'err');
+    }
+  }
+
+  $('#ordRefresh').addEventListener('click', () => loadOrders());
+  $('#ordDay').addEventListener('change', () => {
+    ORD.day = $('#ordDay').value || new Date().toISOString().slice(0, 10);
+    ORD.firstLoad = true; loadOrders();
+  });
+  $('#soundBtn').addEventListener('click', () => {
+    ORD.sound = !ORD.sound;
+    localStorage.setItem('sprint-sound', ORD.sound ? 'on' : 'off');
+    $('#soundBtn').textContent = (ORD.sound ? '🔔' : '🔕') + ' Zilja';
+    $('#soundBtn').setAttribute('aria-pressed', String(ORD.sound));
+    if (ORD.sound) beep();
+  });
+
+  /* ══════════════════ REZERVIMET ══════════════════ */
+  const BK = { list: [], filter: 'upcoming' };
+  const BK_SQ = { new:'I ri', confirmed:'Konfirmuar', seated:'Në tavolinë', done:'Përfunduar', cancelled:'Anuluar' };
+
+  function demoBookings() {
+    const d = new Date(); const iso = (n) =>
+      new Date(d.getTime() + n * 864e5).toISOString().slice(0, 10);
+    return [
+      { id:'dbk1', number:118, status:'new', demo:true, customer_name:'Rezervim shembull',
+        phone:'069 000 0004', date:iso(0), time:'20:30', people:'6',
+        area:'Salla e eventeve', note:'Ditëlindje, tortë në fund', lang:'sq' },
+      { id:'dbk2', number:117, status:'confirmed', demo:true, customer_name:'Rezervim shembull',
+        phone:'069 000 0005', date:iso(1), time:'13:00', people:'2',
+        area:'Jashtë (terracë)', note:null, lang:'sq' },
+    ];
+  }
+
+  async function loadBookings(silent) {
+    try { BK.list = (await store.fetchBookings({ from: ORD.day })) || []; }
+    catch (e) { if (!silent) toast('Rezervimet nuk u lexuan: ' + e.message, 'err'); }
+    if (localMode && !BK.list.length) BK.list = demoBookings();
+    renderBookings();
+  }
+
+  function renderBookings() {
+    const list = BK.filter === 'all' ? BK.list
+      : BK.filter === 'upcoming' ? BK.list.filter((b) => !['done','cancelled'].includes(b.status))
+      : BK.list.filter((b) => b.status === BK.filter);
+
+    const c = (id, label) => {
+      const n = id === 'all' ? BK.list.length
+        : id === 'upcoming' ? BK.list.filter((b) => !['done','cancelled'].includes(b.status)).length
+        : BK.list.filter((b) => b.status === id).length;
+      return `<button class="chip${BK.filter === id ? ' on' : ''}" data-bchip="${id}">${label}<em>${n}</em></button>`;
+    };
+    $('#bkChips').innerHTML = [c('upcoming','Në pritje'), c('new','Të reja'),
+      c('confirmed','Konfirmuar'), c('done','Përfunduar'), c('all','Të gjitha')].join('');
+    $$('[data-bchip]').forEach((b) => b.addEventListener('click', () => {
+      BK.filter = b.dataset.bchip; renderBookings();
+    }));
+
+    const nNew = BK.list.filter((b) => b.status === 'new').length;
+    const tab = $('#tabBook');
+    tab.textContent = nNew; tab.classList.toggle('on', nNew > 0);
+
+    $('#bkList').innerHTML = list.length ? list.map((b) => {
+      const wa = 'https://wa.me/' + String(b.phone).replace(/\D/g, '').replace(/^0/, '355');
+      const nextBtn = b.status === 'new'
+        ? `<button class="btn btn-p" data-bset="${b.id}" data-to="confirmed">Konfirmo</button>`
+        : b.status === 'confirmed'
+        ? `<button class="btn btn-p" data-bset="${b.id}" data-to="seated">Erdhi</button>`
+        : b.status === 'seated'
+        ? `<button class="btn btn-p" data-bset="${b.id}" data-to="done">Përfundo</button>`
+        : `<button class="btn btn-g btn-sm" data-bset="${b.id}" data-to="confirmed">Rikthe</button>`;
+      return `<article class="ord">
+        <div class="ord-hd">
+          <span class="ord-no">#${b.number}</span>
+          <span class="badge b-${b.status === 'new' ? 'new' : b.status === 'cancelled' ? 'cancelled' : 'ready'}">${BK_SQ[b.status]}</span>
+          <span class="clock">${esc(b.date)}${b.time ? ' · ' + esc(b.time) : ''}</span>
+        </div>
+        <div class="ord-bd">
+          <div class="ord-who">
+            <b>${esc(b.customer_name)}</b>
+            <a href="tel:${esc(String(b.phone).replace(/\s/g, ''))}">${esc(b.phone)}</a>
+            <span class="adr">${esc(b.people || '')} persona${b.area ? ' · ' + esc(b.area) : ''}</span>
+          </div>
+          ${b.note ? `<div class="ord-note">📝 ${esc(b.note)}</div>` : ''}
+          <div class="ord-meta"><a href="${wa}" target="_blank" rel="noopener">WhatsApp klientit →</a></div>
+        </div>
+        <div class="ord-act">${nextBtn}
+          <button class="btn btn-d btn-sm" data-bset="${b.id}" data-to="cancelled">Anulo</button></div>
+      </article>`;
+    }).join('') : '<p class="empty">Asnjë rezervim.</p>';
+
+    $$('[data-bset]').forEach((btn) => btn.addEventListener('click', async () => {
+      const b = BK.list.find((x) => x.id === btn.dataset.bset); if (!b) return;
+      const before = b.status; b.status = btn.dataset.to; renderBookings();
+      try { if (!b.demo) await store.updateBooking(b.id, { status: btn.dataset.to }); }
+      catch (e) { b.status = before; renderBookings(); toast('Nuk u ruajt: ' + e.message, 'err'); }
+    }));
+  }
+  $('#bkRefresh').addEventListener('click', () => loadBookings());
+
+  /* ---------- nisja e tabelës ---------- */
+  function startOrderBoard() {
+    $('#ordDay').value = ORD.day;
+    $('#soundBtn').textContent = (ORD.sound ? '🔔' : '🔕') + ' Zilja';
+    loadOrders(); loadBookings();
+    clearInterval(ORD.tick); ORD.tick = setInterval(tickClocks, 1000);
+    clearInterval(ORD.poll);
+    ORD.poll = setInterval(() => {
+      if (document.hidden) return;
+      loadOrders(true); loadBookings(true);
+    }, 15000);
+  }
 
   /* ══════════════════ SIRTARI ══════════════════ */
   function openDrawer(id) {

@@ -389,6 +389,71 @@ body.cart-open .scrim{opacity:1;visibility:visible}
   .top{bottom:5.4rem;right:.7rem}
 }
 
+
+/* ---------- arka dhe ndjekja e porosisë ---------- */
+.sheet{position:fixed;inset:0;z-index:130;display:grid;place-items:end center;
+  opacity:0;visibility:hidden;transition:.35s}
+.sheet.on{opacity:1;visibility:visible}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}
+.sheet-card{position:relative;width:min(560px,100%);max-height:92dvh;overflow-y:auto;
+  background:var(--pan);border:1px solid var(--line);border-radius:26px 26px 0 0;
+  padding:1.4rem 1.3rem 1.6rem;transform:translateY(30px);transition:transform .4s cubic-bezier(.3,1.1,.4,1)}
+.sheet.on .sheet-card{transform:none}
+@media(min-width:640px){.sheet{place-items:center}.sheet-card{border-radius:26px}}
+.sheet-hd{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+.sheet-hd h3{font-size:1.4rem}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;background:var(--pan-2);
+  border:1px solid var(--line);border-radius:14px;padding:.3rem}
+.seg button{border-radius:11px;padding:.6rem;font-size:.85rem;font-weight:600;color:var(--muted);transition:.22s}
+.seg button.on{background:var(--red);color:#1B0D02}
+.co-grid{display:grid;gap:.8rem;margin-top:1rem}
+.co-row2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.co-sum{background:var(--pan-2);border:1px solid var(--line);border-radius:16px;padding:.9rem 1rem;
+  display:grid;gap:.35rem;margin-top:1rem}
+.co-sum .r{display:flex;justify-content:space-between;font-size:.86rem;color:var(--muted)}
+.co-sum .r.t{color:var(--cream);font-size:1rem;border-top:1px dashed var(--line);padding-top:.45rem;margin-top:.25rem}
+.co-sum .r.t b{font-family:var(--display);font-size:1.5rem;color:var(--gold)}
+.co-err{color:#ff8f88;font-size:.84rem;display:none;margin:.5rem 0 0}
+.co-err.on{display:block}
+.co-act{display:grid;gap:.55rem;margin-top:1.1rem}
+.co-act .wa{margin:0}
+.link-btn{font-size:.82rem;color:var(--muted);text-align:center;padding:.5rem;transition:.2s}
+.link-btn:hover{color:var(--gold)}
+
+.ok-wrap{text-align:center;display:grid;gap:.7rem;padding:.6rem 0}
+.ok-badge{width:74px;height:74px;border-radius:50%;background:rgba(76,175,109,.16);
+  border:2px solid #4CAF6D;display:grid;place-items:center;font-size:2rem;margin:0 auto;color:#7fdca0}
+.ok-no{font-family:var(--display);font-size:2.6rem;color:var(--gold);line-height:1}
+.ok-wrap p{color:var(--muted);font-size:.9rem;margin:0}
+
+/* ---------- ndjekja ---------- */
+#track{position:fixed;inset:0;z-index:140;background:var(--ink);overflow-y:auto;display:none}
+#track.on{display:block}
+.tr-wrap{width:min(100% - 2rem,560px);margin:0 auto;padding:3rem 0 4rem;display:grid;gap:1.4rem}
+.tr-hd{text-align:center;display:grid;gap:.4rem}
+.tr-hd .no{font-family:var(--display);font-size:2.4rem;color:var(--gold);line-height:1}
+.tr-clock{background:linear-gradient(165deg,var(--pan-2),var(--pan));border:1px solid var(--line);
+  border-radius:24px;padding:1.6rem;text-align:center;display:grid;gap:.3rem}
+.tr-clock b{font-family:var(--display);font-size:3.4rem;line-height:1;font-variant-numeric:tabular-nums}
+.tr-clock span{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.tr-clock.late b{color:#ff8f88}
+.tr-clock.ok b{color:var(--gold)}
+.tr-steps{display:grid;gap:.55rem}
+.tr-step{display:grid;grid-template-columns:34px 1fr;gap:.8rem;align-items:center;
+  background:var(--pan);border:1px solid var(--line);border-radius:16px;padding:.8rem .9rem;opacity:.45}
+.tr-step.done{opacity:1;border-color:rgba(255,194,68,.4)}
+.tr-step.cur{opacity:1;border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.tr-step i{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);display:grid;
+  place-items:center;font-style:normal;font-size:.9rem}
+.tr-step.done i{background:var(--gold);border-color:var(--gold);color:#241703}
+.tr-step.cur i{border-color:var(--gold);color:var(--gold)}
+.tr-items{background:var(--pan);border:1px solid var(--line);border-radius:18px;padding:1rem 1.1rem;
+  display:grid;gap:.4rem;font-size:.88rem}
+.tr-items .r{display:flex;justify-content:space-between;gap:1rem;color:var(--muted)}
+.tr-items .r.t{color:var(--cream);border-top:1px dashed var(--line);padding-top:.5rem;margin-top:.3rem;font-weight:600}
+.tr-cancel{border:1px solid rgba(229,84,75,.45);background:rgba(229,84,75,.1);color:#ff9a92;
+  border-radius:16px;padding:1rem;text-align:center;font-size:.9rem}
+
 /* ---- shënimi i orarit mbi pjatë (p.sh. 09:00–15:00) ---- */
 .note{font-style:normal;font-size:.62em;font-weight:600;letter-spacing:.06em;
   opacity:.75;white-space:nowrap;vertical-align:middle}
@@ -637,6 +702,103 @@ body.cart-open .scrim{opacity:1;visibility:visible}
   </div>
 </aside>
 
+
+<!-- ══════════════ ARKA ══════════════ -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="coTitle">
+  <div class="sheet-bg" data-co-close></div>
+  <div class="sheet-card">
+    <!-- hapi 1: të dhënat -->
+    <div id="coForm">
+      <div class="sheet-hd">
+        <h3 id="coTitle" data-i18n="co_title"></h3>
+        <button class="x" data-co-close aria-label="Mbyll">✕</button>
+      </div>
+
+      <label class="fld" style="display:grid;gap:.35rem">
+        <span data-i18n="co_kind"></span>
+        <span class="seg">
+          <button type="button" class="on" data-kind="delivery" data-i18n="co_delivery"></button>
+          <button type="button" data-kind="pickup" data-i18n="co_pickup"></button>
+        </span>
+      </label>
+
+      <div class="co-grid">
+        <div class="co-row2">
+          <div class="fld"><label data-i18n="co_name"></label><input id="coName" autocomplete="name"></div>
+          <div class="fld"><label data-i18n="co_phone"></label><input id="coPhone" type="tel" autocomplete="tel"></div>
+        </div>
+        <div class="fld" id="coAddrWrap">
+          <label data-i18n="co_addr"></label>
+          <input id="coAddr" autocomplete="street-address" data-i18n-ph="co_addr_ph">
+        </div>
+        <label class="fld" style="gap:.35rem">
+          <span data-i18n="co_when"></span>
+          <span class="seg">
+            <button type="button" class="on" data-when="asap" data-i18n="co_asap"></button>
+            <button type="button" data-when="time" data-i18n="co_time"></button>
+          </span>
+        </label>
+        <div class="fld hide-when-asap" id="coTimeWrap" style="display:none">
+          <label data-i18n="f_time"></label><input id="coTime" type="time">
+        </div>
+        <label class="fld" style="gap:.35rem">
+          <span data-i18n="co_pay"></span>
+          <span class="seg">
+            <button type="button" class="on" data-pay="cash" data-i18n="co_cash"></button>
+            <button type="button" data-pay="card" data-i18n="co_card"></button>
+          </span>
+        </label>
+        <div class="fld"><label data-i18n="co_note"></label>
+          <textarea id="coNote" rows="2" data-i18n-ph="co_note_ph"></textarea></div>
+      </div>
+
+      <div class="co-sum">
+        <div class="r"><span data-i18n="cart_sub"></span><span id="coSub"></span></div>
+        <div class="r"><span data-i18n="cart_del"></span><span id="coDel"></span></div>
+        <div class="r t"><span data-i18n="cart_total"></span><b id="coTot"></b></div>
+      </div>
+
+      <p class="co-err" id="coErr"></p>
+      <div class="co-act">
+        <button class="wa" id="coSend"><span data-i18n="co_send"></span></button>
+        <button class="link-btn" data-co-close data-i18n="co_back"></button>
+      </div>
+    </div>
+
+    <!-- hapi 2: konfirmimi -->
+    <div id="coOk" style="display:none">
+      <div class="ok-wrap">
+        <span class="ok-badge">✓</span>
+        <h3 data-i18n="ok_title"></h3>
+        <span class="ok-no" id="okNo"></span>
+        <p data-i18n="ok_sub"></p>
+      </div>
+      <div class="co-act">
+        <a class="wa" id="okWa" target="_blank" rel="noopener"><span data-i18n="ok_wa"></span></a>
+        <a class="btn btn-s" id="okTrack" style="justify-content:center"><span data-i18n="ok_track"></span></a>
+        <button class="link-btn" data-co-close data-i18n="ok_new"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ NDJEKJA E POROSISË ══════════════ -->
+<div id="track">
+  <div class="tr-wrap">
+    <div class="tr-hd">
+      <span style="font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)" data-i18n="tr_title"></span>
+      <span class="no" id="trNo"></span>
+      <span id="trStatus" style="color:var(--gold);font-weight:600"></span>
+    </div>
+    <div class="tr-clock" id="trClock"><b id="trTime">–</b><span id="trLabel"></span></div>
+    <div class="tr-steps" id="trSteps"></div>
+    <div class="tr-items" id="trItems"></div>
+    <div class="co-act">
+      <a class="btn btn-s" href="./" style="justify-content:center"><span data-i18n="tr_back"></span></a>
+    </div>
+  </div>
+</div>
+
 <button class="top" id="toTop" aria-label="Kthehu lart">↑</button>
 
 <div class="dock">
@@ -838,6 +1000,14 @@ const app=SPRINT.app({
     document.getElementById('bestT').textContent = l==='sq' ? 'Yjet e kuzhinës sonë' : 'The stars of our kitchen';
     if(activeCat!=='all'){document.querySelectorAll('.sec').forEach(p=>p.classList.toggle('is-on',p.dataset.sec===activeCat));}
   },
+  checkout:(totals,orderMessage)=>openCheckout(totals,orderMessage),
+  onBooking:async (d)=>{
+    // Rezervimi regjistrohet përpara se të hapet WhatsApp-i.
+    await SPRINT.store.createBooking({
+      name:d.name, phone:d.phone, date:d.date, time:d.time,
+      people:d.people, area:d.area, note:d.note, lang:SPRINT.getLang(),
+    });
+  },
   onMenu:(grid)=>{
     // prekja në celular: kthe kartën
     grid.querySelectorAll('.dish').forEach(d=>d.addEventListener('click',e=>{
@@ -888,6 +1058,162 @@ if(!SPRINT.reduced){
     console.warn('Përmbajtja e drejtpërdrejtë nuk u lexua:',err.message);
   }
 })();
+
+
+
+/* ══════════════════ ARKA ══════════════════ */
+const CO = { kind:'delivery', when:'asap', pay:'cash', totals:null, msg:null };
+
+function coSeg(attr, key){
+  document.querySelectorAll(`[data-${attr}]`).forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll(`[data-${attr}]`).forEach(x=>x.classList.toggle('on',x===b));
+    CO[key]=b.dataset[attr];
+    if(attr==='kind'){ coAddrWrap.style.display = CO.kind==='delivery' ? '' : 'none'; coSums(); }
+    if(attr==='when'){ coTimeWrap.style.display = CO.when==='time' ? '' : 'none'; }
+  }));
+}
+coSeg('kind','kind'); coSeg('when','when'); coSeg('pay','pay');
+
+function coSums(){
+  const t=CO.totals; if(!t) return;
+  coSub.textContent=SPRINT.money(t.sub);
+  const del = CO.kind==='pickup' ? SPRINT.money(0)
+    : (!t.known ? SPRINT.T('cart_zone') : (t.del===0 ? SPRINT.T('cart_free') : SPRINT.money(t.del)));
+  coDel.textContent=del;
+  coTot.textContent=SPRINT.money(CO.kind==='pickup' ? t.sub : t.total);
+}
+
+function openCheckout(totals, orderMessage){
+  CO.totals=totals; CO.msg=orderMessage;
+  coForm.style.display=''; coOk.style.display='none';
+  coErr.classList.remove('on');
+  coSums();
+  document.body.classList.remove('cart-open');
+  sheet.classList.add('on');
+  setTimeout(()=>coName.focus(),320);
+}
+document.querySelectorAll('[data-co-close]').forEach(b=>b.addEventListener('click',()=>{
+  sheet.classList.remove('on');
+}));
+addEventListener('keydown',e=>{ if(e.key==='Escape') sheet.classList.remove('on'); });
+
+coSend.addEventListener('click', async ()=>{
+  const name=coName.value.trim(), phone=coPhone.value.trim(), addr=coAddr.value.trim();
+  const err=(k)=>{ coErr.textContent=SPRINT.T(k); coErr.classList.add('on'); };
+  if(name.length<2 || phone.length<5) return err('co_req');
+  if(CO.kind==='delivery' && addr.length<5) return err('co_req_addr');
+  coErr.classList.remove('on');
+
+  const t=CO.totals;
+  const lang=SPRINT.getLang();
+  const wantedAt = CO.when==='time' && coTime.value ? coTime.value : 'asap';
+  const fee = CO.kind==='pickup' ? 0 : (t.known ? t.del : 0);
+  const payload={
+    kind:CO.kind, name, phone, address:CO.kind==='delivery'?addr:null,
+    note:coNote.value.trim()||null, payment:CO.pay, wantedAt, lang,
+    items:t.lines.map(li=>({id:li.m.id,name:li.m[lang==='sq'?'sq':'en'],qty:li.q,price:li.m.p,sum:li.sum})),
+    subtotal:t.sub, deliveryFee:fee, total:t.sub+fee,
+  };
+
+  // Mbrojtje nga dërgimi dy herë me radhë pa dashje.
+  const last=+(localStorage.getItem('sprint-last-order')||0);
+  if(Date.now()-last<25000){
+    return err('co_fail');
+  }
+  coSend.disabled=true; const old=coSend.innerHTML; coSend.textContent='…';
+  try{
+    const row=await SPRINT.store.createOrder(payload);
+    const extra={number:row.number,name,phone,address:addr,kind:CO.kind,wantedAt,payment:CO.pay,note:payload.note};
+    okNo.textContent=SPRINT.T('ok_no')+' '+row.number;
+    okWa.href=SPRINT.waLink(CO.msg(extra));
+    okTrack.href='?p='+encodeURIComponent(row.token);
+    coForm.style.display='none'; coOk.style.display='';
+    // Shporta pastrohet: porosia tashmë është regjistruar.
+    localStorage.setItem('sprint-last-order',String(Date.now()));
+    localStorage.removeItem('sprint-cart');
+    app.state.cart={}; app.renderCart();
+  }catch(e){
+    coErr.textContent=SPRINT.T('co_fail')+' ('+e.message+')'; coErr.classList.add('on');
+  }finally{ coSend.disabled=false; coSend.innerHTML=old; }
+});
+
+/* ══════════════════ NDJEKJA E POROSISË ══════════════════ */
+const FLOW=['new','accepted','preparing','ready','delivering','done'];
+const FLOW_ICON={new:'⏳',accepted:'✓',preparing:'🔥',ready:'🛍️',delivering:'🛵',done:'🏁'};
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function hhmm(ms){ const s=Math.max(0,Math.floor(ms/1000)); return pad(Math.floor(s/60))+':'+pad(s%60); }
+
+let trOrder=null, trTimer=null;
+
+function renderTrack(){
+  const o=trOrder; if(!o) return;
+  const l=SPRINT.getLang();
+  trNo.textContent='#'+o.number;
+  trStatus.textContent=SPRINT.T('st_'+o.status);
+
+  const steps = o.kind==='pickup' ? FLOW.filter(x=>x!=='delivering') : FLOW;
+  const at = steps.indexOf(o.status);
+  trSteps.innerHTML = o.status==='cancelled'
+    ? `<div class="tr-cancel">${SPRINT.T('st_cancelled')}</div>`
+    : steps.map((st,i)=>`
+      <div class="tr-step ${i<at?'done':i===at?'cur':''}">
+        <i>${i<at?'✓':FLOW_ICON[st]}</i><span>${SPRINT.T('st_'+st)}</span>
+      </div>`).join('');
+
+  const items=Array.isArray(o.items)?o.items:[];
+  trItems.innerHTML = items.map(it=>
+    `<div class="r"><span>${it.qty}× ${SPRINT.esc(it.name)}</span><span>${SPRINT.money(it.sum)}</span></div>`
+  ).join('') + `<div class="r t"><span>${SPRINT.T('cart_total')}</span><span>${SPRINT.money(Number(o.total)||0)}</span></div>`;
+
+  tickTrack();
+}
+
+function tickTrack(){
+  const o=trOrder; if(!o) return;
+  const box=trClock;
+  if(o.status==='done'||o.status==='cancelled'){
+    trTime.textContent='—'; trLabel.textContent=SPRINT.T('st_'+o.status);
+    box.className='tr-clock'; return;
+  }
+  if(o.accepted_at && o.prep_minutes){
+    const target=new Date(o.accepted_at).getTime()+o.prep_minutes*60000;
+    const left=target-Date.now();
+    trTime.textContent=hhmm(Math.abs(left));
+    trLabel.textContent=left>=0?SPRINT.T('tr_left'):SPRINT.T('tr_late');
+    box.className='tr-clock '+(left>=0?'ok':'late');
+  }else{
+    trTime.textContent=hhmm(Date.now()-new Date(o.created_at).getTime());
+    trLabel.textContent=SPRINT.T('tr_elapsed');
+    box.className='tr-clock';
+  }
+}
+
+async function openTracking(token){
+  track.classList.add('on');
+  document.body.style.overflow='hidden';
+  try{
+    trOrder=await SPRINT.store.trackOrder(token);
+  }catch(e){ trOrder=null; }
+  if(!trOrder){
+    trNo.textContent='—'; trStatus.textContent=SPRINT.T('tr_notfound');
+    trSteps.innerHTML=''; trItems.innerHTML=''; trTime.textContent='—'; trLabel.textContent='';
+    return;
+  }
+  renderTrack();
+  clearInterval(trTimer);
+  trTimer=setInterval(tickTrack,1000);
+  // Rifreskim i gjendjes çdo gjysmë minute, që klienti të shohë hapin e ri.
+  setInterval(async ()=>{
+    try{ const fresh=await SPRINT.store.trackOrder(token); if(fresh){ trOrder=fresh; renderTrack(); } }
+    catch(e){}
+  },30000);
+}
+
+{
+  const token=new URLSearchParams(location.search).get('p');
+  if(token) openTracking(token);
+}
 
 </script>
 </body>

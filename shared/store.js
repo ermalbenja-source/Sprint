@@ -235,6 +235,149 @@
   }
   const clearLocal = () => localStorage.removeItem(LS_LOCAL);
 
+
+  /* ---------------- porositë dhe rezervimet ---------------- */
+  const LS_ORDERS = 'sprint-local-orders';
+  const LS_BOOKINGS = 'sprint-local-bookings';
+
+  const readLS = (k) => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
+  const writeLS = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+  const rid = () => 'loc-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  /** Krijon porosinë. Kthen numrin dhe kodin e ndjekjes. */
+  async function createOrder(o) {
+    const body = {
+      status: 'new',
+      kind: o.kind || 'delivery',
+      customer_name: o.name,
+      phone: o.phone,
+      address: o.address || null,
+      note: o.note || null,
+      items: o.items,
+      subtotal: o.subtotal,
+      delivery_fee: o.deliveryFee || 0,
+      total: o.total,
+      payment: o.payment || 'cash',
+      wanted_at: o.wantedAt || 'asap',
+      lang: o.lang || 'sq',
+    };
+    if (!configured) {
+      const list = readLS(LS_ORDERS);
+      const row = Object.assign({
+        id: rid(),
+        number: 1000 + list.length,
+        token: Math.random().toString(16).slice(2, 20),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, body);
+      list.unshift(row); writeLS(LS_ORDERS, list);
+      return row;
+    }
+    const rows = await req('/rest/v1/orders', {
+      method: 'POST',
+      headers: headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify([body]),
+    });
+    return rows && rows[0];
+  }
+
+  /** Porositë e ditës (ose të një dite të caktuar), më e reja e para. */
+  async function fetchOrders(opts) {
+    opts = opts || {};
+    if (!configured) {
+      const from = opts.from ? new Date(opts.from).getTime() : 0;
+      return readLS(LS_ORDERS).filter((o) => new Date(o.created_at).getTime() >= from);
+    }
+    let q = '/rest/v1/orders?select=*&order=created_at.desc&limit=' + (opts.limit || 200);
+    if (opts.from) q += '&created_at=gte.' + encodeURIComponent(opts.from);
+    if (opts.to) q += '&created_at=lt.' + encodeURIComponent(opts.to);
+    await ensureAuth();
+    return req(q, { headers: headers() });
+  }
+
+  async function updateOrder(id, patch) {
+    if (!configured) {
+      const list = readLS(LS_ORDERS);
+      const row = list.find((o) => o.id === id);
+      if (row) Object.assign(row, patch, { updated_at: new Date().toISOString() });
+      writeLS(LS_ORDERS, list);
+      return row;
+    }
+    await ensureAuth();
+    const rows = await req('/rest/v1/orders?id=eq.' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(patch),
+    });
+    return rows && rows[0];
+  }
+
+  async function deleteOrder(id) {
+    if (!configured) { writeLS(LS_ORDERS, readLS(LS_ORDERS).filter((o) => o.id !== id)); return; }
+    await ensureAuth();
+    return req('/rest/v1/orders?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE', headers: headers({ Prefer: 'return=minimal' }),
+    });
+  }
+
+  /** Ndjekja publike e një porosie me kodin e saj. */
+  async function trackOrder(token) {
+    if (!configured) return readLS(LS_ORDERS).find((o) => o.token === token) || null;
+    const rows = await req('/rest/v1/rpc/track_order', {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_token: token }),
+    });
+    return (rows && rows[0]) || null;
+  }
+
+  async function createBooking(b) {
+    const body = {
+      status: 'new', customer_name: b.name, phone: b.phone, date: b.date,
+      time: b.time || null, people: b.people || null, area: b.area || null,
+      note: b.note || null, lang: b.lang || 'sq',
+    };
+    if (!configured) {
+      const list = readLS(LS_BOOKINGS);
+      const row = Object.assign({ id: rid(), number: 100 + list.length,
+        created_at: new Date().toISOString() }, body);
+      list.unshift(row); writeLS(LS_BOOKINGS, list);
+      return row;
+    }
+    const rows = await req('/rest/v1/bookings', {
+      method: 'POST',
+      headers: headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify([body]),
+    });
+    return rows && rows[0];
+  }
+
+  async function fetchBookings(opts) {
+    opts = opts || {};
+    if (!configured) return readLS(LS_BOOKINGS);
+    let q = '/rest/v1/bookings?select=*&order=date.asc,time.asc&limit=' + (opts.limit || 200);
+    if (opts.from) q += '&date=gte.' + encodeURIComponent(opts.from);
+    await ensureAuth();
+    return req(q, { headers: headers() });
+  }
+
+  async function updateBooking(id, patch) {
+    if (!configured) {
+      const list = readLS(LS_BOOKINGS);
+      const row = list.find((b) => b.id === id);
+      if (row) Object.assign(row, patch);
+      writeLS(LS_BOOKINGS, list);
+      return row;
+    }
+    await ensureAuth();
+    const rows = await req('/rest/v1/bookings?id=eq.' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(patch),
+    });
+    return rows && rows[0];
+  }
+
   /* ---------------- zbatimi mbi të dhënat e faqes ---------------- */
   /** Fut përmbajtjen e publikuar mbi vlerat e ngurta të shared/data.js. */
   function apply(payload) {
@@ -264,6 +407,8 @@
     signIn, signOut, currentUser, ensureAuth,
     saveItems, deleteItem, saveSettings,
     uploadPhoto, compress,
+    createOrder, fetchOrders, updateOrder, deleteOrder, trackOrder,
+    createBooking, fetchBookings, updateBooking,
     readLocal, writeLocal, clearLocal,
     rowToItem, itemToRow,
   };

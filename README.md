@@ -14,8 +14,9 @@ pa prekur kodin.
 - **Rrota e kategorive** — kliko një fetë, ajo rrotullohet dhe menuja poshtë filtrohet vetë.
 - **Menu interaktive** — 122 artikuj në 6 kategori, me filtra, kërkim dhe etiketa
   (i spikatur, i ri, pikante, vegjetarian). Kartat përmbysen dhe tregojnë përbërësit.
-- **Shportë → WhatsApp** — klienti ndërton porosinë dhe e dërgon të formatuar te 069 666 7000.
-  Shporta ruhet edhe nëse mbyllet faqja.
+- **Shportë → arkë → porosi e regjistruar** — klienti zgjedh dërgesë ose marrje vetë, lë të dhënat,
+  dhe porosia ruhet me numrin e vet përpara se të hapet WhatsApp-i. Shporta ruhet edhe nëse mbyllet faqja.
+- **Ndjekje porosie** — çdo porosi merr një link me hapat dhe kohëmatësin e gjallë.
 - **Rezervim tavoline** — WhatsApp, plus kopje me email kur të vendoset një adresë.
   Ambientet: brenda, terracë ose salla e eventeve.
 - **Galeri** — shfaq fotot e ngarkuara nga paneli; pa to, përdor ilustrimet.
@@ -36,6 +37,8 @@ Hapet te `/admin`. Hyrja bëhet me email dhe fjalëkalim.
 | **Vlerësimet** | Shton, ndryshon dhe fshin vlerësimet që dalin në faqe. |
 | **Publikimi** | Dërgon gjithçka në Supabase, shkarkon një kopje JSON, rikthen një kopje ose kthen menunë fillestare. |
 
+Dy skedat e para — **Porositë** dhe **Rezervimet** — janë ekrani i punës së përditshme; shih më sipër.
+
 **Ndryshim çmimesh me shumicë:** zgjidh kategorinë, shkruaj përqindjen dhe shtyp «Rrit» ose «Ul» —
 p.sh. të gjitha picat +10% me një klikim.
 
@@ -43,6 +46,63 @@ p.sh. të gjitha picat +10% me një klikim.
 
 Asgjë nuk del te klientët derisa të shtypet **«Ruaj ndryshimet»**. Sa herë ka diçka të paruajtur,
 poshtë shfaqet një shirit me numrin e ndryshimeve dhe butonin «Anulo».
+
+
+---
+
+## Porositë dhe rezervimet
+
+Porosia **shkruhet në bazë përpara** se të hapet WhatsApp-i, që të mos humbasë asnjë edhe nëse
+klienti nuk e dërgon mesazhin.
+
+### Si e bën klienti
+
+1. Ndërton shportën dhe shtyp «Dërgo porosinë në WhatsApp».
+2. Hapet arka: me dërgesë apo marr vetë, emri, telefoni, adresa, kur e do, si paguan, shënim.
+3. Porosia regjistrohet dhe merr një numër (`#1042`). Shporta pastrohet vetë.
+4. Klienti sheh dy butona: **Hap WhatsApp** (mesazhi del i gatshëm, me numrin e porosisë) dhe
+   **Ndiq porosinë**.
+
+### Ndjekja nga klienti
+
+Linku `sajti-yt.al/?p=KODI` hap një faqe ndjekjeje me hapat e porosisë, kohëmatësin e gjallë dhe
+listën e pjatave. Përpara pranimit numëron kohën që ka kaluar; pas pranimit numëron **mbrapsht**
+drejt kohës që i ke premtuar, dhe kalon në të kuqe kur kalon afati. Gjendja rifreskohet vetë çdo
+30 sekonda.
+
+Faqja e ndjekjes kthen vetëm fusha jo-personale (numri, gjendja, koha, pjatët) dhe vetëm për një
+kod të saktë — jo emrin, telefonin apo adresën e askujt.
+
+### Tabela e porosive te paneli
+
+Skeda **Porositë** është ekrani i punës së përditshme:
+
+- **Kohëmatësi i gjallë** në çdo kartë. Përpara pranimit numëron nga zero dhe kalon në portokalli
+  pas 3 minutash, në të kuqe pas 6 — sa shpejt përgjigjesh është pjesë e shërbimit. Pas pranimit
+  numëron mbrapsht drejt kohës së premtuar dhe shkon `+02:14` e kuqe kur je me vonesë.
+- **Rrjedha e gjendjeve:** E re → Pranuar → Në përgatitje → Gati → Në rrugë → Përfunduar.
+  Për porositë «marr vetë», hapi «Në rrugë» kapërcehet vetë.
+- **Pranimi me një prekje:** 10′ · 15′ · 20′ · 30′ · 45′ · 60′. Koha që zgjedh është ajo që sheh klienti.
+- **Zilja** për çdo porosi të re, plus titulli i skedës që pulson. Fiket me butonin 🔔.
+- **Rifreskim vetvetiu** çdo 15 sekonda; ndalon kur skeda nuk është në pamje.
+- **Numri i telefonit klikohet** për të marrë klientin, **adresa** hap Google Maps, dhe një link
+  hap WhatsApp-in e tij drejtpërdrejt.
+- **Statistikat e ditës:** porositë, xhiroja, sa janë në punë dhe koha mesatare e pranimit.
+  Zgjidh një datë tjetër për të parë ditët e shkuara.
+- **Filtrat** me numra: Në punë · Të reja · Në përgatitje · Gati · Në rrugë · Përfunduar.
+
+Skeda **Rezervimet** punon njësoj, me rrjedhën I ri → Konfirmuar → Erdhi → Përfunduar.
+
+> Pa Supabase, tabela shfaq tri porosi dhe dy rezervime **shembull**, të shënuara qartë, që ta
+> shohësh si punon. Ato nuk shkojnë kurrë në bazë.
+
+### Një shënim për sigurinë
+
+Që klienti të porosisë pa llogari, tabela `orders` pranon shkrime nga këdo — por **vetëm krijim**,
+kurrë lexim. Kufizimet në bazë (gjatësia e fushave, maksimumi 60 artikuj, totali deri 500 000 L)
+dhe një ndalesë prej 25 sekondash midis porosive nga i njëjti shfletues e mbajnë të kontrolluar.
+Nëse ndonjëherë has spam, hapi tjetër është ta kalosh krijimin e porosisë përmes një funksioni
+Netlify me Turnstile përpara.
 
 ---
 
@@ -118,7 +178,7 @@ cd dist && python3 -m http.server 8899          # hape http://127.0.0.1:8899/
 shared/config.js   ← çelësat e Supabase (këtu i vendos)
 shared/data.js     ← menuja fillestare, kontaktet dhe përkthimet
 shared/art.js      ← 21 ilustrimet SVG të pjatave
-shared/store.js    ← lidhja me Supabase: leximi, shkrimi, ngarkimi i fotove
+shared/store.js    ← lidhja me Supabase: menuja, porositë, rezervimet, fotot
 shared/app.js      ← motori: filtra, kërkim, shportë, WhatsApp, rezervim, dygjuhësia
 src/site.html      ← faqja zyrtare
 src/admin.html     ← pamja e panelit
@@ -147,6 +207,7 @@ menjëherë edhe në internet të ngadaltë; pastaj ajo zëvendësohet pa u drid
 | Orari i plotë | ⛔ Vetëm 09:00–15:00 për tavat është i konfirmuar |
 | Tarifa e dërgesës | ⛔ Bosh → shporta shfaq «Sipas zonës» |
 | Email për rezervimet | ⛔ Bosh → butoni i email-it fshihet vetë |
+| Porositë dhe rezervimet | ✅ Regjistrohen dhe menaxhohen te paneli |
 | Vlerësimet | ⛔ Tekst vendmbajtës — **zëvendësoji para se faqja të dalë online** |
 
 ### ⚠️ Vlerësimet

@@ -934,6 +934,53 @@ window.SPRINT = (function () {
     b_pizzas:     { sq:'Pica',        en:'Pizzas' },
     b_kitchens:   { sq:'Kuzhina',     en:'Kitchens' },
     b_rating:     { sq:'Vlerësim',    en:'Rating' },
+
+    /* ---- arka dhe ndjekja e porosisë ---- */
+    co_title:     { sq:'Përfundo porosinë', en:'Complete your order' },
+    co_kind:      { sq:'Si e do porosinë?', en:'How would you like it?' },
+    co_delivery:  { sq:'Me dërgesë',    en:'Delivery' },
+    co_pickup:    { sq:'Marr vetë',     en:'Pick-up' },
+    co_name:      { sq:'Emri',          en:'Name' },
+    co_phone:     { sq:'Telefoni',      en:'Phone' },
+    co_addr:      { sq:'Adresa e plotë', en:'Full address' },
+    co_addr_ph:   { sq:'Rruga, ndërtesa, kati, apartamenti', en:'Street, building, floor, flat' },
+    co_when:      { sq:'Kur',           en:'When' },
+    co_asap:      { sq:'Sa më shpejt',  en:'As soon as possible' },
+    co_time:      { sq:'Për një orë të caktuar', en:'At a set time' },
+    co_pay:       { sq:'Pagesa',        en:'Payment' },
+    co_cash:      { sq:'Para në dorë',  en:'Cash' },
+    co_card:      { sq:'Me kartë',      en:'Card' },
+    co_note:      { sq:'Shënim për kuzhinën', en:'Note for the kitchen' },
+    co_note_ph:   { sq:'Pa qepë, kampanellë e prishur, kati i 3-të…', en:'No onion, broken doorbell, third floor…' },
+    co_send:      { sq:'Dërgo porosinë', en:'Place the order' },
+    co_back:      { sq:'Kthehu te shporta', en:'Back to the cart' },
+    co_req:       { sq:'Plotëso emrin dhe telefonin.', en:'Please fill in your name and phone.' },
+    co_req_addr:  { sq:'Për dërgesë duhet edhe adresa.', en:'Delivery also needs an address.' },
+    co_fail:      { sq:'Porosia nuk u regjistrua dot. Provo sërish ose na merr në telefon.',
+                    en:'The order could not be saved. Try again or give us a call.' },
+
+    ok_title:     { sq:'Porosia u regjistrua!', en:'Your order is in!' },
+    ok_sub:       { sq:'Na dërgo edhe një mesazh në WhatsApp që ta konfirmojmë menjëherë.',
+                    en:'Send us a WhatsApp message too so we can confirm right away.' },
+    ok_wa:        { sq:'Hap WhatsApp', en:'Open WhatsApp' },
+    ok_track:     { sq:'Ndiq porosinë', en:'Track the order' },
+    ok_new:       { sq:'Porosi e re',   en:'New order' },
+    ok_no:        { sq:'Porosia nr.',   en:'Order no.' },
+
+    tr_title:     { sq:'Porosia jote',  en:'Your order' },
+    tr_elapsed:   { sq:'Nga porosia',   en:'Since ordered' },
+    tr_left:      { sq:'Mbeten',        en:'Remaining' },
+    tr_late:      { sq:'Me vonesë',     en:'Running late' },
+    tr_notfound:  { sq:'Kjo porosi nuk u gjet.', en:'That order was not found.' },
+    tr_back:      { sq:'Kthehu te faqja', en:'Back to the site' },
+
+    st_new:        { sq:'Pritet konfirmimi', en:'Awaiting confirmation' },
+    st_accepted:   { sq:'E pranuar',      en:'Accepted' },
+    st_preparing:  { sq:'Në përgatitje',  en:'Being prepared' },
+    st_ready:      { sq:'Gati',           en:'Ready' },
+    st_delivering: { sq:'Në rrugë',       en:'On the way' },
+    st_done:       { sq:'Përfunduar',     en:'Completed' },
+    st_cancelled:  { sq:'E anuluar',      en:'Cancelled' },
     lang_label:   { sq:'EN',          en:'SQ' },
   };
 
@@ -1688,17 +1735,34 @@ ${S('drink', `
       if (opts.onCart) opts.onCart(t);
     }
 
-    function orderMessage() {
+    function orderMessage(extra) {
       const l = state.lang, t = totals();
+      extra = extra || null;
       const head = l === 'sq'
         ? `🍕 *POROSI E RE — SPRINT Durrës*\n`
         : `🍕 *NEW ORDER — SPRINT Durrës*\n`;
       const lines = t.lines.map((li) =>
         `• ${li.q}× ${li.m[l === 'sq' ? 'sq' : 'en']} — ${S.money(li.sum)}`).join('\n');
       const sums = `\n\n${S.T('cart_sub')}: ${S.money(t.sub)}\n${S.T('cart_del')}: ${deliveryLabel(t)}\n*${S.T('cart_total')}: ${S.money(t.total)}*`;
-      const foot = l === 'sq'
-        ? `\n\n📍 Adresa ime: \n📞 Numri im: \n⏰ E dua për orën: `
-        : `\n\n📍 My address: \n📞 My number: \n⏰ Wanted for: `;
+      let foot;
+      if (extra) {
+        const isDel = extra.kind === 'delivery';
+        foot = l === 'sq'
+          ? `\n\n🧾 Porosia nr. *${extra.number}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
+            (isDel ? `\n📍 ${extra.address}` : `\n🏃 Marr vetë në lokal`) +
+            `\n⏰ ${extra.wantedAt === 'asap' ? 'Sa më shpejt' : 'Për orën ' + extra.wantedAt}` +
+            `\n💵 ${extra.payment === 'cash' ? 'Me para në dorë' : 'Me kartë'}` +
+            (extra.note ? `\n📝 ${extra.note}` : '')
+          : `\n\n🧾 Order no. *${extra.number}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
+            (isDel ? `\n📍 ${extra.address}` : `\n🏃 Collecting in person`) +
+            `\n⏰ ${extra.wantedAt === 'asap' ? 'As soon as possible' : 'For ' + extra.wantedAt}` +
+            `\n💵 ${extra.payment === 'cash' ? 'Cash on delivery' : 'Card'}` +
+            (extra.note ? `\n📝 ${extra.note}` : '');
+      } else {
+        foot = l === 'sq'
+          ? `\n\n📍 Adresa ime: \n📞 Numri im: \n⏰ E dua për orën: `
+          : `\n\n📍 My address: \n📞 My number: \n⏰ Wanted for: `;
+      }
       return head + lines + sums + foot;
     }
 
@@ -1748,11 +1812,21 @@ ${S('drink', `
       const err = form.querySelector('[data-form-error]');
       const show = (msg) => { if (err) { err.textContent = msg; err.classList.toggle('is-on', !!msg); } };
 
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const d = read();
         if (!valid(d)) { show(S.T('f_req')); return; }
         show('');
+        const btn = form.querySelector('[type=submit]');
+        const label = btn ? btn.innerHTML : '';
+        if (btn) { btn.disabled = true; btn.textContent = '…'; }
+        try {
+          if (opts.onBooking) await opts.onBooking(d);
+        } catch (err) {
+          show(err.message || 'Rezervimi nuk u regjistrua dot.');
+        } finally {
+          if (btn) { btn.disabled = false; btn.innerHTML = label; }
+        }
         form.classList.add('is-sent');
         window.open(S.waLink(bookMessage(d)), '_blank', 'noopener');
       });
@@ -1791,6 +1865,16 @@ ${S('drink', `
       const si = $('[data-search]');
       if (si) si.addEventListener('input', () => { state.q = si.value; renderMenu(); });
       $$('[data-cart-clear]').forEach((b) => b.addEventListener('click', clearCart));
+
+      // Kur faqja ka një hap arke, butoni i shportës e hap atë në vend që të
+      // kalojë drejt e në WhatsApp — kështu porosia regjistrohet përpara.
+      if (opts.checkout) {
+        $$('[data-cart-send]').forEach((b) => b.addEventListener('click', (e) => {
+          if (b.classList.contains('is-disabled')) return;
+          e.preventDefault();
+          opts.checkout(totals(), orderMessage);
+        }));
+      }
 
       // panelin e shportës
       $$('[data-cart-open]').forEach((b) => b.addEventListener('click', () =>
