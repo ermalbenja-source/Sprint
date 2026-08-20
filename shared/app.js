@@ -382,7 +382,8 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 
-    return { state, renderMenu, renderCart, totals, revealScan, toggleLang };
+    return { state, renderMenu, renderCart, renderStatic, renderFilters, applyI18n,
+             totals, revealScan, toggleLang };
   }
 
   S.app = app;

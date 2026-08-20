@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>SPRINT · Paneli i menaxhimit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bakbak+One&family=Outfit:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bakbak+One&family=Outfit:wght@300;400;500;600;700&display=swap"></noscript>
+<style>
+/* ============================================================================
+   SPRINT — Paneli i menaxhimit
+   Mjet pune, jo faqe reklame: i dendur, i lexueshëm, me gjendjen gjithnjë të dukshme.
+   ========================================================================== */
+:root{
+  --brand:#DE7F1C; --brand-lt:#FFA33F; --brand-dk:#8A4A10; --gold:#FFC244;
+  --bg:#0C0A0B; --pan:#151011; --pan-2:#1E1618; --pan-3:#271D1F;
+  --txt:#F5EEE4; --muted:#A2949A; --line:rgba(255,255,255,.11);
+  --ok:#4CAF6D; --warn:#E6B23C; --bad:#E5544B;
+  --display:'Bakbak One',Impact,sans-serif;
+  --body:'Outfit',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--gold)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1.1}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+.wrap{width:min(100% - 1.6rem,1180px);margin-inline:auto}
+.hide{display:none!important}
+
+/* ---------- fusha ---------- */
+.f{display:grid;gap:.3rem}
+.f label{font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.f input,.f select,.f textarea{background:#0F0B0C;border:1.5px solid var(--line);border-radius:11px;
+  padding:.62rem .8rem;font-size:.94rem;outline:none;transition:border-color .2s;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--brand)}
+.f textarea{resize:vertical;min-height:66px}
+.f select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 17px) 52%,calc(100% - 12px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+.f .hint{font-size:.72rem;color:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+
+/* ---------- butonat ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border-radius:11px;
+  padding:.6rem 1.05rem;font-size:.85rem;font-weight:600;transition:.22s;white-space:nowrap}
+.btn-p{background:var(--brand);color:#1B0D02}
+.btn-p:hover{background:var(--brand-lt);transform:translateY(-1px)}
+.btn-g{border:1.5px solid var(--line)}
+.btn-g:hover{border-color:var(--gold);color:var(--gold)}
+.btn-d{border:1.5px solid rgba(229,84,75,.45);color:#ff9a92}
+.btn-d:hover{background:var(--bad);color:#fff;border-color:var(--bad)}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btn-sm{padding:.36rem .7rem;font-size:.76rem;border-radius:9px}
+
+/* ---------- hyrja ---------- */
+#gate{min-height:100dvh;display:grid;place-items:center;padding:1.4rem}
+.card{background:var(--pan);border:1px solid var(--line);border-radius:22px;padding:clamp(1.5rem,4vw,2.4rem)}
+#gate .card{width:min(100%,420px);display:grid;gap:1rem}
+.brandmark{font-family:var(--display);font-size:2rem;letter-spacing:.02em}
+.brandmark em{font-style:normal;color:var(--brand)}
+.gate-sub{color:var(--muted);font-size:.9rem;margin:0}
+.msg{border-radius:11px;padding:.7rem .9rem;font-size:.85rem;display:none}
+.msg.on{display:block}
+.msg.err{background:rgba(229,84,75,.14);border:1px solid rgba(229,84,75,.4);color:#ffb0aa}
+.msg.ok{background:rgba(76,175,109,.14);border:1px solid rgba(76,175,109,.4);color:#a7e5bd}
+.msg.warn{background:rgba(230,178,60,.12);border:1px solid rgba(230,178,60,.38);color:#f0d193}
+
+/* ---------- shiriti i sipërm ---------- */
+header{position:sticky;top:0;z-index:60;background:rgba(12,10,11,.94);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:.9rem;padding:.7rem 0;flex-wrap:wrap}
+.top .brandmark{font-size:1.4rem}
+.who{font-size:.76rem;color:var(--muted);margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:block}
+.dot.local{background:var(--warn)}
+.pill{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:999px;padding:.22rem .6rem;color:var(--muted)}
+.pill.dirty{border-color:var(--warn);color:var(--warn)}
+.pill.clean{border-color:rgba(76,175,109,.5);color:var(--ok)}
+
+/* ---------- skedat ---------- */
+.tabs{display:flex;gap:.3rem;overflow-x:auto;border-bottom:1px solid var(--line);padding-bottom:0}
+.tab{padding:.7rem 1rem;font-size:.86rem;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;
+  white-space:nowrap;transition:.2s}
+.tab:hover{color:var(--txt)}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand)}
+main{padding:1.4rem 0 5rem}
+.view{display:grid;gap:1.1rem}
+
+/* ---------- shiriti i veglave ---------- */
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.tools .search{flex:1;min-width:180px}
+.count{font-size:.78rem;color:var(--muted);white-space:nowrap}
+
+/* ---------- lista e pjatave ---------- */
+.items{display:grid;gap:.5rem}
+.item{display:grid;grid-template-columns:56px minmax(0,1fr) auto auto auto;gap:.8rem;align-items:center;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.55rem .7rem;transition:.2s}
+.item:hover{border-color:rgba(222,127,28,.5)}
+.item.off{opacity:.5}
+.thumb{width:56px;height:56px;border-radius:10px;overflow:hidden;background:var(--pan-3);
+  display:grid;place-items:center;flex-shrink:0}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb svg{width:82%}
+.nm{min-width:0}
+.nm b{display:block;font-weight:600;font-size:.94rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nm span{font-size:.74rem;color:var(--muted)}
+.price-in{width:104px}
+.price-in input{background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.4rem .5rem;
+  font-size:.9rem;font-weight:600;text-align:right;width:100%;outline:none;font-variant-numeric:tabular-nums}
+.price-in input:focus{border-color:var(--brand)}
+.price-in input.changed{border-color:var(--gold);color:var(--gold)}
+.sw{width:42px;height:24px;border-radius:999px;background:var(--pan-3);border:1.5px solid var(--line);
+  position:relative;transition:.22s;flex-shrink:0}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;
+  background:var(--muted);transition:.22s}
+.sw.on{background:rgba(76,175,109,.28);border-color:var(--ok)}
+.sw.on::after{left:22px;background:var(--ok)}
+.nm .tagdots{display:flex;gap:.22rem;margin-top:.25rem;flex-wrap:wrap}
+.nm .tagdot{font-size:.56rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:.12rem .4rem;border-radius:5px;line-height:1.5}
+.nm .td-hot{background:var(--bad);color:#2A0806}
+.nm .td-veg{background:var(--ok);color:#062012}
+.nm .td-new{background:var(--gold);color:#241703}
+.nm .td-top{background:#fff;color:#17110f}
+.empty{text-align:center;color:var(--muted);padding:2.6rem 0;font-size:.9rem}
+
+/* ---------- sirtari i redaktimit ---------- */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.66);backdrop-filter:blur(3px);z-index:80;
+  opacity:0;visibility:hidden;transition:.3s}
+.scrim.on{opacity:1;visibility:visible}
+.drawer{position:fixed;top:0;right:0;height:100dvh;width:min(520px,100%);z-index:90;background:var(--pan);
+  border-left:1px solid var(--line);transform:translateX(102%);transition:transform .38s cubic-bezier(.5,0,.2,1);
+  display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.dr-hd{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:1rem 1.2rem;border-bottom:1px solid var(--line)}
+.dr-hd h2{font-size:1.2rem}
+.dr-body{flex:1;overflow-y:auto;padding:1.2rem;display:grid;gap:.9rem;align-content:start}
+.dr-ft{border-top:1px solid var(--line);padding:.9rem 1.2rem;display:flex;gap:.6rem;background:#0F0B0C}
+.dr-ft .btn-p{flex:1}
+.x{width:34px;height:34px;border-radius:10px;border:1.5px solid var(--line);display:grid;place-items:center;transition:.2s}
+.x:hover{background:var(--bad);border-color:var(--bad)}
+
+/* ---------- fotoja ---------- */
+.photo{display:grid;grid-template-columns:110px 1fr;gap:.9rem;align-items:start}
+.photo-box{width:110px;height:110px;border-radius:14px;overflow:hidden;background:var(--pan-3);
+  border:1.5px dashed var(--line);display:grid;place-items:center;position:relative}
+.photo-box img{width:100%;height:100%;object-fit:cover}
+.photo-box svg{width:78%}
+.photo-box.busy::after{content:'';position:absolute;inset:0;background:rgba(12,10,11,.72);
+  background-image:radial-gradient(circle,var(--gold) 3px,transparent 3px);background-size:14px 14px;
+  animation:pulse 1s linear infinite}
+@keyframes pulse{to{background-position:14px 0}}
+.photo-act{display:grid;gap:.45rem;align-content:start}
+.photo-act .hint{font-size:.72rem;color:var(--muted);line-height:1.45}
+input[type=file]{display:none}
+
+/* ---------- etiketat ---------- */
+.tagpick{display:flex;gap:.4rem;flex-wrap:wrap}
+.tagpick button{border:1.5px solid var(--line);border-radius:9px;padding:.34rem .7rem;font-size:.76rem;
+  font-weight:600;transition:.2s;color:var(--muted)}
+.tagpick button.on{background:var(--brand);border-color:var(--brand);color:#1B0D02}
+
+/* ---------- tabelat e vogla (orari, review) ---------- */
+.mini{display:grid;gap:.5rem}
+.mini-row{display:grid;grid-template-columns:1fr 1fr auto;gap:.5rem;align-items:center}
+.rev-row{background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.85rem;display:grid;gap:.6rem}
+.rev-top{display:grid;grid-template-columns:1fr 90px 1fr auto;gap:.5rem;align-items:center}
+
+/* ---------- publikimi ---------- */
+.pub{display:grid;gap:.9rem}
+.pub-row{background:var(--pan);border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.2rem;
+  display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.pub-row div{flex:1;min-width:200px}
+.pub-row b{display:block;font-size:.95rem;margin-bottom:.15rem}
+.pub-row p{margin:0;font-size:.83rem;color:var(--muted)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
+  background:var(--pan-3);padding:.1em .4em;border-radius:5px}
+.steps-ol{padding-left:1.2rem;margin:.6rem 0 0;display:grid;gap:.4rem;font-size:.86rem;color:var(--muted)}
+
+/* ---------- njoftimi ---------- */
+#toast{position:fixed;left:50%;bottom:1.4rem;translate:-50% 0;z-index:100;
+  background:var(--pan-2);border:1px solid var(--line);border-radius:13px;padding:.75rem 1.2rem;
+  font-size:.87rem;box-shadow:0 20px 44px -18px #000;opacity:0;transform:translateY(14px);
+  transition:.3s;pointer-events:none;max-width:min(92vw,460px)}
+#toast.on{opacity:1;transform:none}
+#toast.err{border-color:rgba(229,84,75,.55);color:#ffb0aa}
+#toast.ok{border-color:rgba(76,175,109,.55);color:#a7e5bd}
+
+/* ---------- shiriti i ruajtjes ---------- */
+.savebar{position:fixed;left:50%;translate:-50% 0;bottom:1.2rem;z-index:70;display:flex;gap:.7rem;
+  align-items:center;background:rgba(21,16,17,.95);backdrop-filter:blur(14px);border:1px solid var(--line);
+  border-radius:999px;padding:.55rem .6rem .55rem 1.2rem;box-shadow:0 20px 44px -20px #000;
+  transform:translate(-50%,160%);transition:transform .4s cubic-bezier(.3,1.3,.4,1)}
+.savebar.on{transform:translate(-50%,0)}
+.savebar span{font-size:.84rem;color:var(--warn);white-space:nowrap}
+
+@media(max-width:720px){
+  .item{grid-template-columns:48px minmax(0,1fr) auto;grid-template-areas:
+    'thumb name name' 'price sw hap';row-gap:.6rem;align-items:center}
+  .thumb{width:48px;height:48px;grid-area:thumb}
+  .item .nm{grid-area:name}
+  .item .price-in{grid-area:price;width:100%}
+  .item .sw{grid-area:sw;justify-self:center}
+  .item .btn-sm{grid-area:hap}
+  .tools{gap:.5rem}
+  .tools .btn{flex:1}
+  .row2,.row3{grid-template-columns:1fr}
+  .rev-top{grid-template-columns:1fr}
+  .savebar{width:calc(100% - 1.6rem);border-radius:16px;justify-content:space-between}
+}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HYRJA ══════════════════ -->
+<div id="gate">
+  <form class="card" id="loginForm">
+    <div>
+      <span class="brandmark">SPR<em>I</em>NT</span>
+      <h1 style="font-size:1.3rem;margin-top:.5rem">Paneli i menaxhimit</h1>
+    </div>
+    <p class="gate-sub">Hyr për të ndryshuar çmimet, pjatët dhe fotot e faqes.</p>
+    <div class="msg" id="gateMsg"></div>
+    <div class="f"><label for="em">Email</label>
+      <input id="em" type="email" autocomplete="username" required></div>
+    <div class="f"><label for="pw">Fjalëkalimi</label>
+      <input id="pw" type="password" autocomplete="current-password" required></div>
+    <button class="btn btn-p" type="submit" id="loginBtn">Hyr në panel</button>
+    <button class="btn btn-g" type="button" id="localBtn">Provoje pa llogari</button>
+  </form>
+</div>
+
+<!-- ══════════════════ PANELI ══════════════════ -->
+<div id="panel" class="hide">
+  <header>
+    <div class="wrap">
+      <div class="top">
+        <span class="brandmark">SPR<em>I</em>NT</span>
+        <span class="pill" id="modePill"></span>
+        <span class="who"><span class="dot" id="modeDot"></span><span id="whoTxt"></span>
+          <button class="btn btn-g btn-sm" id="outBtn">Dil</button></span>
+      </div>
+      <nav class="tabs">
+        <button class="tab on" data-tab="menu">Menuja</button>
+        <button class="tab" data-tab="cats">Kategoritë</button>
+        <button class="tab" data-tab="set">Cilësimet</button>
+        <button class="tab" data-tab="rev">Vlerësimet</button>
+        <button class="tab" data-tab="pub">Publikimi</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ─────── MENUJA ─────── -->
+    <section class="view" id="v-menu">
+      <div class="tools">
+        <div class="f search"><input id="q" type="search" placeholder="Kërko pjatë…"></div>
+        <div class="f"><select id="catFilter"></select></div>
+        <span class="count" id="cnt"></span>
+        <button class="btn btn-p" id="addBtn">+ Pjatë e re</button>
+      </div>
+      <div class="tools" style="gap:.5rem">
+        <span class="count">Ndrysho të gjitha çmimet e një kategorie:</span>
+        <div class="f" style="width:150px"><select id="bulkCat"></select></div>
+        <div class="f" style="width:96px"><input id="bulkPct" type="number" step="1" value="10" inputmode="numeric"></div>
+        <span class="count">%</span>
+        <button class="btn btn-g btn-sm" id="bulkUp">Rrit</button>
+        <button class="btn btn-g btn-sm" id="bulkDown">Ul</button>
+      </div>
+      <div class="items" id="itemList"></div>
+    </section>
+
+    <!-- ─────── KATEGORITË ─────── -->
+    <section class="view hide" id="v-cats">
+      <p class="count">Renditja këtu përcakton renditjen e fetave të rrotës dhe të filtrave në faqe.</p>
+      <div class="items" id="catList"></div>
+      <button class="btn btn-g" id="addCat">+ Kategori e re</button>
+    </section>
+
+    <!-- ─────── CILËSIMET ─────── -->
+    <section class="view hide" id="v-set">
+      <div class="card" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">Kontaktet</h2>
+        <div class="row2">
+          <div class="f"><label>Telefoni siç shfaqet</label><input id="s-phone"></div>
+          <div class="f"><label>Telefoni për klikim</label><input id="s-phoneHref" placeholder="+355696667000"></div>
+        </div>
+        <div class="row2">
+          <div class="f"><label>WhatsApp (pa + dhe pa hapësira)</label><input id="s-wa" placeholder="355696667000"></div>
+          <div class="f"><label>Email për rezervimet</label><input id="s-email" type="email"
+            placeholder="lëre bosh dhe butoni fshihet"></div>
+        </div>
+        <div class="row2">
+          <div class="f"><label>Adresa (shqip)</label><input id="s-addr-sq"></div>
+          <div class="f"><label>Adresa (anglisht)</label><input id="s-addr-en"></div>
+        </div>
+        <div class="row3">
+          <div class="f"><label>Gjerësia (lat)</label><input id="s-lat" inputmode="decimal"></div>
+          <div class="f"><label>Gjatësia (lng)</label><input id="s-lng" inputmode="decimal"></div>
+          <div class="f"><label>Tarifa e dërgesës</label><input id="s-fee" inputmode="numeric"
+            placeholder="bosh = «Sipas zonës»"></div>
+        </div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">Orari</h2>
+        <div class="mini" id="hoursSq"></div>
+        <button class="btn btn-g btn-sm" id="addHour" style="justify-self:start">+ Rresht orari</button>
+      </div>
+
+      <div class="card" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">Rrjetet sociale</h2>
+        <p class="count">Linket e lëna bosh fshihen vetvetiu nga faqja.</p>
+        <div class="f"><label>Instagram</label><input id="s-ig" type="url"></div>
+        <div class="row2">
+          <div class="f"><label>Facebook</label><input id="s-fb" type="url"></div>
+          <div class="f"><label>TikTok</label><input id="s-tt" type="url"></div>
+        </div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">Salla e eventeve</h2>
+        <div class="row2">
+          <div class="f"><label>Teksti (shqip)</label><textarea id="s-ev-sq"></textarea></div>
+          <div class="f"><label>Teksti (anglisht)</label><textarea id="s-ev-en"></textarea></div>
+        </div>
+        <div class="photo">
+          <div class="photo-box" id="evBox"><svg viewBox="0 0 200 200"><use href="#art-meze"/></svg></div>
+          <div class="photo-act">
+            <button class="btn btn-g btn-sm" id="evPick">Ngarko foto të sallës</button>
+            <button class="btn btn-d btn-sm" id="evClear">Hiq foton</button>
+            <p class="hint">Fotoja zvogëlohet vetë në 1200 px dhe ngjeshet para ngarkimit.</p>
+          </div>
+        </div>
+        <input type="file" id="evFile" accept="image/*">
+      </div>
+    </section>
+
+    <!-- ─────── VLERËSIMET ─────── -->
+    <section class="view hide" id="v-rev">
+      <p class="count">Vendos këtu vlerësime reale nga Google ose Facebook. Mos shkruaj vlerësime të shpikura.</p>
+      <div class="items" id="revList"></div>
+      <button class="btn btn-g" id="addRev" style="justify-self:start">+ Vlerësim</button>
+    </section>
+
+    <!-- ─────── PUBLIKIMI ─────── -->
+    <section class="view hide" id="v-pub">
+      <div class="msg warn on" id="pubMode"></div>
+      <div class="pub">
+        <div class="pub-row">
+          <div><b>Dërgo gjithçka në Supabase</b>
+            <p>E mbush bazën me menunë aktuale — 122 pjatët, kategoritë dhe cilësimet. Përdore një herë në fillim.</p></div>
+          <button class="btn btn-p" id="seedBtn">Dërgo tani</button>
+        </div>
+        <div class="pub-row">
+          <div><b>Shkarko një kopje</b>
+            <p>Ruan gjithçka në një skedar JSON — kopje sigurie para ndryshimeve të mëdha.</p></div>
+          <button class="btn btn-g" id="expBtn">Shkarko JSON</button>
+        </div>
+        <div class="pub-row">
+          <div><b>Ngarko një kopje</b>
+            <p>Rikthen gjendjen nga një skedar JSON i shkarkuar më parë.</p></div>
+          <button class="btn btn-g" id="impBtn">Zgjidh skedarin</button>
+          <input type="file" id="impFile" accept="application/json,.json">
+        </div>
+        <div class="pub-row">
+          <div><b>Rikthe menunë fillestare</b>
+            <p>Zëvendëson gjithçka në panel me menunë origjinale të faqes. Nuk prek Supabase derisa të shtypësh «Ruaj».</p></div>
+          <button class="btn btn-d" id="resetBtn">Rikthe</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="font-size:1.1rem;margin-bottom:.6rem">Si lidhet Supabase</h2>
+        <ol class="steps-ol">
+          <li>Krijo një projekt falas te <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a>.</li>
+          <li>SQL Editor → ngjit skedarin <code>supabase/schema.sql</code> nga repo-ja → Run.</li>
+          <li>Authentication → Users → Add user: email-i dhe fjalëkalimi me të cilin hyn këtu.</li>
+          <li>Project Settings → Data API → kopjo <code>Project URL</code> dhe çelësin <code>anon</code>
+              te <code>shared/config.js</code>, pastaj ribëj publikimin.</li>
+          <li>Kthehu këtu, hyr, dhe shtyp «Dërgo tani» më sipër.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <div class="savebar" id="saveBar">
+    <span id="saveTxt"></span>
+    <button class="btn btn-g btn-sm" id="discardBtn">Anulo</button>
+    <button class="btn btn-p" id="saveBtn">Ruaj ndryshimet</button>
+  </div>
+</div>
+
+<!-- ══════════════════ SIRTARI ══════════════════ -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Redakto pjatën">
+  <div class="dr-hd"><h2 id="drTitle">Redakto</h2><button class="x" id="drClose" aria-label="Mbyll">✕</button></div>
+  <div class="dr-body">
+    <div class="photo">
+      <div class="photo-box" id="dPhoto"></div>
+      <div class="photo-act">
+        <button class="btn btn-g btn-sm" id="dPick">Ngarko / ndërro foton</button>
+        <button class="btn btn-d btn-sm" id="dPhotoClear">Hiq foton</button>
+        <p class="hint">Pa foto, faqja përdor ilustrimin e zgjedhur më poshtë.</p>
+      </div>
+    </div>
+    <input type="file" id="dFile" accept="image/*">
+
+    <div class="row2">
+      <div class="f"><label>Emri (shqip)</label><input id="d-sq"></div>
+      <div class="f"><label>Emri (anglisht)</label><input id="d-en"></div>
+    </div>
+    <div class="f"><label>Përshkrimi (shqip)</label><textarea id="d-dsq"></textarea></div>
+    <div class="f"><label>Përshkrimi (anglisht)</label><textarea id="d-den"></textarea></div>
+    <div class="row3">
+      <div class="f"><label>Çmimi (Lekë)</label><input id="d-p" inputmode="numeric"></div>
+      <div class="f"><label>Njësia</label><input id="d-unit" placeholder="p.sh. /copë"></div>
+      <div class="f"><label>Shënim</label><input id="d-note" placeholder="p.sh. 09:00–15:00"></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Kategoria</label><select id="d-c"></select></div>
+      <div class="f"><label>Ilustrimi</label><select id="d-art"></select></div>
+    </div>
+    <div class="f"><label>Etiketat</label>
+      <div class="tagpick" id="dTags">
+        <button data-t="top">I spikatur</button><button data-t="new">I ri</button>
+        <button data-t="hot">Pikante</button><button data-t="veg">Vegjetarian</button>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Renditja</label><input id="d-sort" inputmode="numeric"></div>
+      <div class="f"><label>Në menu</label>
+        <div style="display:flex;align-items:center;gap:.6rem;padding-top:.3rem">
+          <button class="sw" id="d-av" aria-label="Në menu"></button>
+          <span class="count" id="d-avTxt"></span>
+        </div></div>
+    </div>
+    <div class="f"><label>Kodi (id)</label><input id="d-id" readonly><span class="hint">Nuk ndryshohet pasi krijohet.</span></div>
+  </div>
+  <div class="dr-ft">
+    <button class="btn btn-d" id="dDelete">Fshi</button>
+    <button class="btn btn-p" id="dSave">Në rregull</button>
+  </div>
+</aside>
+
+<div id="toast"></div>
+
+<!--INCLUDE:shared/config.js-->
+<!--INCLUDE:shared/data.js-->
+<!--INCLUDE:shared/art.js-->
+<!--INCLUDE:shared/store.js-->
+<!--INCLUDE:src/admin.js-->
+</body>
+</html>

@@ -1,33 +1,135 @@
-# SPRINT — Fast Food & Pizza, Durrës
+# SPRINT — Fast Food & Pizza · Restaurant, Durrës
 
-Pesë mockup të plotë dhe funksionalë për faqen e re të biznesit. Zgjidh njërin,
-dhe atë e çojmë deri në publikim me materialet reale.
+Faqja zyrtare e biznesit, plus një panel menaxhimi ku ndryshohen çmimet dhe ngarkohen fotot
+pa prekur kodin.
 
-**Faqja e zgjedhjes:** hap `dist/index.html` — aty i sheh të pesta me pamje paraprake të gjalla.
+- **Faqja** → `dist/index.html`
+- **Paneli** → `dist/admin/index.html` (në internet: `sajti-yt.al/admin`)
+- **Mockup-et e fazës 1** → `dist/mockups/` (ruhen si referencë)
 
 ---
 
-## Të pesë drejtimet
+## Çfarë bën faqja
 
-| # | Emri | Karakteri | Efektet | Kujt i shkon |
-|---|------|-----------|---------|--------------|
-| 1 | **Zjarri** | Kinematik, i errët, thëngjij mbi hero | Maksimale | Brand premium që do efektin "wow" |
-| 2 | **Rrota** | Rrotë interaktive kategorish, karta që përmbysen | 3D e rëndë | Klientë familjarë, më e paharrueshmja |
-| 3 | **Tabela** | Letër krem, terrakotë, menu si e shtypur | Të lehta | Kuzhina tradicionale, konvertim i lartë |
-| 4 | **Nata** | Neon dhe qelq, rrjet bento, "hapur tani" | Mesatare | Orare deri vonë dhe delivery |
-| 5 | **Editorial** | I çelët, serif i madh, revistë gastronomike | Të përmbajtura | Turistë dhe pamje restoranti premium |
+- **Rrota e kategorive** — kliko një fetë, ajo rrotullohet dhe menuja poshtë filtrohet vetë.
+- **Menu interaktive** — 122 artikuj në 6 kategori, me filtra, kërkim dhe etiketa
+  (i spikatur, i ri, pikante, vegjetarian). Kartat përmbysen dhe tregojnë përbërësit.
+- **Shportë → WhatsApp** — klienti ndërton porosinë dhe e dërgon të formatuar te 069 666 7000.
+  Shporta ruhet edhe nëse mbyllet faqja.
+- **Rezervim tavoline** — WhatsApp, plus kopje me email kur të vendoset një adresë.
+  Ambientet: brenda, terracë ose salla e eventeve.
+- **Galeri** — shfaq fotot e ngarkuara nga paneli; pa to, përdor ilustrimet.
+- **Salla e eventeve** — seksion i vetin, me buton që hap WhatsApp-in.
+- **Dygjuhësh shqip / anglisht**, mobile i plotë, respekton `prefers-reduced-motion`.
 
-Kombinimet janë të mundshme — p.sh. hero-ja e nr. 1 me menunë e nr. 3.
+---
 
-## Çfarë funksionon në të pesta
+## Paneli i menaxhimit
 
-- **Menu interaktive** — 122 artikuj në 6 kategori (Pizza, Fast Food, Restorant, Tradicionale, Sallata & Supa, Pije), me filtra, kërkim të drejtpërdrejtë dhe etiketa (pikante, vegjetarian, i ri, i spikatur).
-- **Shportë → WhatsApp** — klienti shton pjata, sheh nëntotalin dhe totalin, pastaj me një klikim hapet WhatsApp me porosinë e formatuar gati te numri 069 666 7000. Shporta ruhet edhe nëse mbyll faqen.
-- **Rezervim tavolinash** — emër, telefon, datë, orë, persona, ambient (brenda, terracë ose salla e eventeve) dhe shënim. Dërgohet në WhatsApp; kur të vendoset një email, shfaqet edhe butoni për kopjen me email.
-- **Telefonatë me një prekje** — çdo numër është link `tel:`, plus shirit i ngjitur poshtë në telefon.
-- **Dygjuhësh shqip / anglisht** — një buton, gjithë faqja ndërron, zgjedhja ruhet.
-- **Mobile i plotë** — të gjitha të testuara në iPhone, pa scroll horizontal.
-- **Respekton `prefers-reduced-motion`** — animacionet fiken për përdoruesit që i kanë çaktivizuar.
+Hapet te `/admin`. Hyrja bëhet me email dhe fjalëkalim.
+
+| Skeda | Çfarë ndryshon |
+|-------|----------------|
+| **Menuja** | Çmimin direkt në listë, ose gjithçka te sirtari: emrin, përshkrimin, kategorinë, etiketat, njësinë (`/copë`), shënimin (`09:00–15:00`), renditjen, foton. Fsheh një pjatë me një çelës pa e fshirë. |
+| **Kategoritë** | Emrat në të dyja gjuhët dhe renditjen — e njëjta renditje del te fetat e rrotës. |
+| **Cilësimet** | Telefonin, WhatsApp-in, email-in, adresën, koordinatat, tarifën e dërgesës, orarin, rrjetet sociale, tekstin dhe foton e sallës. |
+| **Vlerësimet** | Shton, ndryshon dhe fshin vlerësimet që dalin në faqe. |
+| **Publikimi** | Dërgon gjithçka në Supabase, shkarkon një kopje JSON, rikthen një kopje ose kthen menunë fillestare. |
+
+**Ndryshim çmimesh me shumicë:** zgjidh kategorinë, shkruaj përqindjen dhe shtyp «Rrit» ose «Ul» —
+p.sh. të gjitha picat +10% me një klikim.
+
+**Fotot** zvogëlohen vetë në 1200 px dhe ngjeshen në shfletues para ngarkimit, që faqja të mos rëndohet.
+
+Asgjë nuk del te klientët derisa të shtypet **«Ruaj ndryshimet»**. Sa herë ka diçka të paruajtur,
+poshtë shfaqet një shirit me numrin e ndryshimeve dhe butonin «Anulo».
+
+---
+
+## Lidhja e Supabase (një herë, ~10 minuta)
+
+Supabase mban çmimet, tekstet dhe fotot. Plani falas mjafton me tepri.
+
+1. Hap [supabase.com](https://supabase.com) → **New project** (zgjidh rajonin *Frankfurt* — më afër Shqipërisë).
+2. **SQL Editor → New query** → ngjit të gjithë skedarin [`supabase/schema.sql`](supabase/schema.sql) → **Run**.
+   Kjo krijon tabelat, rregullat e sigurisë dhe hapësirën e fotove.
+3. **Authentication → Users → Add user** → vendos email-in dhe fjalëkalimin me të cilin do të hysh
+   në panel. (Regjistrimi publik mbetet i mbyllur — vetëm ky përdorues shkruan.)
+4. **Project Settings → Data API** → kopjo `Project URL` dhe çelësin `anon public` te
+   [`shared/config.js`](shared/config.js):
+
+   ```js
+   window.SPRINT_CONFIG = {
+     SUPABASE_URL: 'https://xxxxxxxx.supabase.co',
+     SUPABASE_ANON_KEY: 'eyJhbGciOi...',
+     PHOTO_BUCKET: 'photos',
+   };
+   ```
+
+5. Ribëj publikimin (`git push` — Netlify e ndërton vetë), hap `/admin`, hyr, dhe te skeda
+   **Publikimi** shtyp **«Dërgo tani»**. Kjo mbush bazën me 122 pjatët.
+
+> Çelësi `anon` është i sigurt të jetë publik: rregullat e sigurisë lejojnë vetëm **leximin**.
+> Çdo shkrim kërkon hyrjen me fjalëkalim.
+
+Pa këtë hap faqja punon njësoj, por me menunë e ngurtë nga `shared/data.js`, dhe paneli ruan
+vetëm në atë shfletues (butoni «Provoje pa llogari»).
+
+---
+
+## Publikimi në Netlify
+
+1. [netlify.com](https://netlify.com) → **Add new site → Import an existing project** → zgjidh repo-n.
+2. Konfigurimi lexohet vetë nga `netlify.toml` (ndërtimi `node build.js`, dosja `dist`).
+3. **Domain settings → Add a domain you already own** → shkruaj domain-in.
+4. Te regjistruesi ku bleve domain-in, vendos rekordet që të jep Netlify — zakonisht:
+   - `A` për domain-in rrënjë → `75.2.60.5`
+   - `CNAME` për `www` → `emri-i-sajtit.netlify.app`
+
+   Përdor gjithmonë vlerat që shfaq paneli i Netlify, jo këto nëse ndryshojnë.
+5. SSL-ja lëshohet vetë brenda pak minutash.
+
+### Mbroje panelin edhe një shtresë
+
+Hyrja te paneli kërkon fjalëkalimin e Supabase, dhe `/admin` është i shënuar `noindex`.
+Për një mbrojtje të dytë, te Netlify: **Site configuration → Access control → Password protection**,
+ose një rregull në `netlify.toml` që kërkon fjalëkalim vetëm për `/admin`.
+
+### Ku ta blej domain-in
+
+`.al` blihet te [AKEP](https://akep.al) ose te rishitësit shqiptarë; `.com` te Namecheap,
+Porkbun ose Cloudflare. Për një lokal në Durrës, `.al` jep besueshmëri lokale — merr edhe `.com`
+nëse është i lirë dhe ridrejtoje te `.al`.
+
+---
+
+## Ndërtimi
+
+Pa varësi, pa `npm install`.
+
+```bash
+node build.js                                   # ndërton dist/
+cd dist && python3 -m http.server 8899          # hape http://127.0.0.1:8899/
+```
+
+### Struktura
+
+```
+shared/config.js   ← çelësat e Supabase (këtu i vendos)
+shared/data.js     ← menuja fillestare, kontaktet dhe përkthimet
+shared/art.js      ← 21 ilustrimet SVG të pjatave
+shared/store.js    ← lidhja me Supabase: leximi, shkrimi, ngarkimi i fotove
+shared/app.js      ← motori: filtra, kërkim, shportë, WhatsApp, rezervim, dygjuhësia
+src/site.html      ← faqja zyrtare
+src/admin.html     ← pamja e panelit
+src/admin.js       ← logjika e panelit
+supabase/schema.sql← skema e bazës, rregullat e sigurisë dhe hapësira e fotove
+mockups/           ← të pesë drejtimet e fazës 1
+build.js           ← bashkon gjithçka në dist/
+```
+
+Përmbajtja lexohet nga Supabase **pasi** faqja është shfaqur, ndaj vizitori sheh menunë
+menjëherë edhe në internet të ngadaltë; pastaj ajo zëvendësohet pa u dridhur.
 
 ---
 
@@ -35,166 +137,20 @@ Kombinimet janë të mundshme — p.sh. hero-ja e nr. 1 me menunë e nr. 3.
 
 | Çfarë | Gjendja |
 |-------|---------|
-| **Menuja — 122 artikuj me çmime** | ✅ Reale, transkriptuar nga menuja zyrtare në Instagram |
-| **Numri i telefonit / WhatsApp** | ✅ Real — 069 666 7000 |
-| **Instagram** | ✅ Real — [@sprint_restorant_fast_pizza](https://www.instagram.com/sprint_restorant_fast_pizza/) |
-| **Ngjyrat e brand-it** | ✅ Portokalli · e zezë · krem, nxjerrë nga menuja dhe logoja |
-| **Salla e eventeve** | ✅ E shtuar te rezervimi dhe te «Rreth Nesh» |
-| **Fotot e pjatave dhe ambientit** | ⛔ Ende ilustrime SVG — presin skedarët origjinalë |
-| **Adresa e saktë dhe koordinatat** | ⛔ `TODO:REAL` te `shared/data.js` |
-| **Orari i hapjes / mbylljes** | ⛔ `TODO:REAL` — vetëm 09:00–15:00 për tavat është i konfirmuar |
-| **Tarifa e dërgesës** | ⛔ Shporta shfaq «Sipas zonës» derisa ta konfirmosh |
-| **Email për rezervime** | ⛔ Butoni i email-it fshihet vetë derisa të vendoset një adresë |
-| **Review-t** | ⛔ Tekst vendmbajtës — **duhen zëvendësuar para se faqja të dalë online** |
+| Menuja — 122 artikuj me çmime | ✅ Reale, nga menuja zyrtare |
+| Telefoni / WhatsApp | ✅ 069 666 7000 |
+| Instagram | ✅ [@sprint_restorant_fast_pizza](https://www.instagram.com/sprint_restorant_fast_pizza/) |
+| Ngjyrat e brand-it | ✅ Portokalli · e zezë · krem |
+| Salla e eventeve | ✅ Seksion i vetin + zgjedhje te rezervimi |
+| Fotot e pjatave | ⛔ Ngarkohen nga paneli — deri atëherë, ilustrime |
+| Adresa dhe koordinatat | ⛔ Vendosen te skeda «Cilësimet» |
+| Orari i plotë | ⛔ Vetëm 09:00–15:00 për tavat është i konfirmuar |
+| Tarifa e dërgesës | ⛔ Bosh → shporta shfaq «Sipas zonës» |
+| Email për rezervimet | ⛔ Bosh → butoni i email-it fshihet vetë |
+| Vlerësimet | ⛔ Tekst vendmbajtës — **zëvendësoji para se faqja të dalë online** |
 
-### Pse mungojnë ende fotot
+### ⚠️ Vlerësimet
 
-Instagram, Facebook, TikTok, Google Maps dhe TripAdvisor janë **të bllokuara nga politika e
-rrjetit të këtij mjedisi** (proxy-ja kthen `403`). Menuja u fut duke u lexuar nga pamjet e
-ekranit të dërguara nga pronari; fotot, megjithatë, duhen si skedarë për t'u vendosur në
-`assets/`. Deri atëherë përdoren ilustrime SVG të vizatuara posaçërisht për këtë projekt
-(21 lloje: pica në katër variante, sufllaqe, sanduiç, burger, biftek, peshk, pasta, sallatë,
-supë, tavë balte, byrek, meze, kafe, birrë, pije).
-
-### ⚠️ Review-t
-
-`reviews` te `shared/data.js` përmban tekst vendmbajtës, **jo** review reale. Zëvendësoje me
-review të vërteta nga Google ose Facebook para publikimit — mos e lër faqen të dalë online me
-vlerësime të shpikura.
-
----
-
-## Si t'i vendos të dhënat reale
-
-Gjithçka rri në **një skedar të vetëm**: `shared/data.js`.
-
-### 1. Kontaktet dhe brand-i
-
-```js
-phone: '069 666 7000',          // ✅ real
-phoneHref: '+355696667000',     // ✅ real
-whatsapp: '355696667000',       // ✅ real — ndërkombëtar, PA '+' dhe PA hapësira
-email: '',                      // ⛔ vendose dhe butoni i email-it shfaqet vetë
-address: { sq: '…', en: '…' },  // ⛔ adresa e saktë
-geo: { lat: 41.3236, lng: 19.4432 },   // ⛔ koordinatat nga Google Maps
-deliveryFee: null,              // ⛔ null → shporta shfaq «Sipas zonës»
-```
-
-Linket sociale që lihen bosh **fshihen vetvetiu** nga footer-i — nuk mbetet asnjë ikonë e vdekur.
-
-### 2. Menuja
-
-Çdo pjatë është një rresht:
-
-```js
-{ id:'pz03', c:'pizza', art:'pizza', sq:'Pica Margarita', en:'Pizza Margherita', p:320,
-  dsq:'Salcë domateje dhe djathë — klasikja.', den:'Tomato sauce and cheese — the classic.', tags:['veg'] },
-```
-
-- `c` — kategoria: `pizza` · `fast` · `rest` · `trad` · `starter` · `pije`
-- `p` — çmimi në lekë (vetëm numër)
-- `tags` — `hot` (pikante) · `veg` · `new` · `top` (më i shituri)
-- `unit` — teksti pas çmimit kur pjata shitet me copë, p.sh. `'/copë'`
-- `note` — shënim i vogël pranë emrit, p.sh. `'09:00–15:00'`
-- `art` — cili ilustrim përdoret: `pizza` `pizzaV` `pizzaW` `pizzaC` `burger` `gyros` `sandwich`
-  `fries` `wings` `steak` `fish` `pasta` `salad` `soup` `tave` `byrek` `meze` `coffee` `beer`
-  `dessert` `drink`
-
-### 3. Fotot reale (kur t'i keni)
-
-1. Vendosini në `assets/dishes/` — p.sh. `assets/dishes/pz03.jpg`
-2. Shtoni fushën `img` te pjata:
-
-```js
-{ id:'pz03', c:'pizza', art:'pizza', img:'assets/dishes/pz03.jpg', sq:'Pica Margarita', … }
-```
-
-Faqja e përdor automatikisht foton; nëse `img` mungon, kthehet te ilustrimi SVG.
-Foto katrore ose 4:3, ideal 1200 px anë, JPG/WebP nën 200 KB.
-
-### 4. Review-t
-
-Zëvendësoni listën `reviews` me review reale nga Google ose Facebook (emri, yjet, burimi, teksti).
-
----
-
-## Ndërtimi
-
-Nuk ka varësi dhe nuk ka nevojë për `npm install`.
-
-```bash
-node build.js
-```
-
-Skripti merr çdo skedar nga `mockups/`, fut brenda `shared/data.js`, `shared/art.js` dhe
-`shared/app.js`, dhe nxjerr te `dist/` faqe krejtësisht të pavarura — një skedar i vetëm secila,
-pa asnjë kërkesë drejt jashtë përveç fontit të Google.
-
-Për ta parë lokalisht:
-
-```bash
-node build.js && cd dist && python3 -m http.server 8899
-# hape http://127.0.0.1:8899/
-```
-
-### Struktura
-
-```
-shared/data.js    ← TË DHËNAT: menu, çmime, kontakte, përkthime  (këtu punon ti)
-shared/art.js     ← ilustrimet SVG të pjatave
-shared/app.js     ← motori: filtra, kërkim, shportë, WhatsApp, rezervim, dygjuhësia
-mockups/*.html    ← pamja e secilit drejtim (HTML + CSS + efektet e veta)
-mockups/_index.html ← faqja e zgjedhjes
-build.js          ← bashkon gjithçka në dist/
-dist/             ← rezultati që publikohet
-```
-
----
-
-## Publikimi (host + domain)
-
-Faqja është statike, pa server dhe pa bazë të dhënash — hosting-u është falas dhe i shpejtë.
-
-### Netlify
-
-1. Lidh repo-n te [netlify.com](https://netlify.com) → *Add new site* → *Import an existing project*.
-2. Konfigurimi lexohet vetë nga `netlify.toml` (build: `node build.js`, publish: `dist`).
-3. *Domain settings* → *Add a domain you already own* → shkruaj domain-in.
-4. Te regjistruesi ku bleve domain-in, vendos rekordet që të jep Netlify:
-   - `A` për `sprintdurres.al` → `75.2.60.5`
-   - `CNAME` për `www` → `<emri-i-sajtit>.netlify.app`
-5. SSL-ja (Let's Encrypt) lëshohet vetë brenda pak minutash.
-
-### Vercel
-
-1. [vercel.com](https://vercel.com) → *Add New* → *Project* → zgjidh repo-n.
-2. `vercel.json` e bën konfigurimin vetë.
-3. *Settings → Domains* → shto domain-in, pastaj te regjistruesi:
-   - `A` për domain-in rrënjë → `76.76.21.21`
-   - `CNAME` për `www` → `cname.vercel-dns.com`
-
-> Rekordet e sakta i konfirmon gjithmonë paneli i Netlify/Vercel pasi shton domain-in —
-> përdor ato që të shfaqen atje, jo vlerat e mësipërme nëse ndryshojnë.
-
-### Ku ta blej domain-in
-
-`.al` blihet te [AKEP](https://akep.al) ose te rishitësit shqiptarë; `.com` te Namecheap,
-Porkbun ose Cloudflare. Për një fast food në Durrës, `.al` jep besueshmëri lokale —
-merr edhe `.com` nëse është i lirë dhe ridrejtoje te `.al`.
-
----
-
-## Hapat e radhës
-
-1. **Zgjidh mockup-in** (ose kombinimin që të pëlqen).
-2. **Dërgo si skedarë:** logon (PNG ose SVG), fotot dhe videot e pjatave dhe të ambientit,
-   review reale nga Google, adresën e saktë, orarin e plotë, tarifën e dërgesës dhe një email.
-3. I fus, publikoj faqen dhe të jap hapat e sakta të DNS-së për domain-in.
-
-### Opsionale, më vonë
-
-- **Njoftim automatik në WhatsApp** pa e prekur klienti — kërkon WhatsApp Cloud API,
-  llogari Meta Business dhe verifikim numri. `wa.me` mbetet rruga kryesore sepse është falas
-  dhe pa fërkim; automatizimi shtohet mbi të pa e rindërtuar faqen.
-- **Panel i thjeshtë** për të ndryshuar menunë pa prekur kodin.
-- **Pagesa online** me kartë (Stripe).
+Vlerësimet e paravendosura janë tekst bosh vendmbajtës, jo review reale. Zëvendësoji te skeda
+«Vlerësimet» me vlerësime të vërteta nga Google ose Facebook përpara publikimit — mos e lër faqen
+të dalë online me vlerësime të shpikura.

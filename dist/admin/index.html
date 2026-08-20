@@ -3,527 +3,476 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>SPRINT · Tabela</title>
-<meta name="description" content="SPRINT Durrës — furrë druri, skarë dhe recetat tradicionale shqiptare. Menu, rezervime dhe porosi në WhatsApp.">
+<meta name="robots" content="noindex,nofollow">
+<title>SPRINT · Paneli i menaxhimit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,600;0,800;1,400&family=Manrope:wght@300;400;500;600;800&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,600;0,800;1,400&family=Manrope:wght@300;400;500;600;800&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bakbak+One&family=Outfit:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bakbak+One&family=Outfit:wght@300;400;500;600;700&display=swap"></noscript>
 <style>
-/* =========================== MOCKUP 3 — "TABELA" =============================
-   I ngrohtë dhe artizanal: letër krem, terrakotë, ar dhe e kuqja e brand-it.
-   Menuja shfaqet si një menu e shtypur restoranti (me pika lidhëse) ose si rrjet.
-   Niveli i efekteve: ELEGANT DHE I SHPEJTË (pak animacione, shumë lexueshmëri).
+/* ============================================================================
+   SPRINT — Paneli i menaxhimit
+   Mjet pune, jo faqe reklame: i dendur, i lexueshëm, me gjendjen gjithnjë të dukshme.
    ========================================================================== */
 :root{
-  --red:#A85E10; --red-lt:#C87518; --terra:#A9502C; --gold:#B98B2E; --gold-lt:#E4B14B;
-  --paper:#FBF5EA; --paper-2:#F3E9D8; --ink:#241C17; --ink-2:#4A3B30;
-  --muted:#7C6A5C; --line:#DCCDB6; --green:#4B6B3A;
-  --serif:'Bitter',Georgia,serif;
-  --sans:'Manrope',system-ui,sans-serif;
-  --max:1180px;
+  --brand:#DE7F1C; --brand-lt:#FFA33F; --brand-dk:#8A4A10; --gold:#FFC244;
+  --bg:#0C0A0B; --pan:#151011; --pan-2:#1E1618; --pan-3:#271D1F;
+  --txt:#F5EEE4; --muted:#A2949A; --line:rgba(255,255,255,.11);
+  --ok:#4CAF6D; --warn:#E6B23C; --bad:#E5544B;
+  --display:'Bakbak One',Impact,sans-serif;
+  --body:'Outfit',system-ui,-apple-system,sans-serif;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;overflow-x:clip}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;
-  overflow-x:clip;-webkit-font-smoothing:antialiased;
-  background-image:radial-gradient(rgba(169,80,44,.05) 1px,transparent 1px);background-size:22px 22px}
-img,svg{max-width:100%;display:block}
-a{color:inherit;text-decoration:none} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-h1,h2,h3{font-family:var(--serif);font-weight:800;margin:0;line-height:1.06;letter-spacing:-.015em}
-.wrap{width:min(100% - 2.2rem,var(--max));margin-inline:auto}
-section{position:relative;padding:clamp(3.5rem,8vw,7rem) 0}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--gold)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1.1}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+.wrap{width:min(100% - 1.6rem,1180px);margin-inline:auto}
+.hide{display:none!important}
 
-/* ---------- header ---------- */
-header{position:fixed;top:0;left:0;right:0;z-index:90;padding:1rem 0;transition:.3s;
-  border-bottom:1px solid transparent}
-header.is-stuck{background:rgba(251,245,234,.94);backdrop-filter:blur(14px);border-bottom-color:var(--line);padding:.55rem 0}
-.hd{display:flex;align-items:center;gap:1.3rem}
-.logo{display:flex;align-items:center;gap:.6rem}
-.logo .mark{width:38px;height:38px;border-radius:10px;background:var(--red);display:grid;place-items:center;
-  font-family:var(--serif);font-weight:800;color:var(--paper);font-size:1.25rem;
-  box-shadow:0 6px 14px -6px rgba(168,94,16,.6)}
-.logo b{font-family:var(--serif);font-size:1.3rem;letter-spacing:.03em;line-height:1}
-.logo small{display:block;font-size:.55rem;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);margin-top:2px}
-nav{margin-left:auto;display:flex;gap:1.5rem;align-items:center}
-nav a{font-size:.82rem;font-weight:600;color:var(--ink-2);position:relative;padding:.2rem 0}
-nav a::after{content:'';position:absolute;left:0;bottom:-2px;height:2px;width:0;background:var(--red);transition:width .3s}
-nav a:hover::after{width:100%}
-.hd-act{display:flex;gap:.5rem;align-items:center}
-.lang{border:1.5px solid var(--line);border-radius:10px;padding:.4rem .7rem;font-size:.7rem;font-weight:700;
-  color:var(--ink-2);transition:.25s}
-.lang:hover{border-color:var(--red);color:var(--red)}
-.cart-btn{display:flex;align-items:center;gap:.5rem;background:var(--ink);color:var(--paper);border-radius:11px;
-  padding:.55rem 1rem;font-size:.78rem;font-weight:700;transition:.25s}
-.cart-btn:hover{background:var(--red)}
-.cart-btn b{background:var(--gold-lt);color:var(--ink);border-radius:7px;min-width:20px;height:20px;
-  display:grid;place-items:center;font-size:.7rem}
-.bump{animation:bump .45s ease}@keyframes bump{40%{transform:scale(1.45)}}
-.burger{display:none;flex-direction:column;gap:5px}
-.burger i{width:23px;height:2.5px;background:var(--ink);border-radius:2px;transition:.3s;display:block}
-body.nav-open .burger i:nth-child(1){transform:translateY(7.5px) rotate(45deg)}
-body.nav-open .burger i:nth-child(2){opacity:0}
-body.nav-open .burger i:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
+/* ---------- fusha ---------- */
+.f{display:grid;gap:.3rem}
+.f label{font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.f input,.f select,.f textarea{background:#0F0B0C;border:1.5px solid var(--line);border-radius:11px;
+  padding:.62rem .8rem;font-size:.94rem;outline:none;transition:border-color .2s;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--brand)}
+.f textarea{resize:vertical;min-height:66px}
+.f select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 17px) 52%,calc(100% - 12px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+.f .hint{font-size:.72rem;color:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
 
-/* ---------- hero ---------- */
-.hero{padding-top:7.5rem;padding-bottom:3rem;overflow:hidden}
-.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:3rem;align-items:center}
-.since{display:inline-flex;align-items:center;gap:.6rem;font-size:.68rem;font-weight:700;letter-spacing:.22em;
-  text-transform:uppercase;color:var(--terra);margin-bottom:1.2rem}
-.since::before,.since::after{content:'';width:26px;height:1px;background:var(--terra)}
-h1{font-size:clamp(2.7rem,6.6vw,5.2rem)}
-h1 em{font-style:italic;font-weight:400;color:var(--red)}
-.hero p.sub{color:var(--ink-2);max-width:46ch;margin:1.3rem 0 2rem;font-size:1.06rem;font-weight:400}
-.cta{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
-.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.92rem 1.7rem;border-radius:12px;
-  font-weight:700;font-size:.84rem;transition:transform .25s,box-shadow .25s,background .25s}
-.btn-p{background:var(--red);color:var(--paper);box-shadow:0 10px 24px -12px rgba(168,94,16,.85)}
-.btn-p:hover{background:var(--red-lt);transform:translateY(-2px)}
-.btn-s{border:1.5px solid var(--ink);color:var(--ink)}
-.btn-s:hover{background:var(--ink);color:var(--paper);transform:translateY(-2px)}
-.trust{display:flex;gap:1.4rem;margin-top:2.2rem;flex-wrap:wrap}
-.trust div{display:flex;flex-direction:column}
-.trust b{font-family:var(--serif);font-size:1.5rem;color:var(--red);line-height:1}
-.trust span{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+/* ---------- butonat ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border-radius:11px;
+  padding:.6rem 1.05rem;font-size:.85rem;font-weight:600;transition:.22s;white-space:nowrap}
+.btn-p{background:var(--brand);color:#1B0D02}
+.btn-p:hover{background:var(--brand-lt);transform:translateY(-1px)}
+.btn-g{border:1.5px solid var(--line)}
+.btn-g:hover{border-color:var(--gold);color:var(--gold)}
+.btn-d{border:1.5px solid rgba(229,84,75,.45);color:#ff9a92}
+.btn-d:hover{background:var(--bad);color:#fff;border-color:var(--bad)}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btn-sm{padding:.36rem .7rem;font-size:.76rem;border-radius:9px}
 
-.hero-plate{position:relative;display:grid;place-items:center}
-.hero-plate .ring{position:absolute;inset:2%;border-radius:50%;border:1px solid var(--line)}
-.hero-plate .ring2{inset:-6%;border-style:dashed;border-color:rgba(185,139,46,.4)}
-.hero-plate .big{width:78%;filter:drop-shadow(0 30px 40px rgba(80,50,30,.28))}
-.chip-note{position:absolute;background:var(--paper);border:1px solid var(--line);border-radius:12px;
-  padding:.55rem .85rem;font-size:.74rem;font-weight:600;box-shadow:0 12px 26px -14px rgba(60,40,25,.5);
-  display:flex;align-items:center;gap:.45rem}
-.chip-note i{width:8px;height:8px;border-radius:50%;background:var(--green);display:block}
-.cn1{top:4%;left:-2%} .cn2{bottom:16%;right:-4%} .cn3{bottom:-1%;left:12%}
+/* ---------- hyrja ---------- */
+#gate{min-height:100dvh;display:grid;place-items:center;padding:1.4rem}
+.card{background:var(--pan);border:1px solid var(--line);border-radius:22px;padding:clamp(1.5rem,4vw,2.4rem)}
+#gate .card{width:min(100%,420px);display:grid;gap:1rem}
+.brandmark{font-family:var(--display);font-size:2rem;letter-spacing:.02em}
+.brandmark em{font-style:normal;color:var(--brand)}
+.gate-sub{color:var(--muted);font-size:.9rem;margin:0}
+.msg{border-radius:11px;padding:.7rem .9rem;font-size:.85rem;display:none}
+.msg.on{display:block}
+.msg.err{background:rgba(229,84,75,.14);border:1px solid rgba(229,84,75,.4);color:#ffb0aa}
+.msg.ok{background:rgba(76,175,109,.14);border:1px solid rgba(76,175,109,.4);color:#a7e5bd}
+.msg.warn{background:rgba(230,178,60,.12);border:1px solid rgba(230,178,60,.38);color:#f0d193}
 
-/* ---------- rripi i kuq ---------- */
-.band{background:var(--red);color:var(--paper);padding:.9rem 0;overflow:hidden;display:flex;gap:2.2rem;white-space:nowrap}
-.band-in{display:flex;gap:2.2rem;animation:mq 34s linear infinite;flex-shrink:0}
-.band span{font-family:var(--serif);font-weight:400;font-style:italic;font-size:1.05rem}
-@keyframes mq{to{transform:translateX(-100%)}}
+/* ---------- shiriti i sipërm ---------- */
+header{position:sticky;top:0;z-index:60;background:rgba(12,10,11,.94);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:.9rem;padding:.7rem 0;flex-wrap:wrap}
+.top .brandmark{font-size:1.4rem}
+.who{font-size:.76rem;color:var(--muted);margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:block}
+.dot.local{background:var(--warn)}
+.pill{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:999px;padding:.22rem .6rem;color:var(--muted)}
+.pill.dirty{border-color:var(--warn);color:var(--warn)}
+.pill.clean{border-color:rgba(76,175,109,.5);color:var(--ok)}
 
-/* ---------- titull ---------- */
-.st{margin-bottom:2.6rem;max-width:58ch}
-.st .k{font-size:.68rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--terra);
-  display:block;margin-bottom:.7rem}
-.st h2{font-size:clamp(1.9rem,4.6vw,3.4rem)}
-.st p{color:var(--muted);margin-top:.8rem}
-.st.mid{text-align:center;margin-inline:auto}
+/* ---------- skedat ---------- */
+.tabs{display:flex;gap:.3rem;overflow-x:auto;border-bottom:1px solid var(--line);padding-bottom:0}
+.tab{padding:.7rem 1rem;font-size:.86rem;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;
+  white-space:nowrap;transition:.2s}
+.tab:hover{color:var(--txt)}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand)}
+main{padding:1.4rem 0 5rem}
+.view{display:grid;gap:1.1rem}
 
-/* ---------- kategoritë ---------- */
-.cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:1rem}
-.cat-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:1.6rem 1.3rem;
-  text-align:left;transition:transform .3s,box-shadow .3s,border-color .3s;
-  transition-delay:calc(var(--i) * 55ms);position:relative;overflow:hidden}
-.cat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--red);
-  transform:scaleY(0);transform-origin:top;transition:transform .35s}
-.cat-card:hover{transform:translateY(-5px);box-shadow:0 20px 40px -22px rgba(60,40,25,.55);border-color:var(--gold)}
-.cat-card:hover::before{transform:scaleY(1)}
-.cat-art{width:70px;height:70px;margin-bottom:.9rem;transform:rotate(var(--rot,0deg));transition:transform .4s}
-.cat-card:hover .cat-art{transform:rotate(calc(var(--rot,0deg) - 6deg)) scale(1.08)}
-.cat-card h3{font-size:1.2rem;margin-bottom:.35rem}
-.cat-card p{font-size:.83rem;color:var(--muted);margin:0}
+/* ---------- shiriti i veglave ---------- */
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.tools .search{flex:1;min-width:180px}
+.count{font-size:.78rem;color:var(--muted);white-space:nowrap}
 
-/* ---------- menuja ---------- */
-#menu{background:var(--paper-2)}
-.menu-bar{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin-bottom:2rem}
-.chips{display:flex;gap:.45rem;flex-wrap:wrap;flex:1}
-.chip{border:1.5px solid var(--line);border-radius:10px;padding:.48rem 1rem;font-size:.79rem;font-weight:600;
-  color:var(--ink-2);background:var(--paper);transition:.25s;white-space:nowrap}
-.chip:hover{border-color:var(--terra);color:var(--terra)}
-.chip.is-on{background:var(--red);border-color:var(--red);color:var(--paper)}
-.search{display:flex;align-items:center;gap:.5rem;border:1.5px solid var(--line);border-radius:10px;
-  padding:.45rem .9rem;background:var(--paper);min-width:200px}
-.search input{background:none;border:0;outline:none;font-size:.85rem;width:100%;font-family:var(--sans);color:var(--ink)}
-.search svg{width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:2}
-.view{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper)}
-.view button{padding:.48rem .85rem;font-size:.74rem;font-weight:700;color:var(--muted);transition:.2s}
-.view button.is-on{background:var(--ink);color:var(--paper)}
+/* ---------- lista e pjatave ---------- */
+.items{display:grid;gap:.5rem}
+.item{display:grid;grid-template-columns:56px minmax(0,1fr) auto auto auto;gap:.8rem;align-items:center;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.55rem .7rem;transition:.2s}
+.item:hover{border-color:rgba(222,127,28,.5)}
+.item.off{opacity:.5}
+.thumb{width:56px;height:56px;border-radius:10px;overflow:hidden;background:var(--pan-3);
+  display:grid;place-items:center;flex-shrink:0}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb svg{width:82%}
+.nm{min-width:0}
+.nm b{display:block;font-weight:600;font-size:.94rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nm span{font-size:.74rem;color:var(--muted)}
+.price-in{width:104px}
+.price-in input{background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.4rem .5rem;
+  font-size:.9rem;font-weight:600;text-align:right;width:100%;outline:none;font-variant-numeric:tabular-nums}
+.price-in input:focus{border-color:var(--brand)}
+.price-in input.changed{border-color:var(--gold);color:var(--gold)}
+.sw{width:42px;height:24px;border-radius:999px;background:var(--pan-3);border:1.5px solid var(--line);
+  position:relative;transition:.22s;flex-shrink:0}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;
+  background:var(--muted);transition:.22s}
+.sw.on{background:rgba(76,175,109,.28);border-color:var(--ok)}
+.sw.on::after{left:22px;background:var(--ok)}
+.nm .tagdots{display:flex;gap:.22rem;margin-top:.25rem;flex-wrap:wrap}
+.nm .tagdot{font-size:.56rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:.12rem .4rem;border-radius:5px;line-height:1.5}
+.nm .td-hot{background:var(--bad);color:#2A0806}
+.nm .td-veg{background:var(--ok);color:#062012}
+.nm .td-new{background:var(--gold);color:#241703}
+.nm .td-top{background:#fff;color:#17110f}
+.empty{text-align:center;color:var(--muted);padding:2.6rem 0;font-size:.9rem}
 
-/* pamja LISTË (si menu e shtypur) */
-.grid.list{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:0 3rem}
-.grid.list .dish{display:grid;grid-template-columns:56px 1fr auto;gap:1rem;align-items:start;
-  padding:1.05rem 0;border-bottom:1px dotted var(--line);transition-delay:calc(var(--i) * 25ms)}
-.grid.list .dish-media{width:56px;height:56px;position:relative}
-.grid.list .dish-art{width:100%;transform:rotate(var(--rot,0deg));transition:transform .35s}
-.grid.list .dish:hover .dish-art{transform:rotate(var(--rot,0deg)) scale(1.14)}
-.grid.list .nm{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
-.grid.list h3{font-size:1.02rem;font-weight:600}
-.grid.list p{font-size:.84rem;color:var(--muted);margin:.2rem 0 0;line-height:1.5}
-.grid.list .rt{display:flex;flex-direction:column;align-items:flex-end;gap:.4rem}
-.grid.list .price{font-family:var(--serif);font-weight:800;font-size:1.1rem;color:var(--red);white-space:nowrap}
+/* ---------- sirtari i redaktimit ---------- */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.66);backdrop-filter:blur(3px);z-index:80;
+  opacity:0;visibility:hidden;transition:.3s}
+.scrim.on{opacity:1;visibility:visible}
+.drawer{position:fixed;top:0;right:0;height:100dvh;width:min(520px,100%);z-index:90;background:var(--pan);
+  border-left:1px solid var(--line);transform:translateX(102%);transition:transform .38s cubic-bezier(.5,0,.2,1);
+  display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.dr-hd{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:1rem 1.2rem;border-bottom:1px solid var(--line)}
+.dr-hd h2{font-size:1.2rem}
+.dr-body{flex:1;overflow-y:auto;padding:1.2rem;display:grid;gap:.9rem;align-content:start}
+.dr-ft{border-top:1px solid var(--line);padding:.9rem 1.2rem;display:flex;gap:.6rem;background:#0F0B0C}
+.dr-ft .btn-p{flex:1}
+.x{width:34px;height:34px;border-radius:10px;border:1.5px solid var(--line);display:grid;place-items:center;transition:.2s}
+.x:hover{background:var(--bad);border-color:var(--bad)}
 
-/* pamja RRJET */
-.grid.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:1rem}
-.grid.cards .dish{background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden;
-  display:flex;flex-direction:column;transition:transform .3s,box-shadow .3s;transition-delay:calc(var(--i) * 35ms)}
-.grid.cards .dish:hover{transform:translateY(-6px);box-shadow:0 22px 44px -24px rgba(60,40,25,.6)}
-.grid.cards .dish-media{aspect-ratio:4/3;display:grid;place-items:center;background:var(--paper-2);position:relative}
-.grid.cards .dish-art{width:74%;transform:rotate(var(--rot,0deg));transition:transform .45s}
-.grid.cards .dish:hover .dish-art{transform:rotate(var(--rot,0deg)) scale(1.09)}
-.grid.cards .bd{padding:.95rem 1rem 1.05rem;display:flex;flex-direction:column;gap:.35rem;flex:1}
-.grid.cards h3{font-size:1rem;font-weight:600}
-.grid.cards p{font-size:.8rem;color:var(--muted);margin:0;flex:1}
-.grid.cards .rt{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-top:.45rem}
-.grid.cards .price{font-family:var(--serif);font-weight:800;font-size:1.15rem;color:var(--red)}
+/* ---------- fotoja ---------- */
+.photo{display:grid;grid-template-columns:110px 1fr;gap:.9rem;align-items:start}
+.photo-box{width:110px;height:110px;border-radius:14px;overflow:hidden;background:var(--pan-3);
+  border:1.5px dashed var(--line);display:grid;place-items:center;position:relative}
+.photo-box img{width:100%;height:100%;object-fit:cover}
+.photo-box svg{width:78%}
+.photo-box.busy::after{content:'';position:absolute;inset:0;background:rgba(12,10,11,.72);
+  background-image:radial-gradient(circle,var(--gold) 3px,transparent 3px);background-size:14px 14px;
+  animation:pulse 1s linear infinite}
+@keyframes pulse{to{background-position:14px 0}}
+.photo-act{display:grid;gap:.45rem;align-content:start}
+.photo-act .hint{font-size:.72rem;color:var(--muted);line-height:1.45}
+input[type=file]{display:none}
 
-.dish-tags{display:flex;gap:.3rem;flex-wrap:wrap}
-.grid.cards .dish-tags{position:absolute;top:.55rem;left:.55rem}
-.tag{font-size:.58rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:.2rem .5rem;
-  border-radius:6px;color:var(--paper)}
-.tag-hot{background:var(--red)} .tag-veg{background:var(--green)}
-.tag-new{background:var(--gold);} .tag-top{background:var(--ink)}
-.add{background:var(--ink);color:var(--paper);border-radius:9px;padding:.42rem .9rem;font-size:.72rem;
-  font-weight:700;transition:.22s;white-space:nowrap}
-.add:hover{background:var(--red)}
-.add.is-added{background:var(--green)}
-.menu-empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:3rem 0}
+/* ---------- etiketat ---------- */
+.tagpick{display:flex;gap:.4rem;flex-wrap:wrap}
+.tagpick button{border:1.5px solid var(--line);border-radius:9px;padding:.34rem .7rem;font-size:.76rem;
+  font-weight:600;transition:.2s;color:var(--muted)}
+.tagpick button.on{background:var(--brand);border-color:var(--brand);color:#1B0D02}
 
-/* ---------- rreth ---------- */
-.about{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(2rem,5vw,4rem);align-items:center}
-.frame{position:relative;border:1px solid var(--line);border-radius:18px;background:var(--paper);
-  padding:2.2rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;place-items:center}
-.frame::after{content:'';position:absolute;inset:10px;border:1px dashed var(--line);border-radius:12px;pointer-events:none}
-.frame svg{width:100%;max-width:150px;filter:drop-shadow(0 14px 22px rgba(80,50,30,.22))}
-.quote{font-family:var(--serif);font-style:italic;font-size:1.15rem;color:var(--terra);
-  border-left:3px solid var(--gold);padding-left:1.1rem;margin:1.4rem 0}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.8rem}
-.stat{border-top:2px solid var(--red);padding-top:.7rem}
-.stat b{display:block;font-family:var(--serif);font-size:1.8rem;color:var(--ink);line-height:1}
-.stat span{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+/* ---------- tabelat e vogla (orari, review) ---------- */
+.mini{display:grid;gap:.5rem}
+.mini-row{display:grid;grid-template-columns:1fr 1fr auto;gap:.5rem;align-items:center}
+.rev-row{background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.85rem;display:grid;gap:.6rem}
+.rev-top{display:grid;grid-template-columns:1fr 90px 1fr auto;gap:.5rem;align-items:center}
 
-/* ---------- review ---------- */
-#revs{background:var(--ink);color:var(--paper)}
-#revs .st .k{color:var(--gold-lt)} #revs .st h2{color:var(--paper)}
-#revs .st p{color:#b8a795}
-.revs{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1rem}
-.review{margin:0;background:#2E2419;border:1px solid #40331f;border-radius:16px;padding:1.5rem;
-  transition:transform .3s;transition-delay:calc(var(--i) * 55ms)}
-.review:hover{transform:translateY(-6px)}
-.stars{color:var(--gold-lt);letter-spacing:.14em;margin-bottom:.7rem}
-.review blockquote{margin:0 0 1rem;font-family:var(--serif);font-style:italic;font-size:.98rem;
-  line-height:1.6;color:#EFE3D2}
-.review figcaption{display:flex;justify-content:space-between;font-size:.8rem;border-top:1px solid #40331f;padding-top:.7rem}
-.review figcaption span{color:#a2917d;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase}
+/* ---------- publikimi ---------- */
+.pub{display:grid;gap:.9rem}
+.pub-row{background:var(--pan);border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.2rem;
+  display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.pub-row div{flex:1;min-width:200px}
+.pub-row b{display:block;font-size:.95rem;margin-bottom:.15rem}
+.pub-row p{margin:0;font-size:.83rem;color:var(--muted)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
+  background:var(--pan-3);padding:.1em .4em;border-radius:5px}
+.steps-ol{padding-left:1.2rem;margin:.6rem 0 0;display:grid;gap:.4rem;font-size:.86rem;color:var(--muted)}
 
-/* ---------- rezervim ---------- */
-.book{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(2rem,5vw,4rem);align-items:start}
-form.bk{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:clamp(1.3rem,3vw,2rem);
-  display:grid;grid-template-columns:1fr 1fr;gap:.9rem;box-shadow:0 26px 50px -34px rgba(60,40,25,.5)}
-.fld{display:grid;gap:.32rem}.fld.full{grid-column:1/-1}
-.fld label{font-size:.66rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
-.fld input,.fld select,.fld textarea{background:var(--paper-2);border:1.5px solid var(--line);border-radius:10px;
-  padding:.72rem .9rem;font-family:var(--sans);font-size:.92rem;color:var(--ink);outline:none;transition:.22s;width:100%}
-.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--red);background:var(--paper)}
-.fld textarea{resize:vertical;min-height:78px}
-.fld select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
-  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat}
-.err{grid-column:1/-1;color:var(--red);font-size:.8rem;font-weight:600;display:none}.err.is-on{display:block}
-.bk-act{grid-column:1/-1;display:flex;gap:.65rem;flex-wrap:wrap}
-.wa{display:flex;align-items:center;justify-content:center;gap:.5rem;background:#128C4B;color:#fff;
-  border-radius:12px;padding:.9rem 1.3rem;font-weight:700;font-size:.84rem;transition:.25s;flex:1;min-width:210px}
-.wa:hover{background:#16a558;transform:translateY(-2px)}
-.wa.is-disabled{opacity:.4;pointer-events:none}
-.mail{border:1.5px solid var(--ink);border-radius:12px;padding:.9rem 1.2rem;font-size:.78rem;font-weight:700;transition:.25s}
-.mail:hover{background:var(--ink);color:var(--paper)}
-.book-side ul{list-style:none;margin:1.2rem 0 0;padding:0;display:grid;gap:.45rem}
-.book-side li{display:flex;justify-content:space-between;font-size:.86rem;color:var(--muted);
-  border-bottom:1px dotted var(--line);padding-bottom:.45rem}
-.book-side li b{color:var(--ink);font-weight:600}
+/* ---------- njoftimi ---------- */
+#toast{position:fixed;left:50%;bottom:1.4rem;translate:-50% 0;z-index:100;
+  background:var(--pan-2);border:1px solid var(--line);border-radius:13px;padding:.75rem 1.2rem;
+  font-size:.87rem;box-shadow:0 20px 44px -18px #000;opacity:0;transform:translateY(14px);
+  transition:.3s;pointer-events:none;max-width:min(92vw,460px)}
+#toast.on{opacity:1;transform:none}
+#toast.err{border-color:rgba(229,84,75,.55);color:#ffb0aa}
+#toast.ok{border-color:rgba(76,175,109,.55);color:#a7e5bd}
 
-/* ---------- kontakt ---------- */
-.contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:1rem}
-.cbox{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:1.5rem;transition:.3s}
-.cbox:hover{border-color:var(--red);transform:translateY(-5px)}
-.cbox h4{font-family:var(--serif);font-size:1.05rem;margin:0 0 .65rem;color:var(--terra)}
-.cbox p{font-size:.9rem;color:var(--ink-2);margin:0}
-.cbox ul{list-style:none;margin:0;padding:0;display:grid;gap:.32rem}
-.cbox li{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);gap:1rem}
-.cbox li b{color:var(--ink);font-weight:600}
+/* ---------- shiriti i ruajtjes ---------- */
+.savebar{position:fixed;left:50%;translate:-50% 0;bottom:1.2rem;z-index:70;display:flex;gap:.7rem;
+  align-items:center;background:rgba(21,16,17,.95);backdrop-filter:blur(14px);border:1px solid var(--line);
+  border-radius:999px;padding:.55rem .6rem .55rem 1.2rem;box-shadow:0 20px 44px -20px #000;
+  transform:translate(-50%,160%);transition:transform .4s cubic-bezier(.3,1.3,.4,1)}
+.savebar.on{transform:translate(-50%,0)}
+.savebar span{font-size:.84rem;color:var(--warn);white-space:nowrap}
 
-footer{background:var(--ink);color:#c9b9a6;padding:2.6rem 0 6rem}
-.ft{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;align-items:center}
-.ft .logo b,.ft .logo small{color:var(--paper)}
-.ft-soc{display:flex;gap:.5rem}
-.ft-soc a{width:36px;height:36px;border:1px solid #453626;border-radius:9px;display:grid;place-items:center;
-  font-size:.7rem;font-weight:800;transition:.25s;color:var(--paper)}
-.ft-soc a:hover{background:var(--gold);color:var(--ink);border-color:var(--gold)}
-.ft small{font-size:.76rem}
-.note{margin-top:1.2rem;font-size:.68rem;color:#8a7663;border-top:1px solid #3a2d20;padding-top:.9rem;line-height:1.6}
-
-/* ---------- shporta ---------- */
-.cart{position:fixed;top:0;right:0;height:100dvh;width:min(410px,100%);z-index:120;background:var(--paper);
-  border-left:1px solid var(--line);transform:translateX(102%);transition:transform .45s cubic-bezier(.6,0,.2,1);
-  display:flex;flex-direction:column;box-shadow:-20px 0 60px -30px rgba(60,40,25,.6)}
-body.cart-open .cart{transform:none}
-.scrim{position:fixed;inset:0;background:rgba(36,28,23,.45);backdrop-filter:blur(3px);z-index:110;opacity:0;visibility:hidden;transition:.35s}
-body.cart-open .scrim{opacity:1;visibility:visible}
-.cart-hd{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.3rem;border-bottom:1px solid var(--line)}
-.cart-hd h3{font-size:1.25rem}
-.x{width:32px;height:32px;border-radius:9px;border:1.5px solid var(--line);display:grid;place-items:center;transition:.22s}
-.x:hover{background:var(--red);color:var(--paper);border-color:var(--red)}
-.cart-list{list-style:none;margin:0;padding:1rem 1.3rem;overflow-y:auto;flex:1;display:grid;gap:.6rem;align-content:start}
-.cart-line{display:grid;grid-template-columns:40px 1fr auto auto;gap:.65rem;align-items:center;
-  border-bottom:1px dotted var(--line);padding-bottom:.6rem}
-.cl-img{width:40px;height:40px}
-.cl-name{font-size:.85rem;line-height:1.25;font-weight:600}
-.cl-name em{display:block;font-style:normal;font-size:.72rem;color:var(--muted);font-weight:400}
-.qty{display:flex;align-items:center;gap:.35rem;border:1.5px solid var(--line);border-radius:8px;padding:.08rem .22rem}
-.qty button{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;transition:.2s}
-.qty button:hover{background:var(--ink);color:var(--paper)}
-.qty b{min-width:14px;text-align:center;font-size:.8rem}
-.cl-sum{font-family:var(--serif);font-weight:800;color:var(--red);font-size:.95rem}
-.cart-empty{color:var(--muted);text-align:center;padding:3rem 1rem;font-size:.9rem}
-.cart-ft{border-top:1px solid var(--line);padding:1.1rem 1.3rem 1.4rem;display:grid;gap:.4rem;background:var(--paper-2)}
-.row{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
-.row.total{color:var(--ink);font-size:1rem;font-weight:600;border-top:1px dotted var(--line);padding-top:.5rem;margin-top:.25rem}
-.row.total b{font-family:var(--serif);font-size:1.5rem;color:var(--red)}
-.cart .wa{margin-top:.55rem}
-.cart-note{font-size:.7rem;color:var(--muted);text-align:center;margin:.15rem 0 0}
-.clear{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.25rem;transition:.2s}
-.clear:hover{color:var(--red)}
-
-/* ---------- dock ---------- */
-.dock{position:fixed;left:0;right:0;bottom:0;z-index:95;display:none;gap:.45rem;padding:.55rem;
-  background:rgba(251,245,234,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
-.dock a,.dock button{flex:1;display:flex;flex-direction:column;align-items:center;padding:.5rem;border-radius:11px;
-  font-size:.63rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
-.dock .d-wa{background:#128C4B;color:#fff}.dock .d-tel{background:var(--red);color:#fff}
-.dock .d-cart{background:var(--ink);color:var(--paper)}
-
-[data-reveal]{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
-[data-reveal].in{opacity:1;transform:none}
-
-@media(max-width:960px){
-  .hero .wrap{grid-template-columns:1fr;text-align:center}
-  .hero p.sub{margin-inline:auto}.cta,.trust{justify-content:center}
-  .hero-plate{order:-1;max-width:320px;margin-inline:auto}.chip-note{display:none}
-  .about,.book{grid-template-columns:1fr}
-  .grid.list{grid-template-columns:1fr;gap:0}
-  nav{position:fixed;inset:0;background:var(--paper);flex-direction:column;justify-content:center;gap:1.6rem;
-    transform:translateX(100%);transition:transform .4s cubic-bezier(.6,0,.2,1);margin:0}
-  body.nav-open nav{transform:none}
-  nav a{font-family:var(--serif);font-size:1.6rem;font-weight:800}
-  .burger{display:flex;z-index:95}.hd-act{margin-left:auto}
-  .dock{display:flex}.stats{grid-template-columns:1fr 1fr}
-  form.bk{grid-template-columns:1fr}
+@media(max-width:720px){
+  .item{grid-template-columns:48px minmax(0,1fr) auto;grid-template-areas:
+    'thumb name name' 'price sw hap';row-gap:.6rem;align-items:center}
+  .thumb{width:48px;height:48px;grid-area:thumb}
+  .item .nm{grid-area:name}
+  .item .price-in{grid-area:price;width:100%}
+  .item .sw{grid-area:sw;justify-self:center}
+  .item .btn-sm{grid-area:hap}
+  .tools{gap:.5rem}
+  .tools .btn{flex:1}
+  .row2,.row3{grid-template-columns:1fr}
+  .rev-top{grid-template-columns:1fr}
+  .savebar{width:calc(100% - 1.6rem);border-radius:16px;justify-content:space-between}
 }
-@media(max-width:480px){
-  .grid.cards{grid-template-columns:1fr 1fr;gap:.65rem}
-  .grid.cards .bd{padding:.7rem .75rem .85rem}.grid.cards h3{font-size:.86rem}
-  .grid.cards p{display:none}.grid.cards .price{font-size:1rem}
-  .grid.list .dish{grid-template-columns:44px 1fr}
-  .grid.list .rt{grid-column:2;flex-direction:row;align-items:center;justify-content:space-between;width:100%}
-}
-
-/* ---- kompaktim i header-it në ekrane të vogla ---- */
-@media(max-width:560px){
-  .logo small,.logo sup{display:none}
-  .cart-btn span[data-i18n]{display:none}
-  .cart-btn{padding:.5rem .75rem}
-  .lang{padding:.36rem .6rem}
-}
-
-/* ---- shënimi i orarit mbi pjatë (p.sh. 09:00–15:00) ---- */
-.note{font-style:normal;font-size:.62em;font-weight:600;letter-spacing:.06em;
-  opacity:.75;white-space:nowrap;vertical-align:middle}
-
-.note{color:var(--terra)}
-
-@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 </style>
 </head>
 <body>
 
-<header data-header>
-  <div class="wrap hd">
-    <a href="#top" class="logo"><span class="mark">S</span>
-      <span><b>SPRINT</b><small data-tagline></small></span></a>
-    <nav data-nav>
-      <a href="#menu" data-i18n="nav_menu"></a>
-      <a href="#about" data-i18n="nav_about"></a>
-      <a href="#revs" data-i18n="nav_reviews"></a>
-      <a href="#book" data-i18n="nav_book"></a>
-      <a href="#contact" data-i18n="nav_contact"></a>
-    </nav>
-    <div class="hd-act">
-      <button class="lang" data-lang-toggle>EN</button>
-      <button class="cart-btn" data-cart-open data-cart-badge>
-        <span data-i18n="cart_title"></span><b data-cart-count>0</b></button>
-      <button class="burger" data-nav-toggle aria-label="Menu"><i></i><i></i><i></i></button>
-    </div>
-  </div>
-</header>
-
-<!-- ══════════════ HERO ══════════════ -->
-<section class="hero" id="top">
-  <div class="wrap">
+<!-- ══════════════════ HYRJA ══════════════════ -->
+<div id="gate">
+  <form class="card" id="loginForm">
     <div>
-      <span class="since" data-i18n="hero_kicker"></span>
-      <h1><span data-i18n="hero_t1"></span> <em data-i18n="hero_t2"></em></h1>
-      <p class="sub" data-i18n="hero_sub"></p>
-      <div class="cta">
-        <a class="btn btn-p" href="#menu"><span data-i18n="cta_menu"></span></a>
-        <a class="btn btn-s" data-tel-href><span data-i18n="cta_call"></span></a>
+      <span class="brandmark">SPR<em>I</em>NT</span>
+      <h1 style="font-size:1.3rem;margin-top:.5rem">Paneli i menaxhimit</h1>
+    </div>
+    <p class="gate-sub">Hyr për të ndryshuar çmimet, pjatët dhe fotot e faqes.</p>
+    <div class="msg" id="gateMsg"></div>
+    <div class="f"><label for="em">Email</label>
+      <input id="em" type="email" autocomplete="username" required></div>
+    <div class="f"><label for="pw">Fjalëkalimi</label>
+      <input id="pw" type="password" autocomplete="current-password" required></div>
+    <button class="btn btn-p" type="submit" id="loginBtn">Hyr në panel</button>
+    <button class="btn btn-g" type="button" id="localBtn">Provoje pa llogari</button>
+  </form>
+</div>
+
+<!-- ══════════════════ PANELI ══════════════════ -->
+<div id="panel" class="hide">
+  <header>
+    <div class="wrap">
+      <div class="top">
+        <span class="brandmark">SPR<em>I</em>NT</span>
+        <span class="pill" id="modePill"></span>
+        <span class="who"><span class="dot" id="modeDot"></span><span id="whoTxt"></span>
+          <button class="btn btn-g btn-sm" id="outBtn">Dil</button></span>
       </div>
-      <div class="trust" data-stats></div>
+      <nav class="tabs">
+        <button class="tab on" data-tab="menu">Menuja</button>
+        <button class="tab" data-tab="cats">Kategoritë</button>
+        <button class="tab" data-tab="set">Cilësimet</button>
+        <button class="tab" data-tab="rev">Vlerësimet</button>
+        <button class="tab" data-tab="pub">Publikimi</button>
+      </nav>
     </div>
-    <div class="hero-plate">
-      <span class="ring"></span><span class="ring ring2"></span>
-      <svg class="big" viewBox="0 0 200 200"><use href="#art-tave"/></svg>
-      <span class="chip-note cn1"><i></i><span id="n1">Furrë druri</span></span>
-      <span class="chip-note cn2"><i></i><span id="n2">Peshk i ditës</span></span>
-      <span class="chip-note cn3"><i></i><span id="n3">Receta të gjyshes</span></span>
-    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ─────── MENUJA ─────── -->
+    <section class="view" id="v-menu">
+      <div class="tools">
+        <div class="f search"><input id="q" type="search" placeholder="Kërko pjatë…"></div>
+        <div class="f"><select id="catFilter"></select></div>
+        <span class="count" id="cnt"></span>
+        <button class="btn btn-p" id="addBtn">+ Pjatë e re</button>
+      </div>
+      <div class="tools" style="gap:.5rem">
+        <span class="count">Ndrysho të gjitha çmimet e një kategorie:</span>
+        <div class="f" style="width:150px"><select id="bulkCat"></select></div>
+        <div class="f" style="width:96px"><input id="bulkPct" type="number" step="1" value="10" inputmode="numeric"></div>
+        <span class="count">%</span>
+        <button class="btn btn-g btn-sm" id="bulkUp">Rrit</button>
+        <button class="btn btn-g btn-sm" id="bulkDown">Ul</button>
+      </div>
+      <div class="items" id="itemList"></div>
+    </section>
+
+    <!-- ─────── KATEGORITË ─────── -->
+    <section class="view hide" id="v-cats">
+      <p class="count">Renditja këtu përcakton renditjen e fetave të rrotës dhe të filtrave në faqe.</p>
+      <div class="items" id="catList"></div>
+      <button class="btn btn-g" id="addCat">+ Kategori e re</button>
+    </section>
+
+    <!-- ─────── CILËSIMET ─────── -->
+    <section class="view hide" id="v-set">
+      <div class="card" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">Kontaktet</h2>
+        <div class="row2">
+          <div class="f"><label>Telefoni siç shfaqet</label><input id="s-phone"></div>
+          <div class="f"><label>Telefoni për klikim</label><input id="s-phoneHref" placeholder="+355696667000"></div>
+        </div>
+        <div class="row2">
+          <div class="f"><label>WhatsApp (pa + dhe pa hapësira)</label><input id="s-wa" placeholder="355696667000"></div>
+          <div class="f"><label>Email për rezervimet</label><input id="s-email" type="email"
+            placeholder="lëre bosh dhe butoni fshihet"></div>
+        </div>
+        <div class="row2">
+          <div class="f"><label>Adresa (shqip)</label><input id="s-addr-sq"></div>
+          <div class="f"><label>Adresa (anglisht)</label><input id="s-addr-en"></div>
+        </div>
+        <div class="row3">
+          <div class="f"><label>Gjerësia (lat)</label><input id="s-lat" inputmode="decimal"></div>
+          <div class="f"><label>Gjatësia (lng)</label><input id="s-lng" inputmode="decimal"></div>
+          <div class="f"><label>Tarifa e dërgesës</label><input id="s-fee" inputmode="numeric"
+            placeholder="bosh = «Sipas zonës»"></div>
+        </div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">Orari</h2>
+        <div class="mini" id="hoursSq"></div>
+        <button class="btn btn-g btn-sm" id="addHour" style="justify-self:start">+ Rresht orari</button>
+      </div>
+
+      <div class="card" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">Rrjetet sociale</h2>
+        <p class="count">Linket e lëna bosh fshihen vetvetiu nga faqja.</p>
+        <div class="f"><label>Instagram</label><input id="s-ig" type="url"></div>
+        <div class="row2">
+          <div class="f"><label>Facebook</label><input id="s-fb" type="url"></div>
+          <div class="f"><label>TikTok</label><input id="s-tt" type="url"></div>
+        </div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">Salla e eventeve</h2>
+        <div class="row2">
+          <div class="f"><label>Teksti (shqip)</label><textarea id="s-ev-sq"></textarea></div>
+          <div class="f"><label>Teksti (anglisht)</label><textarea id="s-ev-en"></textarea></div>
+        </div>
+        <div class="photo">
+          <div class="photo-box" id="evBox"><svg viewBox="0 0 200 200"><use href="#art-meze"/></svg></div>
+          <div class="photo-act">
+            <button class="btn btn-g btn-sm" id="evPick">Ngarko foto të sallës</button>
+            <button class="btn btn-d btn-sm" id="evClear">Hiq foton</button>
+            <p class="hint">Fotoja zvogëlohet vetë në 1200 px dhe ngjeshet para ngarkimit.</p>
+          </div>
+        </div>
+        <input type="file" id="evFile" accept="image/*">
+      </div>
+    </section>
+
+    <!-- ─────── VLERËSIMET ─────── -->
+    <section class="view hide" id="v-rev">
+      <p class="count">Vendos këtu vlerësime reale nga Google ose Facebook. Mos shkruaj vlerësime të shpikura.</p>
+      <div class="items" id="revList"></div>
+      <button class="btn btn-g" id="addRev" style="justify-self:start">+ Vlerësim</button>
+    </section>
+
+    <!-- ─────── PUBLIKIMI ─────── -->
+    <section class="view hide" id="v-pub">
+      <div class="msg warn on" id="pubMode"></div>
+      <div class="pub">
+        <div class="pub-row">
+          <div><b>Dërgo gjithçka në Supabase</b>
+            <p>E mbush bazën me menunë aktuale — 122 pjatët, kategoritë dhe cilësimet. Përdore një herë në fillim.</p></div>
+          <button class="btn btn-p" id="seedBtn">Dërgo tani</button>
+        </div>
+        <div class="pub-row">
+          <div><b>Shkarko një kopje</b>
+            <p>Ruan gjithçka në një skedar JSON — kopje sigurie para ndryshimeve të mëdha.</p></div>
+          <button class="btn btn-g" id="expBtn">Shkarko JSON</button>
+        </div>
+        <div class="pub-row">
+          <div><b>Ngarko një kopje</b>
+            <p>Rikthen gjendjen nga një skedar JSON i shkarkuar më parë.</p></div>
+          <button class="btn btn-g" id="impBtn">Zgjidh skedarin</button>
+          <input type="file" id="impFile" accept="application/json,.json">
+        </div>
+        <div class="pub-row">
+          <div><b>Rikthe menunë fillestare</b>
+            <p>Zëvendëson gjithçka në panel me menunë origjinale të faqes. Nuk prek Supabase derisa të shtypësh «Ruaj».</p></div>
+          <button class="btn btn-d" id="resetBtn">Rikthe</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="font-size:1.1rem;margin-bottom:.6rem">Si lidhet Supabase</h2>
+        <ol class="steps-ol">
+          <li>Krijo një projekt falas te <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a>.</li>
+          <li>SQL Editor → ngjit skedarin <code>supabase/schema.sql</code> nga repo-ja → Run.</li>
+          <li>Authentication → Users → Add user: email-i dhe fjalëkalimi me të cilin hyn këtu.</li>
+          <li>Project Settings → Data API → kopjo <code>Project URL</code> dhe çelësin <code>anon</code>
+              te <code>shared/config.js</code>, pastaj ribëj publikimin.</li>
+          <li>Kthehu këtu, hyr, dhe shtyp «Dërgo tani» më sipër.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <div class="savebar" id="saveBar">
+    <span id="saveTxt"></span>
+    <button class="btn btn-g btn-sm" id="discardBtn">Anulo</button>
+    <button class="btn btn-p" id="saveBtn">Ruaj ndryshimet</button>
   </div>
-</section>
+</div>
 
-<div class="band"><div class="band-in" id="b1"></div><div class="band-in" id="b2"></div></div>
-
-<!-- ══════════════ KATEGORITË ══════════════ -->
-<section id="cats">
-  <div class="wrap">
-    <div class="st" data-reveal>
-      <span class="k" data-i18n="about_kicker"></span>
-      <h2 data-i18n="about_title"></h2>
-      <p data-i18n="about_body"></p>
-    </div>
-    <div class="cats" data-cat-cards></div>
-  </div>
-</section>
-
-<!-- ══════════════ MENUJA ══════════════ -->
-<section id="menu">
-  <div class="wrap">
-    <div class="st" data-reveal>
-      <span class="k" data-i18n="menu_kicker"></span>
-      <h2 data-i18n="menu_title"></h2>
-      <p data-i18n="menu_sub"></p>
-    </div>
-    <div class="menu-bar">
-      <div class="chips" data-filters></div>
-      <label class="search">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-        <input type="search" data-search data-i18n-ph="search_ph">
-      </label>
-      <div class="view">
-        <button id="vList" class="is-on">☰</button>
-        <button id="vCards">▦</button>
+<!-- ══════════════════ SIRTARI ══════════════════ -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Redakto pjatën">
+  <div class="dr-hd"><h2 id="drTitle">Redakto</h2><button class="x" id="drClose" aria-label="Mbyll">✕</button></div>
+  <div class="dr-body">
+    <div class="photo">
+      <div class="photo-box" id="dPhoto"></div>
+      <div class="photo-act">
+        <button class="btn btn-g btn-sm" id="dPick">Ngarko / ndërro foton</button>
+        <button class="btn btn-d btn-sm" id="dPhotoClear">Hiq foton</button>
+        <p class="hint">Pa foto, faqja përdor ilustrimin e zgjedhur më poshtë.</p>
       </div>
     </div>
-    <div class="grid list" data-menu-grid></div>
-  </div>
-</section>
+    <input type="file" id="dFile" accept="image/*">
 
-<!-- ══════════════ RRETH ══════════════ -->
-<section id="about">
-  <div class="wrap about">
-    <div class="frame" data-reveal>
-      <svg viewBox="0 0 200 200"><use href="#art-byrek"/></svg>
-      <svg viewBox="0 0 200 200"><use href="#art-fish"/></svg>
-      <svg viewBox="0 0 200 200"><use href="#art-pizza"/></svg>
-      <svg viewBox="0 0 200 200"><use href="#art-gyros"/></svg>
+    <div class="row2">
+      <div class="f"><label>Emri (shqip)</label><input id="d-sq"></div>
+      <div class="f"><label>Emri (anglisht)</label><input id="d-en"></div>
     </div>
-    <div data-reveal>
-      <span class="k" style="font-size:.68rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--terra)" data-i18n="about_kicker"></span>
-      <h2 style="font-size:clamp(1.9rem,4.4vw,3.1rem);margin:.7rem 0 0" data-i18n="about_title"></h2>
-      <p style="color:var(--ink-2)" data-i18n="about_body"></p>
-      <p class="quote" id="quote">«Nuk të detyrojmë të zgjedhësh mes një pice të mirë dhe një tave kosi. I gjen të dyja në të njëjtën tavolinë.»</p>
-      <div class="stats" data-stats></div>
+    <div class="f"><label>Përshkrimi (shqip)</label><textarea id="d-dsq"></textarea></div>
+    <div class="f"><label>Përshkrimi (anglisht)</label><textarea id="d-den"></textarea></div>
+    <div class="row3">
+      <div class="f"><label>Çmimi (Lekë)</label><input id="d-p" inputmode="numeric"></div>
+      <div class="f"><label>Njësia</label><input id="d-unit" placeholder="p.sh. /copë"></div>
+      <div class="f"><label>Shënim</label><input id="d-note" placeholder="p.sh. 09:00–15:00"></div>
     </div>
-  </div>
-</section>
-
-<!-- ══════════════ REVIEW ══════════════ -->
-<section id="revs">
-  <div class="wrap">
-    <div class="st mid" data-reveal style="text-align:center">
-      <span class="k" data-i18n="rev_kicker"></span>
-      <h2 data-i18n="rev_title"></h2>
+    <div class="row2">
+      <div class="f"><label>Kategoria</label><select id="d-c"></select></div>
+      <div class="f"><label>Ilustrimi</label><select id="d-art"></select></div>
     </div>
-    <div class="revs" data-reviews></div>
-  </div>
-</section>
-
-<!-- ══════════════ REZERVIM ══════════════ -->
-<section id="book">
-  <div class="wrap book">
-    <div class="book-side" data-reveal>
-      <span class="k" style="font-size:.68rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--terra)" data-i18n="book_kicker"></span>
-      <h2 style="font-size:clamp(1.9rem,4.4vw,3rem);margin:.7rem 0 .8rem" data-i18n="book_title"></h2>
-      <p style="color:var(--ink-2)" data-i18n="book_sub"></p>
-      <ul data-hours></ul>
-    </div>
-    <form class="bk" data-book-form data-reveal novalidate>
-      <div class="fld"><label data-i18n="f_name"></label><input name="name" required></div>
-      <div class="fld"><label data-i18n="f_phone"></label><input name="phone" type="tel" required></div>
-      <div class="fld"><label data-i18n="f_date"></label><input name="date" type="date" required></div>
-      <div class="fld"><label data-i18n="f_time"></label><input name="time" type="time" value="20:00"></div>
-      <div class="fld"><label data-i18n="f_people"></label>
-        <select name="people"><option>1</option><option selected>2</option><option>3</option><option>4</option>
-        <option>5</option><option>6</option><option>8</option><option>10+</option></select></div>
-      <div class="fld"><label data-i18n="f_area"></label>
-        <select name="area"><option data-i18n="f_area_in"></option><option data-i18n="f_area_out"></option>
-        <option data-i18n="f_area_any"></option></select></div>
-      <div class="fld full"><label data-i18n="f_note"></label><textarea name="note"></textarea></div>
-      <p class="err" data-form-error></p>
-      <div class="bk-act">
-        <button type="submit" class="wa"><span data-i18n="f_send"></span></button>
-        <a href="#" class="mail" data-book-email><span data-i18n="f_email"></span></a>
+    <div class="f"><label>Etiketat</label>
+      <div class="tagpick" id="dTags">
+        <button data-t="top">I spikatur</button><button data-t="new">I ri</button>
+        <button data-t="hot">Pikante</button><button data-t="veg">Vegjetarian</button>
       </div>
-    </form>
-  </div>
-</section>
-
-<!-- ══════════════ KONTAKT ══════════════ -->
-<section id="contact" style="background:var(--paper-2)">
-  <div class="wrap">
-    <div class="st" data-reveal>
-      <span class="k" data-i18n="ct_kicker"></span>
-      <h2 data-i18n="ct_title"></h2>
     </div>
-    <div class="contact" data-reveal>
-      <div class="cbox"><h4 data-i18n="ct_addr"></h4><p data-addr></p>
-        <p style="margin-top:.7rem"><a data-map-href target="_blank" rel="noopener" style="color:var(--red);font-weight:700" data-i18n="ct_map"></a></p></div>
-      <div class="cbox"><h4 data-i18n="ct_phone"></h4><p><a data-tel-href data-phone style="font-size:1.08rem;font-weight:700"></a></p>
-        <p style="margin-top:.7rem"><a data-wa-href target="_blank" rel="noopener" style="color:#128C4B;font-weight:700">WhatsApp →</a></p></div>
-      <div class="cbox"><h4 data-i18n="ct_hours"></h4><ul data-hours></ul></div>
+    <div class="row2">
+      <div class="f"><label>Renditja</label><input id="d-sort" inputmode="numeric"></div>
+      <div class="f"><label>Në menu</label>
+        <div style="display:flex;align-items:center;gap:.6rem;padding-top:.3rem">
+          <button class="sw" id="d-av" aria-label="Në menu"></button>
+          <span class="count" id="d-avTxt"></span>
+        </div></div>
     </div>
+    <div class="f"><label>Kodi (id)</label><input id="d-id" readonly><span class="hint">Nuk ndryshohet pasi krijohet.</span></div>
   </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <div class="ft">
-      <a href="#top" class="logo"><span class="mark">S</span><span><b>SPRINT</b><small data-tagline></small></span></a>
-      <div class="ft-soc"><a data-soc="ig">IG</a><a data-soc="fb">FB</a><a data-soc="tt">TT</a></div>
-      <small>© <span data-year></span> SPRINT Durrës. <span data-i18n="foot_rights"></span></small>
-    </div>
-    <p class="note"><b>MOCKUP 3 — «TABELA».</b> Ilustrimet janë SVG placeholder; menuja, çmimet, review-t dhe
-      kontaktet janë shembuj që zëvendësohen me të dhënat reale të biznesit.</p>
-  </div>
-</footer>
-
-<div class="scrim" data-cart-close></div>
-<aside class="cart">
-  <div class="cart-hd"><h3 data-i18n="cart_title"></h3><button class="x" data-cart-close aria-label="Mbyll">✕</button></div>
-  <ul class="cart-list" data-cart-items></ul>
-  <div class="cart-ft">
-    <div class="row"><span data-i18n="cart_sub"></span><span data-cart-sub>0 L</span></div>
-    <div class="row"><span data-i18n="cart_del"></span><span data-cart-del>0 L</span></div>
-    <div class="row total"><span data-i18n="cart_total"></span><b data-cart-total>0 L</b></div>
-    <a class="wa is-disabled" data-cart-send target="_blank" rel="noopener" href="#menu"><span data-i18n="cart_send"></span></a>
-    <p class="cart-note" data-i18n="cart_note"></p>
-    <button class="clear" data-cart-clear data-i18n="cart_clear"></button>
+  <div class="dr-ft">
+    <button class="btn btn-d" id="dDelete">Fshi</button>
+    <button class="btn btn-p" id="dSave">Në rregull</button>
   </div>
 </aside>
 
-<div class="dock">
-  <a class="d-tel" data-tel-href><span data-i18n="cta_call"></span></a>
-  <a class="d-wa" data-wa-href target="_blank" rel="noopener">WhatsApp</a>
-  <button class="d-cart" data-cart-open data-cart-badge><span data-i18n="cart_title"></span><b data-cart-count>0</b></button>
-</div>
+<div id="toast"></div>
 
+<script>
+/* ============================================================================
+   SPRINT — Lidhja me Supabase
+   ----------------------------------------------------------------------------
+   Plotëso këto dy vlera pasi të krijosh projektin falas në supabase.com:
+     Supabase → Project Settings → Data API → Project URL dhe anon public key
+
+   Çelësi «anon» është i sigurt të jetë publik: ai lejon VETËM leximin e menusë.
+   Shkrimi kërkon hyrje me email e fjalëkalim (shih supabase/schema.sql).
+
+   Nëse i lë bosh, faqja punon njësoj por me menunë e ngurtë nga shared/data.js
+   dhe paneli admin ruan vetëm në këtë pajisje.
+   ========================================================================== */
+window.SPRINT_CONFIG = {
+  SUPABASE_URL: '',       // p.sh. 'https://abcdefgh.supabase.co'
+  SUPABASE_ANON_KEY: '',  // çelësi publik «anon»
+  PHOTO_BUCKET: 'photos',
+};
+
+</script>
 <script>
 /* ============================================================================
    SPRINT — Fast Food & Pizza · Restaurant, Durrës
@@ -1465,449 +1414,843 @@ ${S('drink', `
 </script>
 <script>
 /* ============================================================================
-   SPRINT — Motori i përbashkët i faqes.
-   Mban logjikën identike në të 5 mockup-et; pamja vjen nga CSS-ja e secilit.
+   SPRINT — Shtresa e ruajtjes.
+   Flet me Supabase përmes REST-it (pa asnjë bibliotekë të jashtme).
+   Nëse Supabase nuk është konfiguruar, bie te ruajtja lokale në shfletues,
+   që paneli admin të jetë i provueshëm edhe pa llogari.
    ========================================================================== */
 (function () {
   const S = window.SPRINT;
-  const $  = (s, r) => (r || document).querySelector(s);
-  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const CFG = window.SPRINT_CONFIG || {};
+  const URL_ = (CFG.SUPABASE_URL || '').replace(/\/+$/, '');
+  const KEY = CFG.SUPABASE_ANON_KEY || '';
+  const BUCKET = CFG.PHOTO_BUCKET || 'photos';
+  const configured = !!(URL_ && KEY);
 
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const LS_SESSION = 'sprint-session';
+  const LS_LOCAL = 'sprint-local-content';
 
-  function app(opts) {
-    opts = opts || {};
-    const state = {
-      cat: 'all',
-      q: '',
-      cart: {},          // id -> qty
-      lang: localStorage.getItem('sprint-lang') || 'sq',
-    };
-    S.setLang(state.lang);
+  /* ---------------- sesioni ---------------- */
+  let session = null;
+  try { session = JSON.parse(localStorage.getItem(LS_SESSION) || 'null'); } catch (e) {}
 
-    /* ---------------- i18n ---------------- */
-    function applyI18n() {
-      S.setLang(state.lang);
-      document.documentElement.lang = state.lang;
-      $$('[data-i18n]').forEach((el) => { el.textContent = S.T(el.dataset.i18n); });
-      $$('[data-i18n-ph]').forEach((el) => { el.placeholder = S.T(el.dataset.i18nPh); });
-      $$('[data-i18n-html]').forEach((el) => { el.innerHTML = S.T(el.dataset.i18nHtml); });
-      $$('[data-lang-toggle]').forEach((el) => { el.textContent = state.lang === 'sq' ? 'EN' : 'SQ'; });
-      if (opts.onLang) opts.onLang(state.lang);
+  const saveSession = (s) => {
+    session = s;
+    if (s) localStorage.setItem(LS_SESSION, JSON.stringify(s));
+    else localStorage.removeItem(LS_SESSION);
+  };
+
+  const authHeader = () => (session && session.access_token)
+    ? 'Bearer ' + session.access_token : 'Bearer ' + KEY;
+
+  const headers = (extra) => Object.assign({
+    apikey: KEY,
+    Authorization: authHeader(),
+    'Content-Type': 'application/json',
+  }, extra || {});
+
+  async function req(path, opts) {
+    const r = await fetch(URL_ + path, opts);
+    if (!r.ok) {
+      let msg = r.status + ' ' + r.statusText;
+      try { const j = await r.json(); msg = j.message || j.error_description || j.msg || msg; } catch (e) {}
+      throw new Error(msg);
     }
-    function toggleLang() {
-      state.lang = state.lang === 'sq' ? 'en' : 'sq';
-      localStorage.setItem('sprint-lang', state.lang);
-      applyI18n(); renderFilters(); renderMenu(); renderCart(); renderStatic();
-    }
-
-    /* ---------------- pjesë statike (kategori, review, orar) ---------------- */
-    function renderStatic() {
-      const l = state.lang;
-      // kartat e kategorive
-      const catWrap = $('[data-cat-cards]');
-      if (catWrap) {
-        catWrap.innerHTML = S.categories.map((c, i) => (opts.catCard || defaultCatCard)(c, i, l)).join('');
-        bindCatCards();
-      }
-      // review
-      const revWrap = $('[data-reviews]');
-      if (revWrap) revWrap.innerHTML = S.reviews.map((r, i) => (opts.review || defaultReview)(r, i, l)).join('');
-      // statistika
-      const stWrap = $('[data-stats]');
-      if (stWrap) stWrap.innerHTML = S.stats.map((s) => (opts.stat || defaultStat)(s, l)).join('');
-      // orari
-      const hWrap = $('[data-hours]');
-      if (hWrap) hWrap.innerHTML = S.config.hours[l].map(([d, h]) =>
-        `<li><span>${esc(d)}</span><b>${esc(h)}</b></li>`).join('');
-      // adresa / kontakt
-      $$('[data-addr]').forEach((e) => { e.textContent = S.config.address[l]; });
-      $$('[data-tagline]').forEach((e) => { e.textContent = S.config.tagline[l]; });
-      $$('[data-phone]').forEach((e) => { e.textContent = S.config.phone; });
-      $$('[data-tel-href]').forEach((e) => { e.href = 'tel:' + S.config.phoneHref; });
-      $$('[data-map-href]').forEach((e) => { e.href = S.mapLink(); });
-      $$('[data-wa-href]').forEach((e) => {
-        e.href = S.waLink(state.lang === 'sq'
-          ? `Përshëndetje SPRINT! 👋 Dua të bëj një porosi.`
-          : `Hello SPRINT! 👋 I'd like to place an order.`);
-      });
-      $$('[data-year]').forEach((e) => { e.textContent = new Date().getFullYear(); });
-      // Rrjetet sociale: fshihi ato që nuk i kemi ende.
-      $$('[data-soc]').forEach((a) => {
-        const url = S.config.social[{ ig:'instagram', fb:'facebook', tt:'tiktok' }[a.dataset.soc]] || '';
-        if (!url) { a.hidden = true; a.style.display = 'none'; return; }
-        a.hidden = false; a.style.removeProperty('display');
-        a.href = url; a.target = '_blank'; a.rel = 'noopener';
-      });
-      if (opts.onStatic) opts.onStatic(l);
-      revealScan();
-    }
-
-    const defaultCatCard = (c, i, l) => `
-      <button class="cat-card" data-reveal data-cat-jump="${c.id}" style="--i:${i}">
-        ${S.art({ art: c.art, sq: c[l === 'sq' ? 'sq' : 'en'] }, 'cat-art')}
-        <h3>${esc(c[l === 'sq' ? 'sq' : 'en'])}</h3>
-        <p>${esc(c[l === 'sq' ? 'dsq' : 'den'])}</p>
-      </button>`;
-
-    const defaultReview = (r, i, l) => `
-      <figure class="review" data-reveal style="--i:${i}">
-        <div class="stars">${'★'.repeat(r.s)}</div>
-        <blockquote>${esc(r[l === 'sq' ? 'sq' : 'en'])}</blockquote>
-        <figcaption><b>${esc(r.n)}</b><span>${esc(r.src)}</span></figcaption>
-      </figure>`;
-
-    const defaultStat = (s, l) => `
-      <div class="stat"><b>${esc(s.v)}</b><span>${esc(s[l === 'sq' ? 'sq' : 'en'])}</span></div>`;
-
-    function bindCatCards() {
-      $$('[data-cat-jump]').forEach((b) => b.addEventListener('click', () => {
-        state.cat = b.dataset.catJump; state.q = '';
-        const si = $('[data-search]'); if (si) si.value = '';
-        renderFilters(); renderMenu();
-        const m = $('#menu'); if (m) m.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
-      }));
-    }
-
-    /* ---------------- filtrat ---------------- */
-    function renderFilters() {
-      const wrap = $('[data-filters]'); if (!wrap) return;
-      const l = state.lang;
-      const items = [{ id: 'all', label: S.T('menu_all'), art: 'pizza' }]
-        .concat(S.categories.map((c) => ({ id: c.id, label: c[l === 'sq' ? 'sq' : 'en'], art: c.art })));
-      wrap.innerHTML = items.map((c) => `
-        <button class="chip${state.cat === c.id ? ' is-on' : ''}" data-chip="${c.id}">
-          <span>${esc(c.label)}</span>
-        </button>`).join('');
-      $$('[data-chip]', wrap).forEach((b) => b.addEventListener('click', () => {
-        state.cat = b.dataset.chip; renderFilters(); renderMenu();
-      }));
-    }
-
-    /* ---------------- menuja ---------------- */
-    const tagLabel = { hot:{sq:'Pikante',en:'Spicy'}, veg:{sq:'Vegjetarian',en:'Veggie'},
-                       new:{sq:'I ri',en:'New'}, top:{sq:'Më i shituri',en:'Bestseller'} };
-
-    function filtered() {
-      const q = state.q.trim().toLowerCase();
-      return S.menu.filter((m) => {
-        if (state.cat !== 'all' && m.c !== state.cat) return false;
-        if (!q) return true;
-        return (m.sq + ' ' + m.en + ' ' + m.dsq + ' ' + m.den).toLowerCase().includes(q);
-      });
-    }
-
-    const defaultCard = (m, i, l) => `
-      <article class="dish" data-reveal style="--i:${i}" data-dish="${m.id}">
-        <div class="dish-media">${S.art(m, 'dish-art')}
-          ${m.tags.length ? `<div class="dish-tags">${m.tags.map((t) =>
-            `<span class="tag tag-${t}">${esc(tagLabel[t][l])}</span>`).join('')}</div>` : ''}
-        </div>
-        <div class="dish-body">
-          <h3>${esc(m[l === 'sq' ? 'sq' : 'en'])}${m.note ? ` <em class="note">${esc(m.note)}</em>` : ''}</h3>
-          <p>${esc(m[l === 'sq' ? 'dsq' : 'den'])}</p>
-          <div class="dish-foot">
-            <span class="price">${S.price(m)}</span>
-            <button class="add" data-add="${m.id}"><span data-i18n="add">${S.T('add')}</span></button>
-          </div>
-        </div>
-      </article>`;
-
-    function renderMenu() {
-      const grid = $('[data-menu-grid]'); if (!grid) return;
-      const l = state.lang, list = filtered();
-      grid.innerHTML = list.length
-        ? list.map((m, i) => (opts.card || defaultCard)(m, i, l)).join('')
-        : `<p class="menu-empty">${esc(S.T('empty'))}</p>`;
-      $$('[data-add]', grid).forEach((b) => b.addEventListener('click', (e) => {
-        e.stopPropagation(); addToCart(b.dataset.add, b);
-      }));
-      if (opts.onMenu) opts.onMenu(grid, list);
-      revealScan();
-    }
-
-    /* ---------------- shporta ---------------- */
-    function addToCart(id, btn) {
-      state.cart[id] = (state.cart[id] || 0) + 1;
-      saveCart(); renderCart();
-      if (btn) {
-        const span = btn.querySelector('span');
-        const old = span.textContent;
-        span.textContent = S.T('added');
-        btn.classList.add('is-added');
-        setTimeout(() => { span.textContent = old; btn.classList.remove('is-added'); }, 1100);
-      }
-      bump();
-    }
-    function setQty(id, d) {
-      state.cart[id] = (state.cart[id] || 0) + d;
-      if (state.cart[id] <= 0) delete state.cart[id];
-      saveCart(); renderCart();
-    }
-    function clearCart() { state.cart = {}; saveCart(); renderCart(); }
-    function saveCart() { try { localStorage.setItem('sprint-cart', JSON.stringify(state.cart)); } catch (e) {} }
-    function loadCart() {
-      try { state.cart = JSON.parse(localStorage.getItem('sprint-cart')) || {}; } catch (e) { state.cart = {}; }
-    }
-    function bump() {
-      $$('[data-cart-count]').forEach((el) => {
-        el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
-      });
-    }
-
-    function cartLines() {
-      return Object.keys(state.cart).map((id) => {
-        const m = S.menu.find((x) => x.id === id);
-        return m ? { m, q: state.cart[id], sum: m.p * state.cart[id] } : null;
-      }).filter(Boolean);
-    }
-    function totals() {
-      const lines = cartLines();
-      const sub = lines.reduce((a, b) => a + b.sum, 0);
-      const fee = S.config.deliveryFee;
-      const free = S.config.freeDeliveryOver;
-      // fee === null → tarifa nuk është konfirmuar ende; shfaqet «Sipas zonës»
-      const known = typeof fee === 'number';
-      const del = !known || sub === 0 ? 0
-        : (typeof free === 'number' && sub >= free ? 0 : fee);
-      return { lines, sub, del, known, total: sub + del, count: lines.reduce((a, b) => a + b.q, 0) };
-    }
-
-    /** Teksti i rreshtit të dërgesës, sipas asaj që dimë vërtet. */
-    function deliveryLabel(t) {
-      if (!t.known) return S.T('cart_zone');
-      if (t.sub > 0 && t.del === 0) return S.T('cart_free');
-      return S.money(t.del);
-    }
-
-    function renderCart() {
-      const l = state.lang, t = totals();
-      $$('[data-cart-count]').forEach((e) => {
-        e.textContent = t.count;
-        e.closest('[data-cart-badge]')?.classList.toggle('is-empty', t.count === 0);
-      });
-      document.body.classList.toggle('has-cart', t.count > 0);
-
-      const box = $('[data-cart-items]');
-      if (box) {
-        box.innerHTML = t.lines.length ? t.lines.map((li) => `
-          <li class="cart-line">
-            <span class="cl-art">${S.art(li.m, 'cl-img')}</span>
-            <span class="cl-name">${esc(li.m[l === 'sq' ? 'sq' : 'en'])}<em>${S.price(li.m)}</em></span>
-            <span class="qty">
-              <button data-q="-1" data-id="${li.m.id}" aria-label="-">−</button>
-              <b>${li.q}</b>
-              <button data-q="1" data-id="${li.m.id}" aria-label="+">+</button>
-            </span>
-            <span class="cl-sum">${S.money(li.sum)}</span>
-          </li>`).join('')
-          : `<li class="cart-empty">${esc(S.T('cart_empty'))}</li>`;
-        $$('[data-q]', box).forEach((b) => b.addEventListener('click', () =>
-          setQty(b.dataset.id, parseInt(b.dataset.q, 10))));
-      }
-      const set = (sel, v) => $$(sel).forEach((e) => { e.textContent = v; });
-      set('[data-cart-sub]', S.money(t.sub));
-      set('[data-cart-del]', deliveryLabel(t));
-      set('[data-cart-total]', S.money(t.total));
-
-      $$('[data-cart-send]').forEach((btn) => {
-        btn.classList.toggle('is-disabled', t.count === 0);
-        btn.setAttribute('aria-disabled', t.count === 0 ? 'true' : 'false');
-        btn.href = t.count === 0 ? '#menu' : S.waLink(orderMessage());
-      });
-      if (opts.onCart) opts.onCart(t);
-    }
-
-    function orderMessage() {
-      const l = state.lang, t = totals();
-      const head = l === 'sq'
-        ? `🍕 *POROSI E RE — SPRINT Durrës*\n`
-        : `🍕 *NEW ORDER — SPRINT Durrës*\n`;
-      const lines = t.lines.map((li) =>
-        `• ${li.q}× ${li.m[l === 'sq' ? 'sq' : 'en']} — ${S.money(li.sum)}`).join('\n');
-      const sums = `\n\n${S.T('cart_sub')}: ${S.money(t.sub)}\n${S.T('cart_del')}: ${deliveryLabel(t)}\n*${S.T('cart_total')}: ${S.money(t.total)}*`;
-      const foot = l === 'sq'
-        ? `\n\n📍 Adresa ime: \n📞 Numri im: \n⏰ E dua për orën: `
-        : `\n\n📍 My address: \n📞 My number: \n⏰ Wanted for: `;
-      return head + lines + sums + foot;
-    }
-
-    /* ---------------- rezervimi ---------------- */
-    function bookMessage(d) {
-      const l = state.lang;
-      return l === 'sq'
-        ? `📅 *REZERVIM I RI — SPRINT Durrës*\n\n👤 Emri: ${d.name}\n📞 Telefon: ${d.phone}\n🗓️ Data: ${d.date}\n🕐 Ora: ${d.time}\n👥 Persona: ${d.people}\n🪑 Ambienti: ${d.area}\n📝 Shënim: ${d.note || '—'}\n\nJu lutem konfirmoni. Faleminderit!`
-        : `📅 *NEW RESERVATION — SPRINT Durrës*\n\n👤 Name: ${d.name}\n📞 Phone: ${d.phone}\n🗓️ Date: ${d.date}\n🕐 Time: ${d.time}\n👥 Guests: ${d.people}\n🪑 Seating: ${d.area}\n📝 Note: ${d.note || '—'}\n\nPlease confirm. Thank you!`;
-    }
-
-    function initBooking() {
-      const form = $('[data-book-form]'); if (!form) return;
-
-      // Salla e eventeve është një ambient real i lokalit — shtoje te zgjedhjet.
-      const areaSel = form.querySelector('[name=area]');
-      if (areaSel && !areaSel.querySelector('[data-i18n="f_area_ev"]')) {
-        const opt = document.createElement('option');
-        opt.dataset.i18n = 'f_area_ev';
-        opt.textContent = S.T('f_area_ev');
-        areaSel.insertBefore(opt, areaSel.options[areaSel.options.length - 1]);
-      }
-      // Butoni i email-it ka kuptim vetëm nëse kemi një adresë.
-      if (!S.config.email) {
-        const mb = form.querySelector('[data-book-email]');
-        if (mb) mb.remove();
-      }
-      const dateEl = form.querySelector('[name=date]');
-      if (dateEl) {
-        const today = new Date().toISOString().slice(0, 10);
-        dateEl.min = today; if (!dateEl.value) dateEl.value = today;
-      }
-      const read = () => {
-        const f = new FormData(form);
-        const areaSel = form.querySelector('[name=area]');
-        return {
-          name: (f.get('name') || '').trim(),
-          phone: (f.get('phone') || '').trim(),
-          date: f.get('date') || '',
-          time: f.get('time') || '',
-          people: f.get('people') || '2',
-          area: areaSel ? areaSel.options[areaSel.selectedIndex].text : '',
-          note: (f.get('note') || '').trim(),
-        };
-      };
-      const valid = (d) => d.name && d.phone && d.date;
-      const err = form.querySelector('[data-form-error]');
-      const show = (msg) => { if (err) { err.textContent = msg; err.classList.toggle('is-on', !!msg); } };
-
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const d = read();
-        if (!valid(d)) { show(S.T('f_req')); return; }
-        show('');
-        form.classList.add('is-sent');
-        window.open(S.waLink(bookMessage(d)), '_blank', 'noopener');
-      });
-
-      const mailBtn = form.querySelector('[data-book-email]');
-      if (mailBtn) mailBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const d = read();
-        if (!valid(d)) { show(S.T('f_req')); return; }
-        show('');
-        const subj = state.lang === 'sq'
-          ? `Rezervim — ${d.name} — ${d.date} ${d.time}`
-          : `Reservation — ${d.name} — ${d.date} ${d.time}`;
-        window.location.href = S.mailLink(subj, bookMessage(d).replace(/\*/g, ''));
-      });
-    }
-
-    /* ---------------- zbulimi në scroll ---------------- */
-    let io;
-    function revealScan() {
-      if (reduced) { $$('[data-reveal]').forEach((e) => e.classList.add('in')); return; }
-      if (!io) {
-        io = new IntersectionObserver((ents) => ents.forEach((en) => {
-          if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-        }), { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-      }
-      $$('[data-reveal]:not(.in)').forEach((e) => io.observe(e));
-    }
-
-    /* ---------------- nis ---------------- */
-    function init() {
-      loadCart();
-      applyI18n(); renderStatic(); renderFilters(); renderMenu(); renderCart(); initBooking();
-
-      $$('[data-lang-toggle]').forEach((b) => b.addEventListener('click', toggleLang));
-      const si = $('[data-search]');
-      if (si) si.addEventListener('input', () => { state.q = si.value; renderMenu(); });
-      $$('[data-cart-clear]').forEach((b) => b.addEventListener('click', clearCart));
-
-      // panelin e shportës
-      $$('[data-cart-open]').forEach((b) => b.addEventListener('click', () =>
-        document.body.classList.add('cart-open')));
-      $$('[data-cart-close]').forEach((b) => b.addEventListener('click', () =>
-        document.body.classList.remove('cart-open')));
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') document.body.classList.remove('cart-open', 'nav-open');
-      });
-      $$('[data-nav-toggle]').forEach((b) => b.addEventListener('click', () =>
-        document.body.classList.toggle('nav-open')));
-      $$('[data-nav] a').forEach((a) => a.addEventListener('click', () =>
-        document.body.classList.remove('nav-open')));
-
-      // header i ngjitur
-      const hdr = $('[data-header]');
-      if (hdr) {
-        const onScroll = () => hdr.classList.toggle('is-stuck', window.scrollY > 24);
-        onScroll(); addEventListener('scroll', onScroll, { passive: true });
-      }
-      if (opts.onReady) opts.onReady({ state, renderMenu, renderCart, totals, revealScan });
-    }
-
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-    else init();
-
-    return { state, renderMenu, renderCart, totals, revealScan, toggleLang };
+    return r.status === 204 ? null : r.json();
   }
 
-  S.app = app;
-  S.$ = $; S.$$ = $$; S.esc = esc; S.reduced = reduced;
+  /* ---------------- hyrja ---------------- */
+  async function signIn(email, password) {
+    if (!configured) throw new Error('Supabase nuk është konfiguruar te shared/config.js');
+    const data = await req('/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { apikey: KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    saveSession({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      email: (data.user && data.user.email) || email,
+      expires_at: Date.now() + (data.expires_in || 3600) * 1000,
+    });
+    return session;
+  }
+
+  async function refresh() {
+    if (!session || !session.refresh_token) return null;
+    try {
+      const data = await req('/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST',
+        headers: { apikey: KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: session.refresh_token }),
+      });
+      saveSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        email: session.email,
+        expires_at: Date.now() + (data.expires_in || 3600) * 1000,
+      });
+      return session;
+    } catch (e) { saveSession(null); return null; }
+  }
+
+  /** Siguron një token të vlefshëm para çdo shkrimi. */
+  async function ensureAuth() {
+    if (!session) return null;
+    if (session.expires_at && session.expires_at - Date.now() < 60000) return refresh();
+    return session;
+  }
+
+  const signOut = () => saveSession(null);
+  const currentUser = () => (session ? { email: session.email } : null);
+
+  /* ---------------- leximi publik ---------------- */
+  /** Rreshti i tabelës → objekti që pret faqja. */
+  const rowToItem = (r) => ({
+    id: r.id, c: r.category, art: r.art || 'pizza',
+    sq: r.name_sq, en: r.name_en || r.name_sq,
+    dsq: r.desc_sq || '', den: r.desc_en || '',
+    p: Number(r.price) || 0,
+    unit: r.unit || undefined,
+    note: r.note || undefined,
+    tags: Array.isArray(r.tags) ? r.tags : [],
+    img: r.image_url || undefined,
+    available: r.available !== false,
+    sort: r.sort == null ? 0 : Number(r.sort),
+  });
+
+  const itemToRow = (m) => ({
+    id: m.id, category: m.c, art: m.art || 'pizza',
+    name_sq: m.sq, name_en: m.en || m.sq,
+    desc_sq: m.dsq || '', desc_en: m.den || '',
+    price: Number(m.p) || 0,
+    unit: m.unit || null,
+    note: m.note || null,
+    tags: m.tags || [],
+    image_url: m.img || null,
+    available: m.available !== false,
+    sort: m.sort == null ? 0 : Number(m.sort),
+  });
+
+  /** Lexon menunë dhe cilësimet. Kthen null nëse s'ka asgjë të publikuar. */
+  async function fetchAll() {
+    if (!configured) return readLocal();
+    const [items, settings] = await Promise.all([
+      req('/rest/v1/menu_items?select=*&order=sort.asc', { headers: headers() }),
+      req('/rest/v1/settings?select=data&id=eq.main', { headers: headers() }),
+    ]);
+    if (!items || !items.length) return null;
+    return {
+      menu: items.map(rowToItem),
+      settings: (settings && settings[0] && settings[0].data) || null,
+    };
+  }
+
+  /* ---------------- shkrimi (vetëm i identifikuar) ---------------- */
+  async function saveItems(list) {
+    if (!configured) return writeLocal({ menu: list });
+    await ensureAuth();
+    return req('/rest/v1/menu_items?on_conflict=id', {
+      method: 'POST',
+      headers: headers({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify(list.map(itemToRow)),
+    });
+  }
+
+  async function deleteItem(id) {
+    if (!configured) {
+      const cur = readLocal() || {};
+      return writeLocal({ menu: (cur.menu || []).filter((m) => m.id !== id) });
+    }
+    await ensureAuth();
+    return req('/rest/v1/menu_items?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE', headers: headers({ Prefer: 'return=minimal' }),
+    });
+  }
+
+  async function saveSettings(data) {
+    if (!configured) {
+      const cur = readLocal() || {};
+      return writeLocal({ menu: cur.menu, settings: data });
+    }
+    await ensureAuth();
+    return req('/rest/v1/settings?on_conflict=id', {
+      method: 'POST',
+      headers: headers({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify([{ id: 'main', data }]),
+    });
+  }
+
+  /* ---------------- fotot ---------------- */
+  const PHOTO_MAX = 3 * 1024 * 1024;   // 3 MB pas ngjeshjes
+
+  /** Zvogëlon dhe ngjesh foton në shfletues para ngarkimit. */
+  function compress(file, maxSide) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const side = maxSide || 1200;
+        let { width: w, height: h } = img;
+        if (Math.max(w, h) > side) {
+          const k = side / Math.max(w, h);
+          w = Math.round(w * k); h = Math.round(h * k);
+        }
+        const cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        cv.toBlob((b) => (b ? resolve(b) : reject(new Error('Nuk u ngjesh dot fotoja'))), 'image/jpeg', 0.84);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Skedari nuk është foto')); };
+      img.src = url;
+    });
+  }
+
+  async function uploadPhoto(file, name) {
+    const blob = await compress(file, 1200);
+    if (blob.size > PHOTO_MAX) throw new Error('Fotoja është shumë e madhe edhe pas ngjeshjes');
+    const path = name + '-' + Date.now() + '.jpg';
+
+    if (!configured) {                         // pa Supabase: ruaje si data URI lokal
+      return new Promise((res) => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result);
+        fr.readAsDataURL(blob);
+      });
+    }
+    await ensureAuth();
+    const r = await fetch(URL_ + '/storage/v1/object/' + BUCKET + '/' + path, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: authHeader(), 'Content-Type': 'image/jpeg', 'x-upsert': 'true' },
+      body: blob,
+    });
+    if (!r.ok) {
+      let msg = r.status + ' ' + r.statusText;
+      try { const j = await r.json(); msg = j.message || j.error || msg; } catch (e) {}
+      throw new Error('Ngarkimi dështoi: ' + msg);
+    }
+    return URL_ + '/storage/v1/object/public/' + BUCKET + '/' + path;
+  }
+
+  /* ---------------- ruajtja lokale (rezervë) ---------------- */
+  function readLocal() {
+    try {
+      const raw = localStorage.getItem(LS_LOCAL);
+      if (!raw) return null;
+      const d = JSON.parse(raw);
+      return d && d.menu && d.menu.length ? d : null;
+    } catch (e) { return null; }
+  }
+  function writeLocal(patch) {
+    const cur = readLocal() || {};
+    const next = { menu: patch.menu || cur.menu || [], settings: patch.settings || cur.settings || null };
+    localStorage.setItem(LS_LOCAL, JSON.stringify(next));
+    return next;
+  }
+  const clearLocal = () => localStorage.removeItem(LS_LOCAL);
+
+  /* ---------------- zbatimi mbi të dhënat e faqes ---------------- */
+  /** Fut përmbajtjen e publikuar mbi vlerat e ngurta të shared/data.js. */
+  function apply(payload) {
+    if (!payload) return false;
+    if (payload.menu && payload.menu.length) {
+      const live = payload.menu
+        .filter((m) => m.available !== false)
+        .sort((a, b) => (a.sort || 0) - (b.sort || 0));
+      S.menu.length = 0;
+      live.forEach((m) => S.menu.push(m));
+    }
+    const st = payload.settings;
+    if (st) {
+      if (st.config) Object.assign(S.config, st.config);
+      if (st.categories && st.categories.length) {
+        S.categories.length = 0;
+        st.categories.forEach((c) => S.categories.push(c));
+      }
+      if (st.reviews) { S.reviews.length = 0; st.reviews.forEach((r) => S.reviews.push(r)); }
+      if (st.stats && st.stats.length) { S.stats.length = 0; st.stats.forEach((x) => S.stats.push(x)); }
+    }
+    return true;
+  }
+
+  S.store = {
+    configured, fetchAll, apply,
+    signIn, signOut, currentUser, ensureAuth,
+    saveItems, deleteItem, saveSettings,
+    uploadPhoto, compress,
+    readLocal, writeLocal, clearLocal,
+    rowToItem, itemToRow,
+  };
 })();
 
 </script>
 <script>
+/* ============================================================================
+   SPRINT — Logjika e panelit të menaxhimit.
+   Ndryshimet mbahen në një kopje pune; asgjë nuk shkon te faqja derisa
+   të shtypet «Ruaj ndryshimet».
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const store = S.store;
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+  const esc = (t) => String(t == null ? '' : t)
+    .replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const clone = (o) => JSON.parse(JSON.stringify(o));
 
-const TXT={
-  sq:{band:['Furrë druri që nga 2013','Petë e hapur me dorë','Peshk i freskët nga Adriatiku','Brumë 48 orë','Mish i vendit'],
-      n:['Furrë druri','Peshk i ditës','Receta të gjyshes'],
-      q:'«Nuk të detyrojmë të zgjedhësh mes një pice të mirë dhe një tave kosi. I gjen të dyja në të njëjtën tavolinë.»'},
-  en:{band:['Wood-fired since 2013','Hand-rolled filo','Fresh Adriatic fish','48-hour dough','Local meat'],
-      n:['Wood-fired oven','Catch of the day',"Grandma's recipes"],
-      q:'“We never make you choose between a great pizza and a tavë kosi. Both live on the same table.”'},
-};
-function localize(l){
-  const t=TXT[l];
-  const h=t.band.map(x=>`<span>${x}</span><span>·</span>`).join('');
-  b1.innerHTML=h; b2.innerHTML=h;
-  n1.textContent=t.n[0]; n2.textContent=t.n[1]; n3.textContent=t.n[2];
-  quote.textContent=t.q;
-}
+  const ART = ['pizza','pizzaV','pizzaW','pizzaC','burger','gyros','sandwich','fries','wings',
+               'steak','fish','pasta','salad','soup','tave','byrek','meze','coffee','beer',
+               'dessert','drink'];
+  const TAGS = ['top','new','hot','veg'];
+  const TAG_SQ = { top:'I spikatur', new:'I ri', hot:'Pikante', veg:'Vegjetarian' };
 
-/* pamja listë / rrjet */
-let view='list';
-const tagL={hot:{sq:'Pikante',en:'Spicy'},veg:{sq:'Vegjetarian',en:'Veggie'},new:{sq:'I ri',en:'New'},top:{sq:'Top',en:'Top'}};
-function card(m,i,l){
-  const tags=m.tags.length?`<div class="dish-tags">${m.tags.map(t=>`<span class="tag tag-${t}">${tagL[t][l]}</span>`).join('')}</div>`:'';
-  const name=SPRINT.esc(m[l==='sq'?'sq':'en']), desc=SPRINT.esc(m[l==='sq'?'dsq':'den']);
-  const note=m.note?`<em class="note">${m.note}</em>`:'';
-  if(view==='list'){
-    return `<article class="dish" data-reveal style="--i:${i}">
-      <div class="dish-media">${SPRINT.art(m,'dish-art')}</div>
-      <div><div class="nm"><h3>${name}</h3>${note}${tags}</div><p>${desc}</p></div>
-      <div class="rt"><span class="price">${SPRINT.price(m)}</span>
-        <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')}</span></button></div>
-    </article>`;
+  let draft = null;      // kopja e punës
+  let saved = '';        // gjendja e fundit e ruajtur, si tekst, për krahasim
+  let localMode = false; // pa Supabase
+  let editing = null;    // id-ja e pjatës në sirtar
+
+  /* ══════════════════ NDIHMËSA ══════════════════ */
+  let toastT;
+  function toast(msg, kind) {
+    const el = $('#toast');
+    el.textContent = msg;
+    el.className = 'on ' + (kind || '');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => { el.className = kind || ''; }, 3800);
   }
-  return `<article class="dish" data-reveal style="--i:${i}">
-    <div class="dish-media">${SPRINT.art(m,'dish-art')}${tags}</div>
-    <div class="bd"><h3>${name}${note}</h3><p>${desc}</p>
-      <div class="rt"><span class="price">${SPRINT.price(m)}</span>
-        <button class="add" data-add="${m.id}"><span>${SPRINT.T('add')}</span></button></div></div>
-  </article>`;
-}
+  const gateMsg = (msg, kind) => {
+    const el = $('#gateMsg');
+    el.textContent = msg || '';
+    el.className = 'msg' + (msg ? ' on ' + (kind || 'err') : '');
+  };
+  const artSvg = (art) => `<svg viewBox="0 0 200 200"><use href="#art-${art || 'pizza'}"/></svg>`;
+  const thumbOf = (m) => m.img
+    ? `<img src="${esc(m.img)}" alt="" loading="lazy" decoding="async">`
+    : artSvg(m.art);
 
-const app=SPRINT.app({ card, onLang:localize });
+  function markDirty() {
+    const dirty = JSON.stringify(draft) !== saved;
+    $('#saveBar').classList.toggle('on', dirty);
+    const pill = $('#modePill');
+    pill.textContent = dirty ? 'Ndryshime të paruajtura' : 'Gjithçka e ruajtur';
+    pill.className = 'pill ' + (dirty ? 'dirty' : 'clean');
+    if (dirty) {
+      const n = countChanges();
+      $('#saveTxt').textContent = n === 1 ? '1 ndryshim i paruajtur' : n + ' ndryshime të paruajtura';
+    }
+    try { localStorage.setItem('sprint-admin-draft', JSON.stringify(draft)); } catch (e) {}
+  }
+  function countChanges() {
+    let old;
+    try { old = JSON.parse(saved); } catch (e) { return 1; }
+    let n = 0;
+    const byId = {};
+    (old.menu || []).forEach((m) => { byId[m.id] = JSON.stringify(m); });
+    draft.menu.forEach((m) => { if (byId[m.id] !== JSON.stringify(m)) n++; delete byId[m.id]; });
+    n += Object.keys(byId).length;
+    if (JSON.stringify(old.settings) !== JSON.stringify(draft.settings)) n++;
+    return n || 1;
+  }
 
-function setView(v){
-  view=v;
-  const g=document.querySelector('[data-menu-grid]');
-  g.classList.toggle('list',v==='list'); g.classList.toggle('cards',v==='cards');
-  vList.classList.toggle('is-on',v==='list'); vCards.classList.toggle('is-on',v==='cards');
-  app.renderMenu();
-}
-vList.onclick=()=>setView('list');
-vCards.onclick=()=>setView('cards');
+  /* ══════════════════ TË DHËNAT ══════════════════ */
+  function seedDraft() {
+    return {
+      menu: clone(S.menu).map((m, i) => Object.assign({ available: true, sort: i * 10 }, m)),
+      settings: {
+        config: clone(S.config),
+        categories: clone(S.categories),
+        reviews: clone(S.reviews),
+        stats: clone(S.stats),
+      },
+    };
+  }
+
+  async function loadData() {
+    let payload = null;
+    try { payload = await store.fetchAll(); }
+    catch (e) { toast('Leximi nga Supabase dështoi: ' + e.message, 'err'); }
+
+    if (payload && payload.menu && payload.menu.length) {
+      const base = seedDraft();
+      draft = {
+        menu: payload.menu.map((m, i) => Object.assign({ available: true, sort: i * 10 }, m)),
+        settings: Object.assign(base.settings, payload.settings || {}),
+      };
+    } else {
+      draft = seedDraft();
+    }
+    saved = JSON.stringify(draft);
+    renderAll();
+    markDirty();
+  }
+
+  /* ══════════════════ HYRJA ══════════════════ */
+  function showPanel() {
+    $('#gate').classList.add('hide');
+    $('#panel').classList.remove('hide');
+    const u = store.currentUser();
+    $('#whoTxt').textContent = localMode ? 'Vetëm në këtë pajisje' : (u ? u.email : '');
+    $('#modeDot').className = 'dot' + (localMode ? ' local' : '');
+    $('#pubMode').textContent = localMode
+      ? 'Po punon pa Supabase: ndryshimet ruhen vetëm në këtë shfletues dhe NUK i shohin klientët. Lidh Supabase sipas hapave më poshtë.'
+      : 'I lidhur me Supabase. Çdo ndryshim që ruan del menjëherë në faqe.';
+    loadData();
+  }
+
+  $('#loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!store.configured) {
+      gateMsg('Supabase nuk është konfiguruar ende te shared/config.js. Përdor «Provoje pa llogari».', 'warn');
+      return;
+    }
+    const btn = $('#loginBtn');
+    btn.disabled = true; btn.textContent = 'Po hyn…';
+    try {
+      await store.signIn($('#em').value.trim(), $('#pw').value);
+      gateMsg(''); localMode = false; showPanel();
+    } catch (err) {
+      gateMsg(/invalid/i.test(err.message) ? 'Email-i ose fjalëkalimi nuk përputhen.' : err.message);
+    } finally { btn.disabled = false; btn.textContent = 'Hyr në panel'; }
+  });
+
+  $('#localBtn').addEventListener('click', () => { localMode = true; showPanel(); });
+
+  $('#outBtn').addEventListener('click', () => {
+    if (JSON.stringify(draft) !== saved && !confirm('Ke ndryshime të paruajtura. Të dilet gjithsesi?')) return;
+    store.signOut();
+    localStorage.removeItem('sprint-admin-draft');
+    location.reload();
+  });
+
+  /* ══════════════════ SKEDAT ══════════════════ */
+  $$('.tab').forEach((t) => t.addEventListener('click', () => {
+    $$('.tab').forEach((x) => x.classList.toggle('on', x === t));
+    $$('.view').forEach((v) => v.classList.toggle('hide', v.id !== 'v-' + t.dataset.tab));
+  }));
+
+  /* ══════════════════ MENUJA ══════════════════ */
+  function catName(id) {
+    const c = draft.settings.categories.find((x) => x.id === id);
+    return c ? c.sq : id;
+  }
+
+  function visibleItems() {
+    const q = $('#q').value.trim().toLowerCase();
+    const cat = $('#catFilter').value;
+    return draft.menu.filter((m) => {
+      if (cat !== 'all' && m.c !== cat) return false;
+      if (!q) return true;
+      return ((m.sq || '') + ' ' + (m.en || '') + ' ' + m.id).toLowerCase().includes(q);
+    });
+  }
+
+  function renderItems() {
+    const list = visibleItems();
+    $('#cnt').textContent = list.length + ' nga ' + draft.menu.length;
+    $('#itemList').innerHTML = list.length ? list.map((m) => `
+      <div class="item${m.available === false ? ' off' : ''}" data-id="${esc(m.id)}">
+        <span class="thumb">${thumbOf(m)}</span>
+        <span class="nm">
+          <b>${esc(m.sq)}</b>
+          <span>${esc(catName(m.c))}${m.unit ? ' · ' + esc(m.unit) : ''}${m.note ? ' · ' + esc(m.note) : ''}</span>
+          ${(m.tags || []).length ? `<span class="tagdots">${m.tags.map((t) =>
+            `<span class="tagdot td-${t}">${esc(TAG_SQ[t] || t)}</span>`).join('')}</span>` : ''}
+        </span>
+        <span class="price-in"><input type="text" inputmode="numeric" value="${m.p}" data-price="${esc(m.id)}"
+          aria-label="Çmimi i ${esc(m.sq)}"></span>
+        <button class="sw${m.available === false ? '' : ' on'}" data-av="${esc(m.id)}"
+          aria-label="Në menu" title="Shfaqet në menu"></button>
+        <button class="btn btn-g btn-sm" data-edit="${esc(m.id)}">Hap</button>
+      </div>`).join('') : '<p class="empty">Asnjë pjatë nuk përputhet.</p>';
+
+    $$('[data-price]').forEach((inp) => {
+      inp.addEventListener('input', () => {
+        const m = draft.menu.find((x) => x.id === inp.dataset.price);
+        const v = parseFloat(inp.value.replace(',', '.'));
+        if (!isNaN(v) && v >= 0) { m.p = v; inp.classList.add('changed'); markDirty(); }
+      });
+    });
+    $$('[data-av]').forEach((b) => b.addEventListener('click', () => {
+      const m = draft.menu.find((x) => x.id === b.dataset.av);
+      m.available = m.available === false;
+      b.classList.toggle('on', m.available !== false);
+      b.closest('.item').classList.toggle('off', m.available === false);
+      markDirty();
+    }));
+    $$('[data-edit]').forEach((b) => b.addEventListener('click', () => openDrawer(b.dataset.edit)));
+  }
+
+  function fillCatSelects() {
+    const opts = draft.settings.categories.map((c) => `<option value="${esc(c.id)}">${esc(c.sq)}</option>`).join('');
+    $('#catFilter').innerHTML = '<option value="all">Të gjitha kategoritë</option>' + opts;
+    $('#bulkCat').innerHTML = opts;
+    $('#d-c').innerHTML = opts;
+  }
+
+  $('#q').addEventListener('input', renderItems);
+  $('#catFilter').addEventListener('change', renderItems);
+
+  $('#addBtn').addEventListener('click', () => {
+    const id = 'x' + Date.now().toString(36);
+    const maxSort = draft.menu.reduce((a, m) => Math.max(a, m.sort || 0), 0);
+    draft.menu.push({
+      id, c: draft.settings.categories[0].id, art: 'pizza',
+      sq: 'Pjatë e re', en: 'New dish', dsq: '', den: '',
+      p: 0, tags: [], available: true, sort: maxSort + 10,
+    });
+    markDirty(); renderItems(); openDrawer(id);
+  });
+
+  /* ---------- ndryshim çmimesh me përqindje ---------- */
+  function bulk(sign) {
+    const pct = parseFloat($('#bulkPct').value);
+    if (isNaN(pct) || pct <= 0) return toast('Vendos një përqindje më të madhe se zero.', 'err');
+    const cat = $('#bulkCat').value;
+    const hit = draft.menu.filter((m) => m.c === cat);
+    if (!hit.length) return toast('Kjo kategori s\'ka pjata.', 'err');
+    const dir = sign > 0 ? 'rriten' : 'ulen';
+    if (!confirm(`${hit.length} çmime të «${catName(cat)}» ${dir} me ${pct}%. Vazhdojmë?`)) return;
+    hit.forEach((m) => { m.p = Math.max(0, Math.round(m.p * (1 + sign * pct / 100))); });
+    markDirty(); renderItems();
+    toast(hit.length + ' çmime u përditësuan. Shtyp «Ruaj ndryshimet».', 'ok');
+  }
+  $('#bulkUp').addEventListener('click', () => bulk(1));
+  $('#bulkDown').addEventListener('click', () => bulk(-1));
+
+  /* ══════════════════ SIRTARI ══════════════════ */
+  function openDrawer(id) {
+    const m = draft.menu.find((x) => x.id === id);
+    if (!m) return;
+    editing = id;
+    $('#drTitle').textContent = m.sq || 'Pjatë';
+    $('#d-id').value = m.id;
+    $('#d-sq').value = m.sq || ''; $('#d-en').value = m.en || '';
+    $('#d-dsq').value = m.dsq || ''; $('#d-den').value = m.den || '';
+    $('#d-p').value = m.p; $('#d-unit').value = m.unit || ''; $('#d-note').value = m.note || '';
+    $('#d-sort').value = m.sort || 0;
+    $('#d-c').value = m.c;
+    $('#d-art').innerHTML = ART.map((a) => `<option value="${a}">${a}</option>`).join('');
+    $('#d-art').value = m.art || 'pizza';
+    $$('#dTags button').forEach((b) => b.classList.toggle('on', (m.tags || []).includes(b.dataset.t)));
+    setAvail(m.available !== false);
+    paintPhoto(m);
+    $('#scrim').classList.add('on'); $('#drawer').classList.add('on');
+  }
+  function setAvail(on) {
+    $('#d-av').classList.toggle('on', on);
+    $('#d-avTxt').textContent = on ? 'Shfaqet' : 'E fshehur';
+  }
+  function paintPhoto(m) {
+    $('#dPhoto').innerHTML = thumbOf(m);
+    $('#dPhotoClear').style.visibility = m.img ? 'visible' : 'hidden';
+  }
+  function closeDrawer() {
+    $('#scrim').classList.remove('on'); $('#drawer').classList.remove('on'); editing = null;
+  }
+  $('#drClose').addEventListener('click', closeDrawer);
+  $('#scrim').addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+  $('#d-av').addEventListener('click', () => setAvail(!$('#d-av').classList.contains('on')));
+  $$('#dTags button').forEach((b) => b.addEventListener('click', () => b.classList.toggle('on')));
+
+  $('#dSave').addEventListener('click', () => {
+    const m = draft.menu.find((x) => x.id === editing);
+    if (!m) return closeDrawer();
+    const p = parseFloat($('#d-p').value.replace(',', '.'));
+    if (isNaN(p) || p < 0) return toast('Çmimi duhet të jetë një numër.', 'err');
+    if (!$('#d-sq').value.trim()) return toast('Emri shqip nuk mund të jetë bosh.', 'err');
+    m.sq = $('#d-sq').value.trim();
+    m.en = $('#d-en').value.trim() || m.sq;
+    m.dsq = $('#d-dsq').value.trim(); m.den = $('#d-den').value.trim();
+    m.p = p;
+    m.unit = $('#d-unit').value.trim() || undefined;
+    m.note = $('#d-note').value.trim() || undefined;
+    m.c = $('#d-c').value; m.art = $('#d-art').value;
+    m.sort = parseInt($('#d-sort').value, 10) || 0;
+    m.tags = TAGS.filter((t) => $(`#dTags [data-t="${t}"]`).classList.contains('on'));
+    m.available = $('#d-av').classList.contains('on');
+    markDirty(); renderItems(); closeDrawer();
+  });
+
+  $('#dDelete').addEventListener('click', async () => {
+    const m = draft.menu.find((x) => x.id === editing);
+    if (!m || !confirm(`Të fshihet «${m.sq}» përfundimisht?`)) return;
+    draft.menu = draft.menu.filter((x) => x.id !== editing);
+    if (!localMode) { try { await store.deleteItem(editing); } catch (e) { toast(e.message, 'err'); } }
+    markDirty(); renderItems(); closeDrawer();
+    toast('Pjata u fshi.', 'ok');
+  });
+
+  /* ---------- fotoja e pjatës ---------- */
+  $('#dPick').addEventListener('click', () => $('#dFile').click());
+  $('#dFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const m = draft.menu.find((x) => x.id === editing); if (!m) return;
+    $('#dPhoto').classList.add('busy');
+    try {
+      m.img = await store.uploadPhoto(file, m.id);
+      paintPhoto(m); markDirty(); renderItems();
+      toast('Fotoja u ngarkua. Shtyp «Ruaj ndryshimet».', 'ok');
+    } catch (err) { toast(err.message, 'err'); }
+    finally { $('#dPhoto').classList.remove('busy'); e.target.value = ''; }
+  });
+  $('#dPhotoClear').addEventListener('click', () => {
+    const m = draft.menu.find((x) => x.id === editing); if (!m) return;
+    delete m.img; paintPhoto(m); markDirty(); renderItems();
+  });
+
+  /* ══════════════════ KATEGORITË ══════════════════ */
+  function renderCats() {
+    $('#catList').innerHTML = draft.settings.categories.map((c, i) => `
+      <div class="item" style="grid-template-columns:56px minmax(0,1fr) auto">
+        <span class="thumb">${artSvg(c.art)}</span>
+        <span class="nm" style="display:grid;gap:.4rem">
+          <input value="${esc(c.sq)}" data-c="sq" data-i="${i}" aria-label="Emri shqip"
+            style="background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.4rem .6rem;width:100%">
+          <input value="${esc(c.en)}" data-c="en" data-i="${i}" aria-label="Emri anglisht"
+            style="background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.4rem .6rem;width:100%">
+          <span class="count">${draft.menu.filter((m) => m.c === c.id).length} pjata · kodi <code>${esc(c.id)}</code></span>
+        </span>
+        <span style="display:grid;gap:.35rem">
+          <button class="btn btn-g btn-sm" data-cup="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button class="btn btn-g btn-sm" data-cdn="${i}" ${i === draft.settings.categories.length - 1 ? 'disabled' : ''}>↓</button>
+        </span>
+      </div>`).join('');
+
+    $$('[data-c]').forEach((inp) => inp.addEventListener('input', () => {
+      draft.settings.categories[+inp.dataset.i][inp.dataset.c] = inp.value;
+      markDirty(); fillCatSelects();
+    }));
+    const move = (i, d) => {
+      const a = draft.settings.categories;
+      [a[i], a[i + d]] = [a[i + d], a[i]];
+      markDirty(); renderCats(); fillCatSelects();
+    };
+    $$('[data-cup]').forEach((b) => b.addEventListener('click', () => move(+b.dataset.cup, -1)));
+    $$('[data-cdn]').forEach((b) => b.addEventListener('click', () => move(+b.dataset.cdn, 1)));
+  }
+
+  $('#addCat').addEventListener('click', () => {
+    const id = prompt('Kodi i kategorisë (shkronja pa hapësira, p.sh. embelsira):');
+    if (!id) return;
+    const key = id.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!key) return toast('Kodi duhet të ketë të paktën një shkronjë.', 'err');
+    if (draft.settings.categories.some((c) => c.id === key)) return toast('Kjo kategori ekziston.', 'err');
+    draft.settings.categories.push({ id: key, art: 'pizza', sq: 'Kategori e re', en: 'New category', dsq: '', den: '' });
+    markDirty(); renderCats(); fillCatSelects();
+  });
+
+  /* ══════════════════ CILËSIMET ══════════════════ */
+  const SET_MAP = {
+    '#s-phone': 'phone', '#s-phoneHref': 'phoneHref', '#s-wa': 'whatsapp', '#s-email': 'email',
+  };
+  function renderSettings() {
+    const c = draft.settings.config;
+    Object.entries(SET_MAP).forEach(([sel, key]) => { $(sel).value = c[key] || ''; });
+    $('#s-addr-sq').value = (c.address && c.address.sq) || '';
+    $('#s-addr-en').value = (c.address && c.address.en) || '';
+    $('#s-lat').value = (c.geo && c.geo.lat) || '';
+    $('#s-lng').value = (c.geo && c.geo.lng) || '';
+    $('#s-fee').value = c.deliveryFee == null ? '' : c.deliveryFee;
+    $('#s-ig').value = (c.social && c.social.instagram) || '';
+    $('#s-fb').value = (c.social && c.social.facebook) || '';
+    $('#s-tt').value = (c.social && c.social.tiktok) || '';
+    $('#s-ev-sq').value = (c.events && c.events.sq) || '';
+    $('#s-ev-en').value = (c.events && c.events.en) || '';
+    $('#evBox').innerHTML = c.eventsPhoto
+      ? `<img src="${esc(c.eventsPhoto)}" alt="">` : artSvg('meze');
+    renderHours();
+  }
+  function renderHours() {
+    const c = draft.settings.config;
+    const sq = (c.hours && c.hours.sq) || [];
+    const en = (c.hours && c.hours.en) || [];
+    $('#hoursSq').innerHTML = sq.map((row, i) => `
+      <div class="mini-row">
+        <input value="${esc(row[0])}" data-h="0" data-i="${i}" aria-label="Ditët"
+          style="background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.5rem .7rem;width:100%">
+        <input value="${esc(row[1])}" data-h="1" data-i="${i}" aria-label="Orari"
+          style="background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.5rem .7rem;width:100%">
+        <button class="btn btn-d btn-sm" data-hdel="${i}">✕</button>
+      </div>`).join('');
+    $$('[data-h]').forEach((inp) => inp.addEventListener('input', () => {
+      const i = +inp.dataset.i, k = +inp.dataset.h;
+      c.hours.sq[i][k] = inp.value;
+      if (!en[i]) c.hours.en[i] = ['', ''];
+      if (k === 1) c.hours.en[i][1] = inp.value;   // orari është i njëjtë në të dyja gjuhët
+      markDirty();
+    }));
+    $$('[data-hdel]').forEach((b) => b.addEventListener('click', () => {
+      const i = +b.dataset.hdel;
+      c.hours.sq.splice(i, 1); c.hours.en.splice(i, 1);
+      markDirty(); renderHours();
+    }));
+  }
+  $('#addHour').addEventListener('click', () => {
+    const c = draft.settings.config;
+    c.hours.sq.push(['Ditët', '00:00 – 00:00']);
+    c.hours.en.push(['Days', '00:00 – 00:00']);
+    markDirty(); renderHours();
+  });
+
+  function bindSettings() {
+    Object.entries(SET_MAP).forEach(([sel, key]) => {
+      $(sel).addEventListener('input', () => { draft.settings.config[key] = $(sel).value.trim(); markDirty(); });
+    });
+    const pair = (sel, path) => $(sel).addEventListener('input', () => {
+      const c = draft.settings.config;
+      const [a, b] = path;
+      c[a] = c[a] || {};
+      c[a][b] = $(sel).value.trim();
+      markDirty();
+    });
+    pair('#s-addr-sq', ['address', 'sq']); pair('#s-addr-en', ['address', 'en']);
+    pair('#s-ig', ['social', 'instagram']); pair('#s-fb', ['social', 'facebook']);
+    pair('#s-tt', ['social', 'tiktok']);
+    pair('#s-ev-sq', ['events', 'sq']); pair('#s-ev-en', ['events', 'en']);
+
+    ['#s-lat', '#s-lng'].forEach((sel) => $(sel).addEventListener('input', () => {
+      const c = draft.settings.config; c.geo = c.geo || {};
+      const v = parseFloat($(sel).value);
+      c.geo[sel === '#s-lat' ? 'lat' : 'lng'] = isNaN(v) ? 0 : v;
+      markDirty();
+    }));
+    $('#s-fee').addEventListener('input', () => {
+      const raw = $('#s-fee').value.trim();
+      const v = parseFloat(raw);
+      draft.settings.config.deliveryFee = raw === '' || isNaN(v) ? null : v;
+      markDirty();
+    });
+  }
+
+  $('#evPick').addEventListener('click', () => $('#evFile').click());
+  $('#evFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    $('#evBox').classList.add('busy');
+    try {
+      draft.settings.config.eventsPhoto = await store.uploadPhoto(file, 'salla');
+      renderSettings(); markDirty();
+      toast('Fotoja e sallës u ngarkua.', 'ok');
+    } catch (err) { toast(err.message, 'err'); }
+    finally { $('#evBox').classList.remove('busy'); e.target.value = ''; }
+  });
+  $('#evClear').addEventListener('click', () => {
+    delete draft.settings.config.eventsPhoto; renderSettings(); markDirty();
+  });
+
+  /* ══════════════════ VLERËSIMET ══════════════════ */
+  function renderReviews() {
+    $('#revList').innerHTML = draft.settings.reviews.map((r, i) => `
+      <div class="rev-row">
+        <div class="rev-top">
+          <input value="${esc(r.n)}" data-r="n" data-i="${i}" placeholder="Emri" aria-label="Emri"
+            style="background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.45rem .7rem;width:100%">
+          <select data-r="s" data-i="${i}" aria-label="Yjet"
+            style="background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.45rem .5rem;width:100%">
+            ${[5,4,3,2,1].map((n) => `<option value="${n}"${r.s === n ? ' selected' : ''}>${'★'.repeat(n)}</option>`).join('')}
+          </select>
+          <input value="${esc(r.src)}" data-r="src" data-i="${i}" placeholder="Burimi" aria-label="Burimi"
+            style="background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.45rem .7rem;width:100%">
+          <button class="btn btn-d btn-sm" data-rdel="${i}">✕</button>
+        </div>
+        <textarea data-r="sq" data-i="${i}" placeholder="Teksti shqip" aria-label="Teksti shqip"
+          style="background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.5rem .7rem;width:100%;min-height:56px">${esc(r.sq)}</textarea>
+        <textarea data-r="en" data-i="${i}" placeholder="Teksti anglisht" aria-label="Teksti anglisht"
+          style="background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;padding:.5rem .7rem;width:100%;min-height:56px">${esc(r.en)}</textarea>
+      </div>`).join('') || '<p class="empty">Asnjë vlerësim ende.</p>';
+
+    $$('[data-r]').forEach((el) => el.addEventListener('input', () => {
+      const r = draft.settings.reviews[+el.dataset.i];
+      r[el.dataset.r] = el.dataset.r === 's' ? +el.value : el.value;
+      markDirty();
+    }));
+    $$('[data-rdel]').forEach((b) => b.addEventListener('click', () => {
+      draft.settings.reviews.splice(+b.dataset.rdel, 1); markDirty(); renderReviews();
+    }));
+  }
+  $('#addRev').addEventListener('click', () => {
+    draft.settings.reviews.push({ n: '', s: 5, src: 'Google', sq: '', en: '' });
+    markDirty(); renderReviews();
+  });
+
+  /* ══════════════════ RUAJTJA ══════════════════ */
+  async function save() {
+    const btn = $('#saveBtn');
+    btn.disabled = true; btn.textContent = 'Po ruhet…';
+    try {
+      await store.saveItems(draft.menu);
+      await store.saveSettings(draft.settings);
+      saved = JSON.stringify(draft);
+      markDirty();
+      toast(localMode ? 'U ruajt në këtë pajisje.' : 'U ruajt. Faqja u përditësua.', 'ok');
+    } catch (err) {
+      toast('Ruajtja dështoi: ' + err.message, 'err');
+    } finally { btn.disabled = false; btn.textContent = 'Ruaj ndryshimet'; }
+  }
+  $('#saveBtn').addEventListener('click', save);
+  $('#discardBtn').addEventListener('click', () => {
+    if (!confirm('Të hidhen poshtë të gjitha ndryshimet e paruajtura?')) return;
+    draft = JSON.parse(saved);
+    localStorage.removeItem('sprint-admin-draft');
+    renderAll(); markDirty();
+  });
+
+  addEventListener('beforeunload', (e) => {
+    if (JSON.stringify(draft) !== saved) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  /* ══════════════════ PUBLIKIMI ══════════════════ */
+  $('#seedBtn').addEventListener('click', async () => {
+    if (!confirm('Do të dërgohen ' + draft.menu.length + ' pjata dhe cilësimet në Supabase. Vazhdojmë?')) return;
+    await save();
+  });
+
+  $('#expBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(draft, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sprint-menu-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+
+  $('#impBtn').addEventListener('click', () => $('#impFile').click());
+  $('#impFile').addEventListener('change', (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const fr = new FileReader();
+    fr.onload = () => {
+      try {
+        const d = JSON.parse(fr.result);
+        if (!d.menu || !Array.isArray(d.menu)) throw new Error('Skedari nuk përmban një menu');
+        draft = d; markDirty(); renderAll();
+        toast('U ngarkua. Shtyp «Ruaj ndryshimet» për ta çuar në faqe.', 'ok');
+      } catch (err) { toast('Skedari nuk u lexua: ' + err.message, 'err'); }
+    };
+    fr.readAsText(file); e.target.value = '';
+  });
+
+  $('#resetBtn').addEventListener('click', () => {
+    if (!confirm('Të kthehet menuja fillestare e faqes? Ndryshimet e paruajtura humbasin.')) return;
+    draft = seedDraft(); markDirty(); renderAll();
+    toast('U kthye menuja fillestare.', 'ok');
+  });
+
+  /* ══════════════════ NISJA ══════════════════ */
+  function renderAll() {
+    fillCatSelects(); renderItems(); renderCats(); renderSettings(); renderReviews();
+  }
+
+  bindSettings();
+
+  if (!store.configured) {
+    gateMsg('Supabase nuk është konfiguruar ende. Mund ta provosh panelin me «Provoje pa llogari».', 'warn');
+  }
+  if (store.currentUser() && store.configured) { localMode = false; showPanel(); }
+})();
+
 </script>
 </body>
 </html>
