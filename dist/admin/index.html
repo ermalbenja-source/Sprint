@@ -257,6 +257,36 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
   .statrow{grid-template-columns:1fr 1fr}
 }
 
+
+/* ---------- kamera ---------- */
+.camwrap{position:fixed;inset:0;z-index:140;display:none;place-items:center;padding:1rem}
+.camwrap.on{display:grid}
+.cam-bg{position:absolute;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(4px)}
+.cam-card{position:relative;width:min(560px,100%);background:var(--pan);border:1px solid var(--line);
+  border-radius:22px;overflow:hidden;display:grid}
+.cam-hd{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.8rem 1rem;border-bottom:1px solid var(--line)}
+.cam-hd b{font-family:var(--display);font-weight:400;font-size:1.15rem}
+.cam-stage{position:relative;background:#000;aspect-ratio:4/3;display:grid;place-items:center}
+.cam-stage video,.cam-stage canvas{width:100%;height:100%;object-fit:cover;display:block}
+.cam-stage canvas{display:none}
+.camwrap.shot .cam-stage video{display:none}
+.camwrap.shot .cam-stage canvas{display:block}
+.cam-msg{position:absolute;inset:0;display:none;place-items:center;text-align:center;
+  padding:1.6rem;color:var(--muted);font-size:.9rem;line-height:1.5;background:var(--pan-2)}
+.cam-msg.on{display:grid}
+.cam-act{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.9rem 1rem;
+  background:#0F0B0C}
+.cam-act.hide{display:none}
+.shutter{width:62px;height:62px;border-radius:50%;background:var(--brand);border:4px solid var(--pan);
+  box-shadow:0 0 0 3px var(--brand);transition:transform .15s}
+.shutter:hover{transform:scale(1.06)}
+.shutter:active{transform:scale(.94)}
+@media(max-width:520px){
+  .cam-card{width:100%}
+  .cam-act .btn{flex:1}
+}
+
 /* ---------- njoftimi ---------- */
 #toast{position:fixed;left:50%;bottom:1.4rem;translate:-50% 0;z-index:100;
   background:var(--pan-2);border:1px solid var(--line);border-radius:13px;padding:.75rem 1.2rem;
@@ -459,12 +489,14 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         <div class="photo">
           <div class="photo-box" id="evBox"><svg viewBox="0 0 200 200"><use href="#art-meze"/></svg></div>
           <div class="photo-act">
-            <button class="btn btn-g btn-sm" id="evPick">Ngarko foto të sallës</button>
+            <button class="btn btn-g btn-sm" id="evPick">📁 Ngarko foto</button>
+            <button class="btn btn-g btn-sm" id="evShoot">📷 Bëj foto</button>
             <button class="btn btn-d btn-sm" id="evClear">Hiq foton</button>
             <p class="hint">Fotoja zvogëlohet vetë në 1200 px dhe ngjeshet para ngarkimit.</p>
           </div>
         </div>
         <input type="file" id="evFile" accept="image/*">
+        <input type="file" id="evCam" accept="image/*" capture="environment">
       </div>
     </section>
 
@@ -532,12 +564,15 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
     <div class="photo">
       <div class="photo-box" id="dPhoto"></div>
       <div class="photo-act">
-        <button class="btn btn-g btn-sm" id="dPick">Ngarko / ndërro foton</button>
+        <button class="btn btn-g btn-sm" id="dPick">📁 Ngarko foto</button>
+        <button class="btn btn-g btn-sm" id="dShoot">📷 Bëj foto</button>
         <button class="btn btn-d btn-sm" id="dPhotoClear">Hiq foton</button>
-        <p class="hint">Pa foto, faqja përdor ilustrimin e zgjedhur më poshtë.</p>
+        <p class="hint">Pa foto, faqja përdor ilustrimin e zgjedhur më poshtë.
+          Fotoja zvogëlohet vetë dhe del në menu, në galeri e në shportë.</p>
       </div>
     </div>
     <input type="file" id="dFile" accept="image/*">
+    <input type="file" id="dCam" accept="image/*" capture="environment">
 
     <div class="row2">
       <div class="f"><label>Emri (shqip)</label><input id="d-sq"></div>
@@ -575,6 +610,32 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
     <button class="btn btn-p" id="dSave">Në rregull</button>
   </div>
 </aside>
+
+
+<!-- ══════════════════ KAMERA ══════════════════ -->
+<div class="camwrap" id="camWrap" role="dialog" aria-modal="true" aria-label="Bëj foto">
+  <div class="cam-bg" id="camCancelBg"></div>
+  <div class="cam-card">
+    <div class="cam-hd">
+      <b id="camTitle">Bëj foto</b>
+      <button class="x" id="camClose" aria-label="Mbyll">✕</button>
+    </div>
+    <div class="cam-stage">
+      <video id="camVideo" autoplay playsinline muted></video>
+      <canvas id="camShot"></canvas>
+      <p class="cam-msg" id="camMsg"></p>
+    </div>
+    <div class="cam-act" id="camActLive">
+      <button class="btn btn-g" id="camFlip">🔄 Kamera</button>
+      <button class="shutter" id="camTake" aria-label="Bëj foton"></button>
+      <button class="btn btn-g" id="camCancel">Anulo</button>
+    </div>
+    <div class="cam-act hide" id="camActShot">
+      <button class="btn btn-g" id="camRetake">Provo sërish</button>
+      <button class="btn btn-p" id="camUse">Përdore këtë</button>
+    </div>
+  </div>
+</div>
 
 <div id="toast"></div>
 
@@ -1838,6 +1899,26 @@ ${S('drink', `
   const clearLocal = () => localStorage.removeItem(LS_LOCAL);
 
 
+  /** Fshin nga hapësira e fotove skedarin që i përket kësaj adrese. */
+  async function deletePhoto(url) {
+    if (!url || !configured) return;                       // data: URI lokale s'kanë çfarë të fshijnë
+    const marker = '/storage/v1/object/public/' + BUCKET + '/';
+    const at = url.indexOf(marker);
+    if (at < 0) return;                                    // foto e jashtme, jo e jona
+    const path = url.slice(at + marker.length).split('?')[0];
+    await ensureAuth();
+    const r = await fetch(URL_ + '/storage/v1/object/' + BUCKET + '/' + path, {
+      method: 'DELETE',
+      headers: { apikey: KEY, Authorization: authHeader() },
+    });
+    // Nëse skedari mungon tashmë, s'ka pse të bëjmë zhurmë.
+    if (!r.ok && r.status !== 404) {
+      let msg = r.status + ' ' + r.statusText;
+      try { const j = await r.json(); msg = j.message || j.error || msg; } catch (e) {}
+      throw new Error(msg);
+    }
+  }
+
   /* ---------------- porositë dhe rezervimet ---------------- */
   const LS_ORDERS = 'sprint-local-orders';
   const LS_BOOKINGS = 'sprint-local-bookings';
@@ -2008,7 +2089,7 @@ ${S('drink', `
     configured, fetchAll, apply,
     signIn, signOut, currentUser, ensureAuth,
     saveItems, deleteItem, saveSettings,
-    uploadPhoto, compress,
+    uploadPhoto, deletePhoto, compress,
     createOrder, fetchOrders, updateOrder, deleteOrder, trackOrder,
     createBooking, fetchBookings, updateBooking,
     readLocal, writeLocal, clearLocal,
@@ -2786,7 +2867,11 @@ ${S('drink', `
   }
   $('#drClose').addEventListener('click', closeDrawer);
   $('#scrim').addEventListener('click', closeDrawer);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if ($('#camWrap').classList.contains('on')) return camClose(null);
+    closeDrawer();
+  });
 
   $('#d-av').addEventListener('click', () => setAvail(!$('#d-av').classList.contains('on')));
   $$('#dTags button').forEach((b) => b.addEventListener('click', () => b.classList.toggle('on')));
@@ -2814,27 +2899,138 @@ ${S('drink', `
     const m = draft.menu.find((x) => x.id === editing);
     if (!m || !confirm(`Të fshihet «${m.sq}» përfundimisht?`)) return;
     draft.menu = draft.menu.filter((x) => x.id !== editing);
+    if (m.img) { try { await store.deletePhoto(m.img); } catch (e) {} }
     if (!localMode) { try { await store.deleteItem(editing); } catch (e) { toast(e.message, 'err'); } }
     markDirty(); renderItems(); closeDrawer();
     toast('Pjata u fshi.', 'ok');
   });
 
-  /* ---------- fotoja e pjatës ---------- */
-  $('#dPick').addEventListener('click', () => $('#dFile').click());
-  $('#dFile').addEventListener('change', async (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const m = draft.menu.find((x) => x.id === editing); if (!m) return;
+
+  /* ══════════════════ KAMERA ══════════════════ */
+  let camStream = null, camFacing = 'environment', camResolve = null, camFallback = null;
+
+  const camStop = () => {
+    if (camStream) { camStream.getTracks().forEach((t) => t.stop()); camStream = null; }
+    $('#camVideo').srcObject = null;
+  };
+
+  function camClose(value) {
+    camStop();
+    $('#camWrap').classList.remove('on', 'shot');
+    const r = camResolve; camResolve = null;
+    if (r) r(value || null);
+  }
+
+  async function camStart() {
+    const msg = $('#camMsg');
+    msg.classList.remove('on');
+    camStop();
+    try {
+      camStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: camFacing, width: { ideal: 1600 }, height: { ideal: 1200 } },
+        audio: false,
+      });
+      $('#camVideo').srcObject = camStream;
+    } catch (e) {
+      msg.innerHTML = /NotAllowed|Permission|denied/i.test(e.name + ' ' + e.message)
+        ? 'Shfletuesi nuk e lejoi kamerën.<br>Lejoje nga ikona pranë adresës, ose zgjidh një foto nga skedarët.'
+        : 'Kamera nuk u hap: ' + esc(e.message);
+      msg.classList.add('on');
+    }
+  }
+
+  /** Hap kamerën dhe kthen foton si Blob; null nëse anulohet. */
+  function openCamera(title, fallbackInput) {
+    camFallback = fallbackInput || null;
+    const md = navigator.mediaDevices;
+    if (!md || !md.getUserMedia) return pickFrom(fallbackInput);   // telefonat e vjetër
+    return new Promise((res) => {
+      camResolve = res;
+      $('#camTitle').textContent = title || 'Bëj foto';
+      $('#camWrap').classList.add('on');
+      $('#camActLive').classList.remove('hide');
+      $('#camActShot').classList.add('hide');
+      camStart();
+    });
+  }
+
+  /** Hap zgjedhësin e skedarëve dhe kthen skedarin e zgjedhur. */
+  function pickFrom(input) {
+    if (!input) return Promise.resolve(null);
+    return new Promise((res) => {
+      const on = () => {
+        input.removeEventListener('change', on);
+        const f = input.files && input.files[0];
+        input.value = '';
+        res(f || null);
+      };
+      input.addEventListener('change', on);
+      input.click();
+    });
+  }
+
+  $('#camTake').addEventListener('click', () => {
+    const v = $('#camVideo'), c = $('#camShot');
+    if (!v.videoWidth) return toast('Kamera ende s’është gati.', 'err');
+    c.width = v.videoWidth; c.height = v.videoHeight;
+    c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+    $('#camWrap').classList.add('shot');
+    $('#camActLive').classList.add('hide');
+    $('#camActShot').classList.remove('hide');
+  });
+
+  $('#camRetake').addEventListener('click', () => {
+    $('#camWrap').classList.remove('shot');
+    $('#camActLive').classList.remove('hide');
+    $('#camActShot').classList.add('hide');
+  });
+
+  $('#camUse').addEventListener('click', () => {
+    $('#camShot').toBlob((b) => camClose(b), 'image/jpeg', 0.92);
+  });
+
+  $('#camFlip').addEventListener('click', () => {
+    camFacing = camFacing === 'environment' ? 'user' : 'environment';
+    camStart();
+  });
+
+  ['#camClose', '#camCancel', '#camCancelBg'].forEach((sel) =>
+    $(sel).addEventListener('click', () => camClose(null)));
+
+  /* ══════════════════ FOTOJA E PJATËS ══════════════════ */
+  async function setDishPhoto(file) {
+    const m = draft.menu.find((x) => x.id === editing);
+    if (!m || !file) return;
+    const old = m.img;
     $('#dPhoto').classList.add('busy');
     try {
       m.img = await store.uploadPhoto(file, m.id);
+      // Fotoja e vjetër nuk ka pse të mbetet në hapësirë.
+      if (old && old !== m.img) { try { await store.deletePhoto(old); } catch (e) {} }
       paintPhoto(m); markDirty(); renderItems();
-      toast('Fotoja u ngarkua. Shtyp «Ruaj ndryshimet».', 'ok');
-    } catch (err) { toast(err.message, 'err'); }
-    finally { $('#dPhoto').classList.remove('busy'); e.target.value = ''; }
-  });
-  $('#dPhotoClear').addEventListener('click', () => {
-    const m = draft.menu.find((x) => x.id === editing); if (!m) return;
-    delete m.img; paintPhoto(m); markDirty(); renderItems();
+      toast('Fotoja u vendos. Shtyp «Ruaj ndryshimet» që ta shohin klientët.', 'ok');
+    } catch (err) {
+      toast(err.message, 'err');
+    } finally {
+      $('#dPhoto').classList.remove('busy');
+    }
+  }
+
+  $('#dPick').addEventListener('click', async () =>
+    setDishPhoto(await pickFrom($('#dFile'))));
+
+  $('#dShoot').addEventListener('click', async () =>
+    setDishPhoto(await openCamera('Bëj foton e pjatës', $('#dCam'))));
+
+  $('#dPhotoClear').addEventListener('click', async () => {
+    const m = draft.menu.find((x) => x.id === editing);
+    if (!m || !m.img) return;
+    if (!confirm('Të hiqet fotoja? Faqja do të kthehet te ilustrimi.')) return;
+    const old = m.img;
+    delete m.img;
+    paintPhoto(m); markDirty(); renderItems();
+    try { await store.deletePhoto(old); } catch (e) {}
+    toast('Fotoja u hoq. Shtyp «Ruaj ndryshimet».', 'ok');
   });
 
   /* ══════════════════ KATEGORITË ══════════════════ */
@@ -3060,19 +3256,30 @@ ${S('drink', `
     } finally { btn.disabled = false; btn.textContent = 'Merr adresën, koordinatat dhe orarin nga Google'; }
   });
 
-  $('#evPick').addEventListener('click', () => $('#evFile').click());
-  $('#evFile').addEventListener('change', async (e) => {
-    const file = e.target.files[0]; if (!file) return;
+  async function setEventsPhoto(file) {
+    if (!file) return;
+    const c = draft.settings.config;
+    const old = c.eventsPhoto;
     $('#evBox').classList.add('busy');
     try {
-      draft.settings.config.eventsPhoto = await store.uploadPhoto(file, 'salla');
+      c.eventsPhoto = await store.uploadPhoto(file, 'salla');
+      if (old && old !== c.eventsPhoto) { try { await store.deletePhoto(old); } catch (e) {} }
       renderSettings(); markDirty();
-      toast('Fotoja e sallës u ngarkua.', 'ok');
+      toast('Fotoja e sallës u vendos. Shtyp «Ruaj ndryshimet».', 'ok');
     } catch (err) { toast(err.message, 'err'); }
-    finally { $('#evBox').classList.remove('busy'); e.target.value = ''; }
-  });
-  $('#evClear').addEventListener('click', () => {
-    delete draft.settings.config.eventsPhoto; renderSettings(); markDirty();
+    finally { $('#evBox').classList.remove('busy'); }
+  }
+
+  $('#evPick').addEventListener('click', async () => setEventsPhoto(await pickFrom($('#evFile'))));
+  $('#evShoot').addEventListener('click', async () =>
+    setEventsPhoto(await openCamera('Bëj foton e sallës', $('#evCam'))));
+  $('#evClear').addEventListener('click', async () => {
+    const c = draft.settings.config;
+    if (!c.eventsPhoto) return;
+    if (!confirm('Të hiqet fotoja e sallës?')) return;
+    const old = c.eventsPhoto;
+    delete c.eventsPhoto; renderSettings(); markDirty();
+    try { await store.deletePhoto(old); } catch (e) {}
   });
 
   /* ══════════════════ VLERËSIMET ══════════════════ */

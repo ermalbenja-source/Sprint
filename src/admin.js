@@ -655,7 +655,11 @@
   }
   $('#drClose').addEventListener('click', closeDrawer);
   $('#scrim').addEventListener('click', closeDrawer);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if ($('#camWrap').classList.contains('on')) return camClose(null);
+    closeDrawer();
+  });
 
   $('#d-av').addEventListener('click', () => setAvail(!$('#d-av').classList.contains('on')));
   $$('#dTags button').forEach((b) => b.addEventListener('click', () => b.classList.toggle('on')));
@@ -683,27 +687,138 @@
     const m = draft.menu.find((x) => x.id === editing);
     if (!m || !confirm(`Të fshihet «${m.sq}» përfundimisht?`)) return;
     draft.menu = draft.menu.filter((x) => x.id !== editing);
+    if (m.img) { try { await store.deletePhoto(m.img); } catch (e) {} }
     if (!localMode) { try { await store.deleteItem(editing); } catch (e) { toast(e.message, 'err'); } }
     markDirty(); renderItems(); closeDrawer();
     toast('Pjata u fshi.', 'ok');
   });
 
-  /* ---------- fotoja e pjatës ---------- */
-  $('#dPick').addEventListener('click', () => $('#dFile').click());
-  $('#dFile').addEventListener('change', async (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const m = draft.menu.find((x) => x.id === editing); if (!m) return;
+
+  /* ══════════════════ KAMERA ══════════════════ */
+  let camStream = null, camFacing = 'environment', camResolve = null, camFallback = null;
+
+  const camStop = () => {
+    if (camStream) { camStream.getTracks().forEach((t) => t.stop()); camStream = null; }
+    $('#camVideo').srcObject = null;
+  };
+
+  function camClose(value) {
+    camStop();
+    $('#camWrap').classList.remove('on', 'shot');
+    const r = camResolve; camResolve = null;
+    if (r) r(value || null);
+  }
+
+  async function camStart() {
+    const msg = $('#camMsg');
+    msg.classList.remove('on');
+    camStop();
+    try {
+      camStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: camFacing, width: { ideal: 1600 }, height: { ideal: 1200 } },
+        audio: false,
+      });
+      $('#camVideo').srcObject = camStream;
+    } catch (e) {
+      msg.innerHTML = /NotAllowed|Permission|denied/i.test(e.name + ' ' + e.message)
+        ? 'Shfletuesi nuk e lejoi kamerën.<br>Lejoje nga ikona pranë adresës, ose zgjidh një foto nga skedarët.'
+        : 'Kamera nuk u hap: ' + esc(e.message);
+      msg.classList.add('on');
+    }
+  }
+
+  /** Hap kamerën dhe kthen foton si Blob; null nëse anulohet. */
+  function openCamera(title, fallbackInput) {
+    camFallback = fallbackInput || null;
+    const md = navigator.mediaDevices;
+    if (!md || !md.getUserMedia) return pickFrom(fallbackInput);   // telefonat e vjetër
+    return new Promise((res) => {
+      camResolve = res;
+      $('#camTitle').textContent = title || 'Bëj foto';
+      $('#camWrap').classList.add('on');
+      $('#camActLive').classList.remove('hide');
+      $('#camActShot').classList.add('hide');
+      camStart();
+    });
+  }
+
+  /** Hap zgjedhësin e skedarëve dhe kthen skedarin e zgjedhur. */
+  function pickFrom(input) {
+    if (!input) return Promise.resolve(null);
+    return new Promise((res) => {
+      const on = () => {
+        input.removeEventListener('change', on);
+        const f = input.files && input.files[0];
+        input.value = '';
+        res(f || null);
+      };
+      input.addEventListener('change', on);
+      input.click();
+    });
+  }
+
+  $('#camTake').addEventListener('click', () => {
+    const v = $('#camVideo'), c = $('#camShot');
+    if (!v.videoWidth) return toast('Kamera ende s’është gati.', 'err');
+    c.width = v.videoWidth; c.height = v.videoHeight;
+    c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+    $('#camWrap').classList.add('shot');
+    $('#camActLive').classList.add('hide');
+    $('#camActShot').classList.remove('hide');
+  });
+
+  $('#camRetake').addEventListener('click', () => {
+    $('#camWrap').classList.remove('shot');
+    $('#camActLive').classList.remove('hide');
+    $('#camActShot').classList.add('hide');
+  });
+
+  $('#camUse').addEventListener('click', () => {
+    $('#camShot').toBlob((b) => camClose(b), 'image/jpeg', 0.92);
+  });
+
+  $('#camFlip').addEventListener('click', () => {
+    camFacing = camFacing === 'environment' ? 'user' : 'environment';
+    camStart();
+  });
+
+  ['#camClose', '#camCancel', '#camCancelBg'].forEach((sel) =>
+    $(sel).addEventListener('click', () => camClose(null)));
+
+  /* ══════════════════ FOTOJA E PJATËS ══════════════════ */
+  async function setDishPhoto(file) {
+    const m = draft.menu.find((x) => x.id === editing);
+    if (!m || !file) return;
+    const old = m.img;
     $('#dPhoto').classList.add('busy');
     try {
       m.img = await store.uploadPhoto(file, m.id);
+      // Fotoja e vjetër nuk ka pse të mbetet në hapësirë.
+      if (old && old !== m.img) { try { await store.deletePhoto(old); } catch (e) {} }
       paintPhoto(m); markDirty(); renderItems();
-      toast('Fotoja u ngarkua. Shtyp «Ruaj ndryshimet».', 'ok');
-    } catch (err) { toast(err.message, 'err'); }
-    finally { $('#dPhoto').classList.remove('busy'); e.target.value = ''; }
-  });
-  $('#dPhotoClear').addEventListener('click', () => {
-    const m = draft.menu.find((x) => x.id === editing); if (!m) return;
-    delete m.img; paintPhoto(m); markDirty(); renderItems();
+      toast('Fotoja u vendos. Shtyp «Ruaj ndryshimet» që ta shohin klientët.', 'ok');
+    } catch (err) {
+      toast(err.message, 'err');
+    } finally {
+      $('#dPhoto').classList.remove('busy');
+    }
+  }
+
+  $('#dPick').addEventListener('click', async () =>
+    setDishPhoto(await pickFrom($('#dFile'))));
+
+  $('#dShoot').addEventListener('click', async () =>
+    setDishPhoto(await openCamera('Bëj foton e pjatës', $('#dCam'))));
+
+  $('#dPhotoClear').addEventListener('click', async () => {
+    const m = draft.menu.find((x) => x.id === editing);
+    if (!m || !m.img) return;
+    if (!confirm('Të hiqet fotoja? Faqja do të kthehet te ilustrimi.')) return;
+    const old = m.img;
+    delete m.img;
+    paintPhoto(m); markDirty(); renderItems();
+    try { await store.deletePhoto(old); } catch (e) {}
+    toast('Fotoja u hoq. Shtyp «Ruaj ndryshimet».', 'ok');
   });
 
   /* ══════════════════ KATEGORITË ══════════════════ */
@@ -929,19 +1044,30 @@
     } finally { btn.disabled = false; btn.textContent = 'Merr adresën, koordinatat dhe orarin nga Google'; }
   });
 
-  $('#evPick').addEventListener('click', () => $('#evFile').click());
-  $('#evFile').addEventListener('change', async (e) => {
-    const file = e.target.files[0]; if (!file) return;
+  async function setEventsPhoto(file) {
+    if (!file) return;
+    const c = draft.settings.config;
+    const old = c.eventsPhoto;
     $('#evBox').classList.add('busy');
     try {
-      draft.settings.config.eventsPhoto = await store.uploadPhoto(file, 'salla');
+      c.eventsPhoto = await store.uploadPhoto(file, 'salla');
+      if (old && old !== c.eventsPhoto) { try { await store.deletePhoto(old); } catch (e) {} }
       renderSettings(); markDirty();
-      toast('Fotoja e sallës u ngarkua.', 'ok');
+      toast('Fotoja e sallës u vendos. Shtyp «Ruaj ndryshimet».', 'ok');
     } catch (err) { toast(err.message, 'err'); }
-    finally { $('#evBox').classList.remove('busy'); e.target.value = ''; }
-  });
-  $('#evClear').addEventListener('click', () => {
-    delete draft.settings.config.eventsPhoto; renderSettings(); markDirty();
+    finally { $('#evBox').classList.remove('busy'); }
+  }
+
+  $('#evPick').addEventListener('click', async () => setEventsPhoto(await pickFrom($('#evFile'))));
+  $('#evShoot').addEventListener('click', async () =>
+    setEventsPhoto(await openCamera('Bëj foton e sallës', $('#evCam'))));
+  $('#evClear').addEventListener('click', async () => {
+    const c = draft.settings.config;
+    if (!c.eventsPhoto) return;
+    if (!confirm('Të hiqet fotoja e sallës?')) return;
+    const old = c.eventsPhoto;
+    delete c.eventsPhoto; renderSettings(); markDirty();
+    try { await store.deletePhoto(old); } catch (e) {}
   });
 
   /* ══════════════════ VLERËSIMET ══════════════════ */

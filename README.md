@@ -31,7 +31,7 @@ Hapet te `/admin`. Hyrja bëhet me email dhe fjalëkalim.
 
 | Skeda | Çfarë ndryshon |
 |-------|----------------|
-| **Menuja** | Çmimin direkt në listë, ose gjithçka te sirtari: emrin, përshkrimin, kategorinë, etiketat, njësinë (`/copë`), shënimin (`09:00–15:00`), renditjen, foton. Fsheh një pjatë me një çelës pa e fshirë. |
+| **Menuja** | Çmimin direkt në listë, ose gjithçka te sirtari: emrin, përshkrimin, kategorinë, etiketat, njësinë (`/copë`), shënimin (`09:00–15:00`), renditjen dhe foton — e ngarkuar ose e bërë me kamerën aty për aty. Fsheh një pjatë me një çelës pa e fshirë. |
 | **Kategoritë** | Emrat në të dyja gjuhët dhe renditjen — e njëjta renditje del te fetat e rrotës. |
 | **Cilësimet** | Telefonin, WhatsApp-in, email-in, adresën, koordinatat, tarifën e dërgesës, orarin, rrjetet sociale, tekstin dhe foton e sallës. |
 | **Vlerësimet** | Rrugë rezervë kur Google nuk është lidhur. Me Google të lidhur, faqja i merr vetë. |
@@ -42,7 +42,23 @@ Dy skedat e para — **Porositë** dhe **Rezervimet** — janë ekrani i punës 
 **Ndryshim çmimesh me shumicë:** zgjidh kategorinë, shkruaj përqindjen dhe shtyp «Rrit» ose «Ul» —
 p.sh. të gjitha picat +10% me një klikim.
 
-**Fotot** zvogëlohen vetë në 1200 px dhe ngjeshen në shfletues para ngarkimit, që faqja të mos rëndohet.
+### Fotot e pjatave
+
+Hap një pjatë te skeda **Menuja** dhe ke tri butona:
+
+- **📁 Ngarko foto** — zgjidh një skedar nga pajisja.
+- **📷 Bëj foto** — hap kamerën aty për aty, me pamje të gjallë, buton shkrepjeje dhe kalim
+  midis kamerës së pasme e asaj të përparme. Pas shkrepjes zgjedh «Përdore këtë» ose
+  «Provo sërish». Në telefonat e vjetër që s'e mbështesin kamerën në shfletues, hapet vetë
+  aplikacioni i kamerës.
+- **Hiq foton** — e heq nga pjata dhe e fshin skedarin nga Supabase, që hapësira të mos mbushet.
+
+Fotoja zvogëlohet në 1200 px dhe ngjeshet brenda telefonit para se të niset, ndaj ngarkohet
+shpejt edhe me internet të dobët. Kur ndërron një foto, e vjetra fshihet vetvetiu.
+
+Sapo shtypësh «Ruaj ndryshimet», fotoja del në kartën e pjatës, në galeri dhe në shportë.
+Pa foto, faqja kthehet te ilustrimi i zgjedhur. I njëjti çift butonash gjendet edhe te
+fotoja e sallës së eventeve, te **Cilësimet**.
 
 Asgjë nuk del te klientët derisa të shtypet **«Ruaj ndryshimet»**. Sa herë ka diçka të paruajtur,
 poshtë shfaqet një shirit me numrin e ndryshimeve dhe butonin «Anulo».
@@ -252,7 +268,7 @@ menjëherë edhe në internet të ngadaltë; pastaj ajo zëvendësohet pa u drid
 | Instagram | ✅ [@sprint_restorant_fast_pizza](https://www.instagram.com/sprint_restorant_fast_pizza/) |
 | Ngjyrat e brand-it | ✅ Portokalli · e zezë · krem |
 | Salla e eventeve | ✅ Seksion i vetin + zgjedhje te rezervimi |
-| Fotot e pjatave | ⛔ Ngarkohen nga paneli — deri atëherë, ilustrime |
+| Fotot e pjatave | ⛔ Ngarkohen ose bëhen me kamerë nga paneli — deri atëherë, ilustrime |
 | Adresa dhe koordinatat | ⛔ Vendosen te skeda «Cilësimet» |
 | Orari i plotë | ⛔ Vetëm 09:00–15:00 për tavat është i konfirmuar |
 | Tarifa e dërgesës | ⛔ Bosh → shporta shfaq «Sipas zonës» |

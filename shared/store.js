@@ -236,6 +236,26 @@
   const clearLocal = () => localStorage.removeItem(LS_LOCAL);
 
 
+  /** Fshin nga hapësira e fotove skedarin që i përket kësaj adrese. */
+  async function deletePhoto(url) {
+    if (!url || !configured) return;                       // data: URI lokale s'kanë çfarë të fshijnë
+    const marker = '/storage/v1/object/public/' + BUCKET + '/';
+    const at = url.indexOf(marker);
+    if (at < 0) return;                                    // foto e jashtme, jo e jona
+    const path = url.slice(at + marker.length).split('?')[0];
+    await ensureAuth();
+    const r = await fetch(URL_ + '/storage/v1/object/' + BUCKET + '/' + path, {
+      method: 'DELETE',
+      headers: { apikey: KEY, Authorization: authHeader() },
+    });
+    // Nëse skedari mungon tashmë, s'ka pse të bëjmë zhurmë.
+    if (!r.ok && r.status !== 404) {
+      let msg = r.status + ' ' + r.statusText;
+      try { const j = await r.json(); msg = j.message || j.error || msg; } catch (e) {}
+      throw new Error(msg);
+    }
+  }
+
   /* ---------------- porositë dhe rezervimet ---------------- */
   const LS_ORDERS = 'sprint-local-orders';
   const LS_BOOKINGS = 'sprint-local-bookings';
@@ -406,7 +426,7 @@
     configured, fetchAll, apply,
     signIn, signOut, currentUser, ensureAuth,
     saveItems, deleteItem, saveSettings,
-    uploadPhoto, compress,
+    uploadPhoto, deletePhoto, compress,
     createOrder, fetchOrders, updateOrder, deleteOrder, trackOrder,
     createBooking, fetchBookings, updateBooking,
     readLocal, writeLocal, clearLocal,

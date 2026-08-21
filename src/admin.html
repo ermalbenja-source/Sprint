@@ -257,6 +257,36 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
   .statrow{grid-template-columns:1fr 1fr}
 }
 
+
+/* ---------- kamera ---------- */
+.camwrap{position:fixed;inset:0;z-index:140;display:none;place-items:center;padding:1rem}
+.camwrap.on{display:grid}
+.cam-bg{position:absolute;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(4px)}
+.cam-card{position:relative;width:min(560px,100%);background:var(--pan);border:1px solid var(--line);
+  border-radius:22px;overflow:hidden;display:grid}
+.cam-hd{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.8rem 1rem;border-bottom:1px solid var(--line)}
+.cam-hd b{font-family:var(--display);font-weight:400;font-size:1.15rem}
+.cam-stage{position:relative;background:#000;aspect-ratio:4/3;display:grid;place-items:center}
+.cam-stage video,.cam-stage canvas{width:100%;height:100%;object-fit:cover;display:block}
+.cam-stage canvas{display:none}
+.camwrap.shot .cam-stage video{display:none}
+.camwrap.shot .cam-stage canvas{display:block}
+.cam-msg{position:absolute;inset:0;display:none;place-items:center;text-align:center;
+  padding:1.6rem;color:var(--muted);font-size:.9rem;line-height:1.5;background:var(--pan-2)}
+.cam-msg.on{display:grid}
+.cam-act{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.9rem 1rem;
+  background:#0F0B0C}
+.cam-act.hide{display:none}
+.shutter{width:62px;height:62px;border-radius:50%;background:var(--brand);border:4px solid var(--pan);
+  box-shadow:0 0 0 3px var(--brand);transition:transform .15s}
+.shutter:hover{transform:scale(1.06)}
+.shutter:active{transform:scale(.94)}
+@media(max-width:520px){
+  .cam-card{width:100%}
+  .cam-act .btn{flex:1}
+}
+
 /* ---------- njoftimi ---------- */
 #toast{position:fixed;left:50%;bottom:1.4rem;translate:-50% 0;z-index:100;
   background:var(--pan-2);border:1px solid var(--line);border-radius:13px;padding:.75rem 1.2rem;
@@ -459,12 +489,14 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         <div class="photo">
           <div class="photo-box" id="evBox"><svg viewBox="0 0 200 200"><use href="#art-meze"/></svg></div>
           <div class="photo-act">
-            <button class="btn btn-g btn-sm" id="evPick">Ngarko foto të sallës</button>
+            <button class="btn btn-g btn-sm" id="evPick">📁 Ngarko foto</button>
+            <button class="btn btn-g btn-sm" id="evShoot">📷 Bëj foto</button>
             <button class="btn btn-d btn-sm" id="evClear">Hiq foton</button>
             <p class="hint">Fotoja zvogëlohet vetë në 1200 px dhe ngjeshet para ngarkimit.</p>
           </div>
         </div>
         <input type="file" id="evFile" accept="image/*">
+        <input type="file" id="evCam" accept="image/*" capture="environment">
       </div>
     </section>
 
@@ -532,12 +564,15 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
     <div class="photo">
       <div class="photo-box" id="dPhoto"></div>
       <div class="photo-act">
-        <button class="btn btn-g btn-sm" id="dPick">Ngarko / ndërro foton</button>
+        <button class="btn btn-g btn-sm" id="dPick">📁 Ngarko foto</button>
+        <button class="btn btn-g btn-sm" id="dShoot">📷 Bëj foto</button>
         <button class="btn btn-d btn-sm" id="dPhotoClear">Hiq foton</button>
-        <p class="hint">Pa foto, faqja përdor ilustrimin e zgjedhur më poshtë.</p>
+        <p class="hint">Pa foto, faqja përdor ilustrimin e zgjedhur më poshtë.
+          Fotoja zvogëlohet vetë dhe del në menu, në galeri e në shportë.</p>
       </div>
     </div>
     <input type="file" id="dFile" accept="image/*">
+    <input type="file" id="dCam" accept="image/*" capture="environment">
 
     <div class="row2">
       <div class="f"><label>Emri (shqip)</label><input id="d-sq"></div>
@@ -575,6 +610,32 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
     <button class="btn btn-p" id="dSave">Në rregull</button>
   </div>
 </aside>
+
+
+<!-- ══════════════════ KAMERA ══════════════════ -->
+<div class="camwrap" id="camWrap" role="dialog" aria-modal="true" aria-label="Bëj foto">
+  <div class="cam-bg" id="camCancelBg"></div>
+  <div class="cam-card">
+    <div class="cam-hd">
+      <b id="camTitle">Bëj foto</b>
+      <button class="x" id="camClose" aria-label="Mbyll">✕</button>
+    </div>
+    <div class="cam-stage">
+      <video id="camVideo" autoplay playsinline muted></video>
+      <canvas id="camShot"></canvas>
+      <p class="cam-msg" id="camMsg"></p>
+    </div>
+    <div class="cam-act" id="camActLive">
+      <button class="btn btn-g" id="camFlip">🔄 Kamera</button>
+      <button class="shutter" id="camTake" aria-label="Bëj foton"></button>
+      <button class="btn btn-g" id="camCancel">Anulo</button>
+    </div>
+    <div class="cam-act hide" id="camActShot">
+      <button class="btn btn-g" id="camRetake">Provo sërish</button>
+      <button class="btn btn-p" id="camUse">Përdore këtë</button>
+    </div>
+  </div>
+</div>
 
 <div id="toast"></div>
 
