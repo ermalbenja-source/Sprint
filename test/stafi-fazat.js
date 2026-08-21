@@ -62,13 +62,13 @@ const out = '/tmp/claude-0/-home-user-Sprint/c53b462c-5ae8-5e47-bcb5-d1a2a85c160
   await p.screenshot({ path: out + 's-phase.png', clip: { x: 0, y: 90, width: 1300, height: 700 } });
 
   // riemërto dhe shiko parapamjen
-  await p.fill('.phrow[data-ph=kitchen] [data-f=customer_label_sq]', 'Po piqet');
+  await p.fill('.phrow[data-ph=preparing] [data-f=customer_label_sq]', 'Po piqet');
   await p.waitForTimeout(300);
   console.log('PAS RIEMËRTIMIT', await p.evaluate(() =>
     [...document.querySelectorAll('#phasePreview .st')].map(s => s.textContent.trim()).join(' → ')));
 
   // fik një fazë jo-bazë
-  await p.click('.phrow[data-ph=confirmed] [data-en]'); await p.waitForTimeout(300);
+  await p.click('.phrow[data-ph=accepted] [data-en]'); await p.waitForTimeout(300);
   console.log('PAS FIKJES', await p.evaluate(() =>
     [...document.querySelectorAll('#phasePreview .st')].map(s => s.textContent.trim()).join(' → ')));
 

@@ -148,4 +148,55 @@ values ('delivery_note','order', :'order_id', 'Fletë dorëzimi', 1400)
 returning number, kind, title;
 
 \echo ''
+\echo '=== 9. EKRANI I KUZHINËS ==='
+select token as kds_token from public.staff_login('1199','tablet-kuzhine') \gset
+
+insert into public.orders (customer_name, phone, address, items, total, status, note)
+values ('Klient Kuzhine','069 222 3344','Rruga X 5',
+        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700}]'::jsonb, 700, 'accepted', 'pa qepë')
+returning id as kds_order \gset
+
+\echo '-- kuzhina sheh porosinë, POR jo emrin/telefonin/adresën:'
+select number, status, kind, note from public.kds_orders(:'kds_token') where id = :'kds_order';
+\echo '-- kolonat e kthyera (nuk duhet të ketë customer_name, phone, address):'
+select array_to_string(proargnames, ', ') as kolonat
+  from pg_proc where proname = 'kds_orders';
+
+\echo '-- kalimi i lejuar: accepted → preparing'
+select public.kds_bump(:'kds_token', :'kds_order', 'preparing') as faza;
+select status, kitchen_at is not null as nisi_kuzhina from public.orders where id = :'kds_order';
+
+\echo '-- kalimi i lejuar: preparing → ready'
+select public.kds_bump(:'kds_token', :'kds_order', 'ready') as faza;
+select status, ready_at is not null as u_be_gati from public.orders where id = :'kds_order';
+
+\echo '-- kthimi mbrapsht lejohet (preket gabimisht shpesh):'
+select public.kds_bump(:'kds_token', :'kds_order', 'preparing') as faza;
+select status, ready_at is null as ora_u_pastrua from public.orders where id = :'kds_order';
+
+select set_config('test.kds_token', :'kds_token', false),
+       set_config('test.kds_order', :'kds_order', false);
+
+\echo '-- kuzhina NUK e shpall dot porosinë të dorëzuar:'
+do $$ begin
+  perform public.kds_bump(current_setting('test.kds_token')::uuid,
+                          current_setting('test.kds_order')::uuid, 'done');
+  raise exception 'DËSHTIM: kuzhina e mbylli porosinë';
+exception when others then
+  if sqlerrm = 'DËSHTIM: kuzhina e mbylli porosinë' then raise; end if;
+  raise notice 'OK — u refuzua: %', sqlerrm;
+end $$;
+
+\echo '-- kodi i motorristit NUK e hap ekranin e kuzhinës:'
+select token as drv_token from public.staff_login('4821','moto') \gset
+select set_config('test.drv_token', :'drv_token', false);
+do $$ begin
+  perform public.kds_orders(current_setting('test.drv_token')::uuid);
+  raise exception 'DËSHTIM: motorristi hapi kuzhinën';
+exception when others then
+  if sqlerrm = 'DËSHTIM: motorristi hapi kuzhinën' then raise; end if;
+  raise notice 'OK — u refuzua: %', sqlerrm;
+end $$;
+
+\echo ''
 \echo '=== TË GJITHA KALUAN ==='

@@ -17,7 +17,8 @@
 
 
 -- ═══════════════════════ 1. FAZAT E POROSISË ═══════════════════════
--- Skeleti i fazave është i fiksuar sepse kuzhina, motorristi, faqja e klientit
+-- Çelësat janë saktësisht vlerat e `orders.status`, që të mos ketë përkthim
+-- midis dy fjalorëve. Skeleti është i fiksuar sepse kuzhina, motorristi, faqja e klientit
 -- dhe statistikat varen prej tij. Ti ndryshon emrin, ngjyrën, radhën, kohën e
 -- synuar dhe çfarë sheh klienti — dhe fik ato që nuk i përdor.
 
@@ -37,7 +38,7 @@ create table if not exists public.order_phases (
   updated_at        timestamptz not null default now(),
 
   constraint order_phases_key_ok check (key in
-    ('placed','confirmed','kitchen','ready','out','done','cancelled')),
+    ('new','accepted','preparing','ready','delivering','done','cancelled')),
   constraint order_phases_label_ok check (char_length(label_sq) between 1 and 40),
   constraint order_phases_target_ok check (target_minutes is null or target_minutes between 1 and 480)
 );
@@ -45,14 +46,22 @@ create table if not exists public.order_phases (
 comment on table public.order_phases is
   'Fazat e porosisë. Çelësi është i fiksuar; emri dhe pamja janë të tuat.';
 
+-- Vetë-shërim për bazat që u ngritën me një grup të mëparshëm çelësash:
+-- hiqet kufizimi, fshihen rreshtat e vjetër, dhe vihet kufizimi i saktë.
+alter table public.order_phases drop constraint if exists order_phases_key_ok;
+delete from public.order_phases
+ where key not in ('new','accepted','preparing','ready','delivering','done','cancelled');
+alter table public.order_phases add constraint order_phases_key_ok check (key in
+  ('new','accepted','preparing','ready','delivering','done','cancelled'));
+
 insert into public.order_phases
   (key, sort, label_sq, label_en, customer_label_sq, customer_label_en, icon, color, customer_visible, target_minutes, is_core)
 values
-  ('placed',    10, 'E marrë',    'Placed',    'E marrë',        'Received',   '📥', '#8a8a8a', true,  null, true),
-  ('confirmed', 20, 'Pranuar',    'Accepted',  'Po përgatitet',  'In progress','✓',  '#c4640b', true,  3,    false),
-  ('kitchen',   30, 'Në furrë',   'In kitchen','Po përgatitet',  'In progress','🔥', '#c4640b', true,  20,   true),
+  ('new',       10, 'E marrë',    'Placed',    'E marrë',        'Received',   '📥', '#8a8a8a', true,  null, true),
+  ('accepted',  20, 'Pranuar',    'Accepted',  'Po përgatitet',  'In progress','✓',  '#c4640b', true,  3,    false),
+  ('preparing', 30, 'Në furrë',   'In kitchen','Po përgatitet',  'In progress','🔥', '#c4640b', true,  20,   true),
   ('ready',     40, 'Gati',       'Ready',     'Nisi për te ti', 'On its way', '🛎',  '#3b6446', true,  5,    false),
-  ('out',       50, 'Në rrugë',   'On the way','Nisi për te ti', 'On its way', '🛵', '#3b6446', true,  25,   true),
+  ('delivering',50, 'Në rrugë',   'On the way','Nisi për te ti', 'On its way', '🛵', '#3b6446', true,  25,   true),
   ('done',      60, 'Dorëzuar',   'Delivered', 'Dorëzuar',       'Delivered',  '🏁', '#3b6446', true,  null, true),
   ('cancelled', 70, 'Anuluar',    'Cancelled', 'Anuluar',        'Cancelled',  '✕',  '#a22f1b', true,  null, true)
 on conflict (key) do nothing;
@@ -743,6 +752,86 @@ $$;
 
 revoke all on function public.public_phases() from public;
 grant execute on function public.public_phases() to anon, authenticated;
+
+
+-- ═══════════════════════ 19. EKRANI I KUZHINËS ═══════════════════════
+-- Kuzhina nuk e prek tabelën drejtpërdrejt: hyn me kod dhe punon përmes këtyre
+-- dy funksioneve. Ato kthejnë VETËM atë që i duhet për të gatuar — pa emër,
+-- pa telefon, pa adresë. Një ekran i varur në mur nuk ka pse t'i mbajë ato të
+-- dukshme gjithë ditën.
+
+create or replace function public.kds_orders(p_token uuid)
+returns table (
+  id uuid, number int, status text, kind text, items jsonb, note text,
+  created_at timestamptz, accepted_at timestamptz, kitchen_at timestamptz,
+  ready_at timestamptz, prep_minutes int
+)
+language plpgsql
+security definer
+stable
+set search_path = public
+as $$
+declare r text;
+begin
+  select s.role into r from public.staff_by_token(p_token) s;
+  if r not in ('kitchen','manager','owner') then
+    raise exception 'Ky kod nuk e hap ekranin e kuzhinës.';
+  end if;
+
+  return query
+    select o.id, o.number, o.status, o.kind, o.items, o.note,
+           o.created_at, o.accepted_at, o.kitchen_at, o.ready_at, o.prep_minutes
+      from public.orders o
+     where o.status in ('new','accepted','preparing','ready')
+       and o.created_at > now() - interval '12 hours'
+     order by o.created_at;
+end;
+$$;
+
+revoke all on function public.kds_orders(uuid) from public;
+grant execute on function public.kds_orders(uuid) to anon, authenticated;
+
+/* Kalimi i fazës nga kuzhina. Lejohen vetëm hapat që kuzhina ka të drejtë të
+   bëjë — që një prekje e gabuar te tableti të mos e shpallë porosinë të
+   dorëzuar. Kthimi mbrapsht lejohet, sepse butoni preket gabimisht shpesh. */
+create or replace function public.kds_bump(p_token uuid, p_order uuid, p_status text)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare r text; cur text;
+begin
+  select s.role into r from public.staff_by_token(p_token) s;
+  if r not in ('kitchen','manager','owner') then
+    raise exception 'Ky kod nuk e hap ekranin e kuzhinës.';
+  end if;
+
+  select status into cur from public.orders where id = p_order;
+  if cur is null then raise exception 'Porosia nuk u gjet.'; end if;
+
+  if not (
+       (p_status = 'preparing' and cur in ('new','accepted','ready'))
+    or (p_status = 'ready'     and cur in ('preparing','accepted'))
+  ) then
+    raise exception 'Kalimi % → % nuk lejohet nga kuzhina.', cur, p_status;
+  end if;
+
+  update public.orders
+     set status      = p_status,
+         kitchen_at  = case when p_status = 'preparing' and kitchen_at is null
+                            then now() else kitchen_at end,
+         ready_at    = case when p_status = 'ready' then now()
+                            when p_status = 'preparing' then null
+                            else ready_at end
+   where id = p_order;
+
+  return p_status;
+end;
+$$;
+
+revoke all on function public.kds_bump(uuid, uuid, text) from public;
+grant execute on function public.kds_bump(uuid, uuid, text) to anon, authenticated;
 
 
 -- ============================================================================

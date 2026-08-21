@@ -2475,16 +2475,17 @@ ${S('drink', `
   const uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
   /* ══════════════════ FAZAT ══════════════════
-     Çelësat janë të fiksuar sepse kuzhina, motorristi dhe faqja e klientit
-     varen prej tyre. Gjithçka tjetër është e jotja. Këto vlera pasqyrojnë
-     saktësisht ato që mbjell supabase/schema-2-biznes.sql. */
+     Çelësat janë saktësisht vlerat e `orders.status`, që të mos ketë përkthim
+     midis dy fjalorëve. Të fiksuar sepse kuzhina, motorristi dhe faqja e
+     klientit varen prej tyre; gjithçka tjetër është e jotja. Këto vlera
+     pasqyrojnë saktësisht ato që mbjell supabase/schema-2-biznes.sql. */
 
   const DEFAULT_PHASES = [
-    { key:'placed',    sort:10, label_sq:'E marrë',  label_en:'Placed',     customer_label_sq:'E marrë',        customer_label_en:'Received',    icon:'📥', color:'#8a8a8a', enabled:true, customer_visible:true, target_minutes:null, is_core:true  },
-    { key:'confirmed', sort:20, label_sq:'Pranuar',  label_en:'Accepted',   customer_label_sq:'Po përgatitet',  customer_label_en:'In progress', icon:'✓',  color:'#c4640b', enabled:true, customer_visible:true, target_minutes:3,    is_core:false },
-    { key:'kitchen',   sort:30, label_sq:'Në furrë', label_en:'In kitchen', customer_label_sq:'Po përgatitet',  customer_label_en:'In progress', icon:'🔥', color:'#c4640b', enabled:true, customer_visible:true, target_minutes:20,   is_core:true  },
+    { key:'new',       sort:10, label_sq:'E marrë',  label_en:'Placed',     customer_label_sq:'E marrë',        customer_label_en:'Received',    icon:'📥', color:'#8a8a8a', enabled:true, customer_visible:true, target_minutes:null, is_core:true  },
+    { key:'accepted',  sort:20, label_sq:'Pranuar',  label_en:'Accepted',   customer_label_sq:'Po përgatitet',  customer_label_en:'In progress', icon:'✓',  color:'#c4640b', enabled:true, customer_visible:true, target_minutes:3,    is_core:false },
+    { key:'preparing', sort:30, label_sq:'Në furrë', label_en:'In kitchen', customer_label_sq:'Po përgatitet',  customer_label_en:'In progress', icon:'🔥', color:'#c4640b', enabled:true, customer_visible:true, target_minutes:20,   is_core:true  },
     { key:'ready',     sort:40, label_sq:'Gati',     label_en:'Ready',      customer_label_sq:'Nisi për te ti', customer_label_en:'On its way',  icon:'🛎',  color:'#3b6446', enabled:true, customer_visible:true, target_minutes:5,    is_core:false },
-    { key:'out',       sort:50, label_sq:'Në rrugë', label_en:'On the way', customer_label_sq:'Nisi për te ti', customer_label_en:'On its way',  icon:'🛵', color:'#3b6446', enabled:true, customer_visible:true, target_minutes:25,   is_core:true  },
+    { key:'delivering',sort:50, label_sq:'Në rrugë', label_en:'On the way', customer_label_sq:'Nisi për te ti', customer_label_en:'On its way',  icon:'🛵', color:'#3b6446', enabled:true, customer_visible:true, target_minutes:25,   is_core:true  },
     { key:'done',      sort:60, label_sq:'Dorëzuar', label_en:'Delivered',  customer_label_sq:'Dorëzuar',       customer_label_en:'Delivered',   icon:'🏁', color:'#3b6446', enabled:true, customer_visible:true, target_minutes:null, is_core:true  },
     { key:'cancelled', sort:70, label_sq:'Anuluar',  label_en:'Cancelled',  customer_label_sq:'Anuluar',        customer_label_en:'Cancelled',   icon:'✕',  color:'#a22f1b', enabled:true, customer_visible:true, target_minutes:null, is_core:true  },
   ];
@@ -2729,6 +2730,37 @@ ${S('drink', `
     }
   }
 
+  /* ══════════════════ EKRANI I KUZHINËS ══════════════════ */
+
+  const KDS_STATES = ['new', 'accepted', 'preparing', 'ready'];
+
+  /** Porositë që i duhen kuzhinës — pa emër, pa telefon, pa adresë. */
+  async function kdsOrders() {
+    if (!live) {
+      const from = new Date(Date.now() - 12 * 3600e3).toISOString();
+      const list = (await st.fetchOrders({ from })) || [];
+      return list
+        .filter((o) => KDS_STATES.indexOf(o.status) >= 0)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    }
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
+    return st._rpc('kds_orders', { p_token: sess.token });
+  }
+
+  /** Kalimi i fazës nga kuzhina. Kthimi mbrapsht lejohet me qëllim. */
+  async function kdsBump(id, status) {
+    if (!live) {
+      const patch = { status };
+      if (status === 'preparing') { patch.kitchen_at = new Date().toISOString(); patch.ready_at = null; }
+      if (status === 'ready') patch.ready_at = new Date().toISOString();
+      return st.updateOrder(id, patch);
+    }
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
+    return st._rpc('kds_bump', { p_token: sess.token, p_order: id, p_status: status });
+  }
+
   /* ══════════════════ VENDNDODHJA ══════════════════ */
 
   /**
@@ -2776,6 +2808,7 @@ ${S('drink', `
     DEFAULT_PHASES, fetchPhases, savePhases, resetPhases, publicPhases, customerSteps,
     lookupCustomer, upsertCustomer,
     STAFF_ROLES: ROLES, fetchStaff, saveStaff, deleteStaff, setStaffPin,
+    KDS_STATES, kdsOrders, kdsBump,
     staffLogin, staffSession, staffLogout,
     getLocation, locationQuality, navLink,
   });
