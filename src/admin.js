@@ -451,6 +451,7 @@
         <span class="ord-no">#${o.number}</span>
         <span class="badge b-${o.status}">${ST_SQ[o.status]}</span>
         <span class="badge b-kind">${o.kind === 'pickup' ? 'Marr vetë' : 'Dërgesë'}</span>
+        ${o.token ? `<span class="badge b-code" title="Kodi i gjurmimit i klientit">${esc(store.fmtCode(o.token))}</span>` : ''}
         <span class="clock ${c.cls}" data-clock="${o.id}">${c.txt}</span>
       </div>
       <div class="ord-bd">

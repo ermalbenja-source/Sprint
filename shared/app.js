@@ -266,12 +266,12 @@
       if (extra) {
         const isDel = extra.kind === 'delivery';
         foot = l === 'sq'
-          ? `\n\n🧾 Porosia nr. *${extra.number}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
+          ? `\n\n🧾 Porosia nr. *${extra.number}*\n🔖 Kodi i gjurmimit: *${extra.code}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
             (isDel ? `\n📍 ${extra.address}` : `\n🏃 Marr vetë në lokal`) +
             `\n⏰ ${extra.wantedAt === 'asap' ? 'Sa më shpejt' : 'Për orën ' + extra.wantedAt}` +
             `\n💵 ${extra.payment === 'cash' ? 'Me para në dorë' : 'Me kartë'}` +
             (extra.note ? `\n📝 ${extra.note}` : '')
-          : `\n\n🧾 Order no. *${extra.number}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
+          : `\n\n🧾 Order no. *${extra.number}*\n🔖 Tracking code: *${extra.code}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
             (isDel ? `\n📍 ${extra.address}` : `\n🏃 Collecting in person`) +
             `\n⏰ ${extra.wantedAt === 'asap' ? 'As soon as possible' : 'For ' + extra.wantedAt}` +
             `\n💵 ${extra.payment === 'cash' ? 'Cash on delivery' : 'Card'}` +

@@ -486,6 +486,53 @@ body.cart-open .scrim{opacity:1;visibility:visible}
 .review .rv-link{font-size:.74rem;color:var(--gold);margin-top:.6rem;display:inline-block}
 @media(max-width:560px){.gscore{grid-template-columns:1fr;text-align:center;justify-items:center}}
 
+
+/* ---------- kodi i gjurmimit te konfirmimi ---------- */
+.codebox{background:var(--pan-2);border:1px dashed var(--gold);border-radius:18px;
+  padding:1rem 1.1rem;display:grid;gap:.5rem;justify-items:center;margin:.4rem 0}
+.codebox .lbl{font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+.codebox .code{font-family:var(--display);font-size:clamp(1.8rem,7vw,2.6rem);letter-spacing:.14em;
+  line-height:1;color:var(--cream);user-select:all}
+.codebox button{border:1.5px solid var(--line);border-radius:10px;padding:.4rem .9rem;
+  font-size:.76rem;font-weight:600;transition:.2s}
+.codebox button:hover{border-color:var(--gold);color:var(--gold)}
+.keepmsg{background:rgba(255,194,68,.1);border:1px solid rgba(255,194,68,.35);border-radius:14px;
+  padding:.7rem .9rem;font-size:.84rem;color:#f0d79a;text-align:left;display:flex;gap:.55rem}
+.keepmsg::before{content:'🔖';flex-shrink:0}
+
+/* ---------- motori i gjurmimit ---------- */
+#gjurmo{background:linear-gradient(180deg,transparent,rgba(33,23,25,.7),transparent)}
+.tkbox{background:linear-gradient(165deg,var(--pan-2),var(--pan));border:1px solid var(--line);
+  border-radius:26px;padding:clamp(1.4rem,3vw,2rem);max-width:620px;margin-inline:auto}
+.tkbox .seg{margin-bottom:1rem}
+.tkform{display:flex;gap:.6rem;flex-wrap:wrap}
+.tkform input{flex:1;min-width:190px;background:#100c0d;border:1.5px solid var(--line);
+  border-radius:14px;padding:.85rem 1rem;color:#fff;font-family:var(--body);font-size:1.05rem;
+  outline:none;transition:border-color .2s}
+.tkform input:focus{border-color:var(--gold)}
+#tkCode{text-transform:uppercase;letter-spacing:.12em;font-family:var(--display);font-size:1.2rem}
+.tkform .btn-p{padding:.85rem 1.6rem}
+@media(max-width:560px){.tkform .btn-p{width:100%;justify-content:center}}
+.tkmsg{margin:.9rem 0 0;font-size:.86rem;display:none}
+.tkmsg.on{display:block}
+.tkmsg.bad{color:#ff9a92}
+.tkhint{margin:.8rem 0 0;font-size:.75rem;color:var(--muted)}
+.tklist{display:grid;gap:.55rem;margin-top:1rem}
+.tkitem{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;background:var(--pan);
+  border:1px solid var(--line);border-radius:16px;padding:.75rem .9rem}
+.tkitem b{font-family:var(--display);font-size:1.05rem;letter-spacing:.08em}
+.tkitem .st{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);border:1px solid currentColor;border-radius:999px;padding:.18rem .55rem}
+.tkitem .go{margin-left:auto;background:var(--gold);color:#241703;border-radius:11px;
+  padding:.42rem .95rem;font-size:.78rem;font-weight:700;transition:.2s}
+.tkitem .go:hover{filter:brightness(1.1)}
+
+/* ---------- kodi te faqja e ndjekjes ---------- */
+.tr-code{font-family:var(--display);font-size:1.15rem;letter-spacing:.16em;color:var(--gold)}
+.tr-close{position:absolute;top:1rem;right:1rem;width:38px;height:38px;border-radius:50%;
+  border:1.5px solid var(--line);display:grid;place-items:center;transition:.2s;background:var(--pan)}
+.tr-close:hover{background:var(--red);border-color:var(--red)}
+
 /* ---- shënimi i orarit mbi pjatë (p.sh. 09:00–15:00) ---- */
 .note{font-style:normal;font-size:.62em;font-weight:600;letter-spacing:.06em;
   opacity:.75;white-space:nowrap;vertical-align:middle}
@@ -502,6 +549,7 @@ body.cart-open .scrim{opacity:1;visibility:visible}
     <a href="#top" class="logo">SPR<em>I</em>NT <small data-tagline></small></a>
     <nav data-nav>
       <a href="#menu" data-i18n="nav_menu">Menuja</a>
+      <a href="#gjurmo" id="navTk">Gjurmo</a>
       <a href="#gallery" id="navGal">Galeria</a>
       <a href="#events" id="navEv">Evente</a>
       <a href="#about" data-i18n="nav_about">Rreth Nesh</a>
@@ -567,6 +615,33 @@ body.cart-open .scrim{opacity:1;visibility:visible}
       <h2 id="howT">Nga menuja te dera jote</h2>
     </div>
     <div class="steps" data-reveal id="steps"></div>
+  </div>
+</section>
+
+<!-- ══════════════ GJURMO POROSINË ══════════════ -->
+<section id="gjurmo">
+  <div class="wrap">
+    <div class="st" style="text-align:center;margin-inline:auto" data-reveal>
+      <span class="k" data-i18n="tk_kicker"></span>
+      <h2 data-i18n="tk_title"></h2>
+      <p data-i18n="tk_sub"></p>
+    </div>
+    <div class="tkbox" data-reveal>
+      <div class="seg">
+        <button type="button" class="on" data-tkmode="code" data-i18n="tk_by_code"></button>
+        <button type="button" data-tkmode="phone" data-i18n="tk_by_phone"></button>
+      </div>
+      <form class="tkform" id="tkForm">
+        <input id="tkCode" data-i18n-ph="tk_code_ph" autocomplete="off" spellcheck="false"
+               maxlength="9" aria-label="Kodi i porosisë">
+        <input id="tkPhone" type="tel" data-i18n-ph="tk_phone_ph" autocomplete="tel"
+               aria-label="Numri i telefonit" style="display:none">
+        <button class="btn btn-p" type="submit" data-i18n="tk_go"></button>
+      </form>
+      <p class="tkmsg" id="tkMsg"></p>
+      <div class="tklist" id="tkList"></div>
+      <p class="tkhint" id="tkHint"></p>
+    </div>
   </div>
 </section>
 
@@ -805,6 +880,12 @@ body.cart-open .scrim{opacity:1;visibility:visible}
         <span class="ok-badge">✓</span>
         <h3 data-i18n="ok_title"></h3>
         <span class="ok-no" id="okNo"></span>
+        <div class="codebox">
+          <span class="lbl" data-i18n="ok_code"></span>
+          <span class="code" id="okCode"></span>
+          <button type="button" id="okCopy" data-i18n="ok_copy"></button>
+        </div>
+        <p class="keepmsg" data-i18n="ok_keep"></p>
         <p data-i18n="ok_sub"></p>
       </div>
       <div class="co-act">
@@ -818,16 +899,19 @@ body.cart-open .scrim{opacity:1;visibility:visible}
 
 <!-- ══════════════ NDJEKJA E POROSISË ══════════════ -->
 <div id="track">
+  <button class="tr-close" id="trClose" aria-label="Mbyll">✕</button>
   <div class="tr-wrap">
     <div class="tr-hd">
       <span style="font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)" data-i18n="tr_title"></span>
       <span class="no" id="trNo"></span>
       <span id="trStatus" style="color:var(--gold);font-weight:600"></span>
+      <span class="tr-code" id="trCode"></span>
     </div>
     <div class="tr-clock" id="trClock"><b id="trTime">–</b><span id="trLabel"></span></div>
     <div class="tr-steps" id="trSteps"></div>
     <div class="tr-items" id="trItems"></div>
     <div class="co-act">
+      <button class="btn btn-p" id="trAgain" style="justify-content:center"><span data-i18n="tr_again"></span></button>
       <a class="btn btn-s" href="./" style="justify-content:center"><span data-i18n="tr_back"></span></a>
     </div>
   </div>
@@ -932,7 +1016,7 @@ document.getElementById('fNext').onclick=()=>{flowIdx=Math.min(flowItems.length-
 /* ---------- tekstet e seksioneve shtesë ---------- */
 const EXTRA={
   sq:{
-    navGal:'Galeria', navEv:'Evente',
+    navGal:'Galeria', navEv:'Evente', navTk:'Gjurmo',
     howK:'Porosia në tre hapa', howT:'Nga menuja te dera jote',
     steps:[
       ['Zgjidh','Kliko një fetë të rrotës ose kërko pjatën, pastaj shtoje në shportë.'],
@@ -947,7 +1031,7 @@ const EXTRA={
     live:'· Menuja e drejtpërdrejtë',
   },
   en:{
-    navGal:'Gallery', navEv:'Events',
+    navGal:'Gallery', navEv:'Events', navTk:'Track',
     howK:'Ordering in three steps', howT:'From the menu to your door',
     steps:[
       ['Choose','Click a slice of the wheel or search a dish, then add it to your cart.'],
@@ -997,6 +1081,8 @@ function buildEvents(l){
 
 function localizeExtras(l){
   navGal.textContent=EXTRA[l].navGal; navEv.textContent=EXTRA[l].navEv;
+  navTk.textContent=EXTRA[l].navTk;
+  tkHint.textContent = tkMode==='phone' ? SPRINT.T('tk_hint') : '';
   howK.textContent=EXTRA[l].howK; howT.textContent=EXTRA[l].howT;
   galK.textContent=EXTRA[l].galK; galT.textContent=EXTRA[l].galT;
   buildSteps(l); buildGallery(l); buildEvents(l);
@@ -1162,10 +1248,13 @@ coSend.addEventListener('click', async ()=>{
   coSend.disabled=true; const old=coSend.innerHTML; coSend.textContent='…';
   try{
     const row=await SPRINT.store.createOrder(payload);
-    const extra={number:row.number,name,phone,address:addr,kind:CO.kind,wantedAt,payment:CO.pay,note:payload.note};
+    const code=SPRINT.store.fmtCode(row.token);
+    const extra={number:row.number,code,name,phone,address:addr,kind:CO.kind,
+                 wantedAt,payment:CO.pay,note:payload.note};
     okNo.textContent=SPRINT.T('ok_no')+' '+row.number;
+    okCode.textContent=code;
     okWa.href=SPRINT.waLink(CO.msg(extra));
-    okTrack.href='?p='+encodeURIComponent(row.token);
+    okTrack.href='?kodi='+encodeURIComponent(SPRINT.store.normCode(row.token));
     coForm.style.display='none'; coOk.style.display='';
     // Shporta pastrohet: porosia tashmë është regjistruar.
     localStorage.setItem('sprint-last-order',String(Date.now()));
@@ -1174,6 +1263,20 @@ coSend.addEventListener('click', async ()=>{
   }catch(e){
     coErr.textContent=SPRINT.T('co_fail')+' ('+e.message+')'; coErr.classList.add('on');
   }finally{ coSend.disabled=false; coSend.innerHTML=old; }
+});
+
+okCopy.addEventListener('click',async ()=>{
+  const txt=okCode.textContent;
+  const done=()=>{ const o=okCopy.textContent; okCopy.textContent=SPRINT.T('ok_copied');
+                   setTimeout(()=>okCopy.textContent=o,1600); };
+  try{ await navigator.clipboard.writeText(txt); done(); }
+  catch(e){
+    const ta=document.createElement('textarea');
+    ta.value=txt; ta.style.cssText='position:fixed;top:-9999px';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(_){ }
+    ta.remove();
+  }
 });
 
 /* ══════════════════ NDJEKJA E POROSISË ══════════════════ */
@@ -1190,6 +1293,7 @@ function renderTrack(){
   const l=SPRINT.getLang();
   trNo.textContent='#'+o.number;
   trStatus.textContent=SPRINT.T('st_'+o.status);
+  trCode.textContent=o.code?SPRINT.T('tr_code')+' '+SPRINT.store.fmtCode(o.code):'';
 
   const steps = o.kind==='pickup' ? FLOW.filter(x=>x!=='delivering') : FLOW;
   const at = steps.indexOf(o.status);
@@ -1228,30 +1332,98 @@ function tickTrack(){
   }
 }
 
-async function openTracking(token){
+let trPoll=null;
+
+function closeTracking(){
+  track.classList.remove('on');
+  document.body.style.overflow='';
+  clearInterval(trTimer); clearInterval(trPoll);
+}
+trClose.addEventListener('click',closeTracking);
+trAgain.addEventListener('click',()=>{
+  closeTracking();
+  document.getElementById('gjurmo').scrollIntoView({behavior:SPRINT.reduced?'auto':'smooth'});
+  setTimeout(()=>tkCode.focus(),400);
+});
+
+async function openTracking(code){
+  const c=SPRINT.store.normCode(code);
   track.classList.add('on');
   document.body.style.overflow='hidden';
-  try{
-    trOrder=await SPRINT.store.trackOrder(token);
-  }catch(e){ trOrder=null; }
+  try{ trOrder=await SPRINT.store.trackOrder(c); }catch(e){ trOrder=null; }
   if(!trOrder){
-    trNo.textContent='—'; trStatus.textContent=SPRINT.T('tr_notfound');
+    trNo.textContent='—'; trStatus.textContent=SPRINT.T('tk_nofind'); trCode.textContent='';
     trSteps.innerHTML=''; trItems.innerHTML=''; trTime.textContent='—'; trLabel.textContent='';
-    return;
+    return false;
   }
   renderTrack();
-  clearInterval(trTimer);
-  trTimer=setInterval(tickTrack,1000);
+  clearInterval(trTimer); trTimer=setInterval(tickTrack,1000);
+  clearInterval(trPoll);
   // Rifreskim i gjendjes çdo gjysmë minute, që klienti të shohë hapin e ri.
-  setInterval(async ()=>{
-    try{ const fresh=await SPRINT.store.trackOrder(token); if(fresh){ trOrder=fresh; renderTrack(); } }
+  trPoll=setInterval(async ()=>{
+    try{ const fresh=await SPRINT.store.trackOrder(c); if(fresh){ trOrder=fresh; renderTrack(); } }
     catch(e){}
   },30000);
+  return true;
 }
 
+/* ---------- motori i kërkimit ---------- */
+let tkMode='code';
+document.querySelectorAll('[data-tkmode]').forEach(b=>b.addEventListener('click',()=>{
+  tkMode=b.dataset.tkmode;
+  document.querySelectorAll('[data-tkmode]').forEach(x=>x.classList.toggle('on',x===b));
+  tkCode.style.display = tkMode==='code' ? '' : 'none';
+  tkPhone.style.display = tkMode==='phone' ? '' : 'none';
+  tkMsg.classList.remove('on'); tkList.innerHTML='';
+  tkHint.textContent = tkMode==='phone' ? SPRINT.T('tk_hint') : '';
+  (tkMode==='code'?tkCode:tkPhone).focus();
+}));
+
+// Kodi shkruhet me viza vetvetiu: A4F7-K2M9
+tkCode.addEventListener('input',()=>{
+  const n=SPRINT.store.normCode(tkCode.value).slice(0,8);
+  tkCode.value = n.length>4 ? n.slice(0,4)+'-'+n.slice(4) : n;
+});
+
+const tkSay=(key,bad)=>{ tkMsg.textContent=SPRINT.T(key); tkMsg.className='tkmsg on'+(bad?' bad':''); };
+
+tkForm.addEventListener('submit',async e=>{
+  e.preventDefault();
+  tkList.innerHTML=''; tkMsg.classList.remove('on');
+  const btn=tkForm.querySelector('[type=submit]');
+  btn.disabled=true;
+  try{
+    if(tkMode==='code'){
+      const c=SPRINT.store.normCode(tkCode.value);
+      if(c.length<6) return tkSay('tk_short',true);
+      const ok=await openTracking(c);
+      if(!ok) tkSay('tk_nofind',true);
+    }else{
+      const d=tkPhone.value.replace(/\D/g,'');
+      if(d.length<6) return tkSay('tk_phone_short',true);
+      const list=await SPRINT.store.findOrdersByPhone(d);
+      if(!list.length) return tkSay('tk_nophone',true);
+      tkMsg.textContent=list.length+' '+SPRINT.T('tk_found');
+      tkMsg.className='tkmsg on';
+      tkList.innerHTML=list.map(o=>`
+        <div class="tkitem">
+          <b>${SPRINT.store.fmtCode(o.code)}</b>
+          <span class="st">${SPRINT.T('st_'+o.status)}</span>
+          <span style="color:var(--muted);font-size:.84rem">#${o.number} · ${SPRINT.money(Number(o.total)||0)}</span>
+          <button class="go" data-tkopen="${SPRINT.store.normCode(o.code)}">${SPRINT.T('tk_open')}</button>
+        </div>`).join('');
+      tkList.querySelectorAll('[data-tkopen]').forEach(b2=>
+        b2.addEventListener('click',()=>openTracking(b2.dataset.tkopen)));
+    }
+  }catch(err){
+    tkMsg.textContent=err.message; tkMsg.className='tkmsg on bad';
+  }finally{ btn.disabled=false; }
+});
+
 {
-  const token=new URLSearchParams(location.search).get('p');
-  if(token) openTracking(token);
+  const qs=new URLSearchParams(location.search);
+  const code=qs.get('kodi')||qs.get('p');
+  if(code) openTracking(code);
 }
 
 

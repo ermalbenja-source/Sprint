@@ -981,8 +981,36 @@ window.SPRINT = (function () {
     ok_track:     { sq:'Ndiq porosinë', en:'Track the order' },
     ok_new:       { sq:'Porosi e re',   en:'New order' },
     ok_no:        { sq:'Porosia nr.',   en:'Order no.' },
+    ok_code:      { sq:'Kodi i gjurmimit', en:'Tracking code' },
+    ok_keep:      { sq:'Ruaje këtë kod. Me të ndjek porosinë në çdo moment, edhe nga një telefon tjetër.',
+                    en:'Keep this code. It lets you follow the order at any time, even from another phone.' },
+    ok_copy:      { sq:'Kopjo kodin',  en:'Copy the code' },
+    ok_copied:    { sq:'U kopjua ✓',   en:'Copied ✓' },
+
+    /* ---- motori i gjurmimit ---- */
+    tk_kicker:    { sq:'Gjurmo porosinë', en:'Track your order' },
+    tk_title:     { sq:'Ku ndodhet porosia jote', en:'Where your order is' },
+    tk_sub:       { sq:'Shkruaj kodin që more kur porosite, ose numrin e telefonit me të cilin e bëre.',
+                    en:'Enter the code you were given when you ordered, or the phone number you used.' },
+    tk_by_code:   { sq:'Me kod',       en:'By code' },
+    tk_by_phone:  { sq:'Me telefon',   en:'By phone' },
+    tk_code_ph:   { sq:'p.sh. A4F7-K2M9', en:'e.g. A4F7-K2M9' },
+    tk_phone_ph:  { sq:'p.sh. 069 123 4567', en:'e.g. 069 123 4567' },
+    tk_go:        { sq:'Gjurmo',       en:'Track' },
+    tk_short:     { sq:'Kodi ka tetë shenja — kontrollo dhe provo sërish.',
+                    en:'The code has eight characters — check it and try again.' },
+    tk_phone_short:{ sq:'Shkruaj numrin e plotë të telefonit.', en:'Enter the full phone number.' },
+    tk_nofind:    { sq:'Nuk u gjet asnjë porosi me këtë kod.', en:'No order was found with that code.' },
+    tk_nophone:   { sq:'Nuk ka porosi në punë me këtë numër. Porositë e mbyllura nuk kërkohen dot me telefon — përdor kodin.',
+                    en:'No orders in progress for that number. Completed orders cannot be found by phone — use the code.' },
+    tk_found:     { sq:'porosi në punë', en:'orders in progress' },
+    tk_open:      { sq:'Hape',         en:'Open' },
+    tk_hint:      { sq:'Kërkimi me telefon gjen vetëm porositë e 24 orëve të fundit që janë ende në punë.',
+                    en:'Phone search only finds orders from the last 24 hours that are still in progress.' },
 
     tr_title:     { sq:'Porosia jote',  en:'Your order' },
+    tr_code:      { sq:'Kodi',          en:'Code' },
+    tr_again:     { sq:'Gjurmo një tjetër', en:'Track another' },
     tr_elapsed:   { sq:'Nga porosia',   en:'Since ordered' },
     tr_left:      { sq:'Mbeten',        en:'Remaining' },
     tr_late:      { sq:'Me vonesë',     en:'Running late' },
@@ -1763,12 +1791,12 @@ ${S('drink', `
       if (extra) {
         const isDel = extra.kind === 'delivery';
         foot = l === 'sq'
-          ? `\n\n🧾 Porosia nr. *${extra.number}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
+          ? `\n\n🧾 Porosia nr. *${extra.number}*\n🔖 Kodi i gjurmimit: *${extra.code}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
             (isDel ? `\n📍 ${extra.address}` : `\n🏃 Marr vetë në lokal`) +
             `\n⏰ ${extra.wantedAt === 'asap' ? 'Sa më shpejt' : 'Për orën ' + extra.wantedAt}` +
             `\n💵 ${extra.payment === 'cash' ? 'Me para në dorë' : 'Me kartë'}` +
             (extra.note ? `\n📝 ${extra.note}` : '')
-          : `\n\n🧾 Order no. *${extra.number}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
+          : `\n\n🧾 Order no. *${extra.number}*\n🔖 Tracking code: *${extra.code}*\n👤 ${extra.name}\n📞 ${extra.phone}` +
             (isDel ? `\n📍 ${extra.address}` : `\n🏃 Collecting in person`) +
             `\n⏰ ${extra.wantedAt === 'asap' ? 'As soon as possible' : 'For ' + extra.wantedAt}` +
             `\n💵 ${extra.payment === 'cash' ? 'Cash on delivery' : 'Card'}` +

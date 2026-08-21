@@ -264,6 +264,15 @@
   const writeLS = (k, v) => localStorage.setItem(k, JSON.stringify(v));
   const rid = () => 'loc-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
+  /** I njëjti format kodi si te baza: 8 shenja pa I, O, 0, 1. */
+  const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const genCode = () => Array.from({ length: 8 },
+    () => CODE_ABC[Math.floor(Math.random() * CODE_ABC.length)]).join('');
+  /** Heq vizat dhe hapësirat, që klienti ta shkruajë si t'i vijë. */
+  const normCode = (c) => String(c || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  /** Kodi siç shfaqet: A4F7-K2M9 */
+  const fmtCode = (c) => { const n = normCode(c); return n.length > 4 ? n.slice(0, 4) + '-' + n.slice(4) : n; };
+
   /** Krijon porosinë. Kthen numrin dhe kodin e ndjekjes. */
   async function createOrder(o) {
     const body = {
@@ -286,7 +295,7 @@
       const row = Object.assign({
         id: rid(),
         number: 1000 + list.length,
-        token: Math.random().toString(16).slice(2, 20),
+        token: genCode(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }, body);
@@ -341,14 +350,40 @@
   }
 
   /** Ndjekja publike e një porosie me kodin e saj. */
-  async function trackOrder(token) {
-    if (!configured) return readLS(LS_ORDERS).find((o) => o.token === token) || null;
-    const rows = await req('/rest/v1/rpc/track_order', {
+  async function trackOrder(code) {
+    const c = normCode(code);
+    if (c.length < 6) return null;
+    if (!configured) {
+      const o = readLS(LS_ORDERS).find((x) => normCode(x.token) === c);
+      return o ? Object.assign({ code: o.token }, o) : null;
+    }
+    const rows = await rpc('track_order', { p_token: c });
+    return (rows && rows[0]) || null;
+  }
+
+  /** Porositë ende në punë të një numri telefoni, të 24 orëve të fundit. */
+  async function findOrdersByPhone(phone) {
+    const d = String(phone || '').replace(/\D/g, '');
+    if (d.length < 6) return [];
+    if (!configured) {
+      const cut = Date.now() - 24 * 3600 * 1000;
+      return readLS(LS_ORDERS)
+        .filter((o) => String(o.phone || '').replace(/\D/g, '').slice(-9) === d.slice(-9))
+        .filter((o) => new Date(o.created_at).getTime() > cut)
+        .filter((o) => !['done', 'cancelled'].includes(o.status))
+        .slice(0, 5)
+        .map((o) => Object.assign({ code: o.token }, o));
+    }
+    return (await rpc('find_orders_by_phone', { p_phone: d })) || [];
+  }
+
+  /** Thirrje funksioni në bazë, gjithnjë me çelësin publik. */
+  function rpc(name, body) {
+    return req('/rest/v1/rpc/' + name, {
       method: 'POST',
       headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_token: token }),
+      body: JSON.stringify(body),
     });
-    return (rows && rows[0]) || null;
   }
 
   async function createBooking(b) {
@@ -427,7 +462,8 @@
     signIn, signOut, currentUser, ensureAuth,
     saveItems, deleteItem, saveSettings,
     uploadPhoto, deletePhoto, compress,
-    createOrder, fetchOrders, updateOrder, deleteOrder, trackOrder,
+    createOrder, fetchOrders, updateOrder, deleteOrder, trackOrder, findOrdersByPhone,
+    genCode, normCode, fmtCode,
     createBooking, fetchBookings, updateBooking,
     readLocal, writeLocal, clearLocal,
     rowToItem, itemToRow,

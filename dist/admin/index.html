@@ -223,6 +223,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 .b-ready{color:var(--ok)} .b-delivering{color:#C79BFF} .b-done{color:var(--muted)}
 .b-cancelled{color:var(--bad)}
 .b-kind{color:var(--muted)}
+.b-code{color:var(--gold);letter-spacing:.14em;font-family:var(--display);font-size:.72rem}
 .clock{margin-left:auto;font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums;
   letter-spacing:.02em}
 .clock.warn{color:var(--warn)} .clock.late{color:var(--bad)} .clock.ok{color:var(--ok)}
@@ -1147,8 +1148,36 @@ window.SPRINT = (function () {
     ok_track:     { sq:'Ndiq porosinë', en:'Track the order' },
     ok_new:       { sq:'Porosi e re',   en:'New order' },
     ok_no:        { sq:'Porosia nr.',   en:'Order no.' },
+    ok_code:      { sq:'Kodi i gjurmimit', en:'Tracking code' },
+    ok_keep:      { sq:'Ruaje këtë kod. Me të ndjek porosinë në çdo moment, edhe nga një telefon tjetër.',
+                    en:'Keep this code. It lets you follow the order at any time, even from another phone.' },
+    ok_copy:      { sq:'Kopjo kodin',  en:'Copy the code' },
+    ok_copied:    { sq:'U kopjua ✓',   en:'Copied ✓' },
+
+    /* ---- motori i gjurmimit ---- */
+    tk_kicker:    { sq:'Gjurmo porosinë', en:'Track your order' },
+    tk_title:     { sq:'Ku ndodhet porosia jote', en:'Where your order is' },
+    tk_sub:       { sq:'Shkruaj kodin që more kur porosite, ose numrin e telefonit me të cilin e bëre.',
+                    en:'Enter the code you were given when you ordered, or the phone number you used.' },
+    tk_by_code:   { sq:'Me kod',       en:'By code' },
+    tk_by_phone:  { sq:'Me telefon',   en:'By phone' },
+    tk_code_ph:   { sq:'p.sh. A4F7-K2M9', en:'e.g. A4F7-K2M9' },
+    tk_phone_ph:  { sq:'p.sh. 069 123 4567', en:'e.g. 069 123 4567' },
+    tk_go:        { sq:'Gjurmo',       en:'Track' },
+    tk_short:     { sq:'Kodi ka tetë shenja — kontrollo dhe provo sërish.',
+                    en:'The code has eight characters — check it and try again.' },
+    tk_phone_short:{ sq:'Shkruaj numrin e plotë të telefonit.', en:'Enter the full phone number.' },
+    tk_nofind:    { sq:'Nuk u gjet asnjë porosi me këtë kod.', en:'No order was found with that code.' },
+    tk_nophone:   { sq:'Nuk ka porosi në punë me këtë numër. Porositë e mbyllura nuk kërkohen dot me telefon — përdor kodin.',
+                    en:'No orders in progress for that number. Completed orders cannot be found by phone — use the code.' },
+    tk_found:     { sq:'porosi në punë', en:'orders in progress' },
+    tk_open:      { sq:'Hape',         en:'Open' },
+    tk_hint:      { sq:'Kërkimi me telefon gjen vetëm porositë e 24 orëve të fundit që janë ende në punë.',
+                    en:'Phone search only finds orders from the last 24 hours that are still in progress.' },
 
     tr_title:     { sq:'Porosia jote',  en:'Your order' },
+    tr_code:      { sq:'Kodi',          en:'Code' },
+    tr_again:     { sq:'Gjurmo një tjetër', en:'Track another' },
     tr_elapsed:   { sq:'Nga porosia',   en:'Since ordered' },
     tr_left:      { sq:'Mbeten',        en:'Remaining' },
     tr_late:      { sq:'Me vonesë',     en:'Running late' },
@@ -1927,6 +1956,15 @@ ${S('drink', `
   const writeLS = (k, v) => localStorage.setItem(k, JSON.stringify(v));
   const rid = () => 'loc-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
+  /** I njëjti format kodi si te baza: 8 shenja pa I, O, 0, 1. */
+  const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const genCode = () => Array.from({ length: 8 },
+    () => CODE_ABC[Math.floor(Math.random() * CODE_ABC.length)]).join('');
+  /** Heq vizat dhe hapësirat, që klienti ta shkruajë si t'i vijë. */
+  const normCode = (c) => String(c || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  /** Kodi siç shfaqet: A4F7-K2M9 */
+  const fmtCode = (c) => { const n = normCode(c); return n.length > 4 ? n.slice(0, 4) + '-' + n.slice(4) : n; };
+
   /** Krijon porosinë. Kthen numrin dhe kodin e ndjekjes. */
   async function createOrder(o) {
     const body = {
@@ -1949,7 +1987,7 @@ ${S('drink', `
       const row = Object.assign({
         id: rid(),
         number: 1000 + list.length,
-        token: Math.random().toString(16).slice(2, 20),
+        token: genCode(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }, body);
@@ -2004,14 +2042,40 @@ ${S('drink', `
   }
 
   /** Ndjekja publike e një porosie me kodin e saj. */
-  async function trackOrder(token) {
-    if (!configured) return readLS(LS_ORDERS).find((o) => o.token === token) || null;
-    const rows = await req('/rest/v1/rpc/track_order', {
+  async function trackOrder(code) {
+    const c = normCode(code);
+    if (c.length < 6) return null;
+    if (!configured) {
+      const o = readLS(LS_ORDERS).find((x) => normCode(x.token) === c);
+      return o ? Object.assign({ code: o.token }, o) : null;
+    }
+    const rows = await rpc('track_order', { p_token: c });
+    return (rows && rows[0]) || null;
+  }
+
+  /** Porositë ende në punë të një numri telefoni, të 24 orëve të fundit. */
+  async function findOrdersByPhone(phone) {
+    const d = String(phone || '').replace(/\D/g, '');
+    if (d.length < 6) return [];
+    if (!configured) {
+      const cut = Date.now() - 24 * 3600 * 1000;
+      return readLS(LS_ORDERS)
+        .filter((o) => String(o.phone || '').replace(/\D/g, '').slice(-9) === d.slice(-9))
+        .filter((o) => new Date(o.created_at).getTime() > cut)
+        .filter((o) => !['done', 'cancelled'].includes(o.status))
+        .slice(0, 5)
+        .map((o) => Object.assign({ code: o.token }, o));
+    }
+    return (await rpc('find_orders_by_phone', { p_phone: d })) || [];
+  }
+
+  /** Thirrje funksioni në bazë, gjithnjë me çelësin publik. */
+  function rpc(name, body) {
+    return req('/rest/v1/rpc/' + name, {
       method: 'POST',
       headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_token: token }),
+      body: JSON.stringify(body),
     });
-    return (rows && rows[0]) || null;
   }
 
   async function createBooking(b) {
@@ -2090,7 +2154,8 @@ ${S('drink', `
     signIn, signOut, currentUser, ensureAuth,
     saveItems, deleteItem, saveSettings,
     uploadPhoto, deletePhoto, compress,
-    createOrder, fetchOrders, updateOrder, deleteOrder, trackOrder,
+    createOrder, fetchOrders, updateOrder, deleteOrder, trackOrder, findOrdersByPhone,
+    genCode, normCode, fmtCode,
     createBooking, fetchBookings, updateBooking,
     readLocal, writeLocal, clearLocal,
     rowToItem, itemToRow,
@@ -2663,6 +2728,7 @@ ${S('drink', `
         <span class="ord-no">#${o.number}</span>
         <span class="badge b-${o.status}">${ST_SQ[o.status]}</span>
         <span class="badge b-kind">${o.kind === 'pickup' ? 'Marr vetë' : 'Dërgesë'}</span>
+        ${o.token ? `<span class="badge b-code" title="Kodi i gjurmimit i klientit">${esc(store.fmtCode(o.token))}</span>` : ''}
         <span class="clock ${c.cls}" data-clock="${o.id}">${c.txt}</span>
       </div>
       <div class="ord-bd">

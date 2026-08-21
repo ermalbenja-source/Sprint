@@ -16,7 +16,8 @@ pa prekur kodin.
   (i spikatur, i ri, pikante, vegjetarian). Kartat përmbysen dhe tregojnë përbërësit.
 - **Shportë → arkë → porosi e regjistruar** — klienti zgjedh dërgesë ose marrje vetë, lë të dhënat,
   dhe porosia ruhet me numrin e vet përpara se të hapet WhatsApp-i. Shporta ruhet edhe nëse mbyllet faqja.
-- **Ndjekje porosie** — çdo porosi merr një link me hapat dhe kohëmatësin e gjallë.
+- **Ndjekje porosie me kod** — çdo porosi merr një kod (`A4F7-K2M9`) dhe një motorr kërkimi
+  në faqe: kërko me kod ose me numër telefoni dhe shih hapin ku ndodhet, me kohëmatës të gjallë.
 - **Rezervim tavoline** — WhatsApp, plus kopje me email kur të vendoset një adresë.
   Ambientet: brenda, terracë ose salla e eventeve.
 - **Galeri** — shfaq fotot e ngarkuara nga paneli; pa to, përdor ilustrimet.
@@ -75,19 +76,49 @@ klienti nuk e dërgon mesazhin.
 
 1. Ndërton shportën dhe shtyp «Dërgo porosinë në WhatsApp».
 2. Hapet arka: me dërgesë apo marr vetë, emri, telefoni, adresa, kur e do, si paguan, shënim.
-3. Porosia regjistrohet dhe merr një numër (`#1042`). Shporta pastrohet vetë.
-4. Klienti sheh dy butona: **Hap WhatsApp** (mesazhi del i gatshëm, me numrin e porosisë) dhe
-   **Ndiq porosinë**.
+3. Porosia regjistrohet dhe merr një numër (`#1042`) plus një **kod gjurmimi** (`A4F7-K2M9`).
+   Shporta pastrohet vetë.
+4. Kodi shfaqet i madh në konfirmim, me butonin **Kopjo kodin** dhe me shënimin që ta ruajë:
+   *«Ruaje këtë kod. Me të ndjek porosinë në çdo moment, edhe nga një telefon tjetër.»*
+5. Klienti sheh dy butona: **Hap WhatsApp** (mesazhi del i gatshëm, me numrin e porosisë **dhe
+   kodin**) dhe **Ndiq porosinë**.
+
+### Kodi i porosisë
+
+Kodi është 8 shenja nga një alfabet pa shkronja që ngatërrohen — pa `I`, `O`, `0`, `1` — dhe
+shfaqet i ndarë me vizë (`A4F7-K2M9`) që të lexohet e të diktohet lehtë në telefon. Prodhohet nga
+baza (`gen_order_code()`), jo nga shfletuesi, dhe shkon:
+
+- te konfirmimi i porosisë, me butonin e kopjimit;
+- te mesazhi i WhatsApp-it: `🔖 Kodi i gjurmimit: *A4F7-K2M9*`;
+- te linku `?kodi=A4F7K2M9` që hap ndjekjen drejtpërdrejt;
+- te çdo kartë porosie në panel, si distinktiv, që ta gjesh klientin kur të marrë në telefon.
+
+### Motorri i kërkimit — seksioni «Gjurmo»
+
+Në faqe, midis hapave dhe kategorive, ka një seksion **«Ku ndodhet porosia jote»** që punon si
+gjurmimi i një dërgese poste. Dy mënyra kërkimi:
+
+- **Me kod** — klienti shkruan kodin (viza vihet vetë ndërsa shkruan, shkronjat e vogla pranohen)
+  dhe i hapet menjëherë faqja e ndjekjes.
+- **Me telefon** — nëse e ka humbur kodin, shkruan numrin me të cilin porositi dhe i del lista e
+  porosive të tij në punë, secila me kodin, gjendjen, numrin dhe totalin, plus butonin **Hape**.
+
+Kërkimi me telefon gjen **vetëm porositë e 24 orëve të fundit që janë ende në punë** — jo
+historikun. Kështu numri i telefonit i dikujt nuk bëhet çelës për të parë çfarë ka porositur
+javën e kaluar.
 
 ### Ndjekja nga klienti
 
-Linku `sajti-yt.al/?p=KODI` hap një faqe ndjekjeje me hapat e porosisë, kohëmatësin e gjallë dhe
-listën e pjatave. Përpara pranimit numëron kohën që ka kaluar; pas pranimit numëron **mbrapsht**
-drejt kohës që i ke premtuar, dhe kalon në të kuqe kur kalon afati. Gjendja rifreskohet vetë çdo
-30 sekonda.
+Linku `sajti-yt.al/?kodi=KODI` (ose kërkimi më sipër) hap faqen e ndjekjes me hapat e porosisë,
+kohëmatësin e gjallë dhe listën e pjatave. Përpara pranimit numëron kohën që ka kaluar; pas
+pranimit numëron **mbrapsht** drejt kohës që i ke premtuar, dhe kalon në të kuqe kur kalon afati.
+Gjendja rifreskohet vetë çdo 30 sekonda.
 
-Faqja e ndjekjes kthen vetëm fusha jo-personale (numri, gjendja, koha, pjatët) dhe vetëm për një
-kod të saktë — jo emrin, telefonin apo adresën e askujt.
+Faqja e ndjekjes kthen vetëm fusha jo-personale (numri, kodi, gjendja, koha, pjatët) dhe vetëm
+për një kod të saktë — jo emrin, telefonin apo adresën e askujt. Të dyja kërkimet kalojnë përmes
+funksioneve `security definer` në bazë (`track_order`, `find_orders_by_phone`), që tabela
+`orders` të mbetet e palexueshme nga jashtë.
 
 ### Tabela e porosive te paneli
 
@@ -128,6 +159,8 @@ Supabase mban çmimet, tekstet dhe fotot. Plani falas mjafton me tepri.
 
 1. Hap [supabase.com](https://supabase.com) → **New project** (zgjidh rajonin *Frankfurt* — më afër Shqipërisë).
 2. **SQL Editor → New query** → ngjit të gjithë skedarin [`supabase/schema.sql`](supabase/schema.sql) → **Run**.
+   Skedari është i shkruar që të ekzekutohet sa herë të duash: nëse e ke lidhur bazën më parë,
+   ekzekutoje sërish pas çdo përditësimi — kështu shtohen edhe kodet e porosive dhe funksionet e kërkimit.
    Kjo krijon tabelat, rregullat e sigurisë dhe hapësirën e fotove.
 3. **Authentication → Users → Add user** → vendos email-in dhe fjalëkalimin me të cilin do të hysh
    në panel. (Regjistrimi publik mbetet i mbyllur — vetëm ky përdorues shkruan.)
