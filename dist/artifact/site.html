@@ -2255,6 +2255,15 @@ ${S('drink', `
       wanted_at: o.wantedAt || 'asap',
       lang: o.lang || 'sq',
     };
+    // Fushat e programit të biznesit. Shtohen vetëm kur ekzistojnë, që porositë
+    // e faqes të mbeten të pandryshuara dhe skema e vjetër të mos prishet.
+    if (o.channel) body.channel = o.channel;
+    if (o.customerId) body.customer_id = o.customerId;
+    if (o.lat != null && o.lng != null) {
+      body.lat = o.lat; body.lng = o.lng;
+      if (o.accuracy != null) body.accuracy = o.accuracy;
+    }
+    if (o.prepMinutes) body.prep_minutes = o.prepMinutes;
     if (!configured) {
       const list = readLS(LS_ORDERS);
       const row = Object.assign({

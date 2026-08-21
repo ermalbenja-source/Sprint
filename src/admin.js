@@ -516,6 +516,10 @@
   }
 
   $('#ordRefresh').addEventListener('click', () => loadOrders());
+
+  // Kur banaku regjistron një porosi me telefon, tabela duhet ta tregojë menjëherë —
+  // jo pas 15 sekondave kur bie rradha e rifreskimit.
+  document.addEventListener('sprint:order-created', () => loadOrders(true));
   $('#ordDay').addEventListener('change', () => {
     ORD.day = $('#ordDay').value || new Date().toISOString().slice(0, 10);
     ORD.firstLoad = true; loadOrders();
