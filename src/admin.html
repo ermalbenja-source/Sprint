@@ -128,6 +128,67 @@ main{padding:1.4rem 0 5rem}
 .nm .td-hot{background:var(--bad);color:#2A0806}
 .nm .td-veg{background:var(--ok);color:#062012}
 .nm .td-new{background:var(--gold);color:#241703}
+
+/* ---------- stafi dhe fazat ---------- */
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
+.srow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto;gap:.75rem;align-items:center;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.7rem .9rem}
+.srow .who-n{min-width:0}
+.srow .who-n b{display:block;font-weight:600;font-size:.94rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .who-n span{font-size:.74rem;color:var(--muted)}
+.rolechip{font-size:.58rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  padding:.24rem .55rem;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.r-driver{color:var(--gold)}
+.r-kitchen{color:var(--brand)}
+.r-cashier{color:var(--ok)}
+.r-owner,.r-manager{color:var(--muted)}
+.pinst{font-size:.72rem;color:var(--muted);white-space:nowrap}
+.pinst.set{color:var(--ok)}
+.pinst.locked{color:var(--bad)}
+
+.phrow{display:grid;grid-template-columns:44px minmax(0,1fr) 96px auto auto;gap:.7rem;align-items:center;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.7rem .9rem}
+.phrow.off{opacity:.5}
+.phrow .ic{width:44px}
+.phrow .ic input{width:100%;text-align:center;font-size:1.05rem;background:#0F0B0C;
+  border:1.5px solid var(--line);border-radius:9px;padding:.35rem .2rem;color:var(--ink)}
+.phlab{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;min-width:0}
+.phlab label{display:grid;gap:.22rem;min-width:0}
+.phlab input,.phmin input{background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;
+  padding:.42rem .55rem;color:var(--txt);font:inherit;font-size:.9rem;width:100%}
+.phlab input:focus,.phmin input:focus,.phrow .ic input:focus{border-color:var(--brand);outline:none}
+.sub{font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phmin{display:grid;gap:.22rem}
+.phmin input{text-align:center;font-variant-numeric:tabular-nums}
+.lockmark{font-size:.9rem;color:var(--muted);cursor:help}
+
+.prev{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center}
+.prev .st{border:1px solid var(--line);border-radius:999px;padding:.4rem .8rem;font-size:.82rem;
+  display:inline-flex;gap:.4rem;align-items:center}
+.prev .arw{color:var(--muted);font-size:.8rem}
+
+.pinwrap{position:fixed;inset:0;z-index:150;display:none;place-items:center;padding:1rem}
+.pinwrap.on{display:grid}
+.pin-bg{position:absolute;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(4px)}
+.pin-card{position:relative;background:var(--pan);border:1px solid var(--line);border-radius:20px;
+  padding:1.6rem;width:min(380px,100%);display:grid;gap:.85rem}
+.pin-card h3{margin:0;font-size:1.05rem}
+.pin-card .hint{font-size:.8rem;color:var(--muted);margin:0}
+.pin-in{font-family:ui-monospace,monospace;font-size:1.5rem;letter-spacing:.45em;text-align:center;
+  background:#0F0B0C;border:1.5px solid var(--line);border-radius:12px;padding:.7rem .5rem;
+  color:var(--ink);width:100%}
+.pin-in:focus{border-color:var(--brand);outline:none}
+.pin-err{color:#ff9a92;font-size:.82rem;min-height:1.15em;margin:0}
+
+@media(max-width:720px){
+  .srow{grid-template-columns:auto minmax(0,1fr) auto;row-gap:.5rem}
+  .srow .pinst{grid-column:2/-1}
+  .phrow{grid-template-columns:44px minmax(0,1fr) auto;row-gap:.55rem}
+  .phlab{grid-template-columns:1fr}
+  .phrow .phmin{grid-column:2}
+  .phrow .sw,.phrow .lockmark{align-self:start}
+}
 .nm .td-top{background:#fff;color:#17110f}
 .empty{text-align:center;color:var(--muted);padding:2.6rem 0;font-size:.9rem}
 
@@ -357,6 +418,8 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         <button class="tab" data-tab="book">Rezervimet <b class="tabn" id="tabBook"></b></button>
         <button class="tab" data-tab="menu">Menuja</button>
         <button class="tab" data-tab="cats">Kategoritë</button>
+        <button class="tab" data-tab="staff">Stafi</button>
+        <button class="tab" data-tab="phase">Fazat</button>
         <button class="tab" data-tab="set">Cilësimet</button>
         <button class="tab" data-tab="rev">Vlerësimet</button>
         <button class="tab" data-tab="pub">Publikimi</button>
@@ -411,6 +474,41 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
       <p class="count">Renditja këtu përcakton renditjen e fetave të rrotës dhe të filtrave në faqe.</p>
       <div class="items" id="catList"></div>
       <button class="btn btn-g" id="addCat">+ Kategori e re</button>
+    </section>
+
+    <!-- ─────── STAFI ─────── -->
+    <section class="view hide" id="v-staff">
+      <p class="count">Kuzhina dhe motorristët hyjnë vetëm me kod — askush nuk shkruan email
+        në motor ose me duar me miell. Kodi ruhet i fshehur dhe nuk shfaqet më kurrë.</p>
+      <div class="items" id="staffList"></div>
+      <button class="btn btn-g" id="addStaff" style="justify-self:start">+ Shto person</button>
+
+      <div class="card" style="display:grid;gap:.6rem">
+        <h2 style="font-size:1.1rem">Ku do të hyjnë</h2>
+        <p class="count" style="margin:0">Kodet vendosen që tani, por ekranet e tyre vijnë me
+          fazën tjetër: kuzhina te <b class="mono">/kuzhina</b> dhe motorristi te
+          <b class="mono">/motorri</b>. Të dy do të shkruajnë vetëm kodin, dhe pajisja do ta
+          mbajë sesionin hapur 30 ditë, që të mos shkruhet kodi çdo turn.</p>
+      </div>
+    </section>
+
+    <!-- ─────── FAZAT ─────── -->
+    <section class="view hide" id="v-phase">
+      <p class="count">Emrat, ngjyrat dhe kohët janë të tuat. Fazat me bravë nuk fiken dot,
+        sepse kuzhina, motorristi dhe faqja e klientit varen prej tyre.</p>
+      <div class="items" id="phaseList"></div>
+
+      <div class="card" style="display:grid;gap:.7rem">
+        <h2 style="font-size:1.1rem">Çfarë sheh klienti</h2>
+        <p class="count" style="margin:0">Fazat me të njëjtën etiketë bashkohen në një hap të
+          vetëm. Kështu ti mban gjashtë faza për punë, ndërsa klienti sheh katër.</p>
+        <div id="phasePreview" class="prev"></div>
+      </div>
+
+      <div class="tools">
+        <button class="btn btn-p" id="savePhases">Ruaj fazat</button>
+        <button class="btn btn-g btn-sm" id="resetPhases">Rikthe te fillestaret</button>
+      </div>
     </section>
 
     <!-- ─────── CILËSIMET ─────── -->
@@ -643,9 +741,27 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 <!--INCLUDE:shared/config.js-->
 <!--INCLUDE:shared/data.js-->
 <!--INCLUDE:shared/art.js-->
+<!-- ─────── KODI I HYRJES ─────── -->
+<div class="pinwrap" id="pinWrap" role="dialog" aria-modal="true" aria-label="Kodi i hyrjes">
+  <div class="pin-bg" data-pin-close></div>
+  <div class="pin-card">
+    <h3 id="pinTitle">Kodi i hyrjes</h3>
+    <p class="hint">4–8 shifra. Kodi ruhet i fshehur dhe nuk shfaqet më kurrë —
+      nëse harrohet, vendos një të ri.</p>
+    <input class="pin-in" id="pinIn" inputmode="numeric" autocomplete="off"
+           maxlength="8" placeholder="••••" aria-label="Kodi">
+    <p class="pin-err" id="pinErr"></p>
+    <div class="tools">
+      <button class="btn btn-p" id="pinSave">Ruaj kodin</button>
+      <button class="btn btn-g btn-sm" data-pin-close>Anulo</button>
+    </div>
+  </div>
+</div>
+
 <!--INCLUDE:shared/store.js-->
 <!--INCLUDE:shared/store-biznes.js-->
 <!--INCLUDE:shared/reviews.js-->
 <!--INCLUDE:src/admin.js-->
+<!--INCLUDE:src/admin-biznes.js-->
 </body>
 </html>
