@@ -513,6 +513,37 @@ body.cart-open .scrim{opacity:1;visibility:visible}
 #tkCode{text-transform:uppercase;letter-spacing:.12em;font-family:var(--display);font-size:1.2rem}
 .tkform .btn-p{padding:.85rem 1.6rem}
 @media(max-width:560px){.tkform .btn-p{width:100%;justify-content:center}}
+
+/* ---------- vendndodhja te arka ---------- */
+.locbtn{margin-top:.5rem;width:100%;border:1.5px dashed var(--line);border-radius:12px;
+  padding:.7rem;font-size:.88rem;font-weight:600;color:var(--gold);transition:.2s;background:none}
+.locbtn:hover{border-color:var(--gold);border-style:solid}
+.locbtn.on{border-style:solid;border-color:var(--ok,#3CB371);color:var(--ok,#3CB371)}
+.lochint{margin:.4rem 0 0;font-size:.74rem;color:var(--muted);line-height:1.45}
+.locbox{margin-top:.6rem;display:grid;gap:.5rem}
+.locmsg{margin:0;font-size:.78rem;color:var(--muted);line-height:1.45}
+.locmsg.good{color:#3CB371}
+.locmsg.poor{color:#E6B23C}
+.locmsg.bad{color:#E5544B}
+.loclose{justify-self:start;font-size:.76rem;color:var(--muted);text-decoration:underline;
+  background:none;border:0;padding:.2rem 0}
+.loclose:hover{color:#E5544B}
+
+/* harta e vogël */
+.smap{position:relative;height:200px;border-radius:14px;overflow:hidden;background:#20303a;
+  cursor:grab;touch-action:none;user-select:none;border:1px solid var(--line)}
+.smap.grab{cursor:grabbing}
+.smap-tiles{position:absolute;inset:0}
+.smap-tiles img{position:absolute;width:256px;height:256px;pointer-events:none}
+.smap-pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-92%);
+  font-size:2rem;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55));z-index:2}
+.smap-pin::after{content:'';position:absolute;left:50%;bottom:.1rem;width:6px;height:6px;
+  transform:translateX(-50%);border-radius:50%;background:rgba(0,0,0,.5)}
+.smap-zoom{position:absolute;right:.5rem;bottom:.5rem;display:grid;gap:.25rem;z-index:3}
+.smap-zoom button{width:30px;height:30px;border-radius:8px;background:rgba(12,10,11,.82);
+  border:1px solid var(--line);color:#fff;font-size:1.05rem;font-weight:700;line-height:1;
+  display:grid;place-items:center}
+.smap-zoom button:hover{background:var(--gold);color:#241703}
 .tkmsg{margin:.9rem 0 0;font-size:.86rem;display:none}
 .tkmsg.on{display:block}
 .tkmsg.bad{color:#ff9a92}
@@ -839,6 +870,15 @@ body.cart-open .scrim{opacity:1;visibility:visible}
         <div class="fld" id="coAddrWrap">
           <label data-i18n="co_addr"></label>
           <input id="coAddr" autocomplete="street-address" data-i18n-ph="co_addr_ph">
+
+          <button type="button" class="locbtn" id="locBtn" data-i18n="loc_btn"></button>
+          <p class="lochint" id="locHint" data-i18n="loc_why"></p>
+
+          <div class="locbox" id="locBox" hidden>
+            <div class="smap" id="locMap"></div>
+            <p class="locmsg" id="locMsg"></p>
+            <button type="button" class="loclose" id="locClear" data-i18n="loc_clear"></button>
+          </div>
         </div>
         <label class="fld" style="gap:.35rem">
           <span data-i18n="co_when"></span>
@@ -930,6 +970,7 @@ body.cart-open .scrim{opacity:1;visibility:visible}
 <!--INCLUDE:shared/art.js-->
 <!--INCLUDE:shared/store.js-->
 <!--INCLUDE:shared/store-biznes.js-->
+<!--INCLUDE:shared/map.js-->
 <!--INCLUDE:shared/reviews.js-->
 <!--INCLUDE:shared/app.js-->
 <script>
@@ -1190,6 +1231,59 @@ loadGoogleReviews();
 /* ══════════════════ ARKA ══════════════════ */
 const CO = { kind:'delivery', when:'asap', pay:'cash', totals:null, msg:null };
 
+/* ══════════════════ VENDNDODHJA ══════════════════
+   Adresa mbetet e detyrueshme; pini vetëm e saktëson. GPS-i nuk të thotë kurrë
+   «kati 3, dera majtas», ndaj e shton adresën, nuk e zëvendëson. */
+const LOC = { lat:null, lng:null, accuracy:null, map:null };
+
+function locSay(key, cls){
+  locMsg.textContent = SPRINT.T(key);
+  locMsg.className = 'locmsg' + (cls ? ' ' + cls : '');
+}
+
+function locMark(){
+  const on = LOC.lat != null;
+  locBtn.classList.toggle('on', on);
+  locBtn.textContent = on ? SPRINT.T('loc_set') : SPRINT.T('loc_btn');
+}
+
+function locClearPin(){
+  LOC.lat = LOC.lng = LOC.accuracy = null;
+  locBox.hidden = true;
+  locMark();
+}
+
+async function locAsk(){
+  locBox.hidden = false;
+  locSay('loc_wait');
+  let pos = null;
+  try{
+    pos = await SPRINT.store.getLocation();
+  }catch(e){
+    // Edhe pa leje harta mbetet e përdorshme: klienti e gjen vetë vendin.
+    locMsg.textContent = e.message; locMsg.className = 'locmsg bad';
+    pos = { lat:SPRINT.config.lat || 41.3231, lng:SPRINT.config.lng || 19.4414, accuracy:0 };
+  }
+  LOC.lat = pos.lat; LOC.lng = pos.lng; LOC.accuracy = pos.accuracy || null;
+
+  if(!LOC.map){
+    LOC.map = SPRINT.miniMap(locMap, { lat:pos.lat, lng:pos.lng, zoom:17,
+      onMove:(p)=>{ LOC.lat = p.lat; LOC.lng = p.lng; LOC.accuracy = null; locMark(); } });
+  }else{
+    LOC.map.setView(pos.lat, pos.lng);
+  }
+
+  if(pos.accuracy){
+    const q = SPRINT.store.locationQuality(pos.accuracy);
+    locSay(q === 'good' ? 'loc_good' : q === 'ok' ? 'loc_ok' : 'loc_poor',
+           q === 'good' ? 'good' : q === 'poor' ? 'poor' : '');
+  }
+  locMark();
+}
+
+locBtn.addEventListener('click', locAsk);
+locClear.addEventListener('click', locClearPin);
+
 function coSeg(attr, key){
   document.querySelectorAll(`[data-${attr}]`).forEach(b=>b.addEventListener('click',()=>{
     document.querySelectorAll(`[data-${attr}]`).forEach(x=>x.classList.toggle('on',x===b));
@@ -1239,7 +1333,12 @@ coSend.addEventListener('click', async ()=>{
     note:coNote.value.trim()||null, payment:CO.pay, wantedAt, lang,
     items:t.lines.map(li=>({id:li.m.id,name:li.m[lang==='sq'?'sq':'en'],qty:li.q,price:li.m.p,sum:li.sum})),
     subtotal:t.sub, deliveryFee:fee, total:t.sub+fee,
+    channel:'web',
   };
+  // Pini shkon bashkë me porosinë vetëm kur ka dërgesë — për marrjen vetë s'ka kuptim.
+  if(CO.kind==='delivery' && LOC.lat!=null){
+    payload.lat=LOC.lat; payload.lng=LOC.lng; payload.accuracy=LOC.accuracy;
+  }
 
   // Mbrojtje nga dërgimi dy herë me radhë pa dashje.
   const last=+(localStorage.getItem('sprint-last-order')||0);
