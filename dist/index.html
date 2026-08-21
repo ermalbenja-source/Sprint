@@ -454,6 +454,38 @@ body.cart-open .scrim{opacity:1;visibility:visible}
 .tr-cancel{border:1px solid rgba(229,84,75,.45);background:rgba(229,84,75,.1);color:#ff9a92;
   border-radius:16px;padding:1rem;text-align:center;font-size:.9rem}
 
+
+/* ---------- vlerësimet nga Google ---------- */
+.gscore{display:grid;grid-template-columns:auto 1fr;gap:1.4rem;align-items:center;
+  background:linear-gradient(165deg,var(--pan-2),var(--pan));border:1px solid var(--line);
+  border-radius:24px;padding:1.5rem 1.6rem;margin-bottom:1.4rem}
+.gscore .num{font-family:var(--display);font-size:clamp(2.6rem,6vw,3.8rem);line-height:1;color:var(--gold)}
+.gscore .meta{display:grid;gap:.35rem;min-width:0}
+.gscore .stars{color:var(--gold);letter-spacing:.16em;font-size:1.05rem}
+/* yje me pjesë: shfaqin notën e saktë, jo të rrumbullakosur */
+.rate{position:relative;display:inline-block;color:#4b4148;letter-spacing:.16em;font-size:1.15rem}
+.rate::before{content:'★★★★★'}
+.rate i{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;
+  color:var(--gold);letter-spacing:.16em;width:var(--pct,0%)}
+.rate i::before{content:'★★★★★'}
+.gscore .cnt{font-size:.86rem;color:var(--muted)}
+.gscore .acts{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
+.gscore .acts a{border:1.5px solid var(--line);border-radius:11px;padding:.45rem .85rem;
+  font-size:.78rem;font-weight:600;transition:.22s}
+.gscore .acts a:hover{border-color:var(--gold);color:var(--gold)}
+.gscore .acts a.prim{background:var(--gold);border-color:var(--gold);color:#241703}
+.gsrc{font-size:.72rem;color:var(--muted);margin:1rem 0 0;text-align:center}
+.review .rv-hd{display:flex;align-items:center;gap:.65rem;margin-bottom:.7rem}
+.review .av{position:relative;width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:var(--pan-3);display:grid;place-items:center;font-weight:700;font-size:.85rem;color:var(--gold)}
+.review .av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;
+  opacity:0;transition:opacity .3s}
+.review .av img.ok{opacity:1}
+.review .rv-hd b{font-size:.9rem;font-weight:600;line-height:1.2}
+.review .rv-hd span{font-size:.72rem;color:var(--muted);display:block}
+.review .rv-link{font-size:.74rem;color:var(--gold);margin-top:.6rem;display:inline-block}
+@media(max-width:560px){.gscore{grid-template-columns:1fr;text-align:center;justify-items:center}}
+
 /* ---- shënimi i orarit mbi pjatë (p.sh. 09:00–15:00) ---- */
 .note{font-style:normal;font-size:.62em;font-weight:600;letter-spacing:.06em;
   opacity:.75;white-space:nowrap;vertical-align:middle}
@@ -622,7 +654,9 @@ body.cart-open .scrim{opacity:1;visibility:visible}
       <span class="k" data-i18n="rev_kicker"></span>
       <h2 data-i18n="rev_title">4.8 nga 5 yje</h2>
     </div>
+    <div id="gScore"></div>
     <div class="revs" data-reviews></div>
+    <p class="gsrc" id="gSrc"></p>
   </div>
 </section>
 
@@ -874,6 +908,14 @@ window.SPRINT = (function () {
     events: {
       sq: 'Salla jonë pritëse është e hapur për ditëlindje, darka pune dhe festa familjare.',
       en: 'Our function room hosts birthdays, business dinners and family celebrations.',
+    },
+
+    // Vlerësimet nga Google — plotësohen nga paneli, skeda «Cilësimet».
+    google: {
+      enabled: true,
+      key: '',        // çelës i Google Maps, i kufizuar sipas domain-it
+      placeId: '',    // gjendet vetë nga paneli me butonin «Gjej biznesin»
+      mapsUri: '',    // lidhja e faqes në Google Maps
     },
 
     currency: 'L',
@@ -1234,6 +1276,13 @@ window.SPRINT = (function () {
 
     rev_kicker:   { sq:'Çfarë thonë klientët', en:'What guests say' },
     rev_title:    { sq:'Vlerësimet tuaja',  en:'Your reviews' },
+    rev_on_g:     { sq:'nga {n} vlerësime në Google', en:'from {n} Google reviews' },
+    rev_all:      { sq:'Shiko të gjitha në Google', en:'See them all on Google' },
+    rev_write:    { sq:'Shkruaj një vlerësim', en:'Write a review' },
+    rev_src:      { sq:'Vlerësimet vijnë drejtpërdrejt nga Google.',
+                    en:'Reviews come straight from Google.' },
+    rev_none:     { sq:'Ende s’kemi vlerësime këtu — na gjej në Google dhe na thuaj si ishte.',
+                    en:'No reviews here yet — find us on Google and tell us how it was.' },
 
     book_kicker:  { sq:'Rezervim', en:'Reservation' },
     book_title:   { sq:'Rezervo tavolinën tënde', en:'Reserve your table' },
@@ -2233,6 +2282,117 @@ ${S('drink', `
 </script>
 <script>
 /* ============================================================================
+   SPRINT — Vlerësimet nga Google (Places API New).
+   Thirrjet bëhen nga shfletuesi me një çelës të kufizuar sipas domain-it.
+   Nëse çelësi ose vendi nuk janë vendosur, gjithçka bie te vlerësimet e panelit.
+
+   Google lejon deri në 5 vlerësime për vend dhe i zgjedh vetë. Ato shfaqen
+   me emrin e autorit dhe me lidhje drejt Google, siç kërkojnë kushtet e tyre,
+   dhe nuk ruhen gjatë — vetëm sa zgjat vizita.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const BASE = 'https://places.googleapis.com/v1';
+  const CACHE_KEY = 'sprint-google-place';
+  const CACHE_MS = 60 * 60 * 1000;      // një orë, brenda së njëjtës vizitë
+
+  const gcfg = () => (S.config && S.config.google) || {};
+  const keyOf = (override) => override || gcfg().key ||
+    (window.SPRINT_CONFIG && window.SPRINT_CONFIG.GOOGLE_MAPS_KEY) || '';
+  const configured = () => !!(keyOf() && gcfg().placeId);
+
+  async function call(path, opts) {
+    const r = await fetch(BASE + path, opts);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const m = (j.error && j.error.message) || (r.status + ' ' + r.statusText);
+      throw new Error(m);
+    }
+    return j;
+  }
+
+  /** Kërkon një biznes me emër, që paneli të gjejë vetë kodin e vendit. */
+  async function search(query, apiKey) {
+    const key = keyOf(apiKey);
+    if (!key) throw new Error('Mungon çelësi i Google Maps');
+    const j = await call('/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': key,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,' +
+                            'places.rating,places.userRatingCount,places.googleMapsUri',
+      },
+      body: JSON.stringify({ textQuery: query, languageCode: 'sq', maxResultCount: 8 }),
+    });
+    return (j.places || []).map((p) => ({
+      id: p.id,
+      name: (p.displayName && p.displayName.text) || '',
+      address: p.formattedAddress || '',
+      rating: p.rating || null,
+      count: p.userRatingCount || 0,
+      mapsUri: p.googleMapsUri || '',
+    }));
+  }
+
+  /** Detajet e vendit: nota, numri i vlerësimeve, vlerësimet, adresa, orari. */
+  async function details(opts) {
+    opts = opts || {};
+    const key = keyOf(opts.key);
+    const id = opts.placeId || gcfg().placeId;
+    if (!key || !id) throw new Error('Vendi në Google nuk është zgjedhur ende');
+
+    if (!opts.fresh) {
+      try {
+        const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+        if (c && c.id === id && Date.now() - c.at < CACHE_MS) return c.data;
+      } catch (e) {}
+    }
+
+    const lang = (S.getLang && S.getLang()) || 'sq';
+    const j = await call('/places/' + encodeURIComponent(id) + '?languageCode=' + lang, {
+      headers: {
+        'X-Goog-Api-Key': key,
+        'X-Goog-FieldMask': 'id,displayName,formattedAddress,location,rating,' +
+                            'userRatingCount,googleMapsUri,reviews,regularOpeningHours',
+      },
+    });
+
+    const data = {
+      id: j.id,
+      name: (j.displayName && j.displayName.text) || '',
+      address: j.formattedAddress || '',
+      lat: j.location && j.location.latitude,
+      lng: j.location && j.location.longitude,
+      rating: j.rating || null,
+      count: j.userRatingCount || 0,
+      mapsUri: j.googleMapsUri || '',
+      hours: (j.regularOpeningHours && j.regularOpeningHours.weekdayDescriptions) || [],
+      reviews: (j.reviews || []).map((r) => ({
+        text: (r.text && r.text.text) || (r.originalText && r.originalText.text) || '',
+        rating: r.rating || 5,
+        when: r.relativePublishTimeDescription || '',
+        author: (r.authorAttribution && r.authorAttribution.displayName) || '',
+        photo: (r.authorAttribution && r.authorAttribution.photoUri) || '',
+        uri: r.googleMapsUri || (r.authorAttribution && r.authorAttribution.uri) || '',
+      })).filter((r) => r.text),
+    };
+
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ id, at: Date.now(), data })); }
+    catch (e) {}
+    return data;
+  }
+
+  /** Lidhja ku klienti shkruan një vlerësim të ri. */
+  const writeUri = (placeId) =>
+    'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(placeId || gcfg().placeId || '');
+
+  S.google = { configured, search, details, writeUri };
+})();
+
+</script>
+<script>
+/* ============================================================================
    SPRINT — Motori i përbashkët i faqes.
    Mban logjikën identike në të 5 mockup-et; pamja vjen nga CSS-ja e secilit.
    ========================================================================== */
@@ -2858,6 +3018,7 @@ const app=SPRINT.app({
       people:d.people, area:d.area, note:d.note, lang:SPRINT.getLang(),
     });
   },
+  onStatic:()=>{ renderGoogleReviews(); },
   onMenu:(grid)=>{
     // prekja në celular: kthe kartën
     grid.querySelectorAll('.dish').forEach(d=>d.addEventListener('click',e=>{
@@ -2895,6 +3056,8 @@ if(!SPRINT.reduced){
 /* ---------- përmbajtja e publikuar nga paneli ----------
    Faqja shfaqet menjëherë me menunë e ngurtë, pastaj zëvendësohet pa u dridhur
    sapo Supabase kthen atë që ka publikuar pronari. */
+loadGoogleReviews();
+
 (async function loadLive(){
   if(!SPRINT.store) return;
   try{
@@ -2903,6 +3066,7 @@ if(!SPRINT.reduced){
     app.applyI18n(); app.renderStatic(); app.renderFilters(); app.renderMenu(); app.renderCart();
     const el=document.getElementById('dataSrc');
     if(el) el.textContent=EXTRA[SPRINT.getLang()].live;
+    loadGoogleReviews();
   }catch(err){
     // Nëse Supabase nuk përgjigjet, faqja mbetet plotësisht e përdorshme.
     console.warn('Përmbajtja e drejtpërdrejtë nuk u lexua:',err.message);
@@ -3063,6 +3227,63 @@ async function openTracking(token){
 {
   const token=new URLSearchParams(location.search).get('p');
   if(token) openTracking(token);
+}
+
+
+
+/* ══════════════════ VLERËSIMET NGA GOOGLE ══════════════════ */
+let gData=null;
+
+const stars=(n)=>'★'.repeat(Math.round(n||0))+'☆'.repeat(Math.max(0,5-Math.round(n||0)));
+const initials=(name)=>String(name||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+
+function renderGoogleReviews(){
+  if(!gData) return false;
+  const l=SPRINT.getLang();
+  const mapsUri=gData.mapsUri||SPRINT.config.google.mapsUri||SPRINT.mapLink();
+
+  gScore.innerHTML = gData.rating ? `
+    <div class="gscore">
+      <span class="num">${gData.rating.toFixed(1).replace('.',',')}</span>
+      <div class="meta">
+        <span class="rate" style="--pct:${(gData.rating/5*100).toFixed(1)}%"><i></i></span>
+        <span class="cnt">${SPRINT.T('rev_on_g').replace('{n}',gData.count.toLocaleString('sq-AL'))}</span>
+        <span class="acts">
+          <a href="${mapsUri}" target="_blank" rel="noopener">${SPRINT.T('rev_all')}</a>
+          <a class="prim" href="${SPRINT.google.writeUri()}" target="_blank" rel="noopener">${SPRINT.T('rev_write')}</a>
+        </span>
+      </div>
+    </div>` : '';
+
+  const box=document.querySelector('[data-reviews]');
+  box.innerHTML = gData.reviews.length ? gData.reviews.map((r,i)=>`
+    <figure class="review" data-reveal style="--i:${i}">
+      <div class="rv-hd">
+        <span class="av">${initials(r.author)}${r.photo
+          ? `<img src="${r.photo}" alt="" loading="lazy" referrerpolicy="no-referrer"
+               onload="this.classList.add('ok')">` : ''}</span>
+        <span><b>${SPRINT.esc(r.author)}</b><span>${SPRINT.esc(r.when)}</span></span>
+      </div>
+      <div class="stars">${stars(r.rating)}</div>
+      <blockquote>${SPRINT.esc(r.text)}</blockquote>
+      ${r.uri?`<a class="rv-link" href="${r.uri}" target="_blank" rel="noopener">Google →</a>`:''}
+    </figure>`).join('')
+    : `<p class="menu-empty">${SPRINT.T('rev_none')}</p>`;
+
+  gSrc.textContent=SPRINT.T('rev_src');
+  return true;
+}
+
+async function loadGoogleReviews(){
+  if(!SPRINT.google || !SPRINT.google.configured() || SPRINT.config.google.enabled===false) return;
+  try{
+    gData=await SPRINT.google.details();
+    renderGoogleReviews();
+    app.revealScan();
+  }catch(e){
+    // Pa lidhje me Google, mbeten vlerësimet e vendosura nga paneli.
+    console.warn('Vlerësimet nga Google:',e.message);
+  }
 }
 
 </script>

@@ -423,6 +423,33 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         </div>
       </div>
 
+
+      <div class="card" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">Vlerësimet nga Google</h2>
+        <p class="count">Kur lidhet, faqja i merr nota dhe vlerësimet drejtpërdrejt nga profili juaj
+          në Google — pa i shkruar ju me dorë. Google jep deri në 5 vlerësime dhe i zgjedh vetë.</p>
+
+        <div class="f"><label>Çelësi i Google Maps</label>
+          <input id="s-gkey" autocomplete="off" placeholder="AIza…">
+          <span class="hint">Google Cloud → Places API (New) → Credentials. Kufizoje çelësin te
+            domain-i i faqes; ashtu i kufizuar, është i sigurt të jetë publik.</span></div>
+
+        <div class="tools" style="gap:.5rem">
+          <div class="f" style="flex:1;min-width:200px"><input id="gQuery"
+            placeholder="SPRINT Fast Food &amp; Pizza, Durrës"></div>
+          <button class="btn btn-p" id="gFind">Gjej biznesin</button>
+        </div>
+        <div class="items" id="gResults"></div>
+        <div class="msg" id="gPicked"></div>
+
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+          <button class="sw on" id="s-genabled" aria-label="Shfaq vlerësimet e Google"></button>
+          <span class="count" id="s-genabledTxt">Shfaq vlerësimet e Google në faqe</span>
+        </div>
+        <button class="btn btn-g" id="gImport" style="justify-self:start">
+          Merr adresën, koordinatat dhe orarin nga Google</button>
+      </div>
+
       <div class="card" style="display:grid;gap:.9rem">
         <h2 style="font-size:1.1rem">Salla e eventeve</h2>
         <div class="row2">
@@ -555,6 +582,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 <!--INCLUDE:shared/data.js-->
 <!--INCLUDE:shared/art.js-->
 <!--INCLUDE:shared/store.js-->
+<!--INCLUDE:shared/reviews.js-->
 <!--INCLUDE:src/admin.js-->
 </body>
 </html>

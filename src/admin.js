@@ -766,7 +766,7 @@
     $('#s-ev-en').value = (c.events && c.events.en) || '';
     $('#evBox').innerHTML = c.eventsPhoto
       ? `<img src="${esc(c.eventsPhoto)}" alt="">` : artSvg('meze');
-    renderHours();
+    renderHours(); renderGoogle();
   }
   function renderHours() {
     const c = draft.settings.config;
@@ -829,6 +829,105 @@
       markDirty();
     });
   }
+
+
+  /* ══════════════════ VLERËSIMET NGA GOOGLE ══════════════════ */
+  const gcfg = () => {
+    const c = draft.settings.config;
+    c.google = c.google || { enabled: true, key: '', placeId: '', mapsUri: '' };
+    return c.google;
+  };
+
+  function renderGoogle() {
+    const g = gcfg();
+    $('#s-gkey').value = g.key || '';
+    $('#s-genabled').classList.toggle('on', g.enabled !== false);
+    $('#s-genabledTxt').textContent = g.enabled !== false
+      ? 'Shfaq vlerësimet e Google në faqe'
+      : 'Fikur — faqja përdor vlerësimet e skedës «Vlerësimet»';
+    if (!$('#gQuery').value) {
+      $('#gQuery').value = 'SPRINT Fast Food & Pizza, ' + (draft.settings.config.city || 'Durrës');
+    }
+    const box = $('#gPicked');
+    if (g.placeId) {
+      box.className = 'msg ok on';
+      box.innerHTML = `Vendi i lidhur: <b>${esc(g.name || g.placeId)}</b>`
+        + (g.address ? `<br><span style="opacity:.8">${esc(g.address)}</span>` : '')
+        + (g.rating ? `<br>${g.rating} ★ · ${g.count} vlerësime` : '')
+        + ` <button class="btn btn-d btn-sm" id="gUnlink" style="margin-top:.5rem">Shkëput</button>`;
+      $('#gUnlink').addEventListener('click', () => {
+        const x = gcfg();
+        x.placeId = ''; x.mapsUri = ''; delete x.name; delete x.address; delete x.rating; delete x.count;
+        markDirty(); renderGoogle();
+      });
+    } else {
+      box.className = 'msg';
+      box.innerHTML = '';
+    }
+  }
+
+  $('#s-gkey').addEventListener('input', () => { gcfg().key = $('#s-gkey').value.trim(); markDirty(); });
+  $('#s-genabled').addEventListener('click', () => {
+    const g = gcfg(); g.enabled = !$('#s-genabled').classList.contains('on');
+    markDirty(); renderGoogle();
+  });
+
+  $('#gFind').addEventListener('click', async () => {
+    const key = $('#s-gkey').value.trim();
+    if (!key) return toast('Vendos më parë çelësin e Google Maps.', 'err');
+    const q = $('#gQuery').value.trim();
+    if (!q) return toast('Shkruaj emrin e biznesit dhe qytetin.', 'err');
+    const btn = $('#gFind'); btn.disabled = true; btn.textContent = 'Po kërkon…';
+    try {
+      const list = await SPRINT.google.search(q, key);
+      $('#gResults').innerHTML = list.length ? list.map((r, i) => `
+        <div class="item" style="grid-template-columns:minmax(0,1fr) auto">
+          <span class="nm">
+            <b>${esc(r.name)}</b>
+            <span>${esc(r.address)}</span>
+            ${r.rating ? `<span class="tagdots"><span class="tagdot td-new">${r.rating} ★ · ${r.count}</span></span>` : ''}
+          </span>
+          <button class="btn btn-p btn-sm" data-gpick="${i}">Zgjidh</button>
+        </div>`).join('') : '<p class="empty">Asnjë rezultat. Provo me adresën e plotë.</p>';
+
+      $$('[data-gpick]').forEach((b) => b.addEventListener('click', () => {
+        const r = list[+b.dataset.gpick];
+        const g = gcfg();
+        g.placeId = r.id; g.mapsUri = r.mapsUri;
+        g.name = r.name; g.address = r.address; g.rating = r.rating; g.count = r.count;
+        $('#gResults').innerHTML = '';
+        markDirty(); renderGoogle();
+        toast('Vendi u lidh. Shtyp «Ruaj ndryshimet».', 'ok');
+      }));
+    } catch (e) {
+      toast('Kërkimi dështoi: ' + e.message, 'err');
+    } finally { btn.disabled = false; btn.textContent = 'Gjej biznesin'; }
+  });
+
+  $('#gImport').addEventListener('click', async () => {
+    const g = gcfg();
+    if (!g.key || !g.placeId) return toast('Lidh më parë biznesin me Google.', 'err');
+    const btn = $('#gImport'); btn.disabled = true; btn.textContent = 'Po merr…';
+    try {
+      const d = await SPRINT.google.details({ key: g.key, placeId: g.placeId, fresh: true });
+      const c = draft.settings.config;
+      if (d.address) { c.address = c.address || {}; c.address.sq = d.address; c.address.en = d.address; }
+      if (d.lat && d.lng) c.geo = { lat: d.lat, lng: d.lng };
+      if (d.hours && d.hours.length) {
+        c.hours = c.hours || { sq: [], en: [] };
+        c.hours.sq = d.hours.map((line) => {
+          const i = line.indexOf(':');
+          return i > 0 ? [line.slice(0, i).trim(), line.slice(i + 1).trim()] : [line, ''];
+        });
+        c.hours.en = c.hours.sq.map((r) => r.slice());
+      }
+      g.rating = d.rating; g.count = d.count; g.mapsUri = d.mapsUri || g.mapsUri;
+      markDirty(); renderSettings(); renderGoogle();
+      toast('Adresa, koordinatat dhe orari u morën nga Google.', 'ok');
+    } catch (e) {
+      toast('Nuk u morën dot: ' + e.message, 'err');
+    } finally { btn.disabled = false; btn.textContent = 'Merr adresën, koordinatat dhe orarin nga Google'; }
+  });
 
   $('#evPick').addEventListener('click', () => $('#evFile').click());
   $('#evFile').addEventListener('change', async (e) => {

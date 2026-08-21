@@ -34,7 +34,7 @@ Hapet te `/admin`. Hyrja bëhet me email dhe fjalëkalim.
 | **Menuja** | Çmimin direkt në listë, ose gjithçka te sirtari: emrin, përshkrimin, kategorinë, etiketat, njësinë (`/copë`), shënimin (`09:00–15:00`), renditjen, foton. Fsheh një pjatë me një çelës pa e fshirë. |
 | **Kategoritë** | Emrat në të dyja gjuhët dhe renditjen — e njëjta renditje del te fetat e rrotës. |
 | **Cilësimet** | Telefonin, WhatsApp-in, email-in, adresën, koordinatat, tarifën e dërgesës, orarin, rrjetet sociale, tekstin dhe foton e sallës. |
-| **Vlerësimet** | Shton, ndryshon dhe fshin vlerësimet që dalin në faqe. |
+| **Vlerësimet** | Rrugë rezervë kur Google nuk është lidhur. Me Google të lidhur, faqja i merr vetë. |
 | **Publikimi** | Dërgon gjithçka në Supabase, shkarkon një kopje JSON, rikthen një kopje ose kthen menunë fillestare. |
 
 Dy skedat e para — **Porositë** dhe **Rezervimet** — janë ekrani i punës së përditshme; shih më sipër.
@@ -135,6 +135,55 @@ Supabase mban çmimet, tekstet dhe fotot. Plani falas mjafton me tepri.
 Pa këtë hap faqja punon njësoj, por me menunë e ngurtë nga `shared/data.js`, dhe paneli ruan
 vetëm në atë shfletues (butoni «Provoje pa llogari»).
 
+
+---
+
+## Vlerësimet nga Google
+
+Faqja i merr **notën, numrin e vlerësimeve dhe vetë vlerësimet drejtpërdrejt nga profili juaj
+në Google**. Asgjë nuk shkruhet me dorë dhe asgjë nuk vjetërohet: sa herë dikush hap faqen,
+sheh atë që është në Google në atë moment.
+
+### Si lidhet (një herë)
+
+1. Hap [console.cloud.google.com](https://console.cloud.google.com) → krijo një projekt.
+2. **APIs & Services → Library** → aktivizo **Places API (New)**.
+3. **Credentials → Create credentials → API key.**
+4. Kliko çelësin → **Application restrictions → Websites** → shto domain-in e faqes
+   (`sprintdurres.al/*` dhe `www.sprintdurres.al/*`). Te **API restrictions** lejo vetëm
+   *Places API (New)*.
+   Ky hap është i rëndësishëm: i kufizuar kështu, çelësi është i sigurt të jetë publik, sepse
+   punon vetëm kur thirret nga faqja juaj.
+5. Në panel → **Cilësimet → Vlerësimet nga Google** → ngjit çelësin, shtyp **«Gjej biznesin»**,
+   zgjidh SPRINT nga lista dhe shtyp **«Ruaj ndryshimet»**.
+
+Paneli e gjen vetë kodin e vendit (Place ID) — nuk ka nevojë ta kërkosh askund.
+
+### Falas dhe dy detaje
+
+Google kërkon një llogari faturimi te Cloud, por jep një kredi mujore falas që një faqe restoranti
+nuk e shteron kurrë — faqja e thërret Google një herë për vizitor, jo një herë për klikim.
+Kontrollo çmimet aktuale te [Google Maps Platform Pricing](https://mapsplatform.google.com/pricing/),
+sepse ndryshojnë herë pas here.
+
+Dy gjëra për t'i ditur:
+
+- **Google jep maksimumi 5 vlerësime** për çdo vend, dhe i zgjedh vetë — nuk mund të zgjedhësh ti
+  cilat të dalin, as të fshihen ato negative. Kjo është edhe arsyeja pse janë të besueshme.
+- Vlerësimet shfaqen **në kohë reale, jo të ruajtura**, me emrin e autorit dhe me lidhje drejt
+  Google, siç kërkojnë kushtet e tyre.
+
+### Shtesë: adresa, koordinatat dhe orari
+
+Në të njëjtën skedë, butoni **«Merr adresën, koordinatat dhe orarin nga Google»** i mbush vetë ato
+tri fusha nga profili juaj — pra edhe tri nga rreshtat që ishin ende bosh te tabela më poshtë.
+
+### Nëse Google nuk lidhet
+
+Faqja nuk prishet: bie te vlerësimet e vendosura me dorë te skeda **Vlerësimet**, dhe nëse edhe ato
+janë bosh, shfaq vetëm ftesën për t'ju gjetur në Google. Çelësin mund ta fikësh kur të duash me
+çelësin **«Shfaq vlerësimet e Google në faqe»**.
+
 ---
 
 ## Publikimi në Netlify
@@ -179,6 +228,7 @@ shared/config.js   ← çelësat e Supabase (këtu i vendos)
 shared/data.js     ← menuja fillestare, kontaktet dhe përkthimet
 shared/art.js      ← 21 ilustrimet SVG të pjatave
 shared/store.js    ← lidhja me Supabase: menuja, porositë, rezervimet, fotot
+shared/reviews.js  ← vlerësimet dhe të dhënat e vendit nga Google Places
 shared/app.js      ← motori: filtra, kërkim, shportë, WhatsApp, rezervim, dygjuhësia
 src/site.html      ← faqja zyrtare
 src/admin.html     ← pamja e panelit
@@ -208,10 +258,10 @@ menjëherë edhe në internet të ngadaltë; pastaj ajo zëvendësohet pa u drid
 | Tarifa e dërgesës | ⛔ Bosh → shporta shfaq «Sipas zonës» |
 | Email për rezervimet | ⛔ Bosh → butoni i email-it fshihet vetë |
 | Porositë dhe rezervimet | ✅ Regjistrohen dhe menaxhohen te paneli |
-| Vlerësimet | ⛔ Tekst vendmbajtës — **zëvendësoji para se faqja të dalë online** |
+| Vlerësimet | ✅ Vijnë nga Google — mjafton çelësi te «Cilësimet» |
 
-### ⚠️ Vlerësimet
+### Vlerësimet
 
-Vlerësimet e paravendosura janë tekst bosh vendmbajtës, jo review reale. Zëvendësoji te skeda
-«Vlerësimet» me vlerësime të vërteta nga Google ose Facebook përpara publikimit — mos e lër faqen
-të dalë online me vlerësime të shpikura.
+Me çelësin e Google të vendosur, vlerësimet vijnë vetë nga profili juaj dhe skeda «Vlerësimet»
+mbetet vetëm si rrugë rezervë. Pa çelës, ajo skedë përmban tekst bosh vendmbajtës që duhet
+zëvendësuar me vlerësime të vërteta — mos e lër faqen të dalë online me vlerësime të shpikura.

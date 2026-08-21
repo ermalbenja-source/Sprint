@@ -640,6 +640,14 @@ window.SPRINT = (function () {
       en: 'Our function room hosts birthdays, business dinners and family celebrations.',
     },
 
+    // Vlerësimet nga Google — plotësohen nga paneli, skeda «Cilësimet».
+    google: {
+      enabled: true,
+      key: '',        // çelës i Google Maps, i kufizuar sipas domain-it
+      placeId: '',    // gjendet vetë nga paneli me butonin «Gjej biznesin»
+      mapsUri: '',    // lidhja e faqes në Google Maps
+    },
+
     currency: 'L',
     // deliveryFee: null → shporta shfaq «Sipas zonës» në vend të një shifre të pasaktë.
     deliveryFee: null,          // TODO:REAL — vendos shifrën kur ta konfirmosh tarifën
@@ -998,6 +1006,13 @@ window.SPRINT = (function () {
 
     rev_kicker:   { sq:'Çfarë thonë klientët', en:'What guests say' },
     rev_title:    { sq:'Vlerësimet tuaja',  en:'Your reviews' },
+    rev_on_g:     { sq:'nga {n} vlerësime në Google', en:'from {n} Google reviews' },
+    rev_all:      { sq:'Shiko të gjitha në Google', en:'See them all on Google' },
+    rev_write:    { sq:'Shkruaj një vlerësim', en:'Write a review' },
+    rev_src:      { sq:'Vlerësimet vijnë drejtpërdrejt nga Google.',
+                    en:'Reviews come straight from Google.' },
+    rev_none:     { sq:'Ende s’kemi vlerësime këtu — na gjej në Google dhe na thuaj si ishte.',
+                    en:'No reviews here yet — find us on Google and tell us how it was.' },
 
     book_kicker:  { sq:'Rezervim', en:'Reservation' },
     book_title:   { sq:'Rezervo tavolinën tënde', en:'Reserve your table' },
