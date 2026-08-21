@@ -467,5 +467,9 @@
     createBooking, fetchBookings, updateBooking,
     readLocal, writeLocal, clearLocal,
     rowToItem, itemToRow,
+
+    // Primitiva për shared/store-biznes.js, që moduli i biznesit të mos
+    // rindërtojë vetë kokat e autorizimit dhe rifreskimin e tokenit.
+    _req: req, _headers: headers, _rpc: rpc, _ensureAuth: ensureAuth,
   };
 })();
