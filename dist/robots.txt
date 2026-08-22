@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /staf/
 Disallow: /kuzhina/
 Disallow: /mockups/

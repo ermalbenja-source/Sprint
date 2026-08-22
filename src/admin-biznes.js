@@ -163,6 +163,62 @@
     }
   }
 
+  /* ══════════════════ KUSH SHEH ÇFARË ══════════════════ */
+
+  let perms = null;
+
+  async function loadPerms() {
+    try {
+      perms = await store.fetchRoleScreens();
+      renderPerms();
+    } catch (e) {
+      $('#permTable').innerHTML = '<tr><td>Nuk u lexuan lejet: ' + esc(e.message) + '</td></tr>';
+    }
+  }
+
+  function renderPerms() {
+    const SC = store.SCREENS;
+    const keys = store.ALL_SCREENS;
+    const roles = ['manager', 'cashier', 'kitchen', 'driver'];
+    const R = store.STAFF_ROLES;
+
+    const head = '<thead><tr><th style="text-align:left">Ekrani</th>'
+      + '<th class="owner">Pronar</th>'
+      + roles.map((r) => `<th>${esc(R[r])}</th>`).join('') + '</tr></thead>';
+
+    const body = '<tbody>' + keys.map((k) => `<tr>
+      <th>${esc(SC[k])}</th>
+      <td class="owner"><span title="Pronari i sheh të gjitha gjithmonë">✓</span></td>
+      ${roles.map((r) => `<td><label>
+        <input type="checkbox" data-perm="${esc(r)}" data-screen="${esc(k)}"
+               ${(perms[r] || []).indexOf(k) >= 0 ? 'checked' : ''}
+               aria-label="${esc(R[r])} · ${esc(SC[k])}"></label></td>`).join('')}
+    </tr>`).join('') + '</tbody>';
+
+    $('#permTable').innerHTML = head + body;
+  }
+
+  function togglePerm(role, screen, on) {
+    perms[role] = perms[role] || [];
+    const i = perms[role].indexOf(screen);
+    if (on && i < 0) perms[role].push(screen);
+    if (!on && i >= 0) perms[role].splice(i, 1);
+  }
+
+  async function savePerms() {
+    try { await store.saveRoleScreens(perms); toast('Lejet u ruajtën.', 'ok'); }
+    catch (e) { toast(e.message, 'err'); }
+  }
+
+  async function resetPerms() {
+    perms = JSON.parse(JSON.stringify(store.DEFAULT_ROLE_SCREENS));
+    try {
+      await store.saveRoleScreens(perms);
+      renderPerms();
+      toast('U kthyen te fillestaret.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
   /* ══════════════════ FAZAT ══════════════════ */
 
   let phases = [];
@@ -252,7 +308,7 @@
 
     const tab = t.closest('.tab');
     if (tab) {
-      if (tab.dataset.tab === 'staff') loadStaff();
+      if (tab.dataset.tab === 'staff') { loadStaff(); loadPerms(); }
       if (tab.dataset.tab === 'phase') loadPhases();
       return;
     }
@@ -260,6 +316,8 @@
     if (t.closest('[data-pin-close]')) return closePin();
     if (t.id === 'pinSave') return savePin();
     if (t.id === 'addStaff') return addStaff();
+    if (t.id === 'savePerms') return savePerms();
+    if (t.id === 'resetPerms') return resetPerms();
     if (t.id === 'savePhases') return savePhases();
     if (t.id === 'resetPhases') return resetPhases();
 
@@ -298,6 +356,11 @@
 
   document.addEventListener('input', (e) => {
     if (e.target.closest('#phaseList')) onPhaseInput(e);
+  });
+
+  document.addEventListener('change', (e) => {
+    const c = e.target.closest('[data-perm]');
+    if (c) togglePerm(c.dataset.perm, c.dataset.screen, c.checked);
   });
 
   document.addEventListener('keydown', (e) => {

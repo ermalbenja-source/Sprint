@@ -7,7 +7,7 @@
    Del në dist/:
      index.html          faqja zyrtare
      admin/index.html    paneli i menaxhimit
-     kuzhina/index.html  ekrani i kuzhinës
+     staf/index.html     hyrja e stafit: kuzhina dhe motorristi
      mockups/            të pesë drejtimet + faqja e zgjedhjes
      artifact/           të njëjtat, pa <html>/<head>/<body>, për publikim
      assets/             fotot dhe logoja, nëse ekzistojnë
@@ -50,6 +50,7 @@ function emit(srcPath, outPath) {
 /* ── faqja zyrtare dhe paneli ── */
 emit(path.join(root, 'src', 'site.html'), path.join(outDir, 'index.html'));
 emit(path.join(root, 'src', 'admin.html'), path.join(outDir, 'admin', 'index.html'));
+emit(path.join(root, 'src', 'staf.html'), path.join(outDir, 'staf', 'index.html'));
 emit(path.join(root, 'src', 'kuzhina.html'), path.join(outDir, 'kuzhina', 'index.html'));
 
 /* ── mockup-et (ruhen si referencë) ── */
@@ -87,8 +88,8 @@ fs.writeFileSync(path.join(artDir, 'site.html'),
   toArtifact(fs.readFileSync(path.join(outDir, 'index.html'), 'utf8')));
 fs.writeFileSync(path.join(artDir, 'admin.html'),
   toArtifact(fs.readFileSync(path.join(outDir, 'admin', 'index.html'), 'utf8')));
-fs.writeFileSync(path.join(artDir, 'kuzhina.html'),
-  toArtifact(fs.readFileSync(path.join(outDir, 'kuzhina', 'index.html'), 'utf8')));
+fs.writeFileSync(path.join(artDir, 'staf.html'),
+  toArtifact(fs.readFileSync(path.join(outDir, 'staf', 'index.html'), 'utf8')));
 // faqja e zgjedhjes për publikim (lidhje drejt URL-ve, pa iframe)
 const artIdx = path.join(root, 'src', 'artifact-index.html');
 if (fs.existsSync(artIdx)) fs.copyFileSync(artIdx, path.join(artDir, 'index.html'));
@@ -96,7 +97,7 @@ console.log('  ✓ dist/artifact/  (variantet për publikim)');
 
 /* ── skedarët e vegjël të rrënjës ── */
 fs.writeFileSync(path.join(outDir, 'robots.txt'),
-  'User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /kuzhina/\nDisallow: /mockups/\n');
+  'User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /staf/\nDisallow: /kuzhina/\nDisallow: /mockups/\n');
 console.log('  ✓ dist/robots.txt');
 
 /* ── fotot dhe logoja ── */

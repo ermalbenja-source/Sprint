@@ -181,6 +181,22 @@ main{padding:1.4rem 0 5rem}
 .pin-in:focus{border-color:var(--brand);outline:none}
 .pin-err{color:#ff9a92;font-size:.82rem;min-height:1.15em;margin:0}
 
+/* ---------- kush sheh çfarë ---------- */
+.permwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+.perm{border-collapse:collapse;width:100%;min-width:520px;font-size:.86rem}
+.perm th,.perm td{padding:.55rem .7rem;border-bottom:1px solid var(--line);text-align:center}
+.perm tr:last-child td{border-bottom:none}
+.perm thead th{background:var(--pan-2);font-size:.66rem;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.perm tbody th{text-align:left;font-weight:600;white-space:nowrap;color:var(--txt)}
+.perm td label{display:grid;place-items:center;cursor:pointer;padding:.2rem}
+.perm input{appearance:none;width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);
+  background:#0F0B0C;display:grid;place-items:center;cursor:pointer;transition:.15s}
+.perm input:checked{background:var(--brand);border-color:var(--brand)}
+.perm input:checked::after{content:'✓';color:#1B0D02;font-size:.8rem;font-weight:700}
+.perm .owner{color:var(--gold)}
+.perm .owner span{opacity:.55;font-size:1rem}
+
 /* ---------- porosi e re me telefon ---------- */
 .nogrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
 .ncol{display:grid;gap:.85rem;align-content:start}
@@ -622,6 +638,18 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         në motor ose me duar me miell. Kodi ruhet i fshehur dhe nuk shfaqet më kurrë.</p>
       <div class="items" id="staffList"></div>
       <button class="btn btn-g" id="addStaff" style="justify-self:start">+ Shto person</button>
+
+      <div class="card" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">Kush sheh çfarë</h2>
+        <p class="count" style="margin:0">Pronari sheh gjithçka dhe kjo nuk ndryshohet dot —
+          përndryshe një gabim i vetëm këtu do të mbyllte jashtë të vetmin person që i
+          rregullon cilësimet. Për të tjerët, vendos ti.</p>
+        <div class="permwrap"><table class="perm" id="permTable"></table></div>
+        <div class="tools">
+          <button class="btn btn-p" id="savePerms">Ruaj lejet</button>
+          <button class="btn btn-g btn-sm" id="resetPerms">Rikthe te fillestaret</button>
+        </div>
+      </div>
 
       <div class="card" style="display:grid;gap:.6rem">
         <h2 style="font-size:1.1rem">Ku do të hyjnë</h2>

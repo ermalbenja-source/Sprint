@@ -555,7 +555,8 @@ window.SPRINT = (function () {
   const setLang = (l) => { lang = l; };
   const getLang = () => lang;
   const T  = (k) => (t[k] ? t[k][lang] : k);
-  const money = (n) => n.toLocaleString('sq-AL') + ' ' + config.currency;
+  // Toleron mungesën: një fushë e zbrazët nga baza s'duhet ta prishë faqen.
+  const money = (n) => (Number(n) || 0).toLocaleString('sq-AL') + ' ' + config.currency;
   /** Çmimi siç shfaqet, bashkë me njësinë nëse pjata shitet me copë. */
   const price = (m) => money(m.p) + (m.unit ? ' ' + m.unit : '');
 

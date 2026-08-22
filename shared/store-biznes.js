@@ -312,6 +312,210 @@
     return st._rpc('kds_bump', { p_token: sess.token, p_order: id, p_status: status });
   }
 
+  /* ══════════════════ HIERARKIA E EKRANEVE ══════════════════ */
+
+  const SCREENS = {
+    neworder: 'Porosi e re',
+    orders:   'Porositë',
+    kds:      'Kuzhina',
+    runs:     'Motorristi',
+    bookings: 'Rezervimet',
+    menu:     'Menuja',
+    stock:    'Magazina',
+    reports:  'Raportet',
+    staff:    'Stafi',
+    settings: 'Cilësimet',
+  };
+  const ALL_SCREENS = Object.keys(SCREENS);
+  const LS_ROLESCR = 'sprint-role-screens';
+
+  const DEFAULT_ROLE_SCREENS = {
+    manager: ['neworder','orders','kds','runs','bookings','menu','stock','reports'],
+    cashier: ['neworder','orders','bookings'],
+    kitchen: ['kds'],
+    driver:  ['runs'],
+  };
+
+  /** Cilat ekrane sheh secili rol. Pronari nuk figuron — i sheh të gjitha. */
+  async function fetchRoleScreens() {
+    if (!live) {
+      const saved = readLS(LS_ROLESCR, null);
+      return saved || JSON.parse(JSON.stringify(DEFAULT_ROLE_SCREENS));
+    }
+    await st._ensureAuth();
+    const rows = await st._req('/rest/v1/role_screens?select=role,screen', { headers: st._headers() });
+    const out = { manager: [], cashier: [], kitchen: [], driver: [] };
+    (rows || []).forEach((r) => { if (out[r.role]) out[r.role].push(r.screen); });
+    return out;
+  }
+
+  async function saveRoleScreens(map) {
+    if (!live) { writeLS(LS_ROLESCR, map); return map; }
+    await st._ensureAuth();
+    // Zëvendësim i plotë: fshi rregullat e vjetra, vendos ato të rejat.
+    await st._req('/rest/v1/role_screens?role=neq.__none__', {
+      method: 'DELETE', headers: st._headers(),
+    });
+    const rows = [];
+    Object.keys(map).forEach((role) =>
+      (map[role] || []).forEach((screen) => rows.push({ role, screen })));
+    if (rows.length) {
+      await st._req('/rest/v1/role_screens', {
+        method: 'POST', headers: st._headers({ Prefer: 'resolution=ignore-duplicates' }),
+        body: JSON.stringify(rows),
+      });
+    }
+    return map;
+  }
+
+  /** Ekranet e mbajtësit të sesionit aktual të pajisjes. */
+  async function myScreens() {
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) return null;
+
+    if (!live) {
+      if (sess.role === 'owner') {
+        return { staff_id: sess.staff_id, name: sess.name, role: sess.role, screens: ALL_SCREENS.slice() };
+      }
+      const map = readLS(LS_ROLESCR, null) || DEFAULT_ROLE_SCREENS;
+      return { staff_id: sess.staff_id, name: sess.name, role: sess.role,
+               screens: (map[sess.role] || []).slice() };
+    }
+    const r = await st._rpc('my_screens', { p_token: sess.token });
+    const row = Array.isArray(r) ? r[0] : r;
+    if (!row) return null;
+    return { staff_id: row.staff_id, name: row.name, role: row.role, screens: row.screens || [] };
+  }
+
+  /* ══════════════════ MOTORRISTI ══════════════════ */
+
+  const tok = () => {
+    const s = readLS(LS_DEVICE, null);
+    if (!s || !s.token) throw new Error('Hyr me kodin tënd.');
+    return s;
+  };
+
+  /** Porositë gati për t'u marrë, ende pa motorrist. */
+  async function drvReady() {
+    if (!live) {
+      const from = new Date(Date.now() - 12 * 3600e3).toISOString();
+      const list = (await st.fetchOrders({ from })) || [];
+      return list
+        .filter((o) => o.status === 'ready' && o.kind === 'delivery' && !o.run_id)
+        .sort((a, b) => new Date(a.ready_at || a.created_at) - new Date(b.ready_at || b.created_at));
+    }
+    return st._rpc('drv_ready', { p_token: tok().token });
+  }
+
+  /** Nisja: disa porosi bashkë. Kthen id-në e nisjes. */
+  async function drvStartRun(ids, pos) {
+    if (!ids || !ids.length) throw new Error('Zgjidh të paktën një porosi.');
+    if (!live) {
+      const s = tok();
+      const open = readLS('sprint-runs', []).find((r) => r.driver_id === s.staff_id && !r.closed_at);
+      if (open) throw new Error('Ke ende një nisje të hapur. Mbylle atë përpara se të nisesh sërish.');
+      const runs = readLS('sprint-runs', []);
+      const run = { id: uid('r'), driver_id: s.staff_id, driver_name: s.name,
+                    started_at: new Date().toISOString(), closed_at: null };
+      runs.push(run); writeLS('sprint-runs', runs);
+      for (const id of ids) {
+        await st.updateOrder(id, { status: 'delivering', run_id: run.id,
+          driver_id: s.staff_id, picked_at: new Date().toISOString() });
+      }
+      addPoint(run.id, null, 'start', pos);
+      return run.id;
+    }
+    return st._rpc('drv_start_run', {
+      p_token: tok().token, p_orders: ids,
+      p_lat: (pos && pos.lat) || null, p_lng: (pos && pos.lng) || null,
+    });
+  }
+
+  /** Nisja e hapur e këtij motorristi, me ndalesat. */
+  async function drvMyRun() {
+    if (!live) {
+      const s = tok();
+      const run = readLS('sprint-runs', [])
+        .filter((r) => r.driver_id === s.staff_id && !r.closed_at)
+        .sort((a, b) => new Date(b.started_at) - new Date(a.started_at))[0];
+      if (!run) return { run: null, stops: [] };
+      const from = new Date(Date.now() - 24 * 3600e3).toISOString();
+      const list = (await st.fetchOrders({ from })) || [];
+      const stops = list.filter((o) => o.run_id === run.id)
+        .sort((a, b) => (a.delivered_at ? 1 : 0) - (b.delivered_at ? 1 : 0) || a.number - b.number);
+      const cash = stops.filter((o) => o.payment === 'cash')
+        .reduce((n, o) => n + (Number(o.total) || 0), 0);
+      return { run: Object.assign({ cash_due: cash }, run), stops };
+    }
+    const rows = (await st._rpc('drv_my_run', { p_token: tok().token })) || [];
+    if (!rows.length || !rows[0].run_id) return { run: null, stops: [] };
+    const run = { id: rows[0].run_id, started_at: rows[0].started_at, cash_due: rows[0].cash_due };
+    const stops = rows.filter((r) => r.id).map((r) => ({
+      id: r.id, number: r.number, status: r.status, customer_name: r.customer_name,
+      phone: r.phone, address: r.address, lat: r.lat, lng: r.lng,
+      total: r.total, payment: r.payment, note: r.note,
+      delivered_at: r.delivered_at, fail_reason: r.fail_reason,
+    }));
+    return { run, stops };
+  }
+
+  function addPoint(runId, orderId, kind, pos) {
+    const pts = readLS('sprint-run-points', []);
+    pts.push({ run_id: runId, order_id: orderId, kind,
+               lat: (pos && pos.lat) || null, lng: (pos && pos.lng) || null,
+               at: new Date().toISOString() });
+    writeLS('sprint-run-points', pts);
+  }
+
+  async function drvDelivered(orderId, pos, cash) {
+    if (!live) {
+      const o = ((await st.fetchOrders({ from: new Date(Date.now() - 24 * 3600e3).toISOString() })) || [])
+        .find((x) => x.id === orderId);
+      if (!o) throw new Error('Kjo porosi nuk është në nisjen tënde.');
+      await st.updateOrder(orderId, { status: 'done', delivered_at: new Date().toISOString(),
+        done_at: new Date().toISOString(), cash_collected: cash == null ? null : Number(cash) });
+      addPoint(o.run_id, orderId, 'delivered', pos);
+      const rest = ((await st.fetchOrders({ from: new Date(Date.now() - 24 * 3600e3).toISOString() })) || [])
+        .filter((x) => x.run_id === o.run_id && ['done', 'cancelled'].indexOf(x.status) < 0);
+      if (!rest.length) {
+        const runs = readLS('sprint-runs', []);
+        const r = runs.find((x) => x.id === o.run_id);
+        if (r) { r.closed_at = new Date().toISOString(); writeLS('sprint-runs', runs); }
+        addPoint(o.run_id, null, 'end', pos);
+      }
+      return 'done';
+    }
+    return st._rpc('drv_delivered', {
+      p_token: tok().token, p_order: orderId,
+      p_lat: (pos && pos.lat) || null, p_lng: (pos && pos.lng) || null,
+      p_cash: cash == null ? null : Number(cash),
+    });
+  }
+
+  /** Klienti nuk u gjend — porosia kthehet te banaku me arsyen. */
+  async function drvFailed(orderId, reason) {
+    if (!live) {
+      await st.updateOrder(orderId, { status: 'ready', run_id: null, picked_at: null,
+        fail_reason: String(reason || 'Nuk u gjend').slice(0, 200) });
+      return 'ready';
+    }
+    return st._rpc('drv_failed', { p_token: tok().token, p_order: orderId, p_reason: reason || null });
+  }
+
+  async function drvMyDay() {
+    if (!live) {
+      const s = tok();
+      const today = new Date().toISOString().slice(0, 10);
+      const list = ((await st.fetchOrders({ from: today + 'T00:00:00.000Z' })) || [])
+        .filter((o) => o.driver_id === s.staff_id && o.delivered_at);
+      const sum = (f) => list.filter(f).reduce((n, o) => n + (Number(o.total) || 0), 0);
+      return { deliveries: list.length, cash: sum((o) => o.payment === 'cash'),
+               card: sum((o) => o.payment === 'card'), avg_minutes: null };
+    }
+    const r = await st._rpc('drv_my_day', { p_token: tok().token });
+    return (Array.isArray(r) ? r[0] : r) || { deliveries: 0, cash: 0, card: 0 };
+  }
+
   /* ══════════════════ VENDNDODHJA ══════════════════ */
 
   /**
@@ -360,6 +564,8 @@
     lookupCustomer, upsertCustomer,
     STAFF_ROLES: ROLES, fetchStaff, saveStaff, deleteStaff, setStaffPin,
     KDS_STATES, kdsOrders, kdsBump,
+    SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
+    drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
     staffLogin, staffSession, staffLogout,
     getLocation, locationQuality, navLink,
   });

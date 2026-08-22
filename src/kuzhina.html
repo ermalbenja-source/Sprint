@@ -2,166 +2,17 @@
 <html lang="sq">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>SPRINT · Kuzhina</title>
-<style>
-/* ============================================================================
-   SPRINT — Ekrani i kuzhinës.
-   Lexohet nga dy metra, me duar me miell. Prandaj: shkronja të mëdha, target
-   të gjerë prekjeje, ngjyrë që flet para se të lexosh, dhe asnjë e dhënë
-   personale — një ekran i varur në mur s'ka pse mban emra e adresa gjithë ditën.
-   ========================================================================== */
-:root{
-  --brand:#DE7F1C; --gold:#FFC244;
-  --bg:#0A0908; --pan:#161211; --pan-2:#1F1917;
-  --txt:#F7F1E7; --muted:#9C9089; --line:rgba(255,255,255,.12);
-  --ok:#4CAF6D; --warn:#E6B23C; --bad:#E5544B;
-  --display:'Bakbak One',Impact,Haettenschweiler,sans-serif;
-  --body:system-ui,-apple-system,'Segoe UI',sans-serif;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);
-  font-size:17px;line-height:1.4;-webkit-font-smoothing:antialiased;
-  overscroll-behavior:none}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.hide{display:none!important}
-
-/* ---------- hyrja me kod ---------- */
-#gate{min-height:100dvh;display:grid;place-items:center;padding:1.5rem}
-.gate-card{width:min(100%,380px);display:grid;gap:1.1rem;text-align:center}
-.logo{font-family:var(--display);font-size:2.4rem;letter-spacing:.02em}
-.logo em{font-style:normal;color:var(--brand)}
-.gate-sub{color:var(--muted);margin:0;font-size:.95rem}
-#pinShow{font-family:ui-monospace,monospace;font-size:2.6rem;letter-spacing:.55em;
-  height:4rem;display:grid;place-items:center;background:var(--pan);
-  border:2px solid var(--line);border-radius:16px;padding-left:.55em}
-#pinShow.err{border-color:var(--bad);animation:shake .3s}
-@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
-.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
-.keys button{background:var(--pan);border:1.5px solid var(--line);border-radius:16px;
-  padding:1.1rem;font-size:1.6rem;font-weight:600;transition:.12s}
-.keys button:active{background:var(--brand);color:#1B0D02;transform:scale(.96)}
-.keys .go{background:var(--brand);color:#1B0D02;border-color:var(--brand)}
-.gate-err{color:#ff9a92;font-size:.9rem;min-height:1.3em;margin:0}
-
-/* ---------- shiriti i sipërm ---------- */
-header{position:sticky;top:0;z-index:20;background:rgba(10,9,8,.96);
-  border-bottom:1px solid var(--line);padding:.55rem clamp(.7rem,2vw,1.2rem);
-  display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
-header .logo{font-size:1.4rem}
-.counts{display:flex;gap:.5rem;margin-left:auto;flex-wrap:wrap}
-.cbadge{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  border:1px solid var(--line);border-radius:999px;padding:.3rem .7rem;white-space:nowrap}
-.cbadge b{color:var(--gold);font-size:.9rem}
-.hbtn{border:1.5px solid var(--line);border-radius:11px;padding:.45rem .8rem;font-size:.82rem;font-weight:600}
-.hbtn:hover{border-color:var(--gold);color:var(--gold)}
-.hbtn.off{opacity:.45}
-
-/* ---------- rrjeti i kartave ---------- */
-main{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
-  grid-template-columns:repeat(auto-fill,minmax(290px,1fr));align-content:start}
-.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:5rem 1rem;font-size:1.1rem}
-
-.tick{background:var(--pan);border:2px solid var(--line);border-radius:18px;
-  display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;transition:border-color .25s}
-.tick.s-new{border-style:dashed;opacity:.62}
-.tick.warn{border-color:var(--warn)}
-.tick.late{border-color:var(--bad);animation:pulse 1.6s infinite}
-@keyframes pulse{50%{border-color:rgba(229,84,75,.35)}}
-
-.t-hd{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;
-  background:var(--pan-2);border-bottom:1px solid var(--line)}
-.t-no{font-family:var(--display);font-size:1.7rem;line-height:1}
-.t-kind{font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
-  border:1px solid currentColor;border-radius:999px;padding:.2rem .5rem;color:var(--muted)}
-.t-kind.pick{color:var(--gold)}
-.t-clock{margin-left:auto;font-family:ui-monospace,monospace;font-size:1.5rem;font-weight:700;
-  font-variant-numeric:tabular-nums}
-.tick.warn .t-clock{color:var(--warn)}
-.tick.late .t-clock{color:var(--bad)}
-
-.t-items{padding:.7rem .85rem;display:grid;gap:.5rem;align-content:start}
-.t-line{display:grid;grid-template-columns:auto 1fr;gap:.65rem;align-items:baseline;
-  font-size:1.15rem;line-height:1.3;cursor:pointer;user-select:none}
-.t-line .q{font-family:var(--display);font-size:1.3rem;color:var(--gold);min-width:1.6rem}
-.t-line.done{opacity:.38;text-decoration:line-through}
-.t-note{margin:.2rem 0 0;background:rgba(230,178,60,.14);border-left:3px solid var(--warn);
-  border-radius:0 8px 8px 0;padding:.45rem .6rem;font-size:1rem;color:#f4dca6}
-
-.t-act{display:grid;grid-template-columns:1fr auto;gap:.5rem;padding:.7rem .85rem;
-  border-top:1px solid var(--line)}
-.big{border-radius:14px;padding:1rem;font-size:1.15rem;font-weight:700;letter-spacing:.02em;
-  transition:.15s;text-align:center}
-.big:active{transform:scale(.97)}
-.b-start{background:var(--brand);color:#1B0D02}
-.b-ready{background:var(--ok);color:#052312}
-.b-back{border:1.5px solid var(--line);color:var(--muted);padding:1rem .9rem;border-radius:14px;font-size:1.2rem}
-.b-back:hover{border-color:var(--gold);color:var(--gold)}
-
-#undo{position:fixed;left:50%;bottom:1.1rem;transform:translateX(-50%) translateY(200%);
-  background:var(--pan-2);border:1.5px solid var(--gold);border-radius:14px;
-  padding:.75rem 1.1rem;display:flex;gap:.9rem;align-items:center;z-index:40;
-  transition:transform .25s;box-shadow:0 8px 30px rgba(0,0,0,.5)}
-#undo.on{transform:translateX(-50%)}
-#undo b{color:var(--gold)}
-#undo button{border:1.5px solid var(--gold);color:var(--gold);border-radius:10px;
-  padding:.4rem .8rem;font-weight:700;font-size:.85rem}
-
-#offline{position:fixed;top:0;left:0;right:0;background:var(--bad);color:#fff;
-  text-align:center;padding:.4rem;font-size:.85rem;font-weight:600;z-index:50;
-  transform:translateY(-100%);transition:transform .25s}
-#offline.on{transform:none}
-</style>
+<title>SPRINT · Stafi</title>
+<!-- Adresa e vjetër. Hyrja tani është një e vetme për të gjithë, te /staf. -->
+<meta http-equiv="refresh" content="0;url=../staf/">
+<style>body{margin:0;background:#0A0908;color:#9C9089;font-family:system-ui,sans-serif;
+  display:grid;place-items:center;height:100dvh;text-align:center;padding:1rem}
+a{color:#FFC244}</style>
 </head>
 <body>
-
-<!-- ─────── HYRJA ─────── -->
-<div id="gate">
-  <div class="gate-card">
-    <div class="logo">SPR<em>I</em>NT</div>
-    <p class="gate-sub">Ekrani i kuzhinës. Shkruaj kodin tënd.</p>
-    <div id="pinShow"></div>
-    <p class="gate-err" id="gateErr"></p>
-    <div class="keys">
-      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
-      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
-      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
-      <button data-k="del">←</button><button data-k="0">0</button>
-      <button data-k="ok" class="go">Hyr</button>
-    </div>
-  </div>
-</div>
-
-<!-- ─────── EKRANI ─────── -->
-<div id="app" class="hide">
-  <div id="offline">Pa internet — po tregohet gjendja e fundit e njohur.</div>
-
-  <header>
-    <span class="logo">SPR<em>I</em>NT</span>
-    <span class="cbadge" id="whoTxt"></span>
-    <div class="counts">
-      <span class="cbadge">Në furrë <b id="cPrep">0</b></span>
-      <span class="cbadge">Gati <b id="cReady">0</b></span>
-      <button class="hbtn" id="sndBtn" title="Zilja për porosi të reja">🔔</button>
-      <button class="hbtn" id="outBtn">Dil</button>
-    </div>
-  </header>
-
-  <main id="grid"></main>
-
-  <div id="undo">
-    <span>Porosia <b id="undoNo"></b> u shpall gati.</span>
-    <button id="undoBtn">Kthe mbrapsht</button>
-  </div>
-</div>
-
-<!--INCLUDE:shared/config.js-->
-<!--INCLUDE:shared/data.js-->
-<!--INCLUDE:shared/store.js-->
-<!--INCLUDE:shared/store-biznes.js-->
-<!--INCLUDE:src/kuzhina.js-->
+<p>Hyrja e stafit u zhvendos.<br><a href="../staf/">Hap /staf</a></p>
+<script>location.replace('../staf/');</script>
 </body>
 </html>

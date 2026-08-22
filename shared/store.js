@@ -10,7 +10,9 @@
   const URL_ = (CFG.SUPABASE_URL || '').replace(/\/+$/, '');
   const KEY = CFG.SUPABASE_ANON_KEY || '';
   const BUCKET = CFG.PHOTO_BUCKET || 'photos';
-  const configured = !!(URL_ && KEY);
+  // Serveri lokal shërben faqen nga e njëjta adresë, ndaj URL-ja rri bosh dhe
+  // kërkesat shkojnë relative. Për Supabase duhen të dyja.
+  const configured = !!(CFG.LOCAL || (URL_ && KEY));
 
   const LS_SESSION = 'sprint-session';
   const LS_LOCAL = 'sprint-local-content';
@@ -387,10 +389,16 @@
   }
 
   /** Thirrje funksioni në bazë, gjithnjë me çelësin publik. */
+  /**
+   * Funksionet e bazës.
+   * Autorizimi vjen nga sesioni kur ka njeri të futur, dhe bie te çelësi publik
+   * kur s'ka. Kështu i njëjti helper u shërben të dyjave: gjurmimit që e bën
+   * klienti pa llogari, dhe funksioneve që i lejohen vetëm panelit.
+   */
   function rpc(name, body) {
     return req('/rest/v1/rpc/' + name, {
       method: 'POST',
-      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      headers: { apikey: KEY, Authorization: authHeader(), 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
   }

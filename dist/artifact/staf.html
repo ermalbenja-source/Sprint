@@ -1,0 +1,2528 @@
+<title>SPRINT · Stafi</title>
+<style>
+/* ============================================================================
+   SPRINT — Hyrja e stafit.
+   Një link i vetëm për të gjithë. Kodi vendos se çfarë sheh njeriu pas tij:
+   kuzhinieri sheh furrën, motorristi sheh nisjen, pronari sheh të dyja.
+   ========================================================================== */
+:root{
+  --brand:#DE7F1C; --gold:#FFC244;
+  --bg:#0A0908; --pan:#161211; --pan-2:#1F1917; --pan-3:#2A2220;
+  --txt:#F7F1E7; --muted:#9C9089; --line:rgba(255,255,255,.12);
+  --ok:#4CAF6D; --warn:#E6B23C; --bad:#E5544B;
+  --display:'Bakbak One',Impact,Haettenschweiler,sans-serif;
+  --body:system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);
+  font-size:17px;line-height:1.4;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:var(--gold)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.hide{display:none!important}
+
+/* ---------- hyrja ---------- */
+#gate{min-height:100dvh;display:grid;place-items:center;padding:1.5rem}
+.gate-card{width:min(100%,380px);display:grid;gap:1.1rem;text-align:center}
+.logo{font-family:var(--display);font-size:2.4rem;letter-spacing:.02em}
+.logo em{font-style:normal;color:var(--brand)}
+.gate-sub{color:var(--muted);margin:0;font-size:.95rem}
+#pinShow{font-family:ui-monospace,monospace;font-size:2.6rem;letter-spacing:.55em;
+  height:4rem;display:grid;place-items:center;background:var(--pan);
+  border:2px solid var(--line);border-radius:16px;padding-left:.55em}
+#pinShow.err{border-color:var(--bad);animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.keys button{background:var(--pan);border:1.5px solid var(--line);border-radius:16px;
+  padding:1.1rem;font-size:1.6rem;font-weight:600;transition:.12s}
+.keys button:active{background:var(--brand);color:#1B0D02;transform:scale(.96)}
+.keys .go{background:var(--brand);color:#1B0D02;border-color:var(--brand)}
+.gate-err{color:#ff9a92;font-size:.9rem;min-height:1.3em;margin:0}
+
+/* ---------- shiriti ---------- */
+header{position:sticky;top:0;z-index:20;background:rgba(10,9,8,.96);
+  border-bottom:1px solid var(--line);padding:.55rem clamp(.7rem,2vw,1.2rem);
+  display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+header .logo{font-size:1.4rem}
+.who{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:999px;padding:.3rem .7rem;white-space:nowrap}
+.switch{display:flex;gap:.3rem;background:var(--pan-2);border-radius:12px;padding:.22rem}
+.switch button{padding:.42rem .85rem;border-radius:9px;font-size:.84rem;font-weight:600;
+  color:var(--muted);transition:.15s;white-space:nowrap}
+.switch button.on{background:var(--brand);color:#1B0D02}
+.hact{display:flex;gap:.5rem;margin-left:auto;align-items:center;flex-wrap:wrap}
+.cbadge{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:999px;padding:.3rem .7rem;white-space:nowrap}
+.cbadge b{color:var(--gold);font-size:.9rem}
+.hbtn{border:1.5px solid var(--line);border-radius:11px;padding:.45rem .8rem;font-size:.82rem;font-weight:600}
+.hbtn:hover{border-color:var(--gold);color:var(--gold)}
+.hbtn.off{opacity:.45}
+
+#offline{position:fixed;top:0;left:0;right:0;background:var(--bad);color:#fff;
+  text-align:center;padding:.4rem;font-size:.85rem;font-weight:600;z-index:50;
+  transform:translateY(-100%);transition:transform .25s}
+#offline.on{transform:none}
+.empty{text-align:center;color:var(--muted);padding:4rem 1rem;font-size:1.05rem}
+
+/* ══════════════════ KUZHINA ══════════════════ */
+#v-kds{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
+  grid-template-columns:repeat(auto-fill,minmax(290px,1fr));align-content:start}
+#v-kds .empty{grid-column:1/-1}
+.tick{background:var(--pan);border:2px solid var(--line);border-radius:18px;
+  display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;transition:border-color .25s}
+.tick.s-new{border-style:dashed;opacity:.62}
+.tick.warn{border-color:var(--warn)}
+.tick.late{border-color:var(--bad);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{border-color:rgba(229,84,75,.35)}}
+.t-hd{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;
+  background:var(--pan-2);border-bottom:1px solid var(--line)}
+.t-no{font-family:var(--display);font-size:1.7rem;line-height:1}
+.t-kind{font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  border:1px solid currentColor;border-radius:999px;padding:.2rem .5rem;color:var(--muted)}
+.t-kind.pick{color:var(--gold)}
+.t-clock{margin-left:auto;font-family:ui-monospace,monospace;font-size:1.5rem;font-weight:700;
+  font-variant-numeric:tabular-nums}
+.tick.warn .t-clock{color:var(--warn)}
+.tick.late .t-clock{color:var(--bad)}
+.t-items{padding:.7rem .85rem;display:grid;gap:.5rem;align-content:start}
+.t-line{display:grid;grid-template-columns:auto 1fr;gap:.65rem;align-items:baseline;
+  font-size:1.15rem;line-height:1.3;cursor:pointer;user-select:none}
+.t-line .q{font-family:var(--display);font-size:1.3rem;color:var(--gold);min-width:1.6rem}
+.t-line.done{opacity:.38;text-decoration:line-through}
+.t-note{margin:.2rem 0 0;background:rgba(230,178,60,.14);border-left:3px solid var(--warn);
+  border-radius:0 8px 8px 0;padding:.45rem .6rem;font-size:1rem;color:#f4dca6}
+.t-act{display:grid;grid-template-columns:1fr auto;gap:.5rem;padding:.7rem .85rem;
+  border-top:1px solid var(--line)}
+.big{border-radius:14px;padding:1rem;font-size:1.15rem;font-weight:700;letter-spacing:.02em;
+  transition:.15s;text-align:center}
+.big:active{transform:scale(.97)}
+.b-start{background:var(--brand);color:#1B0D02}
+.b-ready{background:var(--ok);color:#052312}
+.b-back{border:1.5px solid var(--line);color:var(--muted);padding:1rem .9rem;border-radius:14px;font-size:1.2rem}
+.b-back:hover{border-color:var(--gold);color:var(--gold)}
+
+#undo{position:fixed;left:50%;bottom:1.1rem;transform:translateX(-50%) translateY(220%);
+  background:var(--pan-2);border:1.5px solid var(--gold);border-radius:14px;
+  padding:.75rem 1.1rem;display:flex;gap:.9rem;align-items:center;z-index:40;
+  transition:transform .25s;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+#undo.on{transform:translateX(-50%)}
+#undo b{color:var(--gold)}
+#undo button{border:1.5px solid var(--gold);color:var(--gold);border-radius:10px;
+  padding:.4rem .8rem;font-weight:700;font-size:.85rem}
+
+/* ══════════════════ MOTORRISTI ══════════════════ */
+#v-runs{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;max-width:720px;margin-inline:auto;
+  align-content:start}
+.rsec{display:grid;gap:.6rem}
+.rsec h2{font-family:var(--display);font-size:1.15rem;margin:0;font-weight:400;letter-spacing:.02em}
+.rsec .sub{color:var(--muted);font-size:.84rem;margin:0}
+
+.stop{background:var(--pan);border:1.5px solid var(--line);border-radius:16px;overflow:hidden}
+.stop.pick{border-color:var(--brand)}
+.stop.gone{opacity:.45}
+.s-hd{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;background:var(--pan-2)}
+.s-no{font-family:var(--display);font-size:1.35rem;line-height:1}
+.s-pay{font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  border-radius:999px;padding:.22rem .55rem}
+.s-pay.cash{background:rgba(255,194,68,.16);color:var(--gold)}
+.s-pay.card{background:rgba(76,175,109,.16);color:var(--ok)}
+.s-tot{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;font-size:1.05rem}
+.s-bd{padding:.7rem .9rem;display:grid;gap:.4rem}
+.s-name{font-weight:600}
+.s-addr{color:var(--muted);font-size:.92rem;line-height:1.35}
+.s-note{background:rgba(230,178,60,.14);border-left:3px solid var(--warn);border-radius:0 8px 8px 0;
+  padding:.4rem .55rem;font-size:.9rem;color:#f4dca6;margin:.1rem 0 0}
+.s-act{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:0 .9rem .9rem}
+.s-act .wide{grid-column:1/-1}
+.sbtn{border-radius:12px;padding:.75rem;font-size:.92rem;font-weight:700;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:.4rem;transition:.15s}
+.sbtn:active{transform:scale(.97)}
+.s-nav{background:var(--pan-3);border:1.5px solid var(--line)}
+.s-nav:hover{border-color:var(--gold);color:var(--gold)}
+.s-call{background:var(--pan-3);border:1.5px solid var(--line)}
+.s-done{background:var(--ok);color:#052312}
+.s-fail{border:1.5px solid rgba(229,84,75,.5);color:#ff9a92;font-weight:600;font-size:.84rem}
+.s-pickbox{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;cursor:pointer}
+.s-pickbox .box{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);
+  display:grid;place-items:center;flex:none;font-weight:700;color:transparent}
+.stop.pick .box{background:var(--brand);border-color:var(--brand);color:#1B0D02}
+
+.gobar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 32%);
+  padding:1rem 0 .6rem;display:grid;gap:.5rem;z-index:15}
+.gobtn{background:var(--brand);color:#1B0D02;border-radius:14px;padding:1rem;
+  font-size:1.1rem;font-weight:700;text-align:center}
+.gobtn:disabled{opacity:.35;pointer-events:none}
+
+.daybox{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.daybox div{background:var(--pan);border:1px solid var(--line);border-radius:14px;
+  padding:.7rem;text-align:center}
+.daybox b{display:block;font-family:var(--display);font-size:1.5rem;color:var(--gold);
+  font-variant-numeric:tabular-nums}
+.daybox span{font-size:.7rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+.privacy{font-size:.74rem;color:var(--muted);line-height:1.45;background:var(--pan);
+  border:1px solid var(--line);border-radius:12px;padding:.7rem .85rem;margin:0}
+
+/* ---------- dritarja e dorëzimit ---------- */
+.modal{position:fixed;inset:0;z-index:60;display:none;place-items:center;padding:1rem}
+.modal.on{display:grid}
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.82)}
+.modal-card{position:relative;background:var(--pan);border:1px solid var(--line);
+  border-radius:20px;padding:1.4rem;width:min(400px,100%);display:grid;gap:.85rem}
+.modal-card h3{margin:0;font-family:var(--display);font-size:1.2rem;font-weight:400}
+.modal-card p{margin:0;font-size:.88rem;color:var(--muted)}
+.modal-card input,.modal-card select{background:#0F0B0C;border:1.5px solid var(--line);
+  border-radius:11px;padding:.7rem .8rem;color:var(--txt);font:inherit;width:100%}
+.modal-card input:focus,.modal-card select:focus{border-color:var(--brand);outline:none}
+.modal-act{display:grid;grid-template-columns:1fr auto;gap:.5rem}
+</style>
+
+
+<!-- ─────── HYRJA (e njëjtë për të gjithë) ─────── -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="logo">SPR<em>I</em>NT</div>
+    <p class="gate-sub">Shkruaj kodin tënd.</p>
+    <div id="pinShow"></div>
+    <p class="gate-err" id="gateErr"></p>
+    <div class="keys">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button data-k="del">←</button><button data-k="0">0</button>
+      <button data-k="ok" class="go">Hyr</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── APLIKACIONI ─────── -->
+<div id="app" class="hide">
+  <div id="offline">Pa internet — po tregohet gjendja e fundit e njohur.</div>
+
+  <header>
+    <span class="logo">SPR<em>I</em>NT</span>
+    <span class="who" id="whoTxt"></span>
+    <div class="switch hide" id="switcher"></div>
+    <div class="hact">
+      <span class="cbadge hide" id="kdsCount">Furrë <b id="cPrep">0</b> · Gati <b id="cReady">0</b></span>
+      <button class="hbtn hide" id="sndBtn" title="Zilja për porosi të reja">🔔</button>
+      <button class="hbtn" id="refBtn" title="Rifresko">↻</button>
+      <button class="hbtn" id="outBtn">Dil</button>
+    </div>
+  </header>
+
+  <main id="v-kds" class="hide"></main>
+  <main id="v-runs" class="hide"></main>
+
+  <div id="undo">
+    <span>Porosia <b id="undoNo"></b> u shpall gati.</span>
+    <button id="undoBtn">Kthe mbrapsht</button>
+  </div>
+</div>
+
+<!-- ─────── DORËZIMI ─────── -->
+<div class="modal" id="dlvModal" role="dialog" aria-modal="true" aria-label="Dorëzimi">
+  <div class="modal-bg" data-dlv-close></div>
+  <div class="modal-card">
+    <h3 id="dlvTitle">Dorëzimi</h3>
+    <p id="dlvSub"></p>
+    <div id="dlvCashWrap">
+      <input id="dlvCash" inputmode="numeric" aria-label="Sa para arkëtove">
+    </div>
+    <p class="gate-err" id="dlvErr"></p>
+    <div class="modal-act">
+      <button class="sbtn s-done" id="dlvOk">Konfirmo dorëzimin</button>
+      <button class="hbtn" data-dlv-close>Anulo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── NUK U GJEND ─────── -->
+<div class="modal" id="failModal" role="dialog" aria-modal="true" aria-label="Nuk u gjend">
+  <div class="modal-bg" data-fail-close></div>
+  <div class="modal-card">
+    <h3>Porosia kthehet te banaku</h3>
+    <p>Zgjidh arsyen. Banaku e sheh menjëherë dhe merret me klientin.</p>
+    <select id="failReason">
+      <option>Nuk përgjigjet në telefon</option>
+      <option>Adresa nuk u gjet</option>
+      <option>Klienti e anuloi</option>
+      <option>Klienti nuk kishte para</option>
+      <option>Arsye tjetër</option>
+    </select>
+    <div class="modal-act">
+      <button class="sbtn s-fail" id="failOk">Kthe te banaku</button>
+      <button class="hbtn" data-fail-close>Anulo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   SPRINT — Ku ruhen të dhënat.
+
+   Tri mundësi, dhe faqja është e njëjta te të tria:
+
+   1. Bosh (si tani)  — gjithçka rri në shfletues. Mirë për ta provuar.
+   2. Serveri lokal   — programi ngrihet mbi kompjuterin e dyqanit me
+                        `node local/server.js`. Serveri e vendos vetë këtë,
+                        ndaj këtu nuk preket asgjë.
+   3. Supabase        — për përdorim online. Vendos URL-në dhe çelësin `anon`.
+                        Ai çelës është publik nga natyra; çelësi `service_role`
+                        nuk vihet KURRË këtu.
+   ========================================================================== */
+window.SPRINT_CONFIG = window.SPRINT_LOCAL
+  ? { SUPABASE_URL: '', SUPABASE_ANON_KEY: 'local', PHOTO_BUCKET: 'photos', LOCAL: true }
+  : {
+      SUPABASE_URL: '',
+      SUPABASE_ANON_KEY: '',
+      PHOTO_BUCKET: 'photos',
+    };
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Fast Food & Pizza · Restaurant, Durrës
+   TË DHËNAT QENDRORE — ndrysho VETËM këtë skedar për menunë, çmimet, kontaktet.
+   Pas çdo ndryshimi: `node build.js` për të rigjeneruar faqet në dist/.
+
+   MENUJA DHE ÇMIMET janë transkriptuar nga menuja zyrtare e postuar në
+   Instagram (@sprint_restorant_fast_pizza).
+   Fushat e shënuara me  // TODO:REAL  presin ende konfirmim.
+   Përshkrimet e pjatave janë tekst i propozuar — konfirmoji ose ndryshoji.
+   ========================================================================== */
+
+window.SPRINT = (function () {
+  const config = {
+    brand: 'SPRINT',
+    tagline: { sq: 'Fast Food & Pizza · Restorant', en: 'Fast Food & Pizza · Restaurant' },
+    city: 'Durrës',
+
+    phone: '069 666 7000',
+    phoneHref: '+355696667000',
+    whatsapp: '355696667000',
+
+    // TODO:REAL — email ku do të vijë kopja e rezervimit
+    email: '',
+
+    // TODO:REAL — adresa e saktë e lokalit
+    address: { sq: 'Durrës, Shqipëri', en: 'Durrës, Albania' },
+
+    // TODO:REAL — koordinatat e sakta (Google Maps → Share → kopjo koordinatat)
+    geo: { lat: 41.3236, lng: 19.4432 },
+
+    hours: {
+      // TODO:REAL — konfirmo orarin e hapjes dhe të mbylljes
+      sq: [['Çdo ditë', '09:00 – 23:00'], ['Gatime tradicionale', '09:00 – 15:00'], ['Delivery', 'Pyet në WhatsApp']],
+      en: [['Every day', '09:00 – 23:00'], ['Traditional dishes', '09:00 – 15:00'], ['Delivery', 'Ask on WhatsApp']],
+    },
+
+    social: {
+      instagram: 'https://www.instagram.com/sprint_restorant_fast_pizza/',
+      facebook: '',   // TODO:REAL — linku i faqes në Facebook, nëse ka
+      tiktok: '',     // TODO:REAL — linku i profilit në TikTok, nëse ka
+    },
+
+    // Salla e eventeve — nga postimi «Për çdo event tuaj jemi pranë jush!»
+    events: {
+      sq: 'Salla jonë pritëse është e hapur për ditëlindje, darka pune dhe festa familjare.',
+      en: 'Our function room hosts birthdays, business dinners and family celebrations.',
+    },
+
+    // Vlerësimet nga Google — plotësohen nga paneli, skeda «Cilësimet».
+    google: {
+      enabled: true,
+      key: '',        // çelës i Google Maps, i kufizuar sipas domain-it
+      placeId: '',    // gjendet vetë nga paneli me butonin «Gjej biznesin»
+      mapsUri: '',    // lidhja e faqes në Google Maps
+    },
+
+    currency: 'L',
+    // deliveryFee: null → shporta shfaq «Sipas zonës» në vend të një shifre të pasaktë.
+    deliveryFee: null,          // TODO:REAL — vendos shifrën kur ta konfirmosh tarifën
+    freeDeliveryOver: null,
+  };
+
+  /* --------------------------------------------------------------------------
+     KATEGORITË — gjashtë shtyllat, sipas menusë zyrtare
+     -------------------------------------------------------------------------- */
+  const categories = [
+    { id:'pizza', art:'pizza', sq:'Pizza', en:'Pizza',
+      dsq:'Nga Margarita te Pica Sprint — pesëmbëdhjetë pica dhe fokaçe.',
+      den:'From the Margherita to the Pizza Sprint — fifteen pizzas and focaccias.' },
+    { id:'fast', art:'gyros', sq:'Fast Food', en:'Fast Food',
+      dsq:'Sufllaqe, doner, burger dhe sanduiçë me brumë pice.',
+      den:'Gyros, doner, burgers and pizza-dough sandwiches.' },
+    { id:'rest', art:'steak', sq:'Restorant', en:'Restaurant',
+      dsq:'Pasta, rizoto, mish në zgarë dhe peshk i freskët.',
+      den:'Pasta, risotto, grilled meats and fresh fish.' },
+    { id:'trad', art:'tave', sq:'Tradicionale', en:'Traditional',
+      dsq:'Tavat dhe gatimet e ditës — çdo ditë nga 09:00 deri 15:00.',
+      den:'Clay-pot bakes and dishes of the day — daily from 09:00 to 15:00.' },
+    { id:'starter', art:'salad', sq:'Sallata & Supa', en:'Salads & Soups',
+      dsq:'Sallata të freskëta, supa dhe shoqëruese për tavolinën.',
+      den:'Fresh salads, soups and sides for the table.' },
+    { id:'pije', art:'drink', sq:'Pije', en:'Drinks',
+      dsq:'Kafe, pije freskuese, birra dhe verë.',
+      den:'Coffee, soft drinks, beer and wine.' },
+  ];
+
+  /* --------------------------------------------------------------------------
+     MENUJA — transkriptuar nga menuja zyrtare
+     tags: 'hot' (pikante) · 'veg' · 'new' · 'top' (i spikatur)
+     unit: teksti pas çmimit, p.sh. '/copë'
+     note: shënim i vogël mbi pjatën, p.sh. orari
+     -------------------------------------------------------------------------- */
+  const menu = [
+    /* ─────────────── PIZZA ─────────────── */
+    { id:'pz01', c:'pizza', art:'pizzaW', sq:'Fokaçe', en:'Focaccia', p:150,
+      dsq:'Bukë pice e ngrohtë me vaj ulliri.', den:'Warm pizza bread with olive oil.', tags:['veg'] },
+    { id:'pz02', c:'pizza', art:'pizzaW', sq:'Fokaçe Bruskete', en:'Bruschetta Focaccia', p:250,
+      dsq:'Fokaçe me domate të freskëta dhe hudhër.', den:'Focaccia with fresh tomato and garlic.', tags:['veg'] },
+    { id:'pz03', c:'pizza', art:'pizza', sq:'Pica Margarita', en:'Pizza Margherita', p:320,
+      dsq:'Salcë domateje dhe djathë — klasikja.', den:'Tomato sauce and cheese — the classic.', tags:['veg'] },
+    { id:'pz04', c:'pizza', art:'pizzaC', sq:'Pica me Proshutë Viçi', en:'Beef Ham Pizza', p:370,
+      dsq:'Proshutë viçi mbi bazën e shtëpisë.', den:'Beef ham on the house base.', tags:[] },
+    { id:'pz05', c:'pizza', art:'pizzaW', sq:'Pica 4 Djathërat', en:'Four Cheese Pizza', p:480,
+      dsq:'Katër djathëra të shkrirë.', den:'Four melted cheeses.', tags:['veg'] },
+    { id:'pz06', c:'pizza', art:'pizzaV', sq:'Pica Vegjetariane', en:'Vegetarian Pizza', p:400,
+      dsq:'Perime sezonale mbi salcë domateje dhe djathë.', den:'Seasonal vegetables on tomato and cheese.', tags:['veg'] },
+    { id:'pz07', c:'pizza', art:'pizzaC', sq:'Pica Delicioza', en:'Pizza Deliziosa', p:580,
+      dsq:'Përbërës të pasur — pyet kamarierin për sot.', den:'A rich topping — ask the waiter about today’s.', tags:[] },
+    { id:'pz08', c:'pizza', art:'pizzaC', sq:'Pica Kapriçoza', en:'Pizza Capricciosa', p:480,
+      dsq:'Proshutë, kërpudha dhe ullinj.', den:'Ham, mushrooms and olives.', tags:['top'] },
+    { id:'pz09', c:'pizza', art:'pizza', sq:'Pica Diavola', en:'Pizza Diavola', p:480,
+      dsq:'Sallam pikant dhe spec djegës.', den:'Spicy salami and chilli.', tags:['hot'] },
+    { id:'pz10', c:'pizza', art:'pizzaV', sq:'Pica me Ton & Qepë', en:'Tuna & Onion Pizza', p:450,
+      dsq:'Ton dhe qepë e freskët.', den:'Tuna and fresh onion.', tags:[] },
+    { id:'pz11', c:'pizza', art:'pizzaC', sq:'Pica Milano', en:'Pizza Milano', p:480,
+      dsq:'Kombinim italian me sallam dhe djathë.', den:'An Italian combination of salami and cheese.', tags:[] },
+    { id:'pz12', c:'pizza', art:'pizzaC', sq:'Pica Amerikane', en:'American Pizza', p:470,
+      dsq:'Sallam, wudy dhe djathë i bollshëm.', den:'Salami, frankfurter and plenty of cheese.', tags:[] },
+    { id:'pz13', c:'pizza', art:'pizzaC', sq:'Pica 4 Stinët', en:'Four Seasons Pizza', p:500,
+      dsq:'Katër çerekë, katër shije.', den:'Four quarters, four toppings.', tags:[] },
+    { id:'pz14', c:'pizza', art:'pizzaC', sq:'Pica me Fileto Pule', en:'Chicken Fillet Pizza', p:480,
+      dsq:'Fileto pule në copa mbi djathë.', den:'Chicken fillet strips over cheese.', tags:[] },
+    { id:'pz15', c:'pizza', art:'pizzaC', sq:'Pica Sprint', en:'Pizza Sprint', p:680,
+      dsq:'Specialiteti i shtëpisë — pica jonë më e plotë.', den:'The house speciality — our most loaded pizza.', tags:['top','new'] },
+
+    /* ─────────────── FAST FOOD ─────────────── */
+    { id:'ff01', c:'fast', art:'gyros', sq:'Sufllaqe', en:'Gyros', p:250,
+      dsq:'Pita e mbushur me mish, patate dhe salcë.', den:'Pita filled with meat, fries and sauce.', tags:['top'] },
+    { id:'ff02', c:'fast', art:'gyros', sq:'Sufllaqe Dopio Pitë', en:'Double-Pita Gyros', p:280,
+      dsq:'E njëjta sufllaqe, me dy pita.', den:'The same gyros, with two pitas.', tags:[] },
+    { id:'ff03', c:'fast', art:'gyros', sq:'Sufllaqe Wudy', en:'Frankfurter Gyros', p:250,
+      dsq:'Sufllaqe me wudy dhe patate.', den:'Gyros with frankfurter and fries.', tags:[] },
+    { id:'ff04', c:'fast', art:'gyros', sq:'Sufllaqe e Hapur', en:'Open Gyros', p:450,
+      dsq:'Në pjatë, me porcion të plotë mishi.', den:'On a plate, with a full portion of meat.', tags:[] },
+    { id:'ff05', c:'fast', art:'gyros', sq:'Doner', en:'Doner', p:250,
+      dsq:'Doner i prerë nga hosti, në pitë.', den:'Doner carved from the spit, in pita.', tags:[] },
+    { id:'ff06', c:'fast', art:'gyros', sq:'Doner me Brumë Pice', en:'Doner in Pizza Dough', p:320,
+      dsq:'Doner i mbështjellë në brumë pice.', den:'Doner wrapped in pizza dough.', tags:[] },
+    { id:'ff07', c:'fast', art:'sandwich', sq:'Hot Dog', en:'Hot Dog', p:250,
+      dsq:'Wudy në bukë të gjatë me salca.', den:'Frankfurter in a long roll with sauces.', tags:[] },
+    { id:'ff08', c:'fast', art:'sandwich', sq:'Sanduiç', en:'Sandwich', p:200,
+      dsq:'Sanduiçi klasik i shtëpisë.', den:'The classic house sandwich.', tags:[] },
+    { id:'ff09', c:'fast', art:'burger', sq:'Hamburger Tradicional', en:'Traditional Hamburger', p:200,
+      dsq:'Kotoletë, perime të freskëta dhe salcë.', den:'Patty, fresh vegetables and sauce.', tags:['top'] },
+    { id:'ff10', c:'fast', art:'sandwich', sq:'Tost', en:'Toastie', p:120,
+      dsq:'Tost i ngrohtë me djathë dhe proshutë.', den:'Warm toastie with cheese and ham.', tags:[] },
+    { id:'ff11', c:'fast', art:'sandwich', sq:'Club Sanduiç', en:'Club Sandwich', p:300,
+      dsq:'Tre kate, me pulë dhe perime.', den:'Three layers, with chicken and vegetables.', tags:[] },
+    { id:'ff12', c:'fast', art:'wings', sq:'Chicken Fingers', en:'Chicken Fingers', p:250,
+      dsq:'Fileto pule krokante.', den:'Crispy chicken fillet strips.', tags:[] },
+    { id:'ff13', c:'fast', art:'wings', sq:'Chicken Nuggets', en:'Chicken Nuggets', p:250,
+      dsq:'Nagets pule me salcë për zgjedhje.', den:'Chicken nuggets with a dip of your choice.', tags:[] },
+    { id:'ff14', c:'fast', art:'steak', sq:'Shishqebap Pule', en:'Chicken Skewer', p:120, unit:'/copë',
+      dsq:'Hell pule në zgarë.', den:'Chicken skewer off the grill.', tags:[] },
+    { id:'ff15', c:'fast', art:'steak', sq:'Shishqebap Derri', en:'Pork Skewer', p:100, unit:'/copë',
+      dsq:'Hell derri në zgarë.', den:'Pork skewer off the grill.', tags:[] },
+    { id:'ff16', c:'fast', art:'steak', sq:'Llukank Derri', en:'Pork Sausage', p:100, unit:'/copë',
+      dsq:'Llukanka vendi në zgarë.', den:'Local sausage off the grill.', tags:[] },
+    { id:'ff17', c:'fast', art:'steak', sq:'Mikse Mishi', en:'Mixed Grill', p:1200,
+      dsq:'Pjatë e madhe me mishra të ndryshëm — për ta ndarë.', den:'A large platter of assorted grilled meats — made to share.', tags:['top'] },
+
+    /* ─────────────── PICERI · sanduiçë me brumë pice ─────────────── */
+    { id:'sp01', c:'fast', art:'sandwich', sq:'Sanduiç me Sallam', en:'Salami Sandwich', p:250,
+      dsq:'Me brumë pice, i pjekur në furrë.', den:'In pizza dough, baked in the oven.', tags:[] },
+    { id:'sp02', c:'fast', art:'sandwich', sq:'Sanduiç Pikant', en:'Spicy Sandwich', p:250,
+      dsq:'Me brumë pice dhe sallam pikant.', den:'In pizza dough with spicy salami.', tags:['hot'] },
+    { id:'sp03', c:'fast', art:'sandwich', sq:'Sanduiç me Proshutë Viçi', en:'Beef Ham Sandwich', p:250,
+      dsq:'Me brumë pice dhe proshutë viçi.', den:'In pizza dough with beef ham.', tags:[] },
+    { id:'sp04', c:'fast', art:'sandwich', sq:'Sanduiç me Wudy', en:'Frankfurter Sandwich', p:250,
+      dsq:'Me brumë pice dhe wudy.', den:'In pizza dough with frankfurter.', tags:[] },
+    { id:'sp05', c:'fast', art:'sandwich', sq:'Sanduiç me Ton', en:'Tuna Sandwich', p:250,
+      dsq:'Me brumë pice dhe ton.', den:'In pizza dough with tuna.', tags:[] },
+    { id:'sp06', c:'fast', art:'sandwich', sq:'Sanduiç me Ton & Sallam Pikant', en:'Tuna & Spicy Salami Sandwich', p:300,
+      dsq:'Ton dhe sallam pikant në brumë pice.', den:'Tuna and spicy salami in pizza dough.', tags:['hot'] },
+    { id:'sp07', c:'fast', art:'sandwich', sq:'Sanduiç Fshati', en:'Village Sandwich', p:250,
+      dsq:'Me produkte vendi.', den:'Made with local produce.', tags:[] },
+    { id:'sp08', c:'fast', art:'sandwich', sq:'Sanduiç Miks', en:'Mixed Sandwich', p:300,
+      dsq:'Kombinimi ynë i plotë në brumë pice.', den:'Our full combination in pizza dough.', tags:[] },
+    { id:'sp09', c:'fast', art:'sandwich', sq:'Sanduiç Vegjetarian', en:'Vegetarian Sandwich', p:220,
+      dsq:'Vetëm perime dhe djathë.', den:'Vegetables and cheese only.', tags:['veg'] },
+    { id:'sp10', c:'fast', art:'sandwich', sq:'Sanduiç me Proshutë & Kërpudha', en:'Ham & Mushroom Sandwich', p:250,
+      dsq:'Proshutë dhe kërpudha në brumë pice.', den:'Ham and mushrooms in pizza dough.', tags:[] },
+    { id:'sp11', c:'fast', art:'sandwich', sq:'Sanduiç Pikant & Kërpudha', en:'Spicy & Mushroom Sandwich', p:250,
+      dsq:'Sallam pikant dhe kërpudha.', den:'Spicy salami and mushrooms.', tags:['hot'] },
+
+    /* ─────────────── RESTORANT · pasta dhe rizoto ─────────────── */
+    { id:'pa01', c:'rest', art:'pasta', sq:'Linguini me Fruta Deti', en:'Seafood Linguine', p:600,
+      dsq:'Fruta deti të freskëta mbi linguini.', den:'Fresh seafood over linguine.', tags:['top'] },
+    { id:'pa02', c:'rest', art:'pasta', sq:'Linguini me Pomodorini & Karkaleca', en:'Linguine, Cherry Tomato & Prawns', p:600,
+      dsq:'Karkaleca dhe domate qershi.', den:'Prawns and cherry tomatoes.', tags:[] },
+    { id:'pa03', c:'rest', art:'pasta', sq:'Linguini Bolognese', en:'Linguine Bolognese', p:350,
+      dsq:'Salcë mishi e zier gjatë.', den:'Slow-cooked meat sauce.', tags:[] },
+    { id:'pa04', c:'rest', art:'pasta', sq:'Linguini me Salcë ose Gjalpë', en:'Linguine with Sauce or Butter', p:250,
+      dsq:'E thjeshtë, sipas dëshirës.', den:'Simple, however you like it.', tags:['veg'] },
+    { id:'pa05', c:'rest', art:'pasta', sq:'Pene me Pana & Proshutë', en:'Penne with Cream & Ham', p:350,
+      dsq:'Krem i lehtë dhe proshutë.', den:'Light cream and ham.', tags:[] },
+    { id:'pa06', c:'rest', art:'pasta', sq:'Rizoto me Fruta Deti', en:'Seafood Risotto', p:600,
+      dsq:'Oriz i gatuar me fruta deti.', den:'Rice cooked with seafood.', tags:[] },
+    { id:'pa07', c:'rest', art:'pasta', sq:'Rizoto me Kungull & Karkaleca', en:'Courgette & Prawn Risotto', p:600,
+      dsq:'Kungull i njomë dhe karkaleca.', den:'Courgette and prawns.', tags:[] },
+
+    /* ─────────────── RESTORANT · pjata kryesore ─────────────── */
+    { id:'pk01', c:'rest', art:'steak', sq:'Fileto Pule me Garniturë', en:'Chicken Fillet with Garnish', p:500,
+      dsq:'Fileto pule me garniturë sezonale.', den:'Chicken fillet with a seasonal garnish.', tags:[] },
+    { id:'pk02', c:'rest', art:'steak', sq:'Fileto Pule me Pana & Kërpudha', en:'Chicken Fillet, Cream & Mushrooms', p:600,
+      dsq:'Salcë kremi me kërpudha.', den:'Creamy mushroom sauce.', tags:[] },
+    { id:'pk03', c:'rest', art:'steak', sq:'Biftek Viçi', en:'Beef Steak', p:800,
+      dsq:'Biftek viçi në zgarë.', den:'Grilled beef steak.', tags:['top'] },
+    { id:'pk04', c:'rest', art:'steak', sq:'Bërxollë Viçi', en:'Beef Chop', p:800,
+      dsq:'Bërxollë me kockë, në zgarë.', den:'Bone-in chop, off the grill.', tags:[] },
+    { id:'pk05', c:'rest', art:'steak', sq:'Mish Qengji në Zgarë', en:'Grilled Lamb', p:900,
+      dsq:'Qengj i njomë në zgarë.', den:'Tender lamb off the grill.', tags:['top'] },
+    { id:'pk06', c:'rest', art:'fish', sq:'Karkaleca në Zgarë', en:'Grilled Prawns', p:800,
+      dsq:'Karkaleca të freskëta me limon.', den:'Fresh prawns with lemon.', tags:[] },
+    { id:'pk07', c:'rest', art:'fish', sq:'Friturë Mikse', en:'Mixed Fried Seafood', p:650,
+      dsq:'Peshk e fruta deti të skuqura.', den:'Fried fish and seafood.', tags:[] },
+    { id:'pk08', c:'rest', art:'fish', sq:'Koce / Levrek në Zgarë', en:'Grilled Sea Bream / Sea Bass', p:700,
+      dsq:'Peshk i freskët me perime në zgarë.', den:'Fresh fish with grilled vegetables.', tags:['top'] },
+
+    /* ─────────────── TRADICIONALE ─────────────── */
+    { id:'tr01', c:'trad', art:'tave', sq:'Tavë Dheu', en:'Tavë Dheu', p:400, note:'09:00–15:00',
+      dsq:'Pjekur në tavë balte, si dikur.', den:'Baked in a clay dish, the old way.', tags:['top'] },
+    { id:'tr02', c:'trad', art:'tave', sq:'Tavë Balte', en:'Clay-Pot Bake', p:400, note:'09:00–15:00',
+      dsq:'Gatim i ngadaltë në tavë balte.', den:'Slow-cooked in a clay pot.', tags:[] },
+    { id:'tr03', c:'trad', art:'tave', sq:'Tavë Kosi', en:'Tavë Kosi', p:400, note:'09:00–15:00',
+      dsq:'Mish, oriz dhe kos i trashë në furrë.', den:'Meat, rice and thick yoghurt, oven-baked.', tags:['top'] },
+    { id:'tr04', c:'trad', art:'tave', sq:'Pilaf', en:'Pilaf', p:100, note:'09:00–15:00',
+      dsq:'Oriz i gatuar në lëng mishi.', den:'Rice cooked in meat stock.', tags:[] },
+    { id:'tr05', c:'trad', art:'tave', sq:'Qofte Shtëpie', en:'House Meatballs', p:50, unit:'/copë', note:'09:00–15:00',
+      dsq:'Qofte të fërguara, receta e shtëpisë.', den:'Fried meatballs, the house recipe.', tags:[] },
+    { id:'tr06', c:'trad', art:'soup', sq:'Paçe Koke', en:'Paçe Koke', p:250, note:'09:00–15:00',
+      dsq:'Supa tradicionale e mëngjesit.', den:'The traditional morning soup.', tags:[] },
+    { id:'tr07', c:'trad', art:'tave', sq:'Tasqebap', en:'Tasqebap', p:300, note:'09:00–15:00',
+      dsq:'Mish i zier ngadalë me qepë.', den:'Slowly braised meat with onion.', tags:[] },
+    { id:'tr08', c:'trad', art:'tave', sq:'Lazanja', en:'Lasagne', p:350,
+      dsq:'Petë, salcë mishi dhe beshamel.', den:'Pasta sheets, meat sauce and béchamel.', tags:[] },
+    { id:'tr09', c:'trad', art:'tave', sq:'Pastice', en:'Pastiçio', p:250,
+      dsq:'Makarona të pjekura në furrë.', den:'Oven-baked pasta.', tags:[] },
+    { id:'tr10', c:'trad', art:'tave', sq:'Musaka', en:'Moussaka', p:300,
+      dsq:'Shtresa patatesh, mishi dhe beshameli.', den:'Layers of potato, meat and béchamel.', tags:[] },
+    { id:'tr11', c:'trad', art:'tave', sq:'Tavë Kosi me Mish Qengji', en:'Tavë Kosi with Lamb', p:500,
+      dsq:'Versioni me mish qengji.', den:'The version made with lamb.', tags:['top'] },
+    { id:'tr12', c:'trad', art:'tave', sq:'Speca të Mbushura', en:'Stuffed Peppers', p:250,
+      dsq:'Speca të mbushur me oriz dhe erëza.', den:'Peppers stuffed with rice and herbs.', tags:['veg'] },
+    { id:'tr13', c:'trad', art:'tave', sq:'Patëllxhanë të Mbushur', en:'Stuffed Aubergines', p:300,
+      dsq:'Patëllxhanë të pjekur e të mbushur.', den:'Roasted and stuffed aubergines.', tags:['veg'] },
+    { id:'tr14', c:'trad', art:'tave', sq:'Turli me Mish', en:'Turli with Meat', p:300,
+      dsq:'Perime të pjekura bashkë me mish.', den:'Vegetables baked together with meat.', tags:[] },
+    { id:'tr15', c:'trad', art:'soup', sq:'Fasule Jani', en:'Bean Stew', p:150,
+      dsq:'Fasule të ziera me perime.', den:'Beans stewed with vegetables.', tags:['veg'] },
+    { id:'tr16', c:'trad', art:'soup', sq:'Fasule me Mish', en:'Beans with Meat', p:300,
+      dsq:'Fasule të ziera me mish.', den:'Beans stewed with meat.', tags:[] },
+    { id:'tr17', c:'trad', art:'soup', sq:'Kos Shtëpie', en:'House Yoghurt', p:80,
+      dsq:'Kos i trashë, i bërë në shtëpi.', den:'Thick, house-made yoghurt.', tags:['veg'] },
+
+    /* ─────────────── SALLATA ─────────────── */
+    { id:'sl01', c:'starter', art:'salad', sq:'Sallatë Greke', en:'Greek Salad', p:300,
+      dsq:'Domate, kastravec, ullinj dhe djathë.', den:'Tomato, cucumber, olives and cheese.', tags:['veg','top'] },
+    { id:'sl02', c:'starter', art:'salad', sq:'Sallatë Mikse', en:'Mixed Salad', p:300,
+      dsq:'Perime të freskëta të stinës.', den:'Fresh seasonal vegetables.', tags:['veg'] },
+    { id:'sl03', c:'starter', art:'salad', sq:'Sallatë me Rukola', en:'Rocket Salad', p:350,
+      dsq:'Rukolë, domate qershi dhe djathë i thekur.', den:'Rocket, cherry tomatoes and shaved cheese.', tags:['veg'] },
+    { id:'sl04', c:'starter', art:'salad', sq:'Sallatë Cezar', en:'Caesar Salad', p:350,
+      dsq:'Marule, pulë, krutona dhe salcë Cezar.', den:'Romaine, chicken, croutons and Caesar dressing.', tags:[] },
+    { id:'sl05', c:'starter', art:'salad', sq:'Sallatë Turshi', en:'Pickle Salad', p:200,
+      dsq:'Turshi shtëpie të përziera.', den:'Assorted house pickles.', tags:['veg'] },
+    { id:'sl06', c:'starter', art:'salad', sq:'Perime në Zgarë', en:'Grilled Vegetables', p:300,
+      dsq:'Perime sezonale në zgarë me vaj ulliri.', den:'Seasonal vegetables grilled with olive oil.', tags:['veg'] },
+    { id:'sl07', c:'starter', art:'salad', sq:'Perime në Avull', en:'Steamed Vegetables', p:300,
+      dsq:'Perime të ziera në avull.', den:'Lightly steamed vegetables.', tags:['veg'] },
+
+    /* ─────────────── SUPA ─────────────── */
+    { id:'su01', c:'starter', art:'soup', sq:'Supë me Perime', en:'Vegetable Soup', p:200,
+      dsq:'Supë e lehtë me perime të stinës.', den:'A light soup of seasonal vegetables.', tags:['veg'] },
+    { id:'su02', c:'starter', art:'soup', sq:'Supë Pule', en:'Chicken Soup', p:250,
+      dsq:'Lëng pule i gatuar në shtëpi.', den:'House-made chicken broth.', tags:[] },
+    { id:'su03', c:'starter', art:'soup', sq:'Supë Peshku', en:'Fish Soup', p:300,
+      dsq:'Supë peshku sipas recetës së bregdetit.', den:'Fish soup, the coastal way.', tags:[] },
+
+    /* ─────────────── SHOQËRUESE ─────────────── */
+    { id:'sh01', c:'starter', art:'meze', sq:'Fokaçe Bruskete (shoqëruese)', en:'Bruschetta Focaccia (side)', p:150,
+      dsq:'Porcion shoqërues për tavolinën.', den:'A side portion for the table.', tags:['veg'] },
+    { id:'sh02', c:'starter', art:'byrek', sq:'Bukë Misri me Shëllirë', en:'Cornbread with Brine Cheese', p:100,
+      dsq:'Bukë misri dhe djathë shëllire.', den:'Cornbread with brined cheese.', tags:['veg'] },
+    { id:'sh03', c:'starter', art:'meze', sq:'Djathë i Bardhë', en:'White Cheese', p:150,
+      dsq:'Djathë i bardhë vendi.', den:'Local white cheese.', tags:['veg'] },
+    { id:'sh04', c:'starter', art:'meze', sq:'Djathë Kaçkavall', en:'Kaçkavall Cheese', p:200,
+      dsq:'Kaçkavall i prerë në feta.', den:'Sliced kaçkavall cheese.', tags:['veg'] },
+    { id:'sh05', c:'starter', art:'meze', sq:'Ullinj të Marinuar', en:'Marinated Olives', p:150,
+      dsq:'Ullinj vendi të marinuar.', den:'Marinated local olives.', tags:['veg'] },
+    { id:'sh06', c:'starter', art:'fries', sq:'Patate të Skuqura', en:'French Fries', p:150,
+      dsq:'Patate të skuqura, të kripura sa duhet.', den:'Fries, salted just right.', tags:['veg'] },
+    { id:'sh07', c:'starter', art:'meze', sq:'Xaxiq', en:'Tzatziki', p:150,
+      dsq:'Kos me kastravec dhe hudhër.', den:'Yoghurt with cucumber and garlic.', tags:['veg'] },
+
+    /* ─────────────── BAR · të ngrohta ─────────────── */
+    { id:'bt01', c:'pije', art:'coffee', sq:'Kafe', en:'Coffee', p:70,
+      dsq:'Espreso italiane.', den:'Italian espresso.', tags:['veg'] },
+    { id:'bt02', c:'pije', art:'coffee', sq:'Makijato', en:'Macchiato', p:80,
+      dsq:'Espreso me pak qumësht.', den:'Espresso with a little milk.', tags:['veg'] },
+    { id:'bt03', c:'pije', art:'coffee', sq:'Çaj i Ngrohtë', en:'Hot Tea', p:60,
+      dsq:'Çaj i ngrohtë me limon.', den:'Hot tea with lemon.', tags:['veg'] },
+    { id:'bt04', c:'pije', art:'coffee', sq:'Kapuçino me Kafe', en:'Cappuccino with Coffee', p:120,
+      dsq:'Kapuçino mbi bazë espreso.', den:'Cappuccino on an espresso base.', tags:['veg'] },
+    { id:'bt05', c:'pije', art:'coffee', sq:'Kapuçino me Bustinë', en:'Sachet Cappuccino', p:150,
+      dsq:'Kapuçino me bustinë.', den:'Cappuccino made from a sachet.', tags:['veg'] },
+    { id:'bt06', c:'pije', art:'coffee', sq:'Kakao', en:'Hot Chocolate', p:150,
+      dsq:'Kakao e ngrohtë.', den:'Warm cocoa.', tags:['veg'] },
+    { id:'bt07', c:'pije', art:'coffee', sq:'Kakao e Vogël', en:'Small Hot Chocolate', p:80,
+      dsq:'Porcion i vogël kakaoje.', den:'A small portion of cocoa.', tags:['veg'] },
+    { id:'bt08', c:'pije', art:'coffee', sq:'Çokollatë e Zezë', en:'Dark Chocolate', p:150,
+      dsq:'Çokollatë e zezë e ngrohtë.', den:'Warm dark chocolate.', tags:['veg'] },
+    { id:'bt09', c:'pije', art:'coffee', sq:'Çokollatë e Bardhë', en:'White Chocolate', p:150,
+      dsq:'Çokollatë e bardhë e ngrohtë.', den:'Warm white chocolate.', tags:['veg'] },
+    { id:'bt10', c:'pije', art:'coffee', sq:'Salep', en:'Salep', p:120,
+      dsq:'Pija e ngrohtë e dimrit.', den:'The warm winter drink.', tags:['veg'] },
+
+    /* ─────────────── PIJE FRESKUESE ─────────────── */
+    { id:'pf01', c:'pije', art:'drink', sq:'Bravo', en:'Bravo Juice', p:150,
+      dsq:'Lëng frutash i ftohtë.', den:'Chilled fruit juice.', tags:['veg'] },
+    { id:'pf02', c:'pije', art:'drink', sq:'Fanta', en:'Fanta', p:150, dsq:'E ftohtë akull.', den:'Ice cold.', tags:['veg'] },
+    { id:'pf03', c:'pije', art:'drink', sq:'Coca-Cola', en:'Coca-Cola', p:150, dsq:'E ftohtë akull.', den:'Ice cold.', tags:['veg'] },
+    { id:'pf04', c:'pije', art:'drink', sq:'Çaj i Ftohtë', en:'Iced Tea', p:150, dsq:'Me limon ose pjeshkë.', den:'Lemon or peach.', tags:['veg'] },
+    { id:'pf05', c:'pije', art:'drink', sq:'Lemon / Orange Soda', en:'Lemon / Orange Soda', p:150, dsq:'Sodë me limon ose portokall.', den:'Lemon or orange soda.', tags:['veg'] },
+    { id:'pf06', c:'pije', art:'drink', sq:'Schweppes', en:'Schweppes', p:120, dsq:'Tonik i hidhur.', den:'Bitter tonic.', tags:['veg'] },
+    { id:'pf07', c:'pije', art:'drink', sq:'B52', en:'B52', p:150, dsq:'Pije energjike.', den:'Energy drink.', tags:['veg'] },
+    { id:'pf08', c:'pije', art:'drink', sq:'Golden Eagle', en:'Golden Eagle', p:150, dsq:'Pije energjike.', den:'Energy drink.', tags:['veg'] },
+    { id:'pf09', c:'pije', art:'drink', sq:'Red Bull', en:'Red Bull', p:250, dsq:'Pije energjike.', den:'Energy drink.', tags:['veg'] },
+    { id:'pf10', c:'pije', art:'drink', sq:'Bitter', en:'Bitter', p:70, dsq:'Aperitiv pa alkool.', den:'Non-alcoholic aperitif.', tags:['veg'] },
+    { id:'pf11', c:'pije', art:'drink', sq:'Crodino', en:'Crodino', p:150, dsq:'Aperitiv italian pa alkool.', den:'Italian non-alcoholic aperitif.', tags:['veg'] },
+    { id:'pf12', c:'pije', art:'drink', sq:'Suko', en:'Suko', p:70, dsq:'Lëng frutash.', den:'Fruit juice.', tags:['veg'] },
+    { id:'pf13', c:'pije', art:'drink', sq:'Ujë 0.5L', en:'Water 0.5L', p:60, dsq:'Ujë natyral.', den:'Still water.', tags:['veg'] },
+
+    /* ─────────────── ALKOOLIKE ─────────────── */
+    { id:'al01', c:'pije', art:'drink', sq:'Raki', en:'Raki', p:70,
+      dsq:'Raki vendi, gota.', den:'Local raki, by the glass.', tags:['veg'] },
+    { id:'al02', c:'pije', art:'drink', sq:'Gotë Verë e Bardhë / e Kuqe', en:'Glass of White / Red Wine', p:200,
+      dsq:'Verë e shtëpisë, gota.', den:'House wine, by the glass.', tags:['veg'] },
+    { id:'al03', c:'pije', art:'beer', sq:'Heineken', en:'Heineken', p:200, dsq:'Birrë e ftohtë.', den:'Cold beer.', tags:['veg'] },
+    { id:'al04', c:'pije', art:'beer', sq:'Peroni', en:'Peroni', p:150, dsq:'Birrë italiane.', den:'Italian lager.', tags:['veg'] },
+    { id:'al05', c:'pije', art:'beer', sq:'Korça', en:'Korça', p:150, dsq:'Birra klasike shqiptare.', den:'The classic Albanian lager.', tags:['veg','top'] },
+    { id:'al06', c:'pije', art:'beer', sq:'Paulaner', en:'Paulaner', p:300, dsq:'Birrë gjermane gruri.', den:'German wheat beer.', tags:['veg'] },
+    { id:'al07', c:'pije', art:'beer', sq:'Bavaria 0 Alkool', en:'Bavaria 0.0', p:150, dsq:'Birrë pa alkool.', den:'Alcohol-free beer.', tags:['veg'] },
+  ];
+
+  /* --------------------------------------------------------------------------
+     ⚠️ REVIEW — TODO:REAL
+     Këto NUK janë review reale, janë tekst vendmbajtës. Zëvendësoji me review
+     të vërteta nga Google ose Facebook PARA se faqja të dalë online.
+     -------------------------------------------------------------------------- */
+  const reviews = [
+    { n:'—', s:5, src:'Vendmbajtës', sq:'Këtu vjen review-ja e parë reale nga Google.', en:'The first real Google review goes here.' },
+    { n:'—', s:5, src:'Vendmbajtës', sq:'Këtu vjen review-ja e dytë reale nga Google.', en:'The second real Google review goes here.' },
+    { n:'—', s:5, src:'Vendmbajtës', sq:'Këtu vjen një review nga Facebook ose Instagram.', en:'A Facebook or Instagram review goes here.' },
+  ];
+
+  const stats = [
+    { v:'120+', sq:'Pjata në menu',        en:'Dishes on the menu' },
+    { v:'4',    sq:'Kuzhina nën një çati', en:'Kitchens under one roof' },
+    { v:'15',   sq:'Pica dhe fokaçe',      en:'Pizzas and focaccias' },
+    { v:'30+',  sq:'Pije në bar',          en:'Drinks at the bar' },
+  ];
+
+  /* --------------------------------------------------------------------------
+     PËRKTHIMET
+     -------------------------------------------------------------------------- */
+  const t = {
+    nav_home:     { sq:'Kreu',        en:'Home' },
+    nav_menu:     { sq:'Menuja',      en:'Menu' },
+    nav_about:    { sq:'Rreth Nesh',  en:'About' },
+    nav_reviews:  { sq:'Vlerësime',   en:'Reviews' },
+    nav_contact:  { sq:'Kontakt',     en:'Contact' },
+    nav_book:     { sq:'Rezervo',     en:'Book' },
+
+    hero_kicker:  { sq:'Durrës · Fast Food & Pizza · Restorant', en:'Durrës · Fast Food & Pizza · Restaurant' },
+    hero_t1:      { sq:'Shija që',    en:'Flavour that' },
+    hero_t2:      { sq:'nuk pret',    en:"won't wait" },
+    hero_sub:     { sq:'Pica në furrë, sufllaqe e doner, skarë dhe peshk i freskët, dhe tavat tradicionale çdo mëngjes — mbi 120 pjata nën një çati, në Durrës.',
+                    en:'Oven-baked pizza, gyros and doner, grilled meats and fresh fish, and traditional clay-pot bakes every morning — over 120 dishes under one roof, in Durrës.' },
+    cta_order:    { sq:'Porosit në WhatsApp', en:'Order on WhatsApp' },
+    cta_menu:     { sq:'Shiko Menunë',  en:'Explore the Menu' },
+    cta_call:     { sq:'Telefono Tani', en:'Call Now' },
+    cta_book:     { sq:'Rezervo Tavolinë', en:'Book a Table' },
+
+    menu_kicker:  { sq:'Menuja Interaktive', en:'Interactive Menu' },
+    menu_title:   { sq:'Zgjidh. Shto. Dërgo.', en:'Pick. Add. Send.' },
+    menu_sub:     { sq:'Ndërto porosinë tënde dhe dërgoje me një klikim në WhatsApp — pa aplikacione, pa regjistrim.',
+                    en:'Build your order and send it to WhatsApp in one tap — no apps, no sign-up.' },
+    menu_all:     { sq:'Të gjitha',   en:'All' },
+    search_ph:    { sq:'Kërko pjatë…', en:'Search a dish…' },
+    add:          { sq:'Shto',        en:'Add' },
+    added:        { sq:'U shtua ✓',   en:'Added ✓' },
+    empty:        { sq:'Asnjë pjatë nuk përputhet me kërkimin.', en:'No dishes match your search.' },
+
+    cart_title:   { sq:'Porosia jote', en:'Your order' },
+    cart_empty:   { sq:'Shporta është bosh. Shto diçka të shijshme!', en:'Your cart is empty. Add something delicious!' },
+    cart_sub:     { sq:'Nëntotali',   en:'Subtotal' },
+    cart_del:     { sq:'Dërgesa',     en:'Delivery' },
+    cart_free:    { sq:'FALAS',       en:'FREE' },
+    cart_zone:    { sq:'Sipas zonës', en:'By area' },
+    cart_total:   { sq:'Totali',      en:'Total' },
+    cart_send:    { sq:'Dërgo porosinë në WhatsApp', en:'Send order on WhatsApp' },
+    cart_note:    { sq:'Do të hapet WhatsApp me porosinë të gatshme. Ti shtyp vetëm «Dërgo».',
+                    en:'WhatsApp opens with your order pre-filled. You just hit «Send».' },
+    cart_clear:   { sq:'Pastro',      en:'Clear' },
+
+    about_kicker: { sq:'Historia jonë', en:'Our story' },
+    about_title:  { sq:'Katër kuzhina. Një adresë.', en:'Four kitchens. One address.' },
+    about_body:   { sq:'Në SPRINT nuk të duhet të zgjedhësh. Në mëngjes dalin tavat e baltës dhe gatimet e ditës, gjatë gjithë ditës punojnë furra e picës dhe banaku i sufllaqes, dhe në darkë skara nxjerr biftekun, qengjin dhe peshkun e freskët. E njëjta kuzhinë, e njëjta tavolinë.',
+                    en:'At SPRINT you never have to choose. Mornings bring the clay-pot bakes and the dishes of the day; the pizza oven and the gyros counter run all day; and at night the grill turns out steak, lamb and fresh fish. One kitchen, one table.' },
+    about_events: { sq:'Evente',      en:'Events' },
+
+    rev_kicker:   { sq:'Çfarë thonë klientët', en:'What guests say' },
+    rev_title:    { sq:'Vlerësimet tuaja',  en:'Your reviews' },
+    rev_on_g:     { sq:'nga {n} vlerësime në Google', en:'from {n} Google reviews' },
+    rev_all:      { sq:'Shiko të gjitha në Google', en:'See them all on Google' },
+    rev_write:    { sq:'Shkruaj një vlerësim', en:'Write a review' },
+    rev_src:      { sq:'Vlerësimet vijnë drejtpërdrejt nga Google.',
+                    en:'Reviews come straight from Google.' },
+    rev_none:     { sq:'Ende s’kemi vlerësime këtu — na gjej në Google dhe na thuaj si ishte.',
+                    en:'No reviews here yet — find us on Google and tell us how it was.' },
+
+    book_kicker:  { sq:'Rezervim', en:'Reservation' },
+    book_title:   { sq:'Rezervo tavolinën tënde', en:'Reserve your table' },
+    book_sub:     { sq:'Plotëso formularin — njoftimi vjen direkt në WhatsApp-in tonë dhe konfirmohet brenda pak minutash.',
+                    en:'Fill in the form — the request lands straight in our WhatsApp and is confirmed within minutes.' },
+    f_name:       { sq:'Emri dhe mbiemri', en:'Full name' },
+    f_phone:      { sq:'Numri i telefonit', en:'Phone number' },
+    f_date:       { sq:'Data',        en:'Date' },
+    f_time:       { sq:'Ora',         en:'Time' },
+    f_people:     { sq:'Persona',     en:'Guests' },
+    f_area:       { sq:'Ambienti',    en:'Seating' },
+    f_area_in:    { sq:'Brenda',      en:'Indoor' },
+    f_area_out:   { sq:'Jashtë (terracë)', en:'Outdoor (terrace)' },
+    f_area_ev:    { sq:'Salla e eventeve', en:'Function room' },
+    f_area_any:   { sq:'S\'ka rëndësi', en:'No preference' },
+    f_note:       { sq:'Shënim (ditëlindje, alergji, karrige fëmijësh…)', en:'Note (birthday, allergies, high chair…)' },
+    f_send:       { sq:'Dërgo rezervimin në WhatsApp', en:'Send reservation on WhatsApp' },
+    f_email:      { sq:'Dërgo edhe me email', en:'Send by email too' },
+    f_req:        { sq:'Plotëso emrin, telefonin dhe datën.', en:'Please fill in name, phone and date.' },
+
+    ct_kicker:    { sq:'Na gjeni',    en:'Find us' },
+    ct_title:     { sq:'Jemi këtu, në Durrës', en:'We are here, in Durrës' },
+    ct_hours:     { sq:'Orari',       en:'Opening hours' },
+    ct_addr:      { sq:'Adresa',      en:'Address' },
+    ct_phone:     { sq:'Telefoni',    en:'Phone' },
+    ct_map:       { sq:'Hape në Google Maps', en:'Open in Google Maps' },
+
+    foot_rights:  { sq:'Të gjitha të drejtat e rezervuara.', en:'All rights reserved.' },
+    scroll:       { sq:'Zbrit',       en:'Scroll' },
+    b_delivery:   { sq:'Dërgesë',     en:'Delivery' },
+    b_dishes:     { sq:'Pjata',       en:'Dishes' },
+    b_pizzas:     { sq:'Pica',        en:'Pizzas' },
+    b_kitchens:   { sq:'Kuzhina',     en:'Kitchens' },
+    b_rating:     { sq:'Vlerësim',    en:'Rating' },
+
+    /* ---- arka dhe ndjekja e porosisë ---- */
+    co_title:     { sq:'Përfundo porosinë', en:'Complete your order' },
+    co_kind:      { sq:'Si e do porosinë?', en:'How would you like it?' },
+    co_delivery:  { sq:'Me dërgesë',    en:'Delivery' },
+    co_pickup:    { sq:'Marr vetë',     en:'Pick-up' },
+    co_name:      { sq:'Emri',          en:'Name' },
+    co_phone:     { sq:'Telefoni',      en:'Phone' },
+    co_addr:      { sq:'Adresa e plotë', en:'Full address' },
+    co_addr_ph:   { sq:'Rruga, ndërtesa, kati, apartamenti', en:'Street, building, floor, flat' },
+    co_when:      { sq:'Kur',           en:'When' },
+    co_asap:      { sq:'Sa më shpejt',  en:'As soon as possible' },
+    co_time:      { sq:'Për një orë të caktuar', en:'At a set time' },
+    co_pay:       { sq:'Pagesa',        en:'Payment' },
+    co_cash:      { sq:'Para në dorë',  en:'Cash' },
+    co_card:      { sq:'Me kartë',      en:'Card' },
+    co_note:      { sq:'Shënim për kuzhinën', en:'Note for the kitchen' },
+    co_note_ph:   { sq:'Pa qepë, kampanellë e prishur, kati i 3-të…', en:'No onion, broken doorbell, third floor…' },
+    co_send:      { sq:'Dërgo porosinë', en:'Place the order' },
+    co_back:      { sq:'Kthehu te shporta', en:'Back to the cart' },
+    co_req:       { sq:'Plotëso emrin dhe telefonin.', en:'Please fill in your name and phone.' },
+    co_req_addr:  { sq:'Për dërgesë duhet edhe adresa.', en:'Delivery also needs an address.' },
+    co_fail:      { sq:'Porosia nuk u regjistrua dot. Provo sërish ose na merr në telefon.',
+                    en:'The order could not be saved. Try again or give us a call.' },
+
+    ok_title:     { sq:'Porosia u regjistrua!', en:'Your order is in!' },
+    ok_sub:       { sq:'Na dërgo edhe një mesazh në WhatsApp që ta konfirmojmë menjëherë.',
+                    en:'Send us a WhatsApp message too so we can confirm right away.' },
+    ok_wa:        { sq:'Hap WhatsApp', en:'Open WhatsApp' },
+    ok_track:     { sq:'Ndiq porosinë', en:'Track the order' },
+    ok_new:       { sq:'Porosi e re',   en:'New order' },
+    ok_no:        { sq:'Porosia nr.',   en:'Order no.' },
+    ok_code:      { sq:'Kodi i gjurmimit', en:'Tracking code' },
+    ok_keep:      { sq:'Ruaje këtë kod. Me të ndjek porosinë në çdo moment, edhe nga një telefon tjetër.',
+                    en:'Keep this code. It lets you follow the order at any time, even from another phone.' },
+    ok_copy:      { sq:'Kopjo kodin',  en:'Copy the code' },
+
+    /* vendndodhja */
+    loc_btn:      { sq:'📍 Dërgo vendndodhjen', en:'📍 Share your location' },
+    loc_wait:     { sq:'Po kërkohet vendndodhja…', en:'Finding your location…' },
+    loc_drag:     { sq:'Lëvize hartën derisa pini të jetë te dera jote.',
+                    en:'Drag the map until the pin sits at your door.' },
+    loc_good:     { sq:'Vendndodhja u mor saktë.', en:'Location captured accurately.' },
+    loc_ok:       { sq:'Vendndodhja u mor. Saktësoje pinin nëse nuk është te dera.',
+                    en:'Location captured. Nudge the pin if it is not at your door.' },
+    loc_poor:     { sq:'Vendndodhja nuk është e saktë — lëvize pinin te dera jote.',
+                    en:'This location is not precise — drag the pin to your door.' },
+    loc_set:      { sq:'Pini u vendos ✓', en:'Pin set ✓' },
+    loc_clear:    { sq:'Hiqe pinin', en:'Remove the pin' },
+    loc_why:      { sq:'Pini e çon motorristin te dera, jo te rruga. Adresa mbetet e nevojshme.',
+                    en:'The pin takes the driver to your door, not just the street. The address is still needed.' },
+    ok_copied:    { sq:'U kopjua ✓',   en:'Copied ✓' },
+
+    /* ---- motori i gjurmimit ---- */
+    tk_kicker:    { sq:'Gjurmo porosinë', en:'Track your order' },
+    tk_title:     { sq:'Ku ndodhet porosia jote', en:'Where your order is' },
+    tk_sub:       { sq:'Shkruaj kodin që more kur porosite, ose numrin e telefonit me të cilin e bëre.',
+                    en:'Enter the code you were given when you ordered, or the phone number you used.' },
+    tk_by_code:   { sq:'Me kod',       en:'By code' },
+    tk_by_phone:  { sq:'Me telefon',   en:'By phone' },
+    tk_code_ph:   { sq:'p.sh. A4F7-K2M9', en:'e.g. A4F7-K2M9' },
+    tk_phone_ph:  { sq:'p.sh. 069 123 4567', en:'e.g. 069 123 4567' },
+    tk_go:        { sq:'Gjurmo',       en:'Track' },
+    tk_short:     { sq:'Kodi ka tetë shenja — kontrollo dhe provo sërish.',
+                    en:'The code has eight characters — check it and try again.' },
+    tk_phone_short:{ sq:'Shkruaj numrin e plotë të telefonit.', en:'Enter the full phone number.' },
+    tk_nofind:    { sq:'Nuk u gjet asnjë porosi me këtë kod.', en:'No order was found with that code.' },
+    tk_nophone:   { sq:'Nuk ka porosi në punë me këtë numër. Porositë e mbyllura nuk kërkohen dot me telefon — përdor kodin.',
+                    en:'No orders in progress for that number. Completed orders cannot be found by phone — use the code.' },
+    tk_found:     { sq:'porosi në punë', en:'orders in progress' },
+    tk_open:      { sq:'Hape',         en:'Open' },
+    tk_hint:      { sq:'Kërkimi me telefon gjen vetëm porositë e 24 orëve të fundit që janë ende në punë.',
+                    en:'Phone search only finds orders from the last 24 hours that are still in progress.' },
+
+    tr_title:     { sq:'Porosia jote',  en:'Your order' },
+    tr_code:      { sq:'Kodi',          en:'Code' },
+    tr_again:     { sq:'Gjurmo një tjetër', en:'Track another' },
+    tr_elapsed:   { sq:'Nga porosia',   en:'Since ordered' },
+    tr_left:      { sq:'Mbeten',        en:'Remaining' },
+    tr_late:      { sq:'Me vonesë',     en:'Running late' },
+    tr_notfound:  { sq:'Kjo porosi nuk u gjet.', en:'That order was not found.' },
+    tr_back:      { sq:'Kthehu te faqja', en:'Back to the site' },
+
+    st_new:        { sq:'Pritet konfirmimi', en:'Awaiting confirmation' },
+    st_accepted:   { sq:'E pranuar',      en:'Accepted' },
+    st_preparing:  { sq:'Në përgatitje',  en:'Being prepared' },
+    st_ready:      { sq:'Gati',           en:'Ready' },
+    st_delivering: { sq:'Në rrugë',       en:'On the way' },
+    st_done:       { sq:'Përfunduar',     en:'Completed' },
+    st_cancelled:  { sq:'E anuluar',      en:'Cancelled' },
+    lang_label:   { sq:'EN',          en:'SQ' },
+  };
+
+  /* --------------------------------------------------------------------------
+     NDIHMËSA
+     -------------------------------------------------------------------------- */
+  menu.forEach((m) => { m.tags = m.tags || []; m.dsq = m.dsq || ''; m.den = m.den || ''; });
+
+  let lang = 'sq';
+  const setLang = (l) => { lang = l; };
+  const getLang = () => lang;
+  const T  = (k) => (t[k] ? t[k][lang] : k);
+  // Toleron mungesën: një fushë e zbrazët nga baza s'duhet ta prishë faqen.
+  const money = (n) => (Number(n) || 0).toLocaleString('sq-AL') + ' ' + config.currency;
+  /** Çmimi siç shfaqet, bashkë me njësinë nëse pjata shitet me copë. */
+  const price = (m) => money(m.p) + (m.unit ? ' ' + m.unit : '');
+
+  const waLink = (text) => 'https://wa.me/' + config.whatsapp + '?text=' + encodeURIComponent(text);
+  const mailLink = (subject, body) =>
+    'mailto:' + (config.email || '') + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  const mapLink = () =>
+    'https://www.google.com/maps/search/?api=1&query=' + config.geo.lat + ',' + config.geo.lng;
+
+  return { config, categories, menu, reviews, stats, t, T, setLang, getLang, money, price, waLink, mailLink, mapLink };
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Shtresa e ruajtjes.
+   Flet me Supabase përmes REST-it (pa asnjë bibliotekë të jashtme).
+   Nëse Supabase nuk është konfiguruar, bie te ruajtja lokale në shfletues,
+   që paneli admin të jetë i provueshëm edhe pa llogari.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const CFG = window.SPRINT_CONFIG || {};
+  const URL_ = (CFG.SUPABASE_URL || '').replace(/\/+$/, '');
+  const KEY = CFG.SUPABASE_ANON_KEY || '';
+  const BUCKET = CFG.PHOTO_BUCKET || 'photos';
+  // Serveri lokal shërben faqen nga e njëjta adresë, ndaj URL-ja rri bosh dhe
+  // kërkesat shkojnë relative. Për Supabase duhen të dyja.
+  const configured = !!(CFG.LOCAL || (URL_ && KEY));
+
+  const LS_SESSION = 'sprint-session';
+  const LS_LOCAL = 'sprint-local-content';
+
+  /* ---------------- sesioni ---------------- */
+  let session = null;
+  try { session = JSON.parse(localStorage.getItem(LS_SESSION) || 'null'); } catch (e) {}
+
+  const saveSession = (s) => {
+    session = s;
+    if (s) localStorage.setItem(LS_SESSION, JSON.stringify(s));
+    else localStorage.removeItem(LS_SESSION);
+  };
+
+  const authHeader = () => (session && session.access_token)
+    ? 'Bearer ' + session.access_token : 'Bearer ' + KEY;
+
+  const headers = (extra) => Object.assign({
+    apikey: KEY,
+    Authorization: authHeader(),
+    'Content-Type': 'application/json',
+  }, extra || {});
+
+  async function req(path, opts) {
+    const r = await fetch(URL_ + path, opts);
+    if (!r.ok) {
+      let msg = r.status + ' ' + r.statusText;
+      try { const j = await r.json(); msg = j.message || j.error_description || j.msg || msg; } catch (e) {}
+      throw new Error(msg);
+    }
+    return r.status === 204 ? null : r.json();
+  }
+
+  /* ---------------- hyrja ---------------- */
+  async function signIn(email, password) {
+    if (!configured) throw new Error('Supabase nuk është konfiguruar te shared/config.js');
+    const data = await req('/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { apikey: KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    saveSession({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      email: (data.user && data.user.email) || email,
+      expires_at: Date.now() + (data.expires_in || 3600) * 1000,
+    });
+    return session;
+  }
+
+  async function refresh() {
+    if (!session || !session.refresh_token) return null;
+    try {
+      const data = await req('/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST',
+        headers: { apikey: KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: session.refresh_token }),
+      });
+      saveSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        email: session.email,
+        expires_at: Date.now() + (data.expires_in || 3600) * 1000,
+      });
+      return session;
+    } catch (e) { saveSession(null); return null; }
+  }
+
+  /** Siguron një token të vlefshëm para çdo shkrimi. */
+  async function ensureAuth() {
+    if (!session) return null;
+    if (session.expires_at && session.expires_at - Date.now() < 60000) return refresh();
+    return session;
+  }
+
+  const signOut = () => saveSession(null);
+  const currentUser = () => (session ? { email: session.email } : null);
+
+  /* ---------------- leximi publik ---------------- */
+  /** Rreshti i tabelës → objekti që pret faqja. */
+  const rowToItem = (r) => ({
+    id: r.id, c: r.category, art: r.art || 'pizza',
+    sq: r.name_sq, en: r.name_en || r.name_sq,
+    dsq: r.desc_sq || '', den: r.desc_en || '',
+    p: Number(r.price) || 0,
+    unit: r.unit || undefined,
+    note: r.note || undefined,
+    tags: Array.isArray(r.tags) ? r.tags : [],
+    img: r.image_url || undefined,
+    available: r.available !== false,
+    sort: r.sort == null ? 0 : Number(r.sort),
+  });
+
+  const itemToRow = (m) => ({
+    id: m.id, category: m.c, art: m.art || 'pizza',
+    name_sq: m.sq, name_en: m.en || m.sq,
+    desc_sq: m.dsq || '', desc_en: m.den || '',
+    price: Number(m.p) || 0,
+    unit: m.unit || null,
+    note: m.note || null,
+    tags: m.tags || [],
+    image_url: m.img || null,
+    available: m.available !== false,
+    sort: m.sort == null ? 0 : Number(m.sort),
+  });
+
+  /** Lexon menunë dhe cilësimet. Kthen null nëse s'ka asgjë të publikuar. */
+  async function fetchAll() {
+    if (!configured) return readLocal();
+    const [items, settings] = await Promise.all([
+      req('/rest/v1/menu_items?select=*&order=sort.asc', { headers: headers() }),
+      req('/rest/v1/settings?select=data&id=eq.main', { headers: headers() }),
+    ]);
+    if (!items || !items.length) return null;
+    return {
+      menu: items.map(rowToItem),
+      settings: (settings && settings[0] && settings[0].data) || null,
+    };
+  }
+
+  /* ---------------- shkrimi (vetëm i identifikuar) ---------------- */
+  async function saveItems(list) {
+    if (!configured) return writeLocal({ menu: list });
+    await ensureAuth();
+    return req('/rest/v1/menu_items?on_conflict=id', {
+      method: 'POST',
+      headers: headers({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify(list.map(itemToRow)),
+    });
+  }
+
+  async function deleteItem(id) {
+    if (!configured) {
+      const cur = readLocal() || {};
+      return writeLocal({ menu: (cur.menu || []).filter((m) => m.id !== id) });
+    }
+    await ensureAuth();
+    return req('/rest/v1/menu_items?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE', headers: headers({ Prefer: 'return=minimal' }),
+    });
+  }
+
+  async function saveSettings(data) {
+    if (!configured) {
+      const cur = readLocal() || {};
+      return writeLocal({ menu: cur.menu, settings: data });
+    }
+    await ensureAuth();
+    return req('/rest/v1/settings?on_conflict=id', {
+      method: 'POST',
+      headers: headers({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify([{ id: 'main', data }]),
+    });
+  }
+
+  /* ---------------- fotot ---------------- */
+  const PHOTO_MAX = 3 * 1024 * 1024;   // 3 MB pas ngjeshjes
+
+  /** Zvogëlon dhe ngjesh foton në shfletues para ngarkimit. */
+  function compress(file, maxSide) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const side = maxSide || 1200;
+        let { width: w, height: h } = img;
+        if (Math.max(w, h) > side) {
+          const k = side / Math.max(w, h);
+          w = Math.round(w * k); h = Math.round(h * k);
+        }
+        const cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        cv.toBlob((b) => (b ? resolve(b) : reject(new Error('Nuk u ngjesh dot fotoja'))), 'image/jpeg', 0.84);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Skedari nuk është foto')); };
+      img.src = url;
+    });
+  }
+
+  async function uploadPhoto(file, name) {
+    const blob = await compress(file, 1200);
+    if (blob.size > PHOTO_MAX) throw new Error('Fotoja është shumë e madhe edhe pas ngjeshjes');
+    const path = name + '-' + Date.now() + '.jpg';
+
+    if (!configured) {                         // pa Supabase: ruaje si data URI lokal
+      return new Promise((res) => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result);
+        fr.readAsDataURL(blob);
+      });
+    }
+    await ensureAuth();
+    const r = await fetch(URL_ + '/storage/v1/object/' + BUCKET + '/' + path, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: authHeader(), 'Content-Type': 'image/jpeg', 'x-upsert': 'true' },
+      body: blob,
+    });
+    if (!r.ok) {
+      let msg = r.status + ' ' + r.statusText;
+      try { const j = await r.json(); msg = j.message || j.error || msg; } catch (e) {}
+      throw new Error('Ngarkimi dështoi: ' + msg);
+    }
+    return URL_ + '/storage/v1/object/public/' + BUCKET + '/' + path;
+  }
+
+  /* ---------------- ruajtja lokale (rezervë) ---------------- */
+  function readLocal() {
+    try {
+      const raw = localStorage.getItem(LS_LOCAL);
+      if (!raw) return null;
+      const d = JSON.parse(raw);
+      return d && d.menu && d.menu.length ? d : null;
+    } catch (e) { return null; }
+  }
+  function writeLocal(patch) {
+    const cur = readLocal() || {};
+    const next = { menu: patch.menu || cur.menu || [], settings: patch.settings || cur.settings || null };
+    localStorage.setItem(LS_LOCAL, JSON.stringify(next));
+    return next;
+  }
+  const clearLocal = () => localStorage.removeItem(LS_LOCAL);
+
+
+  /** Fshin nga hapësira e fotove skedarin që i përket kësaj adrese. */
+  async function deletePhoto(url) {
+    if (!url || !configured) return;                       // data: URI lokale s'kanë çfarë të fshijnë
+    const marker = '/storage/v1/object/public/' + BUCKET + '/';
+    const at = url.indexOf(marker);
+    if (at < 0) return;                                    // foto e jashtme, jo e jona
+    const path = url.slice(at + marker.length).split('?')[0];
+    await ensureAuth();
+    const r = await fetch(URL_ + '/storage/v1/object/' + BUCKET + '/' + path, {
+      method: 'DELETE',
+      headers: { apikey: KEY, Authorization: authHeader() },
+    });
+    // Nëse skedari mungon tashmë, s'ka pse të bëjmë zhurmë.
+    if (!r.ok && r.status !== 404) {
+      let msg = r.status + ' ' + r.statusText;
+      try { const j = await r.json(); msg = j.message || j.error || msg; } catch (e) {}
+      throw new Error(msg);
+    }
+  }
+
+  /* ---------------- porositë dhe rezervimet ---------------- */
+  const LS_ORDERS = 'sprint-local-orders';
+  const LS_BOOKINGS = 'sprint-local-bookings';
+
+  const readLS = (k) => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
+  const writeLS = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+  const rid = () => 'loc-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  /** I njëjti format kodi si te baza: 8 shenja pa I, O, 0, 1. */
+  const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const genCode = () => Array.from({ length: 8 },
+    () => CODE_ABC[Math.floor(Math.random() * CODE_ABC.length)]).join('');
+  /** Heq vizat dhe hapësirat, që klienti ta shkruajë si t'i vijë. */
+  const normCode = (c) => String(c || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  /** Kodi siç shfaqet: A4F7-K2M9 */
+  const fmtCode = (c) => { const n = normCode(c); return n.length > 4 ? n.slice(0, 4) + '-' + n.slice(4) : n; };
+
+  /** Krijon porosinë. Kthen numrin dhe kodin e ndjekjes. */
+  async function createOrder(o) {
+    const body = {
+      status: 'new',
+      kind: o.kind || 'delivery',
+      customer_name: o.name,
+      phone: o.phone,
+      address: o.address || null,
+      note: o.note || null,
+      items: o.items,
+      subtotal: o.subtotal,
+      delivery_fee: o.deliveryFee || 0,
+      total: o.total,
+      payment: o.payment || 'cash',
+      wanted_at: o.wantedAt || 'asap',
+      lang: o.lang || 'sq',
+    };
+    // Fushat e programit të biznesit. Shtohen vetëm kur ekzistojnë, që porositë
+    // e faqes të mbeten të pandryshuara dhe skema e vjetër të mos prishet.
+    if (o.channel) body.channel = o.channel;
+    if (o.customerId) body.customer_id = o.customerId;
+    if (o.lat != null && o.lng != null) {
+      body.lat = o.lat; body.lng = o.lng;
+      if (o.accuracy != null) body.accuracy = o.accuracy;
+    }
+    if (o.prepMinutes) body.prep_minutes = o.prepMinutes;
+    if (!configured) {
+      const list = readLS(LS_ORDERS);
+      const row = Object.assign({
+        id: rid(),
+        number: 1000 + list.length,
+        token: genCode(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, body);
+      list.unshift(row); writeLS(LS_ORDERS, list);
+      return row;
+    }
+    const rows = await req('/rest/v1/orders', {
+      method: 'POST',
+      headers: headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify([body]),
+    });
+    return rows && rows[0];
+  }
+
+  /** Porositë e ditës (ose të një dite të caktuar), më e reja e para. */
+  async function fetchOrders(opts) {
+    opts = opts || {};
+    if (!configured) {
+      const from = opts.from ? new Date(opts.from).getTime() : 0;
+      return readLS(LS_ORDERS).filter((o) => new Date(o.created_at).getTime() >= from);
+    }
+    let q = '/rest/v1/orders?select=*&order=created_at.desc&limit=' + (opts.limit || 200);
+    if (opts.from) q += '&created_at=gte.' + encodeURIComponent(opts.from);
+    if (opts.to) q += '&created_at=lt.' + encodeURIComponent(opts.to);
+    await ensureAuth();
+    return req(q, { headers: headers() });
+  }
+
+  async function updateOrder(id, patch) {
+    if (!configured) {
+      const list = readLS(LS_ORDERS);
+      const row = list.find((o) => o.id === id);
+      if (row) Object.assign(row, patch, { updated_at: new Date().toISOString() });
+      writeLS(LS_ORDERS, list);
+      return row;
+    }
+    await ensureAuth();
+    const rows = await req('/rest/v1/orders?id=eq.' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(patch),
+    });
+    return rows && rows[0];
+  }
+
+  async function deleteOrder(id) {
+    if (!configured) { writeLS(LS_ORDERS, readLS(LS_ORDERS).filter((o) => o.id !== id)); return; }
+    await ensureAuth();
+    return req('/rest/v1/orders?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE', headers: headers({ Prefer: 'return=minimal' }),
+    });
+  }
+
+  /** Ndjekja publike e një porosie me kodin e saj. */
+  async function trackOrder(code) {
+    const c = normCode(code);
+    if (c.length < 6) return null;
+    if (!configured) {
+      const o = readLS(LS_ORDERS).find((x) => normCode(x.token) === c);
+      return o ? Object.assign({ code: o.token }, o) : null;
+    }
+    const rows = await rpc('track_order', { p_token: c });
+    return (rows && rows[0]) || null;
+  }
+
+  /** Porositë ende në punë të një numri telefoni, të 24 orëve të fundit. */
+  async function findOrdersByPhone(phone) {
+    const d = String(phone || '').replace(/\D/g, '');
+    if (d.length < 6) return [];
+    if (!configured) {
+      const cut = Date.now() - 24 * 3600 * 1000;
+      return readLS(LS_ORDERS)
+        .filter((o) => String(o.phone || '').replace(/\D/g, '').slice(-9) === d.slice(-9))
+        .filter((o) => new Date(o.created_at).getTime() > cut)
+        .filter((o) => !['done', 'cancelled'].includes(o.status))
+        .slice(0, 5)
+        .map((o) => Object.assign({ code: o.token }, o));
+    }
+    return (await rpc('find_orders_by_phone', { p_phone: d })) || [];
+  }
+
+  /** Thirrje funksioni në bazë, gjithnjë me çelësin publik. */
+  /**
+   * Funksionet e bazës.
+   * Autorizimi vjen nga sesioni kur ka njeri të futur, dhe bie te çelësi publik
+   * kur s'ka. Kështu i njëjti helper u shërben të dyjave: gjurmimit që e bën
+   * klienti pa llogari, dhe funksioneve që i lejohen vetëm panelit.
+   */
+  function rpc(name, body) {
+    return req('/rest/v1/rpc/' + name, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: authHeader(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  }
+
+  async function createBooking(b) {
+    const body = {
+      status: 'new', customer_name: b.name, phone: b.phone, date: b.date,
+      time: b.time || null, people: b.people || null, area: b.area || null,
+      note: b.note || null, lang: b.lang || 'sq',
+    };
+    if (!configured) {
+      const list = readLS(LS_BOOKINGS);
+      const row = Object.assign({ id: rid(), number: 100 + list.length,
+        created_at: new Date().toISOString() }, body);
+      list.unshift(row); writeLS(LS_BOOKINGS, list);
+      return row;
+    }
+    const rows = await req('/rest/v1/bookings', {
+      method: 'POST',
+      headers: headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify([body]),
+    });
+    return rows && rows[0];
+  }
+
+  async function fetchBookings(opts) {
+    opts = opts || {};
+    if (!configured) return readLS(LS_BOOKINGS);
+    let q = '/rest/v1/bookings?select=*&order=date.asc,time.asc&limit=' + (opts.limit || 200);
+    if (opts.from) q += '&date=gte.' + encodeURIComponent(opts.from);
+    await ensureAuth();
+    return req(q, { headers: headers() });
+  }
+
+  async function updateBooking(id, patch) {
+    if (!configured) {
+      const list = readLS(LS_BOOKINGS);
+      const row = list.find((b) => b.id === id);
+      if (row) Object.assign(row, patch);
+      writeLS(LS_BOOKINGS, list);
+      return row;
+    }
+    await ensureAuth();
+    const rows = await req('/rest/v1/bookings?id=eq.' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(patch),
+    });
+    return rows && rows[0];
+  }
+
+  /* ---------------- zbatimi mbi të dhënat e faqes ---------------- */
+  /** Fut përmbajtjen e publikuar mbi vlerat e ngurta të shared/data.js. */
+  function apply(payload) {
+    if (!payload) return false;
+    if (payload.menu && payload.menu.length) {
+      const live = payload.menu
+        .filter((m) => m.available !== false)
+        .sort((a, b) => (a.sort || 0) - (b.sort || 0));
+      S.menu.length = 0;
+      live.forEach((m) => S.menu.push(m));
+    }
+    const st = payload.settings;
+    if (st) {
+      if (st.config) Object.assign(S.config, st.config);
+      if (st.categories && st.categories.length) {
+        S.categories.length = 0;
+        st.categories.forEach((c) => S.categories.push(c));
+      }
+      if (st.reviews) { S.reviews.length = 0; st.reviews.forEach((r) => S.reviews.push(r)); }
+      if (st.stats && st.stats.length) { S.stats.length = 0; st.stats.forEach((x) => S.stats.push(x)); }
+    }
+    return true;
+  }
+
+  S.store = {
+    configured, fetchAll, apply,
+    signIn, signOut, currentUser, ensureAuth,
+    saveItems, deleteItem, saveSettings,
+    uploadPhoto, deletePhoto, compress,
+    createOrder, fetchOrders, updateOrder, deleteOrder, trackOrder, findOrdersByPhone,
+    genCode, normCode, fmtCode,
+    createBooking, fetchBookings, updateBooking,
+    readLocal, writeLocal, clearLocal,
+    rowToItem, itemToRow,
+
+    // Primitiva për shared/store-biznes.js, që moduli i biznesit të mos
+    // rindërtojë vetë kokat e autorizimit dhe rifreskimin e tokenit.
+    _req: req, _headers: headers, _rpc: rpc, _ensureAuth: ensureAuth,
+  };
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Shtresa e programit të biznesit.
+   Fazat, klientët dhe stafi. Ndërtohet mbi shared/store.js.
+
+   Si te pjesa tjetër e programit: pa Supabase, gjithçka punon lokalisht në
+   shfletues, që paneli të jetë i provueshëm pa llogari.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const st = S.store;
+  const live = st.configured;
+
+  const LS_PHASES    = 'sprint-phases';
+  const LS_CUSTOMERS = 'sprint-customers';
+  const LS_STAFF     = 'sprint-staff';
+  const LS_DEVICE    = 'sprint-device';
+
+  const readLS = (k, fb) => {
+    try { return JSON.parse(localStorage.getItem(k) || 'null') || fb; }
+    catch (e) { return fb; }
+  };
+  const writeLS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+
+  // Identifikues i vetëm për modalitetin lokal. Date.now() nuk mjafton: dy rreshta
+  // të krijuar brenda të njëjtit milisekond do të merrnin të njëjtin id.
+  const uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+  /* ══════════════════ FAZAT ══════════════════
+     Çelësat janë saktësisht vlerat e `orders.status`, që të mos ketë përkthim
+     midis dy fjalorëve. Të fiksuar sepse kuzhina, motorristi dhe faqja e
+     klientit varen prej tyre; gjithçka tjetër është e jotja. Këto vlera
+     pasqyrojnë saktësisht ato që mbjell supabase/schema-2-biznes.sql. */
+
+  const DEFAULT_PHASES = [
+    { key:'new',       sort:10, label_sq:'E marrë',  label_en:'Placed',     customer_label_sq:'E marrë',        customer_label_en:'Received',    icon:'📥', color:'#8a8a8a', enabled:true, customer_visible:true, target_minutes:null, is_core:true  },
+    { key:'accepted',  sort:20, label_sq:'Pranuar',  label_en:'Accepted',   customer_label_sq:'Po përgatitet',  customer_label_en:'In progress', icon:'✓',  color:'#c4640b', enabled:true, customer_visible:true, target_minutes:3,    is_core:false },
+    { key:'preparing', sort:30, label_sq:'Në furrë', label_en:'In kitchen', customer_label_sq:'Po përgatitet',  customer_label_en:'In progress', icon:'🔥', color:'#c4640b', enabled:true, customer_visible:true, target_minutes:20,   is_core:true  },
+    { key:'ready',     sort:40, label_sq:'Gati',     label_en:'Ready',      customer_label_sq:'Nisi për te ti', customer_label_en:'On its way',  icon:'🛎',  color:'#3b6446', enabled:true, customer_visible:true, target_minutes:5,    is_core:false },
+    { key:'delivering',sort:50, label_sq:'Në rrugë', label_en:'On the way', customer_label_sq:'Nisi për te ti', customer_label_en:'On its way',  icon:'🛵', color:'#3b6446', enabled:true, customer_visible:true, target_minutes:25,   is_core:true  },
+    { key:'done',      sort:60, label_sq:'Dorëzuar', label_en:'Delivered',  customer_label_sq:'Dorëzuar',       customer_label_en:'Delivered',   icon:'🏁', color:'#3b6446', enabled:true, customer_visible:true, target_minutes:null, is_core:true  },
+    { key:'cancelled', sort:70, label_sq:'Anuluar',  label_en:'Cancelled',  customer_label_sq:'Anuluar',        customer_label_en:'Cancelled',   icon:'✕',  color:'#a22f1b', enabled:true, customer_visible:true, target_minutes:null, is_core:true  },
+  ];
+
+  const clonePhases = () => DEFAULT_PHASES.map((p) => Object.assign({}, p));
+
+  /** Të gjitha fazat, për panelin. */
+  async function fetchPhases() {
+    if (!live) return readLS(LS_PHASES, clonePhases());
+    const rows = await st._req('/rest/v1/order_phases?select=*&order=sort', { headers: st._headers() });
+    return (rows && rows.length) ? rows : clonePhases();
+  }
+
+  /** Ruan fazat e ndryshuara. Çelësi dhe is_core nuk preken kurrë. */
+  async function savePhases(list) {
+    const clean = list.map((p) => ({
+      key: p.key,
+      sort: Number(p.sort) || 0,
+      label_sq: String(p.label_sq || '').trim().slice(0, 40),
+      label_en: String(p.label_en || '').trim().slice(0, 40),
+      customer_label_sq: String(p.customer_label_sq || '').trim().slice(0, 40) || null,
+      customer_label_en: String(p.customer_label_en || '').trim().slice(0, 40) || null,
+      icon: String(p.icon || '').slice(0, 8),
+      color: String(p.color || '').slice(0, 20),
+      enabled: p.is_core ? true : !!p.enabled,
+      customer_visible: !!p.customer_visible,
+      target_minutes: p.target_minutes ? Number(p.target_minutes) : null,
+    }));
+
+    if (!live) {
+      const merged = clean.map((c) => {
+        const base = DEFAULT_PHASES.find((d) => d.key === c.key) || {};
+        return Object.assign({}, base, c);
+      });
+      writeLS(LS_PHASES, merged);
+      return merged;
+    }
+    await st._ensureAuth();
+    return st._req('/rest/v1/order_phases?on_conflict=key', {
+      method: 'POST',
+      headers: st._headers({ Prefer: 'resolution=merge-duplicates,return=representation' }),
+      body: JSON.stringify(clean),
+    });
+  }
+
+  /** Rikthen fazat te vlerat fillestare. */
+  async function resetPhases() { return savePhases(clonePhases()); }
+
+  /** Hapat që sheh klienti te faqja e gjurmimit, me emrat që ke vendosur ti. */
+  async function publicPhases() {
+    if (!live) {
+      return readLS(LS_PHASES, clonePhases())
+        .filter((p) => p.enabled && p.customer_visible && p.key !== 'cancelled')
+        .sort((a, b) => a.sort - b.sort)
+        .map((p) => ({
+          key: p.key, sort: p.sort,
+          label_sq: p.customer_label_sq || p.label_sq,
+          label_en: p.customer_label_en || p.label_en,
+          icon: p.icon, color: p.color,
+        }));
+    }
+    try { return await st._rpc('public_phases', {}); }
+    catch (e) { return []; }
+  }
+
+  /** Bashkon fazat që kanë të njëjtën etiketë për klientin, ruajtur radhën. */
+  function customerSteps(phases, lang) {
+    const out = [];
+    (phases || []).forEach((p) => {
+      const label = (lang === 'en' ? p.label_en : p.label_sq) || p.label_sq;
+      const last = out[out.length - 1];
+      if (last && last.label === label) { last.keys.push(p.key); return; }
+      out.push({ label, icon: p.icon, color: p.color, keys: [p.key] });
+    });
+    return out;
+  }
+
+  /* ══════════════════ KLIENTËT ══════════════════ */
+
+  const digits = (s) => String(s || '').replace(/\D/g, '');
+
+  /** Numri sjell emrin, adresat e ruajtura dhe porosinë e fundit. */
+  async function lookupCustomer(phone) {
+    const d = digits(phone);
+    if (d.length < 6) return null;
+
+    if (!live) {
+      const all = readLS(LS_CUSTOMERS, []);
+      const c = all.find((x) => digits(x.phone).slice(-9) === d.slice(-9));
+      return c || null;
+    }
+    await st._ensureAuth();
+    const r = await st._rpc('lookup_customer', { p_phone: phone });
+    if (!r) return null;
+    const row = Array.isArray(r) ? r[0] : r;
+    if (!row || !row.customer) return null;
+    return {
+      id: row.customer.id,
+      phone: row.customer.phone,
+      name: row.customer.name,
+      blocked: row.customer.blocked,
+      orders_count: row.customer.orders_count,
+      addresses: row.addresses || [],
+      last_order: row.last_order || null,
+    };
+  }
+
+  /** Krijon ose përditëson klientin dhe ruan adresën, pa krijuar dublikatë. */
+  async function upsertCustomer(o) {
+    const phone = String(o.phone || '').trim();
+    if (digits(phone).length < 6) return null;
+
+    if (!live) {
+      const all = readLS(LS_CUSTOMERS, []);
+      let c = all.find((x) => digits(x.phone).slice(-9) === digits(phone).slice(-9));
+      if (!c) { c = { id: uid('c'), phone, name: '', addresses: [], orders_count: 0 }; all.push(c); }
+      if (o.name) c.name = o.name;
+      const addr = String(o.address || '').trim();
+      if (addr.length >= 3) {
+        const hit = c.addresses.find((a) => a.address.toLowerCase() === addr.toLowerCase());
+        if (hit) { if (o.lat) { hit.lat = o.lat; hit.lng = o.lng; hit.accuracy = o.accuracy; } }
+        else c.addresses.unshift({ address: addr, lat: o.lat || null, lng: o.lng || null, accuracy: o.accuracy || null });
+      }
+      writeLS(LS_CUSTOMERS, all);
+      return c.id;
+    }
+    await st._ensureAuth();
+    return st._rpc('upsert_customer', {
+      p_phone: phone, p_name: o.name || '', p_address: o.address || null,
+      p_lat: o.lat || null, p_lng: o.lng || null, p_accuracy: o.accuracy || null,
+    });
+  }
+
+  /* ══════════════════ STAFI ══════════════════ */
+
+  const ROLES = {
+    owner:   'Pronar',
+    manager: 'Menaxher',
+    cashier: 'Banak',
+    kitchen: 'Kuzhinë',
+    driver:  'Motorrist',
+  };
+
+  async function fetchStaff() {
+    if (!live) return readLS(LS_STAFF, []);
+    await st._ensureAuth();
+    return st._req('/rest/v1/staff?select=id,name,role,active,phone,pin_hash,locked_until&order=role,name',
+      { headers: st._headers() });
+  }
+
+  async function saveStaff(row) {
+    if (!live) {
+      const all = readLS(LS_STAFF, []);
+      if (row.id) {
+        const i = all.findIndex((x) => x.id === row.id);
+        if (i >= 0) all[i] = Object.assign(all[i], row);
+      } else {
+        all.push(Object.assign({ id: uid('s'), active: true }, row));
+      }
+      writeLS(LS_STAFF, all);
+      return all;
+    }
+    await st._ensureAuth();
+    const body = { name: row.name, role: row.role, active: row.active !== false, phone: row.phone || null };
+    if (row.id) {
+      return st._req('/rest/v1/staff?id=eq.' + encodeURIComponent(row.id), {
+        method: 'PATCH', headers: st._headers({ Prefer: 'return=representation' }),
+        body: JSON.stringify(body),
+      });
+    }
+    return st._req('/rest/v1/staff', {
+      method: 'POST', headers: st._headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(body),
+    });
+  }
+
+  async function deleteStaff(id) {
+    if (!live) {
+      writeLS(LS_STAFF, readLS(LS_STAFF, []).filter((x) => x.id !== id));
+      return;
+    }
+    await st._ensureAuth();
+    await st._req('/rest/v1/staff?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE', headers: st._headers(),
+    });
+  }
+
+  /** Vendos kodin e hyrjes. Kodi kurrë nuk kthehet dhe kurrë nuk ruhet i hapur. */
+  async function setStaffPin(id, pin) {
+    if (!/^[0-9]{4,8}$/.test(String(pin || ''))) {
+      throw new Error('Kodi duhet të jetë 4–8 shifra.');
+    }
+    if (!live) {
+      const all = readLS(LS_STAFF, []);
+      const dup = all.find((x) => x.id !== id && x.pin === pin);
+      if (dup) throw new Error('Ky kod përdoret tashmë nga ' + dup.name + '.');
+      const s2 = all.find((x) => x.id === id);
+      if (s2) { s2.pin = pin; s2.pin_hash = 'local'; writeLS(LS_STAFF, all); }
+      return;
+    }
+    await st._ensureAuth();
+    await st._rpc('set_staff_pin', { p_staff_id: id, p_pin: String(pin) });
+  }
+
+  /** Hyrja e kuzhinës ose e motorristit, vetëm me kod. */
+  async function staffLogin(pin, device) {
+    if (!live) {
+      const s2 = readLS(LS_STAFF, []).find((x) => x.pin === String(pin) && x.active !== false);
+      if (!s2) throw new Error('Kod i gabuar.');
+      const sess = { token: 'local-' + s2.id, staff_id: s2.id, name: s2.name, role: s2.role };
+      writeLS(LS_DEVICE, sess);
+      return sess;
+    }
+    const r = await st._rpc('staff_login', { p_pin: String(pin), p_device: device || navigator.userAgent.slice(0, 120) });
+    const row = Array.isArray(r) ? r[0] : r;
+    if (!row || !row.token) throw new Error('Kod i gabuar.');
+    writeLS(LS_DEVICE, row);
+    return row;
+  }
+
+  /** Sesioni i ruajtur i pajisjes, nëse ende i vlefshëm. */
+  async function staffSession() {
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) return null;
+    if (!live) return sess;
+    try {
+      const r = await st._rpc('staff_by_token', { p_token: sess.token });
+      const row = Array.isArray(r) ? r[0] : r;
+      if (!row || !row.staff_id) throw new Error('skaduar');
+      return Object.assign({ token: sess.token }, row);
+    } catch (e) {
+      writeLS(LS_DEVICE, null);
+      return null;
+    }
+  }
+
+  async function staffLogout() {
+    const sess = readLS(LS_DEVICE, null);
+    writeLS(LS_DEVICE, null);
+    if (live && sess && sess.token) {
+      try { await st._rpc('staff_logout', { p_token: sess.token }); } catch (e) {}
+    }
+  }
+
+  /* ══════════════════ EKRANI I KUZHINËS ══════════════════ */
+
+  const KDS_STATES = ['new', 'accepted', 'preparing', 'ready'];
+
+  /** Porositë që i duhen kuzhinës — pa emër, pa telefon, pa adresë. */
+  async function kdsOrders() {
+    if (!live) {
+      const from = new Date(Date.now() - 12 * 3600e3).toISOString();
+      const list = (await st.fetchOrders({ from })) || [];
+      return list
+        .filter((o) => KDS_STATES.indexOf(o.status) >= 0)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    }
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
+    return st._rpc('kds_orders', { p_token: sess.token });
+  }
+
+  /** Kalimi i fazës nga kuzhina. Kthimi mbrapsht lejohet me qëllim. */
+  async function kdsBump(id, status) {
+    if (!live) {
+      const patch = { status };
+      if (status === 'preparing') { patch.kitchen_at = new Date().toISOString(); patch.ready_at = null; }
+      if (status === 'ready') patch.ready_at = new Date().toISOString();
+      return st.updateOrder(id, patch);
+    }
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
+    return st._rpc('kds_bump', { p_token: sess.token, p_order: id, p_status: status });
+  }
+
+  /* ══════════════════ HIERARKIA E EKRANEVE ══════════════════ */
+
+  const SCREENS = {
+    neworder: 'Porosi e re',
+    orders:   'Porositë',
+    kds:      'Kuzhina',
+    runs:     'Motorristi',
+    bookings: 'Rezervimet',
+    menu:     'Menuja',
+    stock:    'Magazina',
+    reports:  'Raportet',
+    staff:    'Stafi',
+    settings: 'Cilësimet',
+  };
+  const ALL_SCREENS = Object.keys(SCREENS);
+  const LS_ROLESCR = 'sprint-role-screens';
+
+  const DEFAULT_ROLE_SCREENS = {
+    manager: ['neworder','orders','kds','runs','bookings','menu','stock','reports'],
+    cashier: ['neworder','orders','bookings'],
+    kitchen: ['kds'],
+    driver:  ['runs'],
+  };
+
+  /** Cilat ekrane sheh secili rol. Pronari nuk figuron — i sheh të gjitha. */
+  async function fetchRoleScreens() {
+    if (!live) {
+      const saved = readLS(LS_ROLESCR, null);
+      return saved || JSON.parse(JSON.stringify(DEFAULT_ROLE_SCREENS));
+    }
+    await st._ensureAuth();
+    const rows = await st._req('/rest/v1/role_screens?select=role,screen', { headers: st._headers() });
+    const out = { manager: [], cashier: [], kitchen: [], driver: [] };
+    (rows || []).forEach((r) => { if (out[r.role]) out[r.role].push(r.screen); });
+    return out;
+  }
+
+  async function saveRoleScreens(map) {
+    if (!live) { writeLS(LS_ROLESCR, map); return map; }
+    await st._ensureAuth();
+    // Zëvendësim i plotë: fshi rregullat e vjetra, vendos ato të rejat.
+    await st._req('/rest/v1/role_screens?role=neq.__none__', {
+      method: 'DELETE', headers: st._headers(),
+    });
+    const rows = [];
+    Object.keys(map).forEach((role) =>
+      (map[role] || []).forEach((screen) => rows.push({ role, screen })));
+    if (rows.length) {
+      await st._req('/rest/v1/role_screens', {
+        method: 'POST', headers: st._headers({ Prefer: 'resolution=ignore-duplicates' }),
+        body: JSON.stringify(rows),
+      });
+    }
+    return map;
+  }
+
+  /** Ekranet e mbajtësit të sesionit aktual të pajisjes. */
+  async function myScreens() {
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) return null;
+
+    if (!live) {
+      if (sess.role === 'owner') {
+        return { staff_id: sess.staff_id, name: sess.name, role: sess.role, screens: ALL_SCREENS.slice() };
+      }
+      const map = readLS(LS_ROLESCR, null) || DEFAULT_ROLE_SCREENS;
+      return { staff_id: sess.staff_id, name: sess.name, role: sess.role,
+               screens: (map[sess.role] || []).slice() };
+    }
+    const r = await st._rpc('my_screens', { p_token: sess.token });
+    const row = Array.isArray(r) ? r[0] : r;
+    if (!row) return null;
+    return { staff_id: row.staff_id, name: row.name, role: row.role, screens: row.screens || [] };
+  }
+
+  /* ══════════════════ MOTORRISTI ══════════════════ */
+
+  const tok = () => {
+    const s = readLS(LS_DEVICE, null);
+    if (!s || !s.token) throw new Error('Hyr me kodin tënd.');
+    return s;
+  };
+
+  /** Porositë gati për t'u marrë, ende pa motorrist. */
+  async function drvReady() {
+    if (!live) {
+      const from = new Date(Date.now() - 12 * 3600e3).toISOString();
+      const list = (await st.fetchOrders({ from })) || [];
+      return list
+        .filter((o) => o.status === 'ready' && o.kind === 'delivery' && !o.run_id)
+        .sort((a, b) => new Date(a.ready_at || a.created_at) - new Date(b.ready_at || b.created_at));
+    }
+    return st._rpc('drv_ready', { p_token: tok().token });
+  }
+
+  /** Nisja: disa porosi bashkë. Kthen id-në e nisjes. */
+  async function drvStartRun(ids, pos) {
+    if (!ids || !ids.length) throw new Error('Zgjidh të paktën një porosi.');
+    if (!live) {
+      const s = tok();
+      const open = readLS('sprint-runs', []).find((r) => r.driver_id === s.staff_id && !r.closed_at);
+      if (open) throw new Error('Ke ende një nisje të hapur. Mbylle atë përpara se të nisesh sërish.');
+      const runs = readLS('sprint-runs', []);
+      const run = { id: uid('r'), driver_id: s.staff_id, driver_name: s.name,
+                    started_at: new Date().toISOString(), closed_at: null };
+      runs.push(run); writeLS('sprint-runs', runs);
+      for (const id of ids) {
+        await st.updateOrder(id, { status: 'delivering', run_id: run.id,
+          driver_id: s.staff_id, picked_at: new Date().toISOString() });
+      }
+      addPoint(run.id, null, 'start', pos);
+      return run.id;
+    }
+    return st._rpc('drv_start_run', {
+      p_token: tok().token, p_orders: ids,
+      p_lat: (pos && pos.lat) || null, p_lng: (pos && pos.lng) || null,
+    });
+  }
+
+  /** Nisja e hapur e këtij motorristi, me ndalesat. */
+  async function drvMyRun() {
+    if (!live) {
+      const s = tok();
+      const run = readLS('sprint-runs', [])
+        .filter((r) => r.driver_id === s.staff_id && !r.closed_at)
+        .sort((a, b) => new Date(b.started_at) - new Date(a.started_at))[0];
+      if (!run) return { run: null, stops: [] };
+      const from = new Date(Date.now() - 24 * 3600e3).toISOString();
+      const list = (await st.fetchOrders({ from })) || [];
+      const stops = list.filter((o) => o.run_id === run.id)
+        .sort((a, b) => (a.delivered_at ? 1 : 0) - (b.delivered_at ? 1 : 0) || a.number - b.number);
+      const cash = stops.filter((o) => o.payment === 'cash')
+        .reduce((n, o) => n + (Number(o.total) || 0), 0);
+      return { run: Object.assign({ cash_due: cash }, run), stops };
+    }
+    const rows = (await st._rpc('drv_my_run', { p_token: tok().token })) || [];
+    if (!rows.length || !rows[0].run_id) return { run: null, stops: [] };
+    const run = { id: rows[0].run_id, started_at: rows[0].started_at, cash_due: rows[0].cash_due };
+    const stops = rows.filter((r) => r.id).map((r) => ({
+      id: r.id, number: r.number, status: r.status, customer_name: r.customer_name,
+      phone: r.phone, address: r.address, lat: r.lat, lng: r.lng,
+      total: r.total, payment: r.payment, note: r.note,
+      delivered_at: r.delivered_at, fail_reason: r.fail_reason,
+    }));
+    return { run, stops };
+  }
+
+  function addPoint(runId, orderId, kind, pos) {
+    const pts = readLS('sprint-run-points', []);
+    pts.push({ run_id: runId, order_id: orderId, kind,
+               lat: (pos && pos.lat) || null, lng: (pos && pos.lng) || null,
+               at: new Date().toISOString() });
+    writeLS('sprint-run-points', pts);
+  }
+
+  async function drvDelivered(orderId, pos, cash) {
+    if (!live) {
+      const o = ((await st.fetchOrders({ from: new Date(Date.now() - 24 * 3600e3).toISOString() })) || [])
+        .find((x) => x.id === orderId);
+      if (!o) throw new Error('Kjo porosi nuk është në nisjen tënde.');
+      await st.updateOrder(orderId, { status: 'done', delivered_at: new Date().toISOString(),
+        done_at: new Date().toISOString(), cash_collected: cash == null ? null : Number(cash) });
+      addPoint(o.run_id, orderId, 'delivered', pos);
+      const rest = ((await st.fetchOrders({ from: new Date(Date.now() - 24 * 3600e3).toISOString() })) || [])
+        .filter((x) => x.run_id === o.run_id && ['done', 'cancelled'].indexOf(x.status) < 0);
+      if (!rest.length) {
+        const runs = readLS('sprint-runs', []);
+        const r = runs.find((x) => x.id === o.run_id);
+        if (r) { r.closed_at = new Date().toISOString(); writeLS('sprint-runs', runs); }
+        addPoint(o.run_id, null, 'end', pos);
+      }
+      return 'done';
+    }
+    return st._rpc('drv_delivered', {
+      p_token: tok().token, p_order: orderId,
+      p_lat: (pos && pos.lat) || null, p_lng: (pos && pos.lng) || null,
+      p_cash: cash == null ? null : Number(cash),
+    });
+  }
+
+  /** Klienti nuk u gjend — porosia kthehet te banaku me arsyen. */
+  async function drvFailed(orderId, reason) {
+    if (!live) {
+      await st.updateOrder(orderId, { status: 'ready', run_id: null, picked_at: null,
+        fail_reason: String(reason || 'Nuk u gjend').slice(0, 200) });
+      return 'ready';
+    }
+    return st._rpc('drv_failed', { p_token: tok().token, p_order: orderId, p_reason: reason || null });
+  }
+
+  async function drvMyDay() {
+    if (!live) {
+      const s = tok();
+      const today = new Date().toISOString().slice(0, 10);
+      const list = ((await st.fetchOrders({ from: today + 'T00:00:00.000Z' })) || [])
+        .filter((o) => o.driver_id === s.staff_id && o.delivered_at);
+      const sum = (f) => list.filter(f).reduce((n, o) => n + (Number(o.total) || 0), 0);
+      return { deliveries: list.length, cash: sum((o) => o.payment === 'cash'),
+               card: sum((o) => o.payment === 'card'), avg_minutes: null };
+    }
+    const r = await st._rpc('drv_my_day', { p_token: tok().token });
+    return (Array.isArray(r) ? r[0] : r) || { deliveries: 0, cash: 0, card: 0 };
+  }
+
+  /* ══════════════════ VENDNDODHJA ══════════════════ */
+
+  /**
+   * Kërkon vendndodhjen nga shfletuesi.
+   * Kthen edhe saktësinë, sepse një pin 200 metra larg është më keq se asnjë pin —
+   * klienti duhet ta dijë që i duhet ta lëvizë.
+   */
+  function getLocation(opts) {
+    const o = opts || {};
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) return reject(new Error('Shfletuesi nuk e mbështet vendndodhjen.'));
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({
+          lat: +pos.coords.latitude.toFixed(6),
+          lng: +pos.coords.longitude.toFixed(6),
+          accuracy: Math.round(pos.coords.accuracy || 0),
+        }),
+        (err) => {
+          const m = {
+            1: 'Nuk dhe leje për vendndodhjen. Hape nga cilësimet e shfletuesit.',
+            2: 'Vendndodhja nuk u gjet. Provo sërish ose lëvize pinin me dorë.',
+            3: 'Kërkimi i vendndodhjes zgjati shumë. Provo sërish.',
+          };
+          reject(new Error(m[err.code] || 'Vendndodhja nuk u mor.'));
+        },
+        { enableHighAccuracy: o.high !== false, timeout: o.timeout || 12000, maximumAge: 0 }
+      );
+    });
+  }
+
+  /** Sa e besueshme është vendndodhja: mbi 50 m i themi klientit ta saktësojë. */
+  const locationQuality = (acc) =>
+    !acc ? 'unknown' : acc <= 25 ? 'good' : acc <= 50 ? 'ok' : 'poor';
+
+  /** Linku i navigimit për motorristin — hapet me aplikacionin e hartave të telefonit. */
+  function navLink(o) {
+    if (o && o.lat && o.lng) {
+      return 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lng;
+    }
+    const a = (o && o.address) || '';
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a + ', Durrës, Albania');
+  }
+
+  Object.assign(S.store, {
+    DEFAULT_PHASES, fetchPhases, savePhases, resetPhases, publicPhases, customerSteps,
+    lookupCustomer, upsertCustomer,
+    STAFF_ROLES: ROLES, fetchStaff, saveStaff, deleteStaff, setStaffPin,
+    KDS_STATES, kdsOrders, kdsBump,
+    SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
+    drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
+    staffLogin, staffSession, staffLogout,
+    getLocation, locationQuality, navLink,
+  });
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Pamja e kuzhinës brenda aplikacionit të stafit.
+   Regjistrohet te SPRINT.views.kds; guaska e nis dhe e ndal sipas rolit.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const store = S.store;
+  const $ = (s) => document.querySelector(s);
+  const esc = (t) => String(t == null ? '' : t)
+    .replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+  const LS_TICK = 'sprint-kds-ticks';
+  const LS_SND  = 'sprint-kds-sound';
+
+  const K = { orders: [], phases: [], ticked: {}, sound: true, seen: new Set(),
+              lastBump: null, timer: null, undoT: null, live: false };
+
+  try { K.ticked = JSON.parse(localStorage.getItem(LS_TICK) || '{}') || {}; } catch (e) {}
+  try { K.sound = localStorage.getItem(LS_SND) !== '0'; } catch (e) {}
+
+  /* ---------- zilja ---------- */
+  let ac;
+  function beep() {
+    if (!K.sound) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.18].forEach((t, i) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = 'sine'; o.frequency.value = i ? 1180 : 880;
+        g.gain.setValueAtTime(0.0001, ac.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.32, ac.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + t + 0.16);
+        o.connect(g); g.connect(ac.destination);
+        o.start(ac.currentTime + t); o.stop(ac.currentTime + t + 0.18);
+      });
+    } catch (e) {}
+  }
+
+  /* ---------- koha ---------- */
+  const mmss = (ms) => {
+    const s = Math.max(0, Math.round(ms / 1000));
+    return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  };
+  function targetFor(status) {
+    const p = K.phases.find((x) => x.key === status);
+    return (p && p.target_minutes) || (status === 'preparing' ? 20 : 5);
+  }
+  function clockOf(o) {
+    const since = new Date(o.kitchen_at || o.accepted_at || o.created_at).getTime();
+    const mins = (Date.now() - since) / 60000;
+    const t = targetFor(o.status === 'ready' ? 'ready' : 'preparing');
+    return { txt: mmss(Date.now() - since),
+             cls: mins > t ? 'late' : mins > t * 0.7 ? 'warn' : '' };
+  }
+
+  /* ---------- vizatimi ---------- */
+  const KIND = { pickup: 'Marr vetë', delivery: 'Dërgesë' };
+  const itemsOf = (o) => (Array.isArray(o.items) ? o.items : [])
+    .map((x) => ({ q: Number(x.qty) || 1, n: x.name || x.id || '' }));
+
+  function render() {
+    const list = K.orders;
+    if (!list.length) {
+      $('#v-kds').innerHTML = '<p class="empty">Asnjë porosi në pritje. 🍕</p>';
+    } else {
+      $('#v-kds').innerHTML = list.map((o) => {
+        const c = clockOf(o);
+        const ticks = K.ticked[o.id] || [];
+        const items = itemsOf(o).map((it, i) =>
+          `<div class="t-line${ticks.indexOf(i) >= 0 ? ' done' : ''}" data-tick="${esc(o.id)}" data-i="${i}">
+             <span class="q">${it.q}×</span><span>${esc(it.n)}</span></div>`).join('');
+        const act = o.status === 'ready'
+          ? `<button class="big b-start" data-bump="${esc(o.id)}" data-to="preparing">↩ Kthe në furrë</button>`
+          : o.status === 'preparing'
+            ? `<button class="big b-ready" data-bump="${esc(o.id)}" data-to="ready">GATI</button>
+               <button class="b-back" data-bump="${esc(o.id)}" data-to="preparing" title="Rinis kohën">↺</button>`
+            : `<button class="big b-start" data-bump="${esc(o.id)}" data-to="preparing">Fillo</button>`;
+        return `<article class="tick s-${esc(o.status)} ${c.cls}" data-ord="${esc(o.id)}">
+          <div class="t-hd">
+            <span class="t-no">#${o.number}</span>
+            <span class="t-kind${o.kind === 'pickup' ? ' pick' : ''}">${KIND[o.kind] || ''}</span>
+            <span class="t-clock" data-clock="${esc(o.id)}">${c.txt}</span>
+          </div>
+          <div class="t-items">${items}${o.note ? `<p class="t-note">📝 ${esc(o.note)}</p>` : ''}</div>
+          <div class="t-act">${act}</div>
+        </article>`;
+      }).join('');
+    }
+    $('#cPrep').textContent = list.filter((o) => o.status === 'preparing').length;
+    $('#cReady').textContent = list.filter((o) => o.status === 'ready').length;
+  }
+
+  /* Vetëm orët rifreskohen çdo sekondë, që prekja të mos humbasë nën gisht. */
+  function tickClocks() {
+    K.orders.forEach((o) => {
+      const el = document.querySelector(`[data-clock="${CSS.escape(o.id)}"]`);
+      if (!el) return;
+      const c = clockOf(o);
+      el.textContent = c.txt;
+      const card = el.closest('.tick');
+      card.classList.toggle('warn', c.cls === 'warn');
+      card.classList.toggle('late', c.cls === 'late');
+    });
+  }
+
+  async function load(silent) {
+    if (!K.live) return;
+    try {
+      const rows = (await store.kdsOrders()) || [];
+      S.staf.offline(false);
+      const fresh = rows.filter((o) => !K.seen.has(o.id) && o.status !== 'ready');
+      rows.forEach((o) => K.seen.add(o.id));
+      if (!silent && fresh.length) beep();
+      K.orders = rows;
+      render();
+    } catch (e) {
+      S.staf.offline(true);
+      if (/kod|Hyr|esion/i.test(e.message)) S.staf.logout();
+    }
+  }
+
+  async function bump(id, to) {
+    const o = K.orders.find((x) => x.id === id);
+    if (!o) return;
+    const from = o.status;
+    o.status = to;
+    if (to === 'preparing') o.kitchen_at = new Date().toISOString();
+    render();
+    try {
+      await store.kdsBump(id, to);
+      if (to === 'ready') {
+        K.lastBump = { id, from };
+        $('#undoNo').textContent = '#' + o.number;
+        $('#undo').classList.add('on');
+        clearTimeout(K.undoT);
+        K.undoT = setTimeout(() => $('#undo').classList.remove('on'), 7000);
+      }
+      load(true);
+    } catch (e) {
+      o.status = from; render();
+      S.staf.offline(true);
+    }
+  }
+
+  /* ---------- lidhjet ---------- */
+  document.addEventListener('click', (e) => {
+    if (!K.live) return;
+    const b = e.target.closest('[data-bump]');
+    if (b) return bump(b.dataset.bump, b.dataset.to);
+
+    const t = e.target.closest('[data-tick]');
+    if (t) {
+      const id = t.dataset.tick, i = Number(t.dataset.i);
+      const arr = K.ticked[id] || (K.ticked[id] = []);
+      const at = arr.indexOf(i);
+      if (at >= 0) arr.splice(at, 1); else arr.push(i);
+      try { localStorage.setItem(LS_TICK, JSON.stringify(K.ticked)); } catch (err) {}
+      t.classList.toggle('done', at < 0);
+      return;
+    }
+    if (e.target.closest('#sndBtn')) {
+      K.sound = !K.sound;
+      try { localStorage.setItem(LS_SND, K.sound ? '1' : '0'); } catch (err) {}
+      $('#sndBtn').classList.toggle('off', !K.sound);
+      if (K.sound) beep();
+    }
+  });
+
+  $('#undoBtn').addEventListener('click', () => {
+    if (!K.lastBump) return;
+    bump(K.lastBump.id, 'preparing');
+    K.lastBump = null;
+    $('#undo').classList.remove('on');
+  });
+
+  S.views = S.views || {};
+  S.views.kds = {
+    label: 'Kuzhina',
+    start() {
+      K.live = true;
+      $('#v-kds').classList.remove('hide');
+      $('#kdsCount').classList.remove('hide');
+      $('#sndBtn').classList.remove('hide');
+      $('#sndBtn').classList.toggle('off', !K.sound);
+      store.fetchPhases().then((p) => { K.phases = p || []; }).catch(() => {});
+      load();
+      clearInterval(K.timer);
+      K.timer = setInterval(tickClocks, 1000);
+    },
+    stop() {
+      K.live = false;
+      clearInterval(K.timer);
+      $('#v-kds').classList.add('hide');
+      $('#kdsCount').classList.add('hide');
+      $('#sndBtn').classList.add('hide');
+      $('#undo').classList.remove('on');
+    },
+    refresh: () => load(true),
+  };
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Pamja e motorristit.
+   Njësia e punës është nisja, jo porosia: motorristët dalin me 2–3 bashkë dhe
+   i mbyllin një nga një. Prandaj ekrani ka dy gjendje — zgjedhja para nisjes,
+   dhe ndalesat gjatë saj.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const store = S.store;
+  const $ = (s) => document.querySelector(s);
+  const esc = (t) => String(t == null ? '' : t)
+    .replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const money = (n) => (Math.round(n) || 0).toLocaleString('sq-AL') + ' L';
+
+  const R = { ready: [], run: null, stops: [], day: null, pick: new Set(),
+              live: false, poll: null, target: null };
+
+  /* Vendndodhja merret vetëm në çastet kur faqja është hapur gjithsesi —
+     kur niset dhe kur dorëzon. Pa aplikacion, pa gjurmim të fshehtë. */
+  async function here() {
+    try { return await store.getLocation({ high: true, timeout: 6000 }); }
+    catch (e) { return null; }
+  }
+
+  const tel = (p) => 'tel:' + String(p || '').replace(/[^\d+]/g, '');
+
+  /* ---------- vizatimi ---------- */
+
+  function renderPicking() {
+    const list = R.ready;
+    const head = `<div class="rsec">
+      <h2>Gati për t'u marrë</h2>
+      <p class="sub">Zgjidh porositë që merr bashkë, pastaj shtyp «Nisu».</p>
+    </div>`;
+
+    if (!list.length) {
+      return head + '<p class="empty">Asnjë porosi gati. Prit pak. 🛵</p>' + dayBox() + privacy();
+    }
+
+    const cards = list.map((o) => {
+      const on = R.pick.has(o.id);
+      return `<article class="stop${on ? ' pick' : ''}" data-stop="${esc(o.id)}">
+        <div class="s-pickbox" data-pickit="${esc(o.id)}">
+          <span class="box">✓</span>
+          <span class="s-no">#${o.number}</span>
+          <span class="s-pay ${o.payment === 'cash' ? 'cash' : 'card'}">${o.payment === 'cash' ? 'Para në dorë' : 'Me kartë'}</span>
+          <span class="s-tot">${esc(money(o.total))}</span>
+        </div>
+        <div class="s-bd">
+          <span class="s-name">${esc(o.customer_name)}</span>
+          <span class="s-addr">${esc(o.address || '')}${o.lat ? ' · 📍' : ''}</span>
+          ${o.note ? `<p class="s-note">📝 ${esc(o.note)}</p>` : ''}
+        </div>
+      </article>`;
+    }).join('');
+
+    const n = R.pick.size;
+    const sum = list.filter((o) => R.pick.has(o.id))
+      .reduce((s, o) => s + (Number(o.total) || 0), 0);
+
+    return head + cards + `<div class="gobar">
+      <button class="gobtn" id="goRun"${n ? '' : ' disabled'}>
+        ${n ? `Nisu me ${n} porosi · ${esc(money(sum))}` : 'Zgjidh të paktën një porosi'}
+      </button>
+    </div>` + dayBox() + privacy();
+  }
+
+  function renderRun() {
+    const left = R.stops.filter((o) => o.status === 'delivering');
+    const done = R.stops.filter((o) => o.status === 'done');
+
+    const head = `<div class="rsec">
+      <h2>Nisja jote — ${left.length} ndalesa</h2>
+      <p class="sub">Para në dorë për t'u arkëtuar: <b>${esc(money(R.run.cash_due || 0))}</b></p>
+    </div>`;
+
+    const card = (o, gone) => `<article class="stop${gone ? ' gone' : ''}" data-stop="${esc(o.id)}">
+      <div class="s-hd">
+        <span class="s-no">#${o.number}</span>
+        <span class="s-pay ${o.payment === 'cash' ? 'cash' : 'card'}">${o.payment === 'cash' ? 'Para në dorë' : 'Me kartë'}</span>
+        <span class="s-tot">${esc(money(o.total))}</span>
+      </div>
+      <div class="s-bd">
+        <span class="s-name">${esc(o.customer_name)}</span>
+        <span class="s-addr">${esc(o.address || '')}</span>
+        ${o.note ? `<p class="s-note">📝 ${esc(o.note)}</p>` : ''}
+      </div>
+      ${gone ? '' : `<div class="s-act">
+        <a class="sbtn s-nav" href="${esc(store.navLink(o))}" target="_blank" rel="noopener">🧭 Navigo</a>
+        <a class="sbtn s-call" href="${esc(tel(o.phone))}">📞 Telefono</a>
+        <button class="sbtn s-done wide" data-deliver="${esc(o.id)}">U dorëzua</button>
+        <button class="sbtn s-fail wide" data-fail="${esc(o.id)}">Nuk u gjend / nuk përgjigjet</button>
+      </div>`}
+    </article>`;
+
+    return head
+      + left.map((o) => card(o, false)).join('')
+      + (done.length ? `<div class="rsec"><h2>Dorëzuar — ${done.length}</h2></div>`
+                        + done.map((o) => card(o, true)).join('') : '')
+      + dayBox() + privacy();
+  }
+
+  function dayBox() {
+    const d = R.day || { deliveries: 0, cash: 0, card: 0 };
+    return `<div class="rsec" style="margin-top:.6rem">
+      <h2>Sot</h2>
+      <div class="daybox">
+        <div><b>${d.deliveries || 0}</b><span>Dorëzime</span></div>
+        <div><b>${esc(money(d.cash || 0))}</b><span>Para në dorë</span></div>
+        <div><b>${esc(money(d.card || 0))}</b><span>Me kartë</span></div>
+      </div>
+    </div>`;
+  }
+
+  const privacy = () => `<p class="privacy">Gjatë nisjes regjistrohet vendndodhja
+    kur nisesh dhe kur dorëzon — vetëm në ato çaste, dhe vetëm sa je në punë.
+    Kjo shërben për të ditur sa zgjatin dorëzimet.</p>`;
+
+  function render() {
+    $('#v-runs').innerHTML = R.run ? renderRun() : renderPicking();
+  }
+
+  /* ---------- të dhënat ---------- */
+
+  async function load(silent) {
+    if (!R.live) return;
+    try {
+      const mine = await store.drvMyRun();
+      S.staf.offline(false);
+      R.run = mine.run; R.stops = mine.stops;
+      if (!R.run) {
+        R.ready = (await store.drvReady()) || [];
+        // hiq nga zgjedhja çdo porosi që e mori dikush tjetër ndërkohë
+        const ids = new Set(R.ready.map((o) => o.id));
+        [...R.pick].forEach((id) => { if (!ids.has(id)) R.pick.delete(id); });
+      }
+      R.day = await store.drvMyDay().catch(() => null);
+      render();
+    } catch (e) {
+      S.staf.offline(true);
+      if (/kod|Hyr|esion/i.test(e.message)) S.staf.logout();
+    }
+  }
+
+  async function startRun() {
+    const ids = [...R.pick];
+    if (!ids.length) return;
+    const btn = $('#goRun');
+    if (btn) { btn.disabled = true; btn.textContent = 'Po nisesh…'; }
+    try {
+      await store.drvStartRun(ids, await here());
+      R.pick.clear();
+      await load(true);
+    } catch (e) {
+      alert(e.message);
+      await load(true);
+    }
+  }
+
+  /* ---------- dorëzimi ---------- */
+
+  function openDeliver(id) {
+    const o = R.stops.find((x) => x.id === id);
+    if (!o) return;
+    R.target = o;
+    $('#dlvTitle').textContent = 'Porosia #' + o.number;
+    $('#dlvErr').textContent = '';
+    const cash = o.payment === 'cash';
+    $('#dlvSub').textContent = cash
+      ? 'Sa para arkëtove? Lëre siç është nëse mori shumën e plotë.'
+      : 'Kjo porosi është paguar me kartë — nuk arkëtohet gjë.';
+    $('#dlvCashWrap').classList.toggle('hide', !cash);
+    $('#dlvCash').value = cash ? String(Math.round(Number(o.total) || 0)) : '';
+    $('#dlvModal').classList.add('on');
+  }
+  const closeDeliver = () => { $('#dlvModal').classList.remove('on'); R.target = null; };
+
+  async function confirmDeliver() {
+    const o = R.target;
+    if (!o) return;
+    const cash = o.payment === 'cash'
+      ? Number(String($('#dlvCash').value).replace(/\D/g, '')) : null;
+    $('#dlvOk').disabled = true;
+    try {
+      await store.drvDelivered(o.id, await here(), cash);
+      closeDeliver();
+      await load(true);
+    } catch (e) {
+      $('#dlvErr').textContent = e.message;
+    } finally { $('#dlvOk').disabled = false; }
+  }
+
+  function openFail(id) {
+    R.target = R.stops.find((x) => x.id === id) || null;
+    if (R.target) $('#failModal').classList.add('on');
+  }
+  const closeFail = () => { $('#failModal').classList.remove('on'); R.target = null; };
+
+  async function confirmFail() {
+    const o = R.target;
+    if (!o) return;
+    try {
+      await store.drvFailed(o.id, $('#failReason').value);
+      closeFail();
+      await load(true);
+    } catch (e) { alert(e.message); }
+  }
+
+  /* ---------- lidhjet ---------- */
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-dlv-close]')) return closeDeliver();
+    if (e.target.closest('[data-fail-close]')) return closeFail();
+    if (e.target.id === 'dlvOk') return confirmDeliver();
+    if (e.target.id === 'failOk') return confirmFail();
+    if (!R.live) return;
+
+    const pk = e.target.closest('[data-pickit]');
+    if (pk) {
+      const id = pk.dataset.pickit;
+      if (R.pick.has(id)) R.pick.delete(id); else R.pick.add(id);
+      render();
+      return;
+    }
+    if (e.target.closest('#goRun')) return startRun();
+
+    const d = e.target.closest('[data-deliver]');
+    if (d) return openDeliver(d.dataset.deliver);
+
+    const f = e.target.closest('[data-fail]');
+    if (f) return openFail(f.dataset.fail);
+  });
+
+  S.views = S.views || {};
+  S.views.runs = {
+    label: 'Motorristi',
+    start() {
+      R.live = true;
+      $('#v-runs').classList.remove('hide');
+      load();
+      clearInterval(R.poll);
+      R.poll = setInterval(() => { if (!document.hidden) load(true); }, 12000);
+    },
+    stop() {
+      R.live = false;
+      clearInterval(R.poll);
+      $('#v-runs').classList.add('hide');
+    },
+    refresh: () => load(true),
+  };
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Guaska e aplikacionit të stafit.
+   Një hyrje për të gjithë. Kodi vendos se cilat pamje hapen: kuzhinieri sheh
+   furrën, motorristi sheh nisjen, pronari sheh të dyja dhe ndërron mes tyre.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const store = S.store;
+  const $ = (s) => document.querySelector(s);
+  const esc = (t) => String(t == null ? '' : t)
+    .replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+  // Pamjet që di ta hapë kjo faqe. Ekranet e tjera (porositë, menuja,
+  // magazina) rrinë te paneli — këtu vijnë vetëm ato që përdoren në këmbë.
+  const HERE = ['kds', 'runs'];
+
+  const A = { me: null, view: null, poll: null };
+
+  /* ══════════════════ HYRJA ══════════════════ */
+
+  let pin = '';
+  const showPin = () => { $('#pinShow').textContent = '•'.repeat(pin.length); };
+
+  function gateErr(m) {
+    $('#gateErr').textContent = m || '';
+    if (m) {
+      $('#pinShow').classList.add('err');
+      setTimeout(() => $('#pinShow').classList.remove('err'), 320);
+    }
+  }
+
+  async function tryLogin() {
+    if (pin.length < 4) return gateErr('Kodi ka të paktën 4 shifra.');
+    const code = pin;
+    pin = ''; showPin();
+    try {
+      await store.staffLogin(code, 'staf');
+      const me = await store.myScreens();
+      if (!me) return gateErr('Sesioni nuk u hap. Provo sërish.');
+      const mine = (me.screens || []).filter((s) => HERE.indexOf(s) >= 0);
+      if (!mine.length) {
+        await store.staffLogout();
+        return gateErr('Ky kod nuk ka asnjë ekran këtu. Hyr te paneli me email.');
+      }
+      enter(me);
+    } catch (e) {
+      gateErr(e.message);
+    }
+  }
+
+  $('.keys').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-k]');
+    if (!b) return;
+    gateErr('');
+    const k = b.dataset.k;
+    if (k === 'del') pin = pin.slice(0, -1);
+    else if (k === 'ok') return tryLogin();
+    else if (pin.length < 8) pin += k;
+    showPin();
+    if (pin.length === 8) tryLogin();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if ($('#gate').classList.contains('hide')) return;
+    if (/^[0-9]$/.test(e.key) && pin.length < 8) { pin += e.key; showPin(); gateErr(''); }
+    else if (e.key === 'Backspace') { pin = pin.slice(0, -1); showPin(); }
+    else if (e.key === 'Enter') tryLogin();
+  });
+
+  /* ══════════════════ PAMJET ══════════════════ */
+
+  function setView(key) {
+    if (A.view && S.views[A.view]) S.views[A.view].stop();
+    A.view = key;
+    document.querySelectorAll('#switcher button').forEach((b) =>
+      b.classList.toggle('on', b.dataset.view === key));
+    if (S.views[key]) S.views[key].start();
+    try { localStorage.setItem('sprint-staf-view', key); } catch (e) {}
+  }
+
+  function enter(me) {
+    A.me = me;
+    const mine = (me.screens || []).filter((s) => HERE.indexOf(s) >= 0);
+
+    $('#gate').classList.add('hide');
+    $('#app').classList.remove('hide');
+    $('#whoTxt').textContent = me.name + ' · ' + (store.STAFF_ROLES[me.role] || me.role);
+
+    // Ndërruesi shfaqet vetëm kur ka vërtet ku të ndërrohet.
+    const sw = $('#switcher');
+    if (mine.length > 1) {
+      sw.innerHTML = mine.map((k) =>
+        `<button data-view="${esc(k)}">${esc((S.views[k] && S.views[k].label) || k)}</button>`).join('');
+      sw.classList.remove('hide');
+    } else {
+      sw.innerHTML = ''; sw.classList.add('hide');
+    }
+
+    let want = null;
+    try { want = localStorage.getItem('sprint-staf-view'); } catch (e) {}
+    setView(mine.indexOf(want) >= 0 ? want : mine[0]);
+
+    clearInterval(A.poll);
+    A.poll = setInterval(() => {
+      if (!document.hidden && A.view && S.views[A.view]) S.views[A.view].refresh();
+    }, 8000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && A.view && S.views[A.view]) S.views[A.view].refresh();
+    });
+  }
+
+  async function logout() {
+    clearInterval(A.poll);
+    if (A.view && S.views[A.view]) S.views[A.view].stop();
+    A.view = null; A.me = null;
+    await store.staffLogout();
+    pin = ''; showPin(); gateErr('');
+    $('#app').classList.add('hide');
+    $('#gate').classList.remove('hide');
+  }
+
+  /* ══════════════════ E PËRBASHKËT ══════════════════ */
+
+  S.staf = {
+    offline: (on) => $('#offline').classList.toggle('on', !!on),
+    logout,
+    me: () => A.me,
+  };
+
+  document.addEventListener('click', (e) => {
+    const v = e.target.closest('#switcher button');
+    if (v) return setView(v.dataset.view);
+    if (e.target.closest('#outBtn')) return logout();
+    if (e.target.closest('#refBtn') && A.view && S.views[A.view]) return S.views[A.view].refresh();
+  });
+
+  /* Sesioni i ruajtur e kalon hyrjen — pajisja nuk e shkruan kodin çdo turn. */
+  store.myScreens().then((me) => {
+    if (me && (me.screens || []).some((s) => HERE.indexOf(s) >= 0)) enter(me);
+    else showPin();
+  }).catch(() => showPin());
+})();
+
+</script>

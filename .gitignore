@@ -5,3 +5,4 @@ node_modules/
 .env.*
 .netlify/
 .vercel/
+local/te-dhenat/

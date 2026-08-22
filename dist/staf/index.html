@@ -1,14 +1,19 @@
-<title>SPRINT · Kuzhina</title>
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>SPRINT · Stafi</title>
 <style>
 /* ============================================================================
-   SPRINT — Ekrani i kuzhinës.
-   Lexohet nga dy metra, me duar me miell. Prandaj: shkronja të mëdha, target
-   të gjerë prekjeje, ngjyrë që flet para se të lexosh, dhe asnjë e dhënë
-   personale — një ekran i varur në mur s'ka pse mban emra e adresa gjithë ditën.
+   SPRINT — Hyrja e stafit.
+   Një link i vetëm për të gjithë. Kodi vendos se çfarë sheh njeriu pas tij:
+   kuzhinieri sheh furrën, motorristi sheh nisjen, pronari sheh të dyja.
    ========================================================================== */
 :root{
   --brand:#DE7F1C; --gold:#FFC244;
-  --bg:#0A0908; --pan:#161211; --pan-2:#1F1917;
+  --bg:#0A0908; --pan:#161211; --pan-2:#1F1917; --pan-3:#2A2220;
   --txt:#F7F1E7; --muted:#9C9089; --line:rgba(255,255,255,.12);
   --ok:#4CAF6D; --warn:#E6B23C; --bad:#E5544B;
   --display:'Bakbak One',Impact,Haettenschweiler,sans-serif;
@@ -17,13 +22,13 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);
-  font-size:17px;line-height:1.4;-webkit-font-smoothing:antialiased;
-  overscroll-behavior:none}
+  font-size:17px;line-height:1.4;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:var(--gold)}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .hide{display:none!important}
 
-/* ---------- hyrja me kod ---------- */
+/* ---------- hyrja ---------- */
 #gate{min-height:100dvh;display:grid;place-items:center;padding:1.5rem}
 .gate-card{width:min(100%,380px);display:grid;gap:1.1rem;text-align:center}
 .logo{font-family:var(--display);font-size:2.4rem;letter-spacing:.02em}
@@ -41,12 +46,18 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .keys .go{background:var(--brand);color:#1B0D02;border-color:var(--brand)}
 .gate-err{color:#ff9a92;font-size:.9rem;min-height:1.3em;margin:0}
 
-/* ---------- shiriti i sipërm ---------- */
+/* ---------- shiriti ---------- */
 header{position:sticky;top:0;z-index:20;background:rgba(10,9,8,.96);
   border-bottom:1px solid var(--line);padding:.55rem clamp(.7rem,2vw,1.2rem);
-  display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+  display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
 header .logo{font-size:1.4rem}
-.counts{display:flex;gap:.5rem;margin-left:auto;flex-wrap:wrap}
+.who{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:999px;padding:.3rem .7rem;white-space:nowrap}
+.switch{display:flex;gap:.3rem;background:var(--pan-2);border-radius:12px;padding:.22rem}
+.switch button{padding:.42rem .85rem;border-radius:9px;font-size:.84rem;font-weight:600;
+  color:var(--muted);transition:.15s;white-space:nowrap}
+.switch button.on{background:var(--brand);color:#1B0D02}
+.hact{display:flex;gap:.5rem;margin-left:auto;align-items:center;flex-wrap:wrap}
 .cbadge{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   border:1px solid var(--line);border-radius:999px;padding:.3rem .7rem;white-space:nowrap}
 .cbadge b{color:var(--gold);font-size:.9rem}
@@ -54,18 +65,22 @@ header .logo{font-size:1.4rem}
 .hbtn:hover{border-color:var(--gold);color:var(--gold)}
 .hbtn.off{opacity:.45}
 
-/* ---------- rrjeti i kartave ---------- */
-main{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
-  grid-template-columns:repeat(auto-fill,minmax(290px,1fr));align-content:start}
-.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:5rem 1rem;font-size:1.1rem}
+#offline{position:fixed;top:0;left:0;right:0;background:var(--bad);color:#fff;
+  text-align:center;padding:.4rem;font-size:.85rem;font-weight:600;z-index:50;
+  transform:translateY(-100%);transition:transform .25s}
+#offline.on{transform:none}
+.empty{text-align:center;color:var(--muted);padding:4rem 1rem;font-size:1.05rem}
 
+/* ══════════════════ KUZHINA ══════════════════ */
+#v-kds{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
+  grid-template-columns:repeat(auto-fill,minmax(290px,1fr));align-content:start}
+#v-kds .empty{grid-column:1/-1}
 .tick{background:var(--pan);border:2px solid var(--line);border-radius:18px;
   display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;transition:border-color .25s}
 .tick.s-new{border-style:dashed;opacity:.62}
 .tick.warn{border-color:var(--warn)}
 .tick.late{border-color:var(--bad);animation:pulse 1.6s infinite}
 @keyframes pulse{50%{border-color:rgba(229,84,75,.35)}}
-
 .t-hd{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;
   background:var(--pan-2);border-bottom:1px solid var(--line)}
 .t-no{font-family:var(--display);font-size:1.7rem;line-height:1}
@@ -76,7 +91,6 @@ main{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
   font-variant-numeric:tabular-nums}
 .tick.warn .t-clock{color:var(--warn)}
 .tick.late .t-clock{color:var(--bad)}
-
 .t-items{padding:.7rem .85rem;display:grid;gap:.5rem;align-content:start}
 .t-line{display:grid;grid-template-columns:auto 1fr;gap:.65rem;align-items:baseline;
   font-size:1.15rem;line-height:1.3;cursor:pointer;user-select:none}
@@ -84,7 +98,6 @@ main{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
 .t-line.done{opacity:.38;text-decoration:line-through}
 .t-note{margin:.2rem 0 0;background:rgba(230,178,60,.14);border-left:3px solid var(--warn);
   border-radius:0 8px 8px 0;padding:.45rem .6rem;font-size:1rem;color:#f4dca6}
-
 .t-act{display:grid;grid-template-columns:1fr auto;gap:.5rem;padding:.7rem .85rem;
   border-top:1px solid var(--line)}
 .big{border-radius:14px;padding:1rem;font-size:1.15rem;font-weight:700;letter-spacing:.02em;
@@ -95,7 +108,7 @@ main{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
 .b-back{border:1.5px solid var(--line);color:var(--muted);padding:1rem .9rem;border-radius:14px;font-size:1.2rem}
 .b-back:hover{border-color:var(--gold);color:var(--gold)}
 
-#undo{position:fixed;left:50%;bottom:1.1rem;transform:translateX(-50%) translateY(200%);
+#undo{position:fixed;left:50%;bottom:1.1rem;transform:translateX(-50%) translateY(220%);
   background:var(--pan-2);border:1.5px solid var(--gold);border-radius:14px;
   padding:.75rem 1.1rem;display:flex;gap:.9rem;align-items:center;z-index:40;
   transition:transform .25s;box-shadow:0 8px 30px rgba(0,0,0,.5)}
@@ -104,18 +117,80 @@ main{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
 #undo button{border:1.5px solid var(--gold);color:var(--gold);border-radius:10px;
   padding:.4rem .8rem;font-weight:700;font-size:.85rem}
 
-#offline{position:fixed;top:0;left:0;right:0;background:var(--bad);color:#fff;
-  text-align:center;padding:.4rem;font-size:.85rem;font-weight:600;z-index:50;
-  transform:translateY(-100%);transition:transform .25s}
-#offline.on{transform:none}
+/* ══════════════════ MOTORRISTI ══════════════════ */
+#v-runs{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;max-width:720px;margin-inline:auto;
+  align-content:start}
+.rsec{display:grid;gap:.6rem}
+.rsec h2{font-family:var(--display);font-size:1.15rem;margin:0;font-weight:400;letter-spacing:.02em}
+.rsec .sub{color:var(--muted);font-size:.84rem;margin:0}
+
+.stop{background:var(--pan);border:1.5px solid var(--line);border-radius:16px;overflow:hidden}
+.stop.pick{border-color:var(--brand)}
+.stop.gone{opacity:.45}
+.s-hd{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;background:var(--pan-2)}
+.s-no{font-family:var(--display);font-size:1.35rem;line-height:1}
+.s-pay{font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  border-radius:999px;padding:.22rem .55rem}
+.s-pay.cash{background:rgba(255,194,68,.16);color:var(--gold)}
+.s-pay.card{background:rgba(76,175,109,.16);color:var(--ok)}
+.s-tot{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;font-size:1.05rem}
+.s-bd{padding:.7rem .9rem;display:grid;gap:.4rem}
+.s-name{font-weight:600}
+.s-addr{color:var(--muted);font-size:.92rem;line-height:1.35}
+.s-note{background:rgba(230,178,60,.14);border-left:3px solid var(--warn);border-radius:0 8px 8px 0;
+  padding:.4rem .55rem;font-size:.9rem;color:#f4dca6;margin:.1rem 0 0}
+.s-act{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:0 .9rem .9rem}
+.s-act .wide{grid-column:1/-1}
+.sbtn{border-radius:12px;padding:.75rem;font-size:.92rem;font-weight:700;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:.4rem;transition:.15s}
+.sbtn:active{transform:scale(.97)}
+.s-nav{background:var(--pan-3);border:1.5px solid var(--line)}
+.s-nav:hover{border-color:var(--gold);color:var(--gold)}
+.s-call{background:var(--pan-3);border:1.5px solid var(--line)}
+.s-done{background:var(--ok);color:#052312}
+.s-fail{border:1.5px solid rgba(229,84,75,.5);color:#ff9a92;font-weight:600;font-size:.84rem}
+.s-pickbox{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;cursor:pointer}
+.s-pickbox .box{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);
+  display:grid;place-items:center;flex:none;font-weight:700;color:transparent}
+.stop.pick .box{background:var(--brand);border-color:var(--brand);color:#1B0D02}
+
+.gobar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 32%);
+  padding:1rem 0 .6rem;display:grid;gap:.5rem;z-index:15}
+.gobtn{background:var(--brand);color:#1B0D02;border-radius:14px;padding:1rem;
+  font-size:1.1rem;font-weight:700;text-align:center}
+.gobtn:disabled{opacity:.35;pointer-events:none}
+
+.daybox{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.daybox div{background:var(--pan);border:1px solid var(--line);border-radius:14px;
+  padding:.7rem;text-align:center}
+.daybox b{display:block;font-family:var(--display);font-size:1.5rem;color:var(--gold);
+  font-variant-numeric:tabular-nums}
+.daybox span{font-size:.7rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+.privacy{font-size:.74rem;color:var(--muted);line-height:1.45;background:var(--pan);
+  border:1px solid var(--line);border-radius:12px;padding:.7rem .85rem;margin:0}
+
+/* ---------- dritarja e dorëzimit ---------- */
+.modal{position:fixed;inset:0;z-index:60;display:none;place-items:center;padding:1rem}
+.modal.on{display:grid}
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.82)}
+.modal-card{position:relative;background:var(--pan);border:1px solid var(--line);
+  border-radius:20px;padding:1.4rem;width:min(400px,100%);display:grid;gap:.85rem}
+.modal-card h3{margin:0;font-family:var(--display);font-size:1.2rem;font-weight:400}
+.modal-card p{margin:0;font-size:.88rem;color:var(--muted)}
+.modal-card input,.modal-card select{background:#0F0B0C;border:1.5px solid var(--line);
+  border-radius:11px;padding:.7rem .8rem;color:var(--txt);font:inherit;width:100%}
+.modal-card input:focus,.modal-card select:focus{border-color:var(--brand);outline:none}
+.modal-act{display:grid;grid-template-columns:1fr auto;gap:.5rem}
 </style>
+</head>
+<body>
 
-
-<!-- ─────── HYRJA ─────── -->
+<!-- ─────── HYRJA (e njëjtë për të gjithë) ─────── -->
 <div id="gate">
   <div class="gate-card">
     <div class="logo">SPR<em>I</em>NT</div>
-    <p class="gate-sub">Ekrani i kuzhinës. Shkruaj kodin tënd.</p>
+    <p class="gate-sub">Shkruaj kodin tënd.</p>
     <div id="pinShow"></div>
     <p class="gate-err" id="gateErr"></p>
     <div class="keys">
@@ -128,22 +203,24 @@ main{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
   </div>
 </div>
 
-<!-- ─────── EKRANI ─────── -->
+<!-- ─────── APLIKACIONI ─────── -->
 <div id="app" class="hide">
   <div id="offline">Pa internet — po tregohet gjendja e fundit e njohur.</div>
 
   <header>
     <span class="logo">SPR<em>I</em>NT</span>
-    <span class="cbadge" id="whoTxt"></span>
-    <div class="counts">
-      <span class="cbadge">Në furrë <b id="cPrep">0</b></span>
-      <span class="cbadge">Gati <b id="cReady">0</b></span>
-      <button class="hbtn" id="sndBtn" title="Zilja për porosi të reja">🔔</button>
+    <span class="who" id="whoTxt"></span>
+    <div class="switch hide" id="switcher"></div>
+    <div class="hact">
+      <span class="cbadge hide" id="kdsCount">Furrë <b id="cPrep">0</b> · Gati <b id="cReady">0</b></span>
+      <button class="hbtn hide" id="sndBtn" title="Zilja për porosi të reja">🔔</button>
+      <button class="hbtn" id="refBtn" title="Rifresko">↻</button>
       <button class="hbtn" id="outBtn">Dil</button>
     </div>
   </header>
 
-  <main id="grid"></main>
+  <main id="v-kds" class="hide"></main>
+  <main id="v-runs" class="hide"></main>
 
   <div id="undo">
     <span>Porosia <b id="undoNo"></b> u shpall gati.</span>
@@ -151,24 +228,64 @@ main{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
   </div>
 </div>
 
+<!-- ─────── DORËZIMI ─────── -->
+<div class="modal" id="dlvModal" role="dialog" aria-modal="true" aria-label="Dorëzimi">
+  <div class="modal-bg" data-dlv-close></div>
+  <div class="modal-card">
+    <h3 id="dlvTitle">Dorëzimi</h3>
+    <p id="dlvSub"></p>
+    <div id="dlvCashWrap">
+      <input id="dlvCash" inputmode="numeric" aria-label="Sa para arkëtove">
+    </div>
+    <p class="gate-err" id="dlvErr"></p>
+    <div class="modal-act">
+      <button class="sbtn s-done" id="dlvOk">Konfirmo dorëzimin</button>
+      <button class="hbtn" data-dlv-close>Anulo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── NUK U GJEND ─────── -->
+<div class="modal" id="failModal" role="dialog" aria-modal="true" aria-label="Nuk u gjend">
+  <div class="modal-bg" data-fail-close></div>
+  <div class="modal-card">
+    <h3>Porosia kthehet te banaku</h3>
+    <p>Zgjidh arsyen. Banaku e sheh menjëherë dhe merret me klientin.</p>
+    <select id="failReason">
+      <option>Nuk përgjigjet në telefon</option>
+      <option>Adresa nuk u gjet</option>
+      <option>Klienti e anuloi</option>
+      <option>Klienti nuk kishte para</option>
+      <option>Arsye tjetër</option>
+    </select>
+    <div class="modal-act">
+      <button class="sbtn s-fail" id="failOk">Kthe te banaku</button>
+      <button class="hbtn" data-fail-close>Anulo</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ============================================================================
-   SPRINT — Lidhja me Supabase
-   ----------------------------------------------------------------------------
-   Plotëso këto dy vlera pasi të krijosh projektin falas në supabase.com:
-     Supabase → Project Settings → Data API → Project URL dhe anon public key
+   SPRINT — Ku ruhen të dhënat.
 
-   Çelësi «anon» është i sigurt të jetë publik: ai lejon VETËM leximin e menusë.
-   Shkrimi kërkon hyrje me email e fjalëkalim (shih supabase/schema.sql).
+   Tri mundësi, dhe faqja është e njëjta te të tria:
 
-   Nëse i lë bosh, faqja punon njësoj por me menunë e ngurtë nga shared/data.js
-   dhe paneli admin ruan vetëm në këtë pajisje.
+   1. Bosh (si tani)  — gjithçka rri në shfletues. Mirë për ta provuar.
+   2. Serveri lokal   — programi ngrihet mbi kompjuterin e dyqanit me
+                        `node local/server.js`. Serveri e vendos vetë këtë,
+                        ndaj këtu nuk preket asgjë.
+   3. Supabase        — për përdorim online. Vendos URL-në dhe çelësin `anon`.
+                        Ai çelës është publik nga natyra; çelësi `service_role`
+                        nuk vihet KURRË këtu.
    ========================================================================== */
-window.SPRINT_CONFIG = {
-  SUPABASE_URL: '',       // p.sh. 'https://abcdefgh.supabase.co'
-  SUPABASE_ANON_KEY: '',  // çelësi publik «anon»
-  PHOTO_BUCKET: 'photos',
-};
+window.SPRINT_CONFIG = window.SPRINT_LOCAL
+  ? { SUPABASE_URL: '', SUPABASE_ANON_KEY: 'local', PHOTO_BUCKET: 'photos', LOCAL: true }
+  : {
+      SUPABASE_URL: '',
+      SUPABASE_ANON_KEY: '',
+      PHOTO_BUCKET: 'photos',
+    };
 
 </script>
 <script>
@@ -729,7 +846,8 @@ window.SPRINT = (function () {
   const setLang = (l) => { lang = l; };
   const getLang = () => lang;
   const T  = (k) => (t[k] ? t[k][lang] : k);
-  const money = (n) => n.toLocaleString('sq-AL') + ' ' + config.currency;
+  // Toleron mungesën: një fushë e zbrazët nga baza s'duhet ta prishë faqen.
+  const money = (n) => (Number(n) || 0).toLocaleString('sq-AL') + ' ' + config.currency;
   /** Çmimi siç shfaqet, bashkë me njësinë nëse pjata shitet me copë. */
   const price = (m) => money(m.p) + (m.unit ? ' ' + m.unit : '');
 
@@ -756,7 +874,9 @@ window.SPRINT = (function () {
   const URL_ = (CFG.SUPABASE_URL || '').replace(/\/+$/, '');
   const KEY = CFG.SUPABASE_ANON_KEY || '';
   const BUCKET = CFG.PHOTO_BUCKET || 'photos';
-  const configured = !!(URL_ && KEY);
+  // Serveri lokal shërben faqen nga e njëjta adresë, ndaj URL-ja rri bosh dhe
+  // kërkesat shkojnë relative. Për Supabase duhen të dyja.
+  const configured = !!(CFG.LOCAL || (URL_ && KEY));
 
   const LS_SESSION = 'sprint-session';
   const LS_LOCAL = 'sprint-local-content';
@@ -1133,10 +1253,16 @@ window.SPRINT = (function () {
   }
 
   /** Thirrje funksioni në bazë, gjithnjë me çelësin publik. */
+  /**
+   * Funksionet e bazës.
+   * Autorizimi vjen nga sesioni kur ka njeri të futur, dhe bie te çelësi publik
+   * kur s'ka. Kështu i njëjti helper u shërben të dyjave: gjurmimit që e bën
+   * klienti pa llogari, dhe funksioneve që i lejohen vetëm panelit.
+   */
   function rpc(name, body) {
     return req('/rest/v1/rpc/' + name, {
       method: 'POST',
-      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      headers: { apikey: KEY, Authorization: authHeader(), 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
   }
@@ -1545,6 +1671,210 @@ window.SPRINT = (function () {
     return st._rpc('kds_bump', { p_token: sess.token, p_order: id, p_status: status });
   }
 
+  /* ══════════════════ HIERARKIA E EKRANEVE ══════════════════ */
+
+  const SCREENS = {
+    neworder: 'Porosi e re',
+    orders:   'Porositë',
+    kds:      'Kuzhina',
+    runs:     'Motorristi',
+    bookings: 'Rezervimet',
+    menu:     'Menuja',
+    stock:    'Magazina',
+    reports:  'Raportet',
+    staff:    'Stafi',
+    settings: 'Cilësimet',
+  };
+  const ALL_SCREENS = Object.keys(SCREENS);
+  const LS_ROLESCR = 'sprint-role-screens';
+
+  const DEFAULT_ROLE_SCREENS = {
+    manager: ['neworder','orders','kds','runs','bookings','menu','stock','reports'],
+    cashier: ['neworder','orders','bookings'],
+    kitchen: ['kds'],
+    driver:  ['runs'],
+  };
+
+  /** Cilat ekrane sheh secili rol. Pronari nuk figuron — i sheh të gjitha. */
+  async function fetchRoleScreens() {
+    if (!live) {
+      const saved = readLS(LS_ROLESCR, null);
+      return saved || JSON.parse(JSON.stringify(DEFAULT_ROLE_SCREENS));
+    }
+    await st._ensureAuth();
+    const rows = await st._req('/rest/v1/role_screens?select=role,screen', { headers: st._headers() });
+    const out = { manager: [], cashier: [], kitchen: [], driver: [] };
+    (rows || []).forEach((r) => { if (out[r.role]) out[r.role].push(r.screen); });
+    return out;
+  }
+
+  async function saveRoleScreens(map) {
+    if (!live) { writeLS(LS_ROLESCR, map); return map; }
+    await st._ensureAuth();
+    // Zëvendësim i plotë: fshi rregullat e vjetra, vendos ato të rejat.
+    await st._req('/rest/v1/role_screens?role=neq.__none__', {
+      method: 'DELETE', headers: st._headers(),
+    });
+    const rows = [];
+    Object.keys(map).forEach((role) =>
+      (map[role] || []).forEach((screen) => rows.push({ role, screen })));
+    if (rows.length) {
+      await st._req('/rest/v1/role_screens', {
+        method: 'POST', headers: st._headers({ Prefer: 'resolution=ignore-duplicates' }),
+        body: JSON.stringify(rows),
+      });
+    }
+    return map;
+  }
+
+  /** Ekranet e mbajtësit të sesionit aktual të pajisjes. */
+  async function myScreens() {
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) return null;
+
+    if (!live) {
+      if (sess.role === 'owner') {
+        return { staff_id: sess.staff_id, name: sess.name, role: sess.role, screens: ALL_SCREENS.slice() };
+      }
+      const map = readLS(LS_ROLESCR, null) || DEFAULT_ROLE_SCREENS;
+      return { staff_id: sess.staff_id, name: sess.name, role: sess.role,
+               screens: (map[sess.role] || []).slice() };
+    }
+    const r = await st._rpc('my_screens', { p_token: sess.token });
+    const row = Array.isArray(r) ? r[0] : r;
+    if (!row) return null;
+    return { staff_id: row.staff_id, name: row.name, role: row.role, screens: row.screens || [] };
+  }
+
+  /* ══════════════════ MOTORRISTI ══════════════════ */
+
+  const tok = () => {
+    const s = readLS(LS_DEVICE, null);
+    if (!s || !s.token) throw new Error('Hyr me kodin tënd.');
+    return s;
+  };
+
+  /** Porositë gati për t'u marrë, ende pa motorrist. */
+  async function drvReady() {
+    if (!live) {
+      const from = new Date(Date.now() - 12 * 3600e3).toISOString();
+      const list = (await st.fetchOrders({ from })) || [];
+      return list
+        .filter((o) => o.status === 'ready' && o.kind === 'delivery' && !o.run_id)
+        .sort((a, b) => new Date(a.ready_at || a.created_at) - new Date(b.ready_at || b.created_at));
+    }
+    return st._rpc('drv_ready', { p_token: tok().token });
+  }
+
+  /** Nisja: disa porosi bashkë. Kthen id-në e nisjes. */
+  async function drvStartRun(ids, pos) {
+    if (!ids || !ids.length) throw new Error('Zgjidh të paktën një porosi.');
+    if (!live) {
+      const s = tok();
+      const open = readLS('sprint-runs', []).find((r) => r.driver_id === s.staff_id && !r.closed_at);
+      if (open) throw new Error('Ke ende një nisje të hapur. Mbylle atë përpara se të nisesh sërish.');
+      const runs = readLS('sprint-runs', []);
+      const run = { id: uid('r'), driver_id: s.staff_id, driver_name: s.name,
+                    started_at: new Date().toISOString(), closed_at: null };
+      runs.push(run); writeLS('sprint-runs', runs);
+      for (const id of ids) {
+        await st.updateOrder(id, { status: 'delivering', run_id: run.id,
+          driver_id: s.staff_id, picked_at: new Date().toISOString() });
+      }
+      addPoint(run.id, null, 'start', pos);
+      return run.id;
+    }
+    return st._rpc('drv_start_run', {
+      p_token: tok().token, p_orders: ids,
+      p_lat: (pos && pos.lat) || null, p_lng: (pos && pos.lng) || null,
+    });
+  }
+
+  /** Nisja e hapur e këtij motorristi, me ndalesat. */
+  async function drvMyRun() {
+    if (!live) {
+      const s = tok();
+      const run = readLS('sprint-runs', [])
+        .filter((r) => r.driver_id === s.staff_id && !r.closed_at)
+        .sort((a, b) => new Date(b.started_at) - new Date(a.started_at))[0];
+      if (!run) return { run: null, stops: [] };
+      const from = new Date(Date.now() - 24 * 3600e3).toISOString();
+      const list = (await st.fetchOrders({ from })) || [];
+      const stops = list.filter((o) => o.run_id === run.id)
+        .sort((a, b) => (a.delivered_at ? 1 : 0) - (b.delivered_at ? 1 : 0) || a.number - b.number);
+      const cash = stops.filter((o) => o.payment === 'cash')
+        .reduce((n, o) => n + (Number(o.total) || 0), 0);
+      return { run: Object.assign({ cash_due: cash }, run), stops };
+    }
+    const rows = (await st._rpc('drv_my_run', { p_token: tok().token })) || [];
+    if (!rows.length || !rows[0].run_id) return { run: null, stops: [] };
+    const run = { id: rows[0].run_id, started_at: rows[0].started_at, cash_due: rows[0].cash_due };
+    const stops = rows.filter((r) => r.id).map((r) => ({
+      id: r.id, number: r.number, status: r.status, customer_name: r.customer_name,
+      phone: r.phone, address: r.address, lat: r.lat, lng: r.lng,
+      total: r.total, payment: r.payment, note: r.note,
+      delivered_at: r.delivered_at, fail_reason: r.fail_reason,
+    }));
+    return { run, stops };
+  }
+
+  function addPoint(runId, orderId, kind, pos) {
+    const pts = readLS('sprint-run-points', []);
+    pts.push({ run_id: runId, order_id: orderId, kind,
+               lat: (pos && pos.lat) || null, lng: (pos && pos.lng) || null,
+               at: new Date().toISOString() });
+    writeLS('sprint-run-points', pts);
+  }
+
+  async function drvDelivered(orderId, pos, cash) {
+    if (!live) {
+      const o = ((await st.fetchOrders({ from: new Date(Date.now() - 24 * 3600e3).toISOString() })) || [])
+        .find((x) => x.id === orderId);
+      if (!o) throw new Error('Kjo porosi nuk është në nisjen tënde.');
+      await st.updateOrder(orderId, { status: 'done', delivered_at: new Date().toISOString(),
+        done_at: new Date().toISOString(), cash_collected: cash == null ? null : Number(cash) });
+      addPoint(o.run_id, orderId, 'delivered', pos);
+      const rest = ((await st.fetchOrders({ from: new Date(Date.now() - 24 * 3600e3).toISOString() })) || [])
+        .filter((x) => x.run_id === o.run_id && ['done', 'cancelled'].indexOf(x.status) < 0);
+      if (!rest.length) {
+        const runs = readLS('sprint-runs', []);
+        const r = runs.find((x) => x.id === o.run_id);
+        if (r) { r.closed_at = new Date().toISOString(); writeLS('sprint-runs', runs); }
+        addPoint(o.run_id, null, 'end', pos);
+      }
+      return 'done';
+    }
+    return st._rpc('drv_delivered', {
+      p_token: tok().token, p_order: orderId,
+      p_lat: (pos && pos.lat) || null, p_lng: (pos && pos.lng) || null,
+      p_cash: cash == null ? null : Number(cash),
+    });
+  }
+
+  /** Klienti nuk u gjend — porosia kthehet te banaku me arsyen. */
+  async function drvFailed(orderId, reason) {
+    if (!live) {
+      await st.updateOrder(orderId, { status: 'ready', run_id: null, picked_at: null,
+        fail_reason: String(reason || 'Nuk u gjend').slice(0, 200) });
+      return 'ready';
+    }
+    return st._rpc('drv_failed', { p_token: tok().token, p_order: orderId, p_reason: reason || null });
+  }
+
+  async function drvMyDay() {
+    if (!live) {
+      const s = tok();
+      const today = new Date().toISOString().slice(0, 10);
+      const list = ((await st.fetchOrders({ from: today + 'T00:00:00.000Z' })) || [])
+        .filter((o) => o.driver_id === s.staff_id && o.delivered_at);
+      const sum = (f) => list.filter(f).reduce((n, o) => n + (Number(o.total) || 0), 0);
+      return { deliveries: list.length, cash: sum((o) => o.payment === 'cash'),
+               card: sum((o) => o.payment === 'card'), avg_minutes: null };
+    }
+    const r = await st._rpc('drv_my_day', { p_token: tok().token });
+    return (Array.isArray(r) ? r[0] : r) || { deliveries: 0, cash: 0, card: 0 };
+  }
+
   /* ══════════════════ VENDNDODHJA ══════════════════ */
 
   /**
@@ -1593,6 +1923,8 @@ window.SPRINT = (function () {
     lookupCustomer, upsertCustomer,
     STAFF_ROLES: ROLES, fetchStaff, saveStaff, deleteStaff, setStaffPin,
     KDS_STATES, kdsOrders, kdsBump,
+    SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
+    drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
     staffLogin, staffSession, staffLogout,
     getLocation, locationQuality, navLink,
   });
@@ -1601,83 +1933,26 @@ window.SPRINT = (function () {
 </script>
 <script>
 /* ============================================================================
-   SPRINT — Logjika e ekranit të kuzhinës.
-   Një ekran i vetëm, i prekur me duar të zëna: pak butona, të mëdhenj, dhe
-   asnjë veprim që s'kthehet dot mbrapsht.
+   SPRINT — Pamja e kuzhinës brenda aplikacionit të stafit.
+   Regjistrohet te SPRINT.views.kds; guaska e nis dhe e ndal sipas rolit.
    ========================================================================== */
 (function () {
   const S = window.SPRINT;
   const store = S.store;
   const $ = (s) => document.querySelector(s);
-  const $$ = (s) => Array.from(document.querySelectorAll(s));
   const esc = (t) => String(t == null ? '' : t)
     .replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-
-  const K = {
-    orders: [],
-    phases: [],
-    ticked: {},        // { orderId: [indeksat e pjatëve të bëra] }
-    sound: true,
-    seen: new Set(),
-    lastBump: null,
-    timer: null,
-    poll: null,
-  };
 
   const LS_TICK = 'sprint-kds-ticks';
   const LS_SND  = 'sprint-kds-sound';
 
+  const K = { orders: [], phases: [], ticked: {}, sound: true, seen: new Set(),
+              lastBump: null, timer: null, undoT: null, live: false };
+
   try { K.ticked = JSON.parse(localStorage.getItem(LS_TICK) || '{}') || {}; } catch (e) {}
   try { K.sound = localStorage.getItem(LS_SND) !== '0'; } catch (e) {}
 
-  /* ══════════════════ HYRJA ══════════════════ */
-
-  let pin = '';
-  const showPin = () => { $('#pinShow').textContent = '•'.repeat(pin.length); };
-
-  function gateErr(m) {
-    $('#gateErr').textContent = m || '';
-    if (m) { $('#pinShow').classList.add('err'); setTimeout(() => $('#pinShow').classList.remove('err'), 320); }
-  }
-
-  async function tryLogin() {
-    if (pin.length < 4) return gateErr('Kodi ka të paktën 4 shifra.');
-    try {
-      const sess = await store.staffLogin(pin, 'kuzhina');
-      if (['kitchen', 'manager', 'owner'].indexOf(sess.role) < 0) {
-        await store.staffLogout();
-        pin = ''; showPin();
-        return gateErr('Ky kod nuk e hap ekranin e kuzhinës.');
-      }
-      start(sess);
-    } catch (e) {
-      pin = ''; showPin();
-      gateErr(e.message);
-    }
-  }
-
-  $('.keys').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-k]');
-    if (!b) return;
-    const k = b.dataset.k;
-    gateErr('');
-    if (k === 'del') pin = pin.slice(0, -1);
-    else if (k === 'ok') return tryLogin();
-    else if (pin.length < 8) pin += k;
-    showPin();
-    if (pin.length === 8) tryLogin();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (!$('#gate').classList.contains('hide')) {
-      if (/^[0-9]$/.test(e.key) && pin.length < 8) { pin += e.key; showPin(); gateErr(''); }
-      else if (e.key === 'Backspace') { pin = pin.slice(0, -1); showPin(); }
-      else if (e.key === 'Enter') tryLogin();
-    }
-  });
-
-  /* ══════════════════ ZILJA ══════════════════ */
-
+  /* ---------- zilja ---------- */
   let ac;
   function beep() {
     if (!K.sound) return;
@@ -1685,8 +1960,7 @@ window.SPRINT = (function () {
       ac = ac || new (window.AudioContext || window.webkitAudioContext)();
       [0, 0.18].forEach((t, i) => {
         const o = ac.createOscillator(), g = ac.createGain();
-        o.type = 'sine';
-        o.frequency.value = i ? 1180 : 880;
+        o.type = 'sine'; o.frequency.value = i ? 1180 : 880;
         g.gain.setValueAtTime(0.0001, ac.currentTime + t);
         g.gain.exponentialRampToValueAtTime(0.32, ac.currentTime + t + 0.02);
         g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + t + 0.16);
@@ -1696,68 +1970,52 @@ window.SPRINT = (function () {
     } catch (e) {}
   }
 
-  /* ══════════════════ KOHA ══════════════════ */
-
+  /* ---------- koha ---------- */
   const mmss = (ms) => {
     const s = Math.max(0, Math.round(ms / 1000));
     return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   };
-
-  /** Sa minuta i ka premtuar kjo fazë; përdoret për ngjyrat. */
   function targetFor(status) {
     const p = K.phases.find((x) => x.key === status);
     return (p && p.target_minutes) || (status === 'preparing' ? 20 : 5);
   }
-
-  /* Ngjyra flet para se të lexosh: e qetë → e verdhë → e kuqe që pulson. */
   function clockOf(o) {
     const since = new Date(o.kitchen_at || o.accepted_at || o.created_at).getTime();
     const mins = (Date.now() - since) / 60000;
     const t = targetFor(o.status === 'ready' ? 'ready' : 'preparing');
-    return {
-      txt: mmss(Date.now() - since),
-      cls: mins > t ? 'late' : mins > t * 0.7 ? 'warn' : '',
-    };
+    return { txt: mmss(Date.now() - since),
+             cls: mins > t ? 'late' : mins > t * 0.7 ? 'warn' : '' };
   }
 
-  /* ══════════════════ VIZATIMI ══════════════════ */
-
+  /* ---------- vizatimi ---------- */
   const KIND = { pickup: 'Marr vetë', delivery: 'Dërgesë' };
-
-  function itemsOf(o) {
-    const arr = Array.isArray(o.items) ? o.items : [];
-    return arr.map((x) => ({ q: Number(x.qty) || 1, n: x.name || x.id || '' }));
-  }
+  const itemsOf = (o) => (Array.isArray(o.items) ? o.items : [])
+    .map((x) => ({ q: Number(x.qty) || 1, n: x.name || x.id || '' }));
 
   function render() {
     const list = K.orders;
     if (!list.length) {
-      $('#grid').innerHTML = '<p class="empty">Asnjë porosi në pritje. 🍕</p>';
+      $('#v-kds').innerHTML = '<p class="empty">Asnjë porosi në pritje. 🍕</p>';
     } else {
-      $('#grid').innerHTML = list.map((o) => {
+      $('#v-kds').innerHTML = list.map((o) => {
         const c = clockOf(o);
         const ticks = K.ticked[o.id] || [];
         const items = itemsOf(o).map((it, i) =>
           `<div class="t-line${ticks.indexOf(i) >= 0 ? ' done' : ''}" data-tick="${esc(o.id)}" data-i="${i}">
              <span class="q">${it.q}×</span><span>${esc(it.n)}</span></div>`).join('');
-
         const act = o.status === 'ready'
           ? `<button class="big b-start" data-bump="${esc(o.id)}" data-to="preparing">↩ Kthe në furrë</button>`
           : o.status === 'preparing'
             ? `<button class="big b-ready" data-bump="${esc(o.id)}" data-to="ready">GATI</button>
                <button class="b-back" data-bump="${esc(o.id)}" data-to="preparing" title="Rinis kohën">↺</button>`
             : `<button class="big b-start" data-bump="${esc(o.id)}" data-to="preparing">Fillo</button>`;
-
         return `<article class="tick s-${esc(o.status)} ${c.cls}" data-ord="${esc(o.id)}">
           <div class="t-hd">
             <span class="t-no">#${o.number}</span>
             <span class="t-kind${o.kind === 'pickup' ? ' pick' : ''}">${KIND[o.kind] || ''}</span>
             <span class="t-clock" data-clock="${esc(o.id)}">${c.txt}</span>
           </div>
-          <div class="t-items">
-            ${items}
-            ${o.note ? `<p class="t-note">📝 ${esc(o.note)}</p>` : ''}
-          </div>
+          <div class="t-items">${items}${o.note ? `<p class="t-note">📝 ${esc(o.note)}</p>` : ''}</div>
           <div class="t-act">${act}</div>
         </article>`;
       }).join('');
@@ -1766,7 +2024,7 @@ window.SPRINT = (function () {
     $('#cReady').textContent = list.filter((o) => o.status === 'ready').length;
   }
 
-  /* Vetëm orët rifreskohen çdo sekondë — jo gjithë ekrani, që prekja të mos humbasë. */
+  /* Vetëm orët rifreskohen çdo sekondë, që prekja të mos humbasë nën gisht. */
   function tickClocks() {
     K.orders.forEach((o) => {
       const el = document.querySelector(`[data-clock="${CSS.escape(o.id)}"]`);
@@ -1779,24 +2037,19 @@ window.SPRINT = (function () {
     });
   }
 
-  /* ══════════════════ TË DHËNAT ══════════════════ */
-
   async function load(silent) {
+    if (!K.live) return;
     try {
       const rows = (await store.kdsOrders()) || [];
-      $('#offline').classList.remove('on');
-
-      // zilja vetëm për porosi që s'i kemi parë ende
+      S.staf.offline(false);
       const fresh = rows.filter((o) => !K.seen.has(o.id) && o.status !== 'ready');
       rows.forEach((o) => K.seen.add(o.id));
       if (!silent && fresh.length) beep();
-
       K.orders = rows;
       render();
     } catch (e) {
-      // Interneti bie shpesh në dyqan. Ekrani mban atë që ka, dhe e thotë hapur.
-      $('#offline').classList.add('on');
-      if (/kod|Hyr|sesion/i.test(e.message)) logout();
+      S.staf.offline(true);
+      if (/kod|Hyr|esion/i.test(e.message)) S.staf.logout();
     }
   }
 
@@ -1804,10 +2057,9 @@ window.SPRINT = (function () {
     const o = K.orders.find((x) => x.id === id);
     if (!o) return;
     const from = o.status;
-    o.status = to;                       // përgjigje e menjëhershme; rifreskimi e vërteton
+    o.status = to;
     if (to === 'preparing') o.kitchen_at = new Date().toISOString();
     render();
-
     try {
       await store.kdsBump(id, to);
       if (to === 'ready') {
@@ -1820,39 +2072,13 @@ window.SPRINT = (function () {
       load(true);
     } catch (e) {
       o.status = from; render();
-      $('#offline').classList.add('on');
+      S.staf.offline(true);
     }
   }
 
-  /* ══════════════════ NISJA ══════════════════ */
-
-  function start(sess) {
-    $('#gate').classList.add('hide');
-    $('#app').classList.remove('hide');
-    $('#whoTxt').textContent = sess.name;
-    $('#sndBtn').classList.toggle('off', !K.sound);
-
-    store.publicPhases().catch(() => []).then(() => {});
-    store.fetchPhases().then((p) => { K.phases = p || []; }).catch(() => {});
-
-    load();
-    clearInterval(K.poll); clearInterval(K.timer);
-    K.poll = setInterval(() => { if (!document.hidden) load(true); }, 8000);
-    K.timer = setInterval(tickClocks, 1000);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) load(true); });
-  }
-
-  async function logout() {
-    clearInterval(K.poll); clearInterval(K.timer);
-    await store.staffLogout();
-    K.seen.clear(); pin = ''; showPin();
-    $('#app').classList.add('hide');
-    $('#gate').classList.remove('hide');
-  }
-
-  /* ══════════════════ LIDHJET ══════════════════ */
-
-  $('#app').addEventListener('click', (e) => {
+  /* ---------- lidhjet ---------- */
+  document.addEventListener('click', (e) => {
+    if (!K.live) return;
     const b = e.target.closest('[data-bump]');
     if (b) return bump(b.dataset.bump, b.dataset.to);
 
@@ -1866,15 +2092,12 @@ window.SPRINT = (function () {
       t.classList.toggle('done', at < 0);
       return;
     }
-
     if (e.target.closest('#sndBtn')) {
       K.sound = !K.sound;
       try { localStorage.setItem(LS_SND, K.sound ? '1' : '0'); } catch (err) {}
       $('#sndBtn').classList.toggle('off', !K.sound);
       if (K.sound) beep();
-      return;
     }
-    if (e.target.closest('#outBtn')) return logout();
   });
 
   $('#undoBtn').addEventListener('click', () => {
@@ -1884,11 +2107,431 @@ window.SPRINT = (function () {
     $('#undo').classList.remove('on');
   });
 
-  /* Sesioni i ruajtur e kalon hyrjen — tableti nuk e shkruan kodin çdo turn. */
-  store.staffSession().then((sess) => {
-    if (sess && ['kitchen', 'manager', 'owner'].indexOf(sess.role) >= 0) start(sess);
+  S.views = S.views || {};
+  S.views.kds = {
+    label: 'Kuzhina',
+    start() {
+      K.live = true;
+      $('#v-kds').classList.remove('hide');
+      $('#kdsCount').classList.remove('hide');
+      $('#sndBtn').classList.remove('hide');
+      $('#sndBtn').classList.toggle('off', !K.sound);
+      store.fetchPhases().then((p) => { K.phases = p || []; }).catch(() => {});
+      load();
+      clearInterval(K.timer);
+      K.timer = setInterval(tickClocks, 1000);
+    },
+    stop() {
+      K.live = false;
+      clearInterval(K.timer);
+      $('#v-kds').classList.add('hide');
+      $('#kdsCount').classList.add('hide');
+      $('#sndBtn').classList.add('hide');
+      $('#undo').classList.remove('on');
+    },
+    refresh: () => load(true),
+  };
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Pamja e motorristit.
+   Njësia e punës është nisja, jo porosia: motorristët dalin me 2–3 bashkë dhe
+   i mbyllin një nga një. Prandaj ekrani ka dy gjendje — zgjedhja para nisjes,
+   dhe ndalesat gjatë saj.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const store = S.store;
+  const $ = (s) => document.querySelector(s);
+  const esc = (t) => String(t == null ? '' : t)
+    .replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const money = (n) => (Math.round(n) || 0).toLocaleString('sq-AL') + ' L';
+
+  const R = { ready: [], run: null, stops: [], day: null, pick: new Set(),
+              live: false, poll: null, target: null };
+
+  /* Vendndodhja merret vetëm në çastet kur faqja është hapur gjithsesi —
+     kur niset dhe kur dorëzon. Pa aplikacion, pa gjurmim të fshehtë. */
+  async function here() {
+    try { return await store.getLocation({ high: true, timeout: 6000 }); }
+    catch (e) { return null; }
+  }
+
+  const tel = (p) => 'tel:' + String(p || '').replace(/[^\d+]/g, '');
+
+  /* ---------- vizatimi ---------- */
+
+  function renderPicking() {
+    const list = R.ready;
+    const head = `<div class="rsec">
+      <h2>Gati për t'u marrë</h2>
+      <p class="sub">Zgjidh porositë që merr bashkë, pastaj shtyp «Nisu».</p>
+    </div>`;
+
+    if (!list.length) {
+      return head + '<p class="empty">Asnjë porosi gati. Prit pak. 🛵</p>' + dayBox() + privacy();
+    }
+
+    const cards = list.map((o) => {
+      const on = R.pick.has(o.id);
+      return `<article class="stop${on ? ' pick' : ''}" data-stop="${esc(o.id)}">
+        <div class="s-pickbox" data-pickit="${esc(o.id)}">
+          <span class="box">✓</span>
+          <span class="s-no">#${o.number}</span>
+          <span class="s-pay ${o.payment === 'cash' ? 'cash' : 'card'}">${o.payment === 'cash' ? 'Para në dorë' : 'Me kartë'}</span>
+          <span class="s-tot">${esc(money(o.total))}</span>
+        </div>
+        <div class="s-bd">
+          <span class="s-name">${esc(o.customer_name)}</span>
+          <span class="s-addr">${esc(o.address || '')}${o.lat ? ' · 📍' : ''}</span>
+          ${o.note ? `<p class="s-note">📝 ${esc(o.note)}</p>` : ''}
+        </div>
+      </article>`;
+    }).join('');
+
+    const n = R.pick.size;
+    const sum = list.filter((o) => R.pick.has(o.id))
+      .reduce((s, o) => s + (Number(o.total) || 0), 0);
+
+    return head + cards + `<div class="gobar">
+      <button class="gobtn" id="goRun"${n ? '' : ' disabled'}>
+        ${n ? `Nisu me ${n} porosi · ${esc(money(sum))}` : 'Zgjidh të paktën një porosi'}
+      </button>
+    </div>` + dayBox() + privacy();
+  }
+
+  function renderRun() {
+    const left = R.stops.filter((o) => o.status === 'delivering');
+    const done = R.stops.filter((o) => o.status === 'done');
+
+    const head = `<div class="rsec">
+      <h2>Nisja jote — ${left.length} ndalesa</h2>
+      <p class="sub">Para në dorë për t'u arkëtuar: <b>${esc(money(R.run.cash_due || 0))}</b></p>
+    </div>`;
+
+    const card = (o, gone) => `<article class="stop${gone ? ' gone' : ''}" data-stop="${esc(o.id)}">
+      <div class="s-hd">
+        <span class="s-no">#${o.number}</span>
+        <span class="s-pay ${o.payment === 'cash' ? 'cash' : 'card'}">${o.payment === 'cash' ? 'Para në dorë' : 'Me kartë'}</span>
+        <span class="s-tot">${esc(money(o.total))}</span>
+      </div>
+      <div class="s-bd">
+        <span class="s-name">${esc(o.customer_name)}</span>
+        <span class="s-addr">${esc(o.address || '')}</span>
+        ${o.note ? `<p class="s-note">📝 ${esc(o.note)}</p>` : ''}
+      </div>
+      ${gone ? '' : `<div class="s-act">
+        <a class="sbtn s-nav" href="${esc(store.navLink(o))}" target="_blank" rel="noopener">🧭 Navigo</a>
+        <a class="sbtn s-call" href="${esc(tel(o.phone))}">📞 Telefono</a>
+        <button class="sbtn s-done wide" data-deliver="${esc(o.id)}">U dorëzua</button>
+        <button class="sbtn s-fail wide" data-fail="${esc(o.id)}">Nuk u gjend / nuk përgjigjet</button>
+      </div>`}
+    </article>`;
+
+    return head
+      + left.map((o) => card(o, false)).join('')
+      + (done.length ? `<div class="rsec"><h2>Dorëzuar — ${done.length}</h2></div>`
+                        + done.map((o) => card(o, true)).join('') : '')
+      + dayBox() + privacy();
+  }
+
+  function dayBox() {
+    const d = R.day || { deliveries: 0, cash: 0, card: 0 };
+    return `<div class="rsec" style="margin-top:.6rem">
+      <h2>Sot</h2>
+      <div class="daybox">
+        <div><b>${d.deliveries || 0}</b><span>Dorëzime</span></div>
+        <div><b>${esc(money(d.cash || 0))}</b><span>Para në dorë</span></div>
+        <div><b>${esc(money(d.card || 0))}</b><span>Me kartë</span></div>
+      </div>
+    </div>`;
+  }
+
+  const privacy = () => `<p class="privacy">Gjatë nisjes regjistrohet vendndodhja
+    kur nisesh dhe kur dorëzon — vetëm në ato çaste, dhe vetëm sa je në punë.
+    Kjo shërben për të ditur sa zgjatin dorëzimet.</p>`;
+
+  function render() {
+    $('#v-runs').innerHTML = R.run ? renderRun() : renderPicking();
+  }
+
+  /* ---------- të dhënat ---------- */
+
+  async function load(silent) {
+    if (!R.live) return;
+    try {
+      const mine = await store.drvMyRun();
+      S.staf.offline(false);
+      R.run = mine.run; R.stops = mine.stops;
+      if (!R.run) {
+        R.ready = (await store.drvReady()) || [];
+        // hiq nga zgjedhja çdo porosi që e mori dikush tjetër ndërkohë
+        const ids = new Set(R.ready.map((o) => o.id));
+        [...R.pick].forEach((id) => { if (!ids.has(id)) R.pick.delete(id); });
+      }
+      R.day = await store.drvMyDay().catch(() => null);
+      render();
+    } catch (e) {
+      S.staf.offline(true);
+      if (/kod|Hyr|esion/i.test(e.message)) S.staf.logout();
+    }
+  }
+
+  async function startRun() {
+    const ids = [...R.pick];
+    if (!ids.length) return;
+    const btn = $('#goRun');
+    if (btn) { btn.disabled = true; btn.textContent = 'Po nisesh…'; }
+    try {
+      await store.drvStartRun(ids, await here());
+      R.pick.clear();
+      await load(true);
+    } catch (e) {
+      alert(e.message);
+      await load(true);
+    }
+  }
+
+  /* ---------- dorëzimi ---------- */
+
+  function openDeliver(id) {
+    const o = R.stops.find((x) => x.id === id);
+    if (!o) return;
+    R.target = o;
+    $('#dlvTitle').textContent = 'Porosia #' + o.number;
+    $('#dlvErr').textContent = '';
+    const cash = o.payment === 'cash';
+    $('#dlvSub').textContent = cash
+      ? 'Sa para arkëtove? Lëre siç është nëse mori shumën e plotë.'
+      : 'Kjo porosi është paguar me kartë — nuk arkëtohet gjë.';
+    $('#dlvCashWrap').classList.toggle('hide', !cash);
+    $('#dlvCash').value = cash ? String(Math.round(Number(o.total) || 0)) : '';
+    $('#dlvModal').classList.add('on');
+  }
+  const closeDeliver = () => { $('#dlvModal').classList.remove('on'); R.target = null; };
+
+  async function confirmDeliver() {
+    const o = R.target;
+    if (!o) return;
+    const cash = o.payment === 'cash'
+      ? Number(String($('#dlvCash').value).replace(/\D/g, '')) : null;
+    $('#dlvOk').disabled = true;
+    try {
+      await store.drvDelivered(o.id, await here(), cash);
+      closeDeliver();
+      await load(true);
+    } catch (e) {
+      $('#dlvErr').textContent = e.message;
+    } finally { $('#dlvOk').disabled = false; }
+  }
+
+  function openFail(id) {
+    R.target = R.stops.find((x) => x.id === id) || null;
+    if (R.target) $('#failModal').classList.add('on');
+  }
+  const closeFail = () => { $('#failModal').classList.remove('on'); R.target = null; };
+
+  async function confirmFail() {
+    const o = R.target;
+    if (!o) return;
+    try {
+      await store.drvFailed(o.id, $('#failReason').value);
+      closeFail();
+      await load(true);
+    } catch (e) { alert(e.message); }
+  }
+
+  /* ---------- lidhjet ---------- */
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-dlv-close]')) return closeDeliver();
+    if (e.target.closest('[data-fail-close]')) return closeFail();
+    if (e.target.id === 'dlvOk') return confirmDeliver();
+    if (e.target.id === 'failOk') return confirmFail();
+    if (!R.live) return;
+
+    const pk = e.target.closest('[data-pickit]');
+    if (pk) {
+      const id = pk.dataset.pickit;
+      if (R.pick.has(id)) R.pick.delete(id); else R.pick.add(id);
+      render();
+      return;
+    }
+    if (e.target.closest('#goRun')) return startRun();
+
+    const d = e.target.closest('[data-deliver]');
+    if (d) return openDeliver(d.dataset.deliver);
+
+    const f = e.target.closest('[data-fail]');
+    if (f) return openFail(f.dataset.fail);
+  });
+
+  S.views = S.views || {};
+  S.views.runs = {
+    label: 'Motorristi',
+    start() {
+      R.live = true;
+      $('#v-runs').classList.remove('hide');
+      load();
+      clearInterval(R.poll);
+      R.poll = setInterval(() => { if (!document.hidden) load(true); }, 12000);
+    },
+    stop() {
+      R.live = false;
+      clearInterval(R.poll);
+      $('#v-runs').classList.add('hide');
+    },
+    refresh: () => load(true),
+  };
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Guaska e aplikacionit të stafit.
+   Një hyrje për të gjithë. Kodi vendos se cilat pamje hapen: kuzhinieri sheh
+   furrën, motorristi sheh nisjen, pronari sheh të dyja dhe ndërron mes tyre.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const store = S.store;
+  const $ = (s) => document.querySelector(s);
+  const esc = (t) => String(t == null ? '' : t)
+    .replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+  // Pamjet që di ta hapë kjo faqe. Ekranet e tjera (porositë, menuja,
+  // magazina) rrinë te paneli — këtu vijnë vetëm ato që përdoren në këmbë.
+  const HERE = ['kds', 'runs'];
+
+  const A = { me: null, view: null, poll: null };
+
+  /* ══════════════════ HYRJA ══════════════════ */
+
+  let pin = '';
+  const showPin = () => { $('#pinShow').textContent = '•'.repeat(pin.length); };
+
+  function gateErr(m) {
+    $('#gateErr').textContent = m || '';
+    if (m) {
+      $('#pinShow').classList.add('err');
+      setTimeout(() => $('#pinShow').classList.remove('err'), 320);
+    }
+  }
+
+  async function tryLogin() {
+    if (pin.length < 4) return gateErr('Kodi ka të paktën 4 shifra.');
+    const code = pin;
+    pin = ''; showPin();
+    try {
+      await store.staffLogin(code, 'staf');
+      const me = await store.myScreens();
+      if (!me) return gateErr('Sesioni nuk u hap. Provo sërish.');
+      const mine = (me.screens || []).filter((s) => HERE.indexOf(s) >= 0);
+      if (!mine.length) {
+        await store.staffLogout();
+        return gateErr('Ky kod nuk ka asnjë ekran këtu. Hyr te paneli me email.');
+      }
+      enter(me);
+    } catch (e) {
+      gateErr(e.message);
+    }
+  }
+
+  $('.keys').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-k]');
+    if (!b) return;
+    gateErr('');
+    const k = b.dataset.k;
+    if (k === 'del') pin = pin.slice(0, -1);
+    else if (k === 'ok') return tryLogin();
+    else if (pin.length < 8) pin += k;
+    showPin();
+    if (pin.length === 8) tryLogin();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if ($('#gate').classList.contains('hide')) return;
+    if (/^[0-9]$/.test(e.key) && pin.length < 8) { pin += e.key; showPin(); gateErr(''); }
+    else if (e.key === 'Backspace') { pin = pin.slice(0, -1); showPin(); }
+    else if (e.key === 'Enter') tryLogin();
+  });
+
+  /* ══════════════════ PAMJET ══════════════════ */
+
+  function setView(key) {
+    if (A.view && S.views[A.view]) S.views[A.view].stop();
+    A.view = key;
+    document.querySelectorAll('#switcher button').forEach((b) =>
+      b.classList.toggle('on', b.dataset.view === key));
+    if (S.views[key]) S.views[key].start();
+    try { localStorage.setItem('sprint-staf-view', key); } catch (e) {}
+  }
+
+  function enter(me) {
+    A.me = me;
+    const mine = (me.screens || []).filter((s) => HERE.indexOf(s) >= 0);
+
+    $('#gate').classList.add('hide');
+    $('#app').classList.remove('hide');
+    $('#whoTxt').textContent = me.name + ' · ' + (store.STAFF_ROLES[me.role] || me.role);
+
+    // Ndërruesi shfaqet vetëm kur ka vërtet ku të ndërrohet.
+    const sw = $('#switcher');
+    if (mine.length > 1) {
+      sw.innerHTML = mine.map((k) =>
+        `<button data-view="${esc(k)}">${esc((S.views[k] && S.views[k].label) || k)}</button>`).join('');
+      sw.classList.remove('hide');
+    } else {
+      sw.innerHTML = ''; sw.classList.add('hide');
+    }
+
+    let want = null;
+    try { want = localStorage.getItem('sprint-staf-view'); } catch (e) {}
+    setView(mine.indexOf(want) >= 0 ? want : mine[0]);
+
+    clearInterval(A.poll);
+    A.poll = setInterval(() => {
+      if (!document.hidden && A.view && S.views[A.view]) S.views[A.view].refresh();
+    }, 8000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && A.view && S.views[A.view]) S.views[A.view].refresh();
+    });
+  }
+
+  async function logout() {
+    clearInterval(A.poll);
+    if (A.view && S.views[A.view]) S.views[A.view].stop();
+    A.view = null; A.me = null;
+    await store.staffLogout();
+    pin = ''; showPin(); gateErr('');
+    $('#app').classList.add('hide');
+    $('#gate').classList.remove('hide');
+  }
+
+  /* ══════════════════ E PËRBASHKËT ══════════════════ */
+
+  S.staf = {
+    offline: (on) => $('#offline').classList.toggle('on', !!on),
+    logout,
+    me: () => A.me,
+  };
+
+  document.addEventListener('click', (e) => {
+    const v = e.target.closest('#switcher button');
+    if (v) return setView(v.dataset.view);
+    if (e.target.closest('#outBtn')) return logout();
+    if (e.target.closest('#refBtn') && A.view && S.views[A.view]) return S.views[A.view].refresh();
+  });
+
+  /* Sesioni i ruajtur e kalon hyrjen — pajisja nuk e shkruan kodin çdo turn. */
+  store.myScreens().then((me) => {
+    if (me && (me.screens || []).some((s) => HERE.indexOf(s) >= 0)) enter(me);
     else showPin();
   }).catch(() => showPin());
 })();
 
 </script>
+</body>
+</html>

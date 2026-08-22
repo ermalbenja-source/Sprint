@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>SPRINT · Stafi</title>
+<style>
+/* ============================================================================
+   SPRINT — Hyrja e stafit.
+   Një link i vetëm për të gjithë. Kodi vendos se çfarë sheh njeriu pas tij:
+   kuzhinieri sheh furrën, motorristi sheh nisjen, pronari sheh të dyja.
+   ========================================================================== */
+:root{
+  --brand:#DE7F1C; --gold:#FFC244;
+  --bg:#0A0908; --pan:#161211; --pan-2:#1F1917; --pan-3:#2A2220;
+  --txt:#F7F1E7; --muted:#9C9089; --line:rgba(255,255,255,.12);
+  --ok:#4CAF6D; --warn:#E6B23C; --bad:#E5544B;
+  --display:'Bakbak One',Impact,Haettenschweiler,sans-serif;
+  --body:system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);
+  font-size:17px;line-height:1.4;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:var(--gold)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.hide{display:none!important}
+
+/* ---------- hyrja ---------- */
+#gate{min-height:100dvh;display:grid;place-items:center;padding:1.5rem}
+.gate-card{width:min(100%,380px);display:grid;gap:1.1rem;text-align:center}
+.logo{font-family:var(--display);font-size:2.4rem;letter-spacing:.02em}
+.logo em{font-style:normal;color:var(--brand)}
+.gate-sub{color:var(--muted);margin:0;font-size:.95rem}
+#pinShow{font-family:ui-monospace,monospace;font-size:2.6rem;letter-spacing:.55em;
+  height:4rem;display:grid;place-items:center;background:var(--pan);
+  border:2px solid var(--line);border-radius:16px;padding-left:.55em}
+#pinShow.err{border-color:var(--bad);animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.keys button{background:var(--pan);border:1.5px solid var(--line);border-radius:16px;
+  padding:1.1rem;font-size:1.6rem;font-weight:600;transition:.12s}
+.keys button:active{background:var(--brand);color:#1B0D02;transform:scale(.96)}
+.keys .go{background:var(--brand);color:#1B0D02;border-color:var(--brand)}
+.gate-err{color:#ff9a92;font-size:.9rem;min-height:1.3em;margin:0}
+
+/* ---------- shiriti ---------- */
+header{position:sticky;top:0;z-index:20;background:rgba(10,9,8,.96);
+  border-bottom:1px solid var(--line);padding:.55rem clamp(.7rem,2vw,1.2rem);
+  display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+header .logo{font-size:1.4rem}
+.who{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:999px;padding:.3rem .7rem;white-space:nowrap}
+.switch{display:flex;gap:.3rem;background:var(--pan-2);border-radius:12px;padding:.22rem}
+.switch button{padding:.42rem .85rem;border-radius:9px;font-size:.84rem;font-weight:600;
+  color:var(--muted);transition:.15s;white-space:nowrap}
+.switch button.on{background:var(--brand);color:#1B0D02}
+.hact{display:flex;gap:.5rem;margin-left:auto;align-items:center;flex-wrap:wrap}
+.cbadge{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:999px;padding:.3rem .7rem;white-space:nowrap}
+.cbadge b{color:var(--gold);font-size:.9rem}
+.hbtn{border:1.5px solid var(--line);border-radius:11px;padding:.45rem .8rem;font-size:.82rem;font-weight:600}
+.hbtn:hover{border-color:var(--gold);color:var(--gold)}
+.hbtn.off{opacity:.45}
+
+#offline{position:fixed;top:0;left:0;right:0;background:var(--bad);color:#fff;
+  text-align:center;padding:.4rem;font-size:.85rem;font-weight:600;z-index:50;
+  transform:translateY(-100%);transition:transform .25s}
+#offline.on{transform:none}
+.empty{text-align:center;color:var(--muted);padding:4rem 1rem;font-size:1.05rem}
+
+/* ══════════════════ KUZHINA ══════════════════ */
+#v-kds{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
+  grid-template-columns:repeat(auto-fill,minmax(290px,1fr));align-content:start}
+#v-kds .empty{grid-column:1/-1}
+.tick{background:var(--pan);border:2px solid var(--line);border-radius:18px;
+  display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;transition:border-color .25s}
+.tick.s-new{border-style:dashed;opacity:.62}
+.tick.warn{border-color:var(--warn)}
+.tick.late{border-color:var(--bad);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{border-color:rgba(229,84,75,.35)}}
+.t-hd{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;
+  background:var(--pan-2);border-bottom:1px solid var(--line)}
+.t-no{font-family:var(--display);font-size:1.7rem;line-height:1}
+.t-kind{font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  border:1px solid currentColor;border-radius:999px;padding:.2rem .5rem;color:var(--muted)}
+.t-kind.pick{color:var(--gold)}
+.t-clock{margin-left:auto;font-family:ui-monospace,monospace;font-size:1.5rem;font-weight:700;
+  font-variant-numeric:tabular-nums}
+.tick.warn .t-clock{color:var(--warn)}
+.tick.late .t-clock{color:var(--bad)}
+.t-items{padding:.7rem .85rem;display:grid;gap:.5rem;align-content:start}
+.t-line{display:grid;grid-template-columns:auto 1fr;gap:.65rem;align-items:baseline;
+  font-size:1.15rem;line-height:1.3;cursor:pointer;user-select:none}
+.t-line .q{font-family:var(--display);font-size:1.3rem;color:var(--gold);min-width:1.6rem}
+.t-line.done{opacity:.38;text-decoration:line-through}
+.t-note{margin:.2rem 0 0;background:rgba(230,178,60,.14);border-left:3px solid var(--warn);
+  border-radius:0 8px 8px 0;padding:.45rem .6rem;font-size:1rem;color:#f4dca6}
+.t-act{display:grid;grid-template-columns:1fr auto;gap:.5rem;padding:.7rem .85rem;
+  border-top:1px solid var(--line)}
+.big{border-radius:14px;padding:1rem;font-size:1.15rem;font-weight:700;letter-spacing:.02em;
+  transition:.15s;text-align:center}
+.big:active{transform:scale(.97)}
+.b-start{background:var(--brand);color:#1B0D02}
+.b-ready{background:var(--ok);color:#052312}
+.b-back{border:1.5px solid var(--line);color:var(--muted);padding:1rem .9rem;border-radius:14px;font-size:1.2rem}
+.b-back:hover{border-color:var(--gold);color:var(--gold)}
+
+#undo{position:fixed;left:50%;bottom:1.1rem;transform:translateX(-50%) translateY(220%);
+  background:var(--pan-2);border:1.5px solid var(--gold);border-radius:14px;
+  padding:.75rem 1.1rem;display:flex;gap:.9rem;align-items:center;z-index:40;
+  transition:transform .25s;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+#undo.on{transform:translateX(-50%)}
+#undo b{color:var(--gold)}
+#undo button{border:1.5px solid var(--gold);color:var(--gold);border-radius:10px;
+  padding:.4rem .8rem;font-weight:700;font-size:.85rem}
+
+/* ══════════════════ MOTORRISTI ══════════════════ */
+#v-runs{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;max-width:720px;margin-inline:auto;
+  align-content:start}
+.rsec{display:grid;gap:.6rem}
+.rsec h2{font-family:var(--display);font-size:1.15rem;margin:0;font-weight:400;letter-spacing:.02em}
+.rsec .sub{color:var(--muted);font-size:.84rem;margin:0}
+
+.stop{background:var(--pan);border:1.5px solid var(--line);border-radius:16px;overflow:hidden}
+.stop.pick{border-color:var(--brand)}
+.stop.gone{opacity:.45}
+.s-hd{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;background:var(--pan-2)}
+.s-no{font-family:var(--display);font-size:1.35rem;line-height:1}
+.s-pay{font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  border-radius:999px;padding:.22rem .55rem}
+.s-pay.cash{background:rgba(255,194,68,.16);color:var(--gold)}
+.s-pay.card{background:rgba(76,175,109,.16);color:var(--ok)}
+.s-tot{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;font-size:1.05rem}
+.s-bd{padding:.7rem .9rem;display:grid;gap:.4rem}
+.s-name{font-weight:600}
+.s-addr{color:var(--muted);font-size:.92rem;line-height:1.35}
+.s-note{background:rgba(230,178,60,.14);border-left:3px solid var(--warn);border-radius:0 8px 8px 0;
+  padding:.4rem .55rem;font-size:.9rem;color:#f4dca6;margin:.1rem 0 0}
+.s-act{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:0 .9rem .9rem}
+.s-act .wide{grid-column:1/-1}
+.sbtn{border-radius:12px;padding:.75rem;font-size:.92rem;font-weight:700;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:.4rem;transition:.15s}
+.sbtn:active{transform:scale(.97)}
+.s-nav{background:var(--pan-3);border:1.5px solid var(--line)}
+.s-nav:hover{border-color:var(--gold);color:var(--gold)}
+.s-call{background:var(--pan-3);border:1.5px solid var(--line)}
+.s-done{background:var(--ok);color:#052312}
+.s-fail{border:1.5px solid rgba(229,84,75,.5);color:#ff9a92;font-weight:600;font-size:.84rem}
+.s-pickbox{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;cursor:pointer}
+.s-pickbox .box{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);
+  display:grid;place-items:center;flex:none;font-weight:700;color:transparent}
+.stop.pick .box{background:var(--brand);border-color:var(--brand);color:#1B0D02}
+
+.gobar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 32%);
+  padding:1rem 0 .6rem;display:grid;gap:.5rem;z-index:15}
+.gobtn{background:var(--brand);color:#1B0D02;border-radius:14px;padding:1rem;
+  font-size:1.1rem;font-weight:700;text-align:center}
+.gobtn:disabled{opacity:.35;pointer-events:none}
+
+.daybox{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.daybox div{background:var(--pan);border:1px solid var(--line);border-radius:14px;
+  padding:.7rem;text-align:center}
+.daybox b{display:block;font-family:var(--display);font-size:1.5rem;color:var(--gold);
+  font-variant-numeric:tabular-nums}
+.daybox span{font-size:.7rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+.privacy{font-size:.74rem;color:var(--muted);line-height:1.45;background:var(--pan);
+  border:1px solid var(--line);border-radius:12px;padding:.7rem .85rem;margin:0}
+
+/* ---------- dritarja e dorëzimit ---------- */
+.modal{position:fixed;inset:0;z-index:60;display:none;place-items:center;padding:1rem}
+.modal.on{display:grid}
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.82)}
+.modal-card{position:relative;background:var(--pan);border:1px solid var(--line);
+  border-radius:20px;padding:1.4rem;width:min(400px,100%);display:grid;gap:.85rem}
+.modal-card h3{margin:0;font-family:var(--display);font-size:1.2rem;font-weight:400}
+.modal-card p{margin:0;font-size:.88rem;color:var(--muted)}
+.modal-card input,.modal-card select{background:#0F0B0C;border:1.5px solid var(--line);
+  border-radius:11px;padding:.7rem .8rem;color:var(--txt);font:inherit;width:100%}
+.modal-card input:focus,.modal-card select:focus{border-color:var(--brand);outline:none}
+.modal-act{display:grid;grid-template-columns:1fr auto;gap:.5rem}
+</style>
+</head>
+<body>
+
+<!-- ─────── HYRJA (e njëjtë për të gjithë) ─────── -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="logo">SPR<em>I</em>NT</div>
+    <p class="gate-sub">Shkruaj kodin tënd.</p>
+    <div id="pinShow"></div>
+    <p class="gate-err" id="gateErr"></p>
+    <div class="keys">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button data-k="del">←</button><button data-k="0">0</button>
+      <button data-k="ok" class="go">Hyr</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── APLIKACIONI ─────── -->
+<div id="app" class="hide">
+  <div id="offline">Pa internet — po tregohet gjendja e fundit e njohur.</div>
+
+  <header>
+    <span class="logo">SPR<em>I</em>NT</span>
+    <span class="who" id="whoTxt"></span>
+    <div class="switch hide" id="switcher"></div>
+    <div class="hact">
+      <span class="cbadge hide" id="kdsCount">Furrë <b id="cPrep">0</b> · Gati <b id="cReady">0</b></span>
+      <button class="hbtn hide" id="sndBtn" title="Zilja për porosi të reja">🔔</button>
+      <button class="hbtn" id="refBtn" title="Rifresko">↻</button>
+      <button class="hbtn" id="outBtn">Dil</button>
+    </div>
+  </header>
+
+  <main id="v-kds" class="hide"></main>
+  <main id="v-runs" class="hide"></main>
+
+  <div id="undo">
+    <span>Porosia <b id="undoNo"></b> u shpall gati.</span>
+    <button id="undoBtn">Kthe mbrapsht</button>
+  </div>
+</div>
+
+<!-- ─────── DORËZIMI ─────── -->
+<div class="modal" id="dlvModal" role="dialog" aria-modal="true" aria-label="Dorëzimi">
+  <div class="modal-bg" data-dlv-close></div>
+  <div class="modal-card">
+    <h3 id="dlvTitle">Dorëzimi</h3>
+    <p id="dlvSub"></p>
+    <div id="dlvCashWrap">
+      <input id="dlvCash" inputmode="numeric" aria-label="Sa para arkëtove">
+    </div>
+    <p class="gate-err" id="dlvErr"></p>
+    <div class="modal-act">
+      <button class="sbtn s-done" id="dlvOk">Konfirmo dorëzimin</button>
+      <button class="hbtn" data-dlv-close>Anulo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── NUK U GJEND ─────── -->
+<div class="modal" id="failModal" role="dialog" aria-modal="true" aria-label="Nuk u gjend">
+  <div class="modal-bg" data-fail-close></div>
+  <div class="modal-card">
+    <h3>Porosia kthehet te banaku</h3>
+    <p>Zgjidh arsyen. Banaku e sheh menjëherë dhe merret me klientin.</p>
+    <select id="failReason">
+      <option>Nuk përgjigjet në telefon</option>
+      <option>Adresa nuk u gjet</option>
+      <option>Klienti e anuloi</option>
+      <option>Klienti nuk kishte para</option>
+      <option>Arsye tjetër</option>
+    </select>
+    <div class="modal-act">
+      <button class="sbtn s-fail" id="failOk">Kthe te banaku</button>
+      <button class="hbtn" data-fail-close>Anulo</button>
+    </div>
+  </div>
+</div>
+
+<!--INCLUDE:shared/config.js-->
+<!--INCLUDE:shared/data.js-->
+<!--INCLUDE:shared/store.js-->
+<!--INCLUDE:shared/store-biznes.js-->
+<!--INCLUDE:src/staf-kds.js-->
+<!--INCLUDE:src/staf-runs.js-->
+<!--INCLUDE:src/staf.js-->
+</body>
+</html>

@@ -1,17 +1,20 @@
 /* ============================================================================
-   SPRINT — Lidhja me Supabase
-   ----------------------------------------------------------------------------
-   Plotëso këto dy vlera pasi të krijosh projektin falas në supabase.com:
-     Supabase → Project Settings → Data API → Project URL dhe anon public key
+   SPRINT — Ku ruhen të dhënat.
 
-   Çelësi «anon» është i sigurt të jetë publik: ai lejon VETËM leximin e menusë.
-   Shkrimi kërkon hyrje me email e fjalëkalim (shih supabase/schema.sql).
+   Tri mundësi, dhe faqja është e njëjta te të tria:
 
-   Nëse i lë bosh, faqja punon njësoj por me menunë e ngurtë nga shared/data.js
-   dhe paneli admin ruan vetëm në këtë pajisje.
+   1. Bosh (si tani)  — gjithçka rri në shfletues. Mirë për ta provuar.
+   2. Serveri lokal   — programi ngrihet mbi kompjuterin e dyqanit me
+                        `node local/server.js`. Serveri e vendos vetë këtë,
+                        ndaj këtu nuk preket asgjë.
+   3. Supabase        — për përdorim online. Vendos URL-në dhe çelësin `anon`.
+                        Ai çelës është publik nga natyra; çelësi `service_role`
+                        nuk vihet KURRË këtu.
    ========================================================================== */
-window.SPRINT_CONFIG = {
-  SUPABASE_URL: '',       // p.sh. 'https://abcdefgh.supabase.co'
-  SUPABASE_ANON_KEY: '',  // çelësi publik «anon»
-  PHOTO_BUCKET: 'photos',
-};
+window.SPRINT_CONFIG = window.SPRINT_LOCAL
+  ? { SUPABASE_URL: '', SUPABASE_ANON_KEY: 'local', PHOTO_BUCKET: 'photos', LOCAL: true }
+  : {
+      SUPABASE_URL: '',
+      SUPABASE_ANON_KEY: '',
+      PHOTO_BUCKET: 'photos',
+    };
