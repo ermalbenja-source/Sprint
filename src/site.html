@@ -1331,7 +1331,7 @@ coSend.addEventListener('click', async ()=>{
   const payload={
     kind:CO.kind, name, phone, address:CO.kind==='delivery'?addr:null,
     note:coNote.value.trim()||null, payment:CO.pay, wantedAt, lang,
-    items:t.lines.map(li=>({id:li.m.id,name:li.m[lang==='sq'?'sq':'en'],qty:li.q,price:li.m.p,sum:li.sum})),
+    items:t.lines.map(li=>({id:li.m.id,c:li.m.c,name:li.m[lang==='sq'?'sq':'en'],qty:li.q,price:li.m.p,sum:li.sum})),
     subtotal:t.sub, deliveryFee:fee, total:t.sub+fee,
     channel:'web',
   };

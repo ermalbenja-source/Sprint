@@ -202,7 +202,7 @@ header .logo{font-size:1.4rem}
     <p class="gate-sub">Shkruaj kodin tënd.</p>
     <div id="pinShow"></div>
     <p class="gate-err" id="gateErr"></p>
-    <p class="buildtag" id="buildTag">v2026-08-22 11:55</p>
+    <p class="buildtag" id="buildTag">v2026-08-22 13:49</p>
     <div class="keys">
       <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
       <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
@@ -1930,6 +1930,406 @@ window.SPRINT = (function () {
       p_token: sess.token, p_order: id, p_status: status, p_station: sta });
   }
 
+  /* ══════════════════ MAGAZINA, FURNITORËT, BLERJET ══════════════════
+     Gjendja nuk ruhet askund si numër: llogaritet nga lëvizjet. Prandaj çdo
+     copë që hyn ose del ka një rresht që thotë kur, sa dhe pse. Kur numri te
+     rafti nuk përputhet me atë të ekranit, numërimi e barazon dhe lë gjurmë —
+     jo duke fshirë historinë, por duke shtuar një rresht të ri. */
+
+  const MOVE_KINDS = {
+    in:         'Hyrje',
+    out:        'Dalje',
+    waste:      'Prishje',
+    count:      'Numërim',
+    production: 'Gatim',
+    return:     'Kthim',
+  };
+
+  const LS_STOCK = 'sprint-stock';
+  const LS_SUPPL = 'sprint-suppliers';
+  const LS_MOVES = 'sprint-moves';
+  const LS_PURCH = 'sprint-purchases';
+  const LS_RECIP = 'sprint-recipes';
+
+  const num = (v) => Number(v) || 0;
+
+  /* ---------- furnitorët ---------- */
+  async function fetchSuppliers() {
+    if (!live) return readLS(LS_SUPPL, []);
+    await st._ensureAuth();
+    return st._req('/rest/v1/suppliers?select=*&order=name', { headers: st._headers() });
+  }
+
+  async function saveSupplier(row) {
+    const body = {
+      name: String(row.name || '').trim(),
+      nipt: row.nipt || null, phone: row.phone || null,
+      email: row.email || null, address: row.address || null,
+      note: row.note || null, active: row.active !== false,
+    };
+    if (body.name.length < 2) throw new Error('Emri i furnitorit duhet të paktën 2 shkronja.');
+    if (!live) {
+      const all = readLS(LS_SUPPL, []);
+      if (row.id) {
+        const i = all.findIndex((x) => x.id === row.id);
+        if (i >= 0) all[i] = Object.assign(all[i], body);
+      } else all.push(Object.assign({ id: uid('f') }, body));
+      writeLS(LS_SUPPL, all);
+      return all;
+    }
+    await st._ensureAuth();
+    if (row.id) {
+      return st._req('/rest/v1/suppliers?id=eq.' + encodeURIComponent(row.id), {
+        method: 'PATCH', headers: st._headers({ Prefer: 'return=representation' }),
+        body: JSON.stringify(body) });
+    }
+    return st._req('/rest/v1/suppliers', {
+      method: 'POST', headers: st._headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(body) });
+  }
+
+  async function deleteSupplier(id) {
+    if (!live) {
+      writeLS(LS_SUPPL, readLS(LS_SUPPL, []).filter((x) => x.id !== id));
+      return;
+    }
+    await st._ensureAuth();
+    return st._req('/rest/v1/suppliers?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE', headers: st._headers({ Prefer: 'return=minimal' }) });
+  }
+
+  /* ---------- artikujt e magazinës ---------- */
+
+  /** Gjendja e tanishme: artikulli plus sa ka mbetur dhe sa vlen. */
+  async function fetchStock() {
+    if (!live) {
+      const items = readLS(LS_STOCK, []);
+      const moves = readLS(LS_MOVES, []);
+      return items.map((i) => {
+        const mine = moves.filter((m) => m.item_id === i.id);
+        const qty = mine.reduce((n, m) => n + num(m.qty), 0);
+        return Object.assign({}, i, {
+          qty, value: qty * num(i.cost), low: qty <= num(i.min_qty),
+          last_move_at: mine.length ? mine[mine.length - 1].at : null,
+        });
+      }).sort((a, b) => String(a.name).localeCompare(String(b.name), 'sq'));
+    }
+    await st._ensureAuth();
+    return st._req('/rest/v1/stock_levels?select=*&order=name', { headers: st._headers() });
+  }
+
+  async function saveStockItem(row) {
+    const body = {
+      sku: row.sku ? String(row.sku).trim().toUpperCase() : null,
+      name: String(row.name || '').trim(),
+      unit: String(row.unit || 'copë').trim(),
+      category: row.category || '',
+      min_qty: num(row.min_qty),
+      cost: num(row.cost),
+      active: row.active !== false,
+    };
+    if (body.name.length < 2) throw new Error('Emri i artikullit duhet të paktën 2 shkronja.');
+    if (!live) {
+      const all = readLS(LS_STOCK, []);
+      if (row.id) {
+        const i = all.findIndex((x) => x.id === row.id);
+        if (i >= 0) all[i] = Object.assign(all[i], body);
+      } else all.push(Object.assign({ id: uid('m') }, body));
+      writeLS(LS_STOCK, all);
+      return all;
+    }
+    await st._ensureAuth();
+    if (row.id) {
+      return st._req('/rest/v1/stock_items?id=eq.' + encodeURIComponent(row.id), {
+        method: 'PATCH', headers: st._headers({ Prefer: 'return=representation' }),
+        body: JSON.stringify(body) });
+    }
+    return st._req('/rest/v1/stock_items', {
+      method: 'POST', headers: st._headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(body) });
+  }
+
+  async function deleteStockItem(id) {
+    if (!live) {
+      writeLS(LS_STOCK, readLS(LS_STOCK, []).filter((x) => x.id !== id));
+      writeLS(LS_MOVES, readLS(LS_MOVES, []).filter((m) => m.item_id !== id));
+      return;
+    }
+    await st._ensureAuth();
+    return st._req('/rest/v1/stock_items?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE', headers: st._headers({ Prefer: 'return=minimal' }) });
+  }
+
+  /** Një lëvizje. Te «count» jepet gjendja e gjetur, jo ndryshimi. */
+  async function stockAdjust(itemId, qty, kind, note) {
+    if (!live) {
+      const moves = readLS(LS_MOVES, []);
+      const cur = moves.filter((m) => m.item_id === itemId).reduce((n, m) => n + num(m.qty), 0);
+      let delta;
+      if (kind === 'count') { delta = num(qty) - cur; if (!delta) return cur; }
+      else if (kind === 'out' || kind === 'waste') delta = -Math.abs(num(qty));
+      else delta = Math.abs(num(qty));
+      moves.push({ id: uid('l'), item_id: itemId, qty: delta, kind,
+        note: kind === 'count' ? ((note || '') + ' (numërim: ' + num(qty) + ')') : (note || null),
+        at: new Date().toISOString() });
+      writeLS(LS_MOVES, moves);
+      return cur + delta;
+    }
+    return st._rpc('stock_adjust',
+      { p_item: itemId, p_qty: num(qty), p_kind: kind, p_note: note || null });
+  }
+
+  /** Historiku i një artikulli — nga i fundit te i pari. */
+  async function stockMoves(itemId, limit) {
+    const n = limit || 40;
+    if (!live) {
+      return readLS(LS_MOVES, []).filter((m) => m.item_id === itemId)
+        .sort((a, b) => new Date(b.at) - new Date(a.at)).slice(0, n);
+    }
+    await st._ensureAuth();
+    return st._req('/rest/v1/stock_moves?select=*&item_id=eq.'
+      + encodeURIComponent(itemId) + '&order=at.desc&limit=' + n, { headers: st._headers() });
+  }
+
+  /* ---------- blerjet ---------- */
+  async function fetchPurchases(limit) {
+    const n = limit || 50;
+    if (!live) {
+      return readLS(LS_PURCH, []).slice().sort((a, b) => (b.number || 0) - (a.number || 0)).slice(0, n);
+    }
+    await st._ensureAuth();
+    return st._req('/rest/v1/purchases?select=*&order=number.desc&limit=' + n,
+      { headers: st._headers() });
+  }
+
+  async function fetchPurchaseLines(purchaseId) {
+    if (!live) {
+      const p = readLS(LS_PURCH, []).find((x) => x.id === purchaseId);
+      return (p && p.lines) || [];
+    }
+    await st._ensureAuth();
+    return st._req('/rest/v1/purchase_lines?select=*&purchase_id=eq.'
+      + encodeURIComponent(purchaseId), { headers: st._headers() });
+  }
+
+  /** Krijon ose përditëson një blerje bashkë me rreshtat e saj. */
+  async function savePurchase(head, lines) {
+    const clean = (lines || [])
+      .filter((l) => l.item_id && num(l.qty) > 0)
+      .map((l) => ({ item_id: l.item_id, qty: num(l.qty), unit_cost: num(l.unit_cost),
+                     total: Math.round(num(l.qty) * num(l.unit_cost) * 100) / 100 }));
+    const sum = clean.reduce((n, l) => n + l.total, 0);
+    const body = {
+      supplier_id: head.supplier_id || null,
+      date: head.date || new Date().toISOString().slice(0, 10),
+      status: head.status || 'draft',
+      doc_ref: head.doc_ref || null,
+      note: head.note || null,
+      subtotal: sum, total: sum,
+    };
+
+    if (!live) {
+      const all = readLS(LS_PURCH, []);
+      let row;
+      if (head.id) {
+        row = all.find((x) => x.id === head.id);
+        if (row) Object.assign(row, body, { lines: clean });
+      } else {
+        row = Object.assign({ id: uid('b'), number: all.length + 1,
+          created_at: new Date().toISOString() }, body, { lines: clean });
+        all.push(row);
+      }
+      writeLS(LS_PURCH, all);
+      return row;
+    }
+
+    await st._ensureAuth();
+    let row;
+    if (head.id) {
+      row = (await st._req('/rest/v1/purchases?id=eq.' + encodeURIComponent(head.id), {
+        method: 'PATCH', headers: st._headers({ Prefer: 'return=representation' }),
+        body: JSON.stringify(body) }))[0];
+      await st._req('/rest/v1/purchase_lines?purchase_id=eq.' + encodeURIComponent(head.id), {
+        method: 'DELETE', headers: st._headers({ Prefer: 'return=minimal' }) });
+    } else {
+      row = (await st._req('/rest/v1/purchases', {
+        method: 'POST', headers: st._headers({ Prefer: 'return=representation' }),
+        body: JSON.stringify(body) }))[0];
+    }
+    if (clean.length) {
+      await st._req('/rest/v1/purchase_lines', {
+        method: 'POST', headers: st._headers({ Prefer: 'return=minimal' }),
+        body: JSON.stringify(clean.map((l) => Object.assign({ purchase_id: row.id }, l))) });
+    }
+    return row;
+  }
+
+  /** Pranimi: rreshtat bëhen hyrje magazine. Dy herë nuk hyn. */
+  async function receivePurchase(id) {
+    if (!live) {
+      const all = readLS(LS_PURCH, []);
+      const p = all.find((x) => x.id === id);
+      if (!p) throw new Error('Blerja nuk u gjet.');
+      if (p.status === 'received') return 0;
+      if (p.status === 'cancelled') throw new Error('Blerja është anuluar.');
+      const moves = readLS(LS_MOVES, []);
+      const items = readLS(LS_STOCK, []);
+      (p.lines || []).forEach((l) => {
+        moves.push({ id: uid('l'), item_id: l.item_id, qty: num(l.qty), kind: 'in',
+          unit_cost: num(l.unit_cost), ref_type: 'purchase', ref_id: p.id,
+          note: 'Hyrje nga blerja', at: new Date().toISOString() });
+        const it = items.find((x) => x.id === l.item_id);
+        if (it && num(l.unit_cost) > 0) it.cost = num(l.unit_cost);
+      });
+      writeLS(LS_MOVES, moves);
+      writeLS(LS_STOCK, items);
+      p.status = 'received';
+      writeLS(LS_PURCH, all);
+      return (p.lines || []).length;
+    }
+    return st._rpc('receive_purchase', { p_id: id });
+  }
+
+  async function deletePurchase(id) {
+    if (!live) {
+      writeLS(LS_PURCH, readLS(LS_PURCH, []).filter((x) => x.id !== id));
+      return;
+    }
+    await st._ensureAuth();
+    return st._req('/rest/v1/purchases?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE', headers: st._headers({ Prefer: 'return=minimal' }) });
+  }
+
+  /* ---------- recetat ---------- */
+  async function fetchRecipes(menuItemId) {
+    if (!live) {
+      const all = readLS(LS_RECIP, []);
+      return menuItemId ? all.filter((r) => r.menu_item_id === menuItemId) : all;
+    }
+    await st._ensureAuth();
+    const q = menuItemId ? '&menu_item_id=eq.' + encodeURIComponent(menuItemId) : '';
+    return st._req('/rest/v1/recipes?select=*' + q, { headers: st._headers() });
+  }
+
+  /** Zëvendëson recetën e një pjate me listën e dhënë. */
+  async function saveRecipe(menuItemId, rows) {
+    const clean = (rows || [])
+      .filter((r) => r.stock_item_id && num(r.qty) > 0)
+      .map((r) => ({ menu_item_id: menuItemId, stock_item_id: r.stock_item_id, qty: num(r.qty) }));
+    if (!live) {
+      const all = readLS(LS_RECIP, []).filter((r) => r.menu_item_id !== menuItemId);
+      writeLS(LS_RECIP, all.concat(clean));
+      return clean;
+    }
+    await st._ensureAuth();
+    await st._req('/rest/v1/recipes?menu_item_id=eq.' + encodeURIComponent(menuItemId), {
+      method: 'DELETE', headers: st._headers({ Prefer: 'return=minimal' }) });
+    if (clean.length) {
+      await st._req('/rest/v1/recipes', {
+        method: 'POST', headers: st._headers({ Prefer: 'return=minimal' }),
+        body: JSON.stringify(clean) });
+    }
+    return clean;
+  }
+
+  /* ══════════════════ RAPORTET ══════════════════
+     Të gjitha nxirren nga e njëjta tabelë që përdor kuzhina — pa regjistër të
+     dytë që del jashtë sinkroni. Porositë e anuluara nuk numërohen si xhiro. */
+
+  const day10 = (d) => (d instanceof Date ? d : new Date(d || Date.now())).toISOString().slice(0, 10);
+
+  async function reportDay(date) {
+    const d = day10(date);
+    if (!live) {
+      const list = ((await st.fetchOrders({})) || [])
+        .filter((o) => String(o.created_at).slice(0, 10) === d);
+      const good = list.filter((o) => o.status !== 'cancelled');
+      const mins = (a, b) => (new Date(b) - new Date(a)) / 60000;
+      const avg = (xs) => (xs.length
+        ? Math.round((xs.reduce((n, x) => n + x, 0) / xs.length) * 10) / 10 : null);
+      return {
+        orders_count: good.length,
+        revenue: good.reduce((n, o) => n + num(o.total), 0),
+        cash: good.filter((o) => o.payment === 'cash').reduce((n, o) => n + num(o.total), 0),
+        card: good.filter((o) => o.payment !== 'cash').reduce((n, o) => n + num(o.total), 0),
+        delivery_count: good.filter((o) => o.kind === 'delivery').length,
+        pickup_count: good.filter((o) => o.kind === 'pickup').length,
+        web_count: good.filter((o) => o.channel === 'web').length,
+        phone_count: good.filter((o) => o.channel === 'phone').length,
+        cancelled_count: list.length - good.length,
+        avg_prep_minutes: avg(good.filter((o) => o.ready_at)
+          .map((o) => mins(o.created_at, o.ready_at))),
+        avg_delivery_minutes: avg(good.filter((o) => o.delivered_at && o.picked_at)
+          .map((o) => mins(o.picked_at, o.delivered_at))),
+        guests_avg: good.length ? Math.round(good.reduce((n, o) => n + num(o.total), 0) / good.length) : 0,
+      };
+    }
+    const r = await st._rpc('report_day', { p_date: d });
+    return (Array.isArray(r) ? r[0] : r) || null;
+  }
+
+  async function reportRange(from, to) {
+    const a = day10(from), b = day10(to);
+    if (!live) {
+      const acc = {};
+      ((await st.fetchOrders({})) || [])
+        .filter((o) => o.status !== 'cancelled')
+        .forEach((o) => {
+          const d = String(o.created_at).slice(0, 10);
+          if (d < a || d > b) return;
+          const k = acc[d] || (acc[d] = { day: d, orders_count: 0, revenue: 0 });
+          k.orders_count++; k.revenue += num(o.total);
+        });
+      return Object.values(acc).sort((x, y) => x.day.localeCompare(y.day));
+    }
+    return st._rpc('report_range', { p_from: a, p_to: b });
+  }
+
+  async function reportItems(from, to) {
+    const a = day10(from), b = day10(to);
+    if (!live) {
+      const router = await loadRouter();
+      const acc = {};
+      ((await st.fetchOrders({})) || [])
+        .filter((o) => o.status !== 'cancelled')
+        .forEach((o) => {
+          const d = String(o.created_at).slice(0, 10);
+          if (d < a || d > b) return;
+          (o.items || []).forEach((li) => {
+            const id = String(li.id == null ? '' : li.id);
+            const k = acc[id] || (acc[id] = { item_id: id, name: li.name || id, qty: 0,
+                                              revenue: 0, station: router.of(li) });
+            k.qty += num(li.qty);
+            k.revenue += num(li.qty) * num(li.price);
+            if (li.name) k.name = li.name;
+          });
+        });
+      return Object.values(acc).sort((x, y) => y.qty - x.qty);
+    }
+    return st._rpc('report_items', { p_from: a, p_to: b });
+  }
+
+  /** Fleta e ditës për të gjithë motorristët — pronari, jo motorristi vetë. */
+  async function driverDay(date) {
+    const d = day10(date);
+    if (!live) {
+      const staff = readLS(LS_STAFF, []);
+      const acc = {};
+      ((await st.fetchOrders({})) || [])
+        .filter((o) => o.delivered_at && String(o.delivered_at).slice(0, 10) === d && o.driver_id)
+        .forEach((o) => {
+          const k = acc[o.driver_id] || (acc[o.driver_id] = {
+            driver_id: o.driver_id,
+            driver_name: (staff.find((x) => x.id === o.driver_id) || {}).name || '—',
+            deliveries: 0, cash: 0, card: 0 });
+          k.deliveries++;
+          if (o.payment === 'cash') k.cash += num(o.total); else k.card += num(o.total);
+        });
+      return Object.values(acc).sort((x, y) => y.deliveries - x.deliveries);
+    }
+    return st._rpc('driver_day', { p_date: d });
+  }
+
   /* ══════════════════ HIERARKIA E EKRANEVE ══════════════════ */
 
   const SCREENS = {
@@ -2187,6 +2587,11 @@ window.SPRINT = (function () {
     KDS_STATES, kdsOrders, kdsBump,
     STATIONS, STATION_ICON, DEFAULT_STATIONS, fetchStations, saveStations,
     stationRouter, loadRouter,
+    MOVE_KINDS, fetchSuppliers, saveSupplier, deleteSupplier,
+    fetchStock, saveStockItem, deleteStockItem, stockAdjust, stockMoves,
+    fetchPurchases, fetchPurchaseLines, savePurchase, receivePurchase, deletePurchase,
+    fetchRecipes, saveRecipe,
+    reportDay, reportRange, reportItems, driverDay,
     DEMO_STAFF, ensureLocalStaff, ensureLocalOrders,
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,

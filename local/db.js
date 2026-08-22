@@ -132,6 +132,17 @@ create table if not exists stock_moves (
   qty real not null, kind text not null, unit_cost real,
   ref_type text, ref_id text, staff_id text, note text, at text not null);
 
+-- Gjendja e magazinës llogaritet, nuk ruhet — njësoj si te Postgres-i.
+create view if not exists stock_levels as
+select i.id, i.sku, i.name, i.unit, i.category, i.min_qty, i.cost, i.active,
+       coalesce(sum(m.qty), 0)                as qty,
+       coalesce(sum(m.qty), 0) * i.cost       as value,
+       case when coalesce(sum(m.qty), 0) <= i.min_qty then 1 else 0 end as low,
+       max(m.at)                              as last_move_at
+  from stock_items i
+  left join stock_moves m on m.item_id = i.id
+ group by i.id;
+
 create table if not exists purchases (
   id text primary key, number integer, supplier_id text, date text not null,
   status text not null default 'draft', subtotal real not null default 0,

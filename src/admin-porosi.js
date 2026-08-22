@@ -126,7 +126,7 @@
     if (!m) return;
     const hit = O.lines.find((l) => l.id === id);
     if (hit) hit.qty++;
-    else O.lines.push({ id: m.id, name: dishName(m), price: dishPrice(m), qty: 1 });
+    else O.lines.push({ id: m.id, c: m.c || m.category, name: dishName(m), price: dishPrice(m), qty: 1 });
     $('#nSearch').value = '';
     O.sugg = []; O.pick = 0;
     renderSugg(); renderLines();
@@ -190,7 +190,10 @@
         name, phone,
         address: O.kind === 'delivery' ? addr : null,
         note: $('#nNote').value.trim() || null,
-        items: O.lines.map((l) => ({ id: l.id, name: l.name, qty: l.qty, price: l.price })),
+        // Kategoria udhëton bashkë me rreshtin: pa të, ndarja kuzhinë/furrë
+        // do të varej nga menuja e publikuar, dhe para publikimit të parë çdo
+        // pjatë do të binte te kuzhina.
+        items: O.lines.map((l) => ({ id: l.id, c: l.c, name: l.name, qty: l.qty, price: l.price })),
         subtotal: total(),
         total: total(),
         payment: $('#nPay').value,

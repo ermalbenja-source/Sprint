@@ -41,6 +41,19 @@ Të gjithë hyjnë te i njëjti link. Ajo që u hapet varet nga roli dhe nga tab
 «Kush sheh çfarë» te paneli: kuzhinieri sheh kuzhinën, piceri furrën, motorristi
 nisjen. Çfarë gatuhet ku e vendos ti te **Paneli → Gatimi**.
 
+Te paneli, përveç porosive dhe menusë, ke edhe:
+
+| Skeda | Për çfarë |
+|---|---|
+| **Gatimi** | çfarë del nga kuzhina dhe çfarë nga furra e picës |
+| **Magazina** | gjendja, furnitorët dhe recetat |
+| **Blerjet** | fatura e furnitorit → gjendja rritet vetvetiu |
+| **Raportet** | xhiroja e ditës, java, motorristët, pjatat më të shitura |
+
+Gjendja e magazinës nuk shkruhet me dorë: llogaritet nga lëvizjet. Kur numri te
+rafti nuk përputhet, shtyp «Numërim» dhe shkruaj sa gjete — programi e barazon
+dhe e lë gjurmën, pa fshirë asgjë.
+
 Këshillë: ruaje adresën si faqe fillestare te tableti, dhe në telefonat e
 motorristëve shtoje në ekranin bazë. Sesioni mbahet 30 ditë, ndaj kodi nuk
 shkruhet çdo turn.

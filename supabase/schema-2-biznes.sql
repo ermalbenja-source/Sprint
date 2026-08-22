@@ -898,17 +898,24 @@ alter table public.menu_items add constraint menu_items_station_ok
 
 /* Ku gatuhet kjo pjatë? Përgjigjja: përjashtimi i pjatës, përndryshe kategoria,
    përndryshe kuzhina — që një pjatë e panjohur të mos humbasë pa u parë. */
-create or replace function public.item_station(p_item_id text)
+create or replace function public.item_station(p_item_id text, p_category text default null)
 returns text
 language sql
 stable
 set search_path = public
 as $$
-  select coalesce(mi.station, cs.station, 'kitchen')
-    from public.menu_items mi
-    left join public.category_stations cs on cs.category = mi.category
-   where mi.id = p_item_id;
+  select coalesce(
+    (select coalesce(mi.station, cs.station)
+       from public.menu_items mi
+       left join public.category_stations cs on cs.category = mi.category
+      where mi.id = p_item_id),
+    -- Pjata mund të mos jetë ende te menuja e publikuar. Rreshti i porosisë e
+    -- mban vetë kategorinë, ndaj ndarja punon që nga porosia e parë.
+    (select cs.station from public.category_stations cs where cs.category = p_category),
+    'kitchen');
 $$;
+
+drop function if exists public.item_station(text);
 
 /* Rreshtat e porosisë me stacionin e ngjitur secilit. Nëse rreshti e mban
    tashmë stacionin nga çasti i porosisë, ai respektohet — porositë e vjetra
@@ -922,7 +929,8 @@ as $$
   select coalesce(jsonb_agg(
            case when li->>'station' in ('kitchen','oven','none') then li
                 else li || jsonb_build_object('station',
-                       coalesce(public.item_station(li->>'id'), 'kitchen')) end
+                       public.item_station(li->>'id',
+                         coalesce(li->>'c', li->>'category'))) end
            order by ord), '[]'::jsonb)
     from jsonb_array_elements(coalesce(p_items, '[]'::jsonb)) with ordinality t(li, ord);
 $$;
@@ -1292,3 +1300,176 @@ grant execute on function public.drv_my_day(uuid, date) to anon, authenticated;
 --   Cilësimet → Stafi      — shto motorristët dhe kodet e tyre
 --   Magazina  → Artikujt   — shto lëndën e parë, pastaj recetat
 -- ============================================================================
+
+
+-- ═══════════════════════ 22. MAGAZINA NË PUNË ═══════════════════════
+-- Tabelat e magazinës ekzistonin që herët; këtu vijnë veprimet që i vënë në
+-- punë. Rregulli i vetëm që mban gjithçka të ndershme: gjendja nuk shkruhet
+-- kurrë drejtpërdrejt, llogaritet nga lëvizjet. Kështu çdo copë ka një pse.
+
+/* Një lëvizje e vetme: hyrje, dalje, prishje, ose numërim.
+   Numërimi është i veçantë — aty nuk jepet ndryshimi, jepet gjendja e vërtetë
+   që u gjet në raft, dhe funksioni e llogarit vetë diferencën. */
+create or replace function public.stock_adjust(
+  p_item uuid, p_qty numeric, p_kind text, p_note text default null)
+returns numeric
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare cur numeric; delta numeric;
+begin
+  if p_kind not in ('in','out','waste','count','return') then
+    raise exception 'Lloj lëvizjeje i panjohur: %', p_kind;
+  end if;
+  if not exists (select 1 from public.stock_items where id = p_item) then
+    raise exception 'Artikulli nuk u gjet.';
+  end if;
+
+  select coalesce(sum(qty), 0) into cur from public.stock_moves where item_id = p_item;
+
+  if p_kind = 'count' then
+    delta := p_qty - cur;                       -- sa mungon ose sa tepron
+    if delta = 0 then return cur; end if;
+  elsif p_kind in ('out','waste') then
+    delta := -1 * abs(p_qty);                   -- dalja është gjithmonë minus
+  else
+    delta := abs(p_qty);
+  end if;
+
+  insert into public.stock_moves (item_id, qty, kind, note)
+  values (p_item, delta, p_kind,
+          case when p_kind = 'count'
+               then coalesce(p_note, '') || ' (numërim: ' || p_qty || ')'
+               else p_note end);
+
+  return cur + delta;
+end;
+$$;
+
+revoke all on function public.stock_adjust(uuid, numeric, text, text) from public, anon;
+grant execute on function public.stock_adjust(uuid, numeric, text, text) to authenticated;
+
+/* Pranimi i një blerjeje. Deri sa blerja është `draft` nuk prek gjë; kur
+   pranohet, çdo rresht bëhet hyrje magazine dhe kostoja e artikullit merr
+   çmimin e fundit të blerë — që vlera e magazinës të mos mbetet e vitit
+   të kaluar. Thirrja e dytë nuk bën asgjë: fatura nuk hyn dy herë. */
+create or replace function public.receive_purchase(p_id uuid)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare n integer := 0; st text;
+begin
+  select status into st from public.purchases where id = p_id;
+  if st is null then raise exception 'Blerja nuk u gjet.'; end if;
+  if st = 'received' then return 0; end if;
+  if st = 'cancelled' then raise exception 'Blerja është anuluar.'; end if;
+
+  insert into public.stock_moves (item_id, qty, kind, unit_cost, ref_type, ref_id, note)
+  select l.item_id, l.qty, 'in', l.unit_cost, 'purchase', p_id, 'Hyrje nga blerja'
+    from public.purchase_lines l
+   where l.purchase_id = p_id;
+  get diagnostics n = row_count;
+
+  update public.stock_items i
+     set cost = l.unit_cost, updated_at = now()
+    from public.purchase_lines l
+   where l.purchase_id = p_id and l.item_id = i.id and l.unit_cost > 0;
+
+  update public.purchases
+     set status = 'received', updated_at = now(),
+         subtotal = coalesce((select sum(total) from public.purchase_lines where purchase_id = p_id), 0),
+         total    = coalesce((select sum(total) from public.purchase_lines where purchase_id = p_id), 0)
+   where id = p_id;
+
+  return n;
+end;
+$$;
+
+revoke all on function public.receive_purchase(uuid) from public, anon;
+grant execute on function public.receive_purchase(uuid) to authenticated;
+
+
+-- ═══════════════════════ 23. RAPORTET ═══════════════════════
+-- Numrat që i duhen pronarit në mbyllje të ditës, të nxjerrë nga e njëjta
+-- tabelë që përdor kuzhina — pa regjistër të dytë që del jashtë sinkroni.
+-- Porositë e anuluara nuk numërohen askund si xhiro.
+
+create or replace function public.report_day(p_date date default current_date)
+returns table (
+  orders_count bigint, revenue numeric, cash numeric, card numeric,
+  delivery_count bigint, pickup_count bigint,
+  web_count bigint, phone_count bigint,
+  cancelled_count bigint, avg_prep_minutes numeric, avg_delivery_minutes numeric,
+  guests_avg numeric
+)
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select count(*) filter (where o.status <> 'cancelled'),
+         coalesce(sum(o.total) filter (where o.status <> 'cancelled'), 0),
+         coalesce(sum(o.total) filter (where o.status <> 'cancelled' and o.payment = 'cash'), 0),
+         coalesce(sum(o.total) filter (where o.status <> 'cancelled' and o.payment <> 'cash'), 0),
+         count(*) filter (where o.status <> 'cancelled' and o.kind = 'delivery'),
+         count(*) filter (where o.status <> 'cancelled' and o.kind = 'pickup'),
+         count(*) filter (where o.status <> 'cancelled' and o.channel = 'web'),
+         count(*) filter (where o.status <> 'cancelled' and o.channel = 'phone'),
+         count(*) filter (where o.status = 'cancelled'),
+         round(avg(extract(epoch from (o.ready_at - o.created_at)) / 60.0)
+               filter (where o.ready_at is not null)::numeric, 1),
+         round(avg(extract(epoch from (o.delivered_at - o.picked_at)) / 60.0)
+               filter (where o.delivered_at is not null)::numeric, 1),
+         round(avg(o.total) filter (where o.status <> 'cancelled')::numeric, 0)
+    from public.orders o
+   where o.created_at::date = p_date;
+$$;
+
+revoke all on function public.report_day(date) from public, anon;
+grant execute on function public.report_day(date) to authenticated;
+
+/* Xhiroja ditë për ditë, për të parë javën me një sy. */
+create or replace function public.report_range(p_from date, p_to date)
+returns table (day date, orders_count bigint, revenue numeric)
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select o.created_at::date, count(*), coalesce(sum(o.total), 0)
+    from public.orders o
+   where o.created_at::date between p_from and p_to
+     and o.status <> 'cancelled'
+   group by 1
+   order by 1;
+$$;
+
+revoke all on function public.report_range(date, date) from public, anon;
+grant execute on function public.report_range(date, date) to authenticated;
+
+/* Çfarë shitet vërtet. Rreshtat e porosive hapen një nga një. */
+create or replace function public.report_items(p_from date, p_to date)
+returns table (item_id text, name text, qty numeric, revenue numeric, station text)
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select line->>'id',
+         max(line->>'name'),
+         sum((line->>'qty')::numeric),
+         sum((line->>'qty')::numeric * coalesce((line->>'price')::numeric, 0)),
+         public.item_station(line->>'id', coalesce(line->>'c', line->>'category'))
+    from public.orders o
+    cross join lateral jsonb_array_elements(o.items) as line
+   where o.created_at::date between p_from and p_to
+     and o.status <> 'cancelled'
+   group by 1, 5
+   order by 3 desc;
+$$;
+
+revoke all on function public.report_items(date, date) from public, anon;
+grant execute on function public.report_items(date, date) to authenticated;

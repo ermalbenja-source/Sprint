@@ -16,9 +16,10 @@ const JSON_COLS = { menu_items: ['tags'], settings: ['data'], orders: ['items','
 
 const TABLES = ['menu_items','settings','order_phases','customers','customer_addresses',
                 'staff','role_screens','category_stations','runs','run_points','orders','bookings','suppliers',
+                'stock_levels',
                 'stock_items','stock_moves','purchases','purchase_lines','recipes','documents'];
 
-const BOOL_COLS = ['available','enabled','customer_visible','is_core','active','blocked','is_default'];
+const BOOL_COLS = ['available','enabled','customer_visible','is_core','active','blocked','is_default','low'];
 
 function decode(table, row) {
   if (!row) return row;
@@ -73,6 +74,41 @@ function buildOrder(params) {
 
 /* ══════════════════ REST ══════════════════ */
 
+/* Kufijtë që Postgres-i i mban vetë me `check`. SQLite nuk i ka, ndaj
+   kontrollohen këtu — përndryshe diçka që punon lokalisht do të refuzohej
+   nga Supabase, dhe gabimi do të dilte vetëm pas kalimit online. */
+function check(table, row) {
+  if (table === 'orders' && row.items !== undefined) {
+    const n = Array.isArray(row.items) ? row.items.length : -1;
+    if (n < 1 || n > 60) {
+      throw httpErr(400, 'Porosia duhet të ketë nga 1 deri në 60 rreshta.');
+    }
+  }
+  if (table === 'orders' && row.total !== undefined
+      && (Number(row.total) < 0 || Number(row.total) > 500000)) {
+    throw httpErr(400, 'Vlera e porosisë del jashtë kufijve.');
+  }
+}
+
+/* Artikulli që ka histori blerjeje ose është përbërës i një recete nuk fshihet
+   dot — dhe kjo është e drejtë. Por gabimi i bazës nuk i thotë asgjë njeriut
+   përpara ekranit, ndaj kthehet një fjali e kuptueshme. */
+function guardDelete(db, table, w) {
+  if (table !== 'stock_items') return;
+  const ids = db.prepare(`select id, name from "stock_items"${w.sql}`).all(...w.args);
+  for (const it of ids) {
+    const inBuy = db.prepare('select count(*) as n from purchase_lines where item_id=?').get(it.id).n;
+    if (inBuy) {
+      throw httpErr(409, `«${it.name}» ka blerje të regjistruara dhe nuk fshihet dot. `
+        + 'Çaktivizoje në vend që ta fshish — historia mbetet e paprekur.');
+    }
+    const inRec = db.prepare('select count(*) as n from recipes where stock_item_id=?').get(it.id).n;
+    if (inRec) {
+      throw httpErr(409, `«${it.name}» përdoret te një recetë. Hiqe së pari nga receta.`);
+    }
+  }
+}
+
 function rest(db, method, table, params, body, headers) {
   if (TABLES.indexOf(table) < 0) throw httpErr(404, 'Tabelë e panjohur: ' + table);
   const prefer = String(headers['prefer'] || '');
@@ -92,6 +128,7 @@ function rest(db, method, table, params, body, headers) {
     const ignore = prefer.indexOf('ignore-duplicates') >= 0;
     const out = [];
     for (const raw of rows) {
+      check(table, raw);
       const row = encode(table, withDefaults(db, table, raw));
       const cols = Object.keys(row);
       const verb = merge ? 'insert or replace' : ignore ? 'insert or ignore' : 'insert';
@@ -118,6 +155,7 @@ function rest(db, method, table, params, body, headers) {
 
   if (method === 'DELETE') {
     const w = buildWhere(params);
+    guardDelete(db, table, w);
     db.prepare(`delete from "${table}"${w.sql}`).run(...w.args);
     return null;
   }
@@ -501,6 +539,117 @@ const RPC = {
       });
     });
     return n;
+  },
+
+  /* ---------- magazina ----------
+     Gjendja nuk shkruhet kurrë drejtpërdrejt: llogaritet nga lëvizjet, që
+     çdo copë të ketë një pse. */
+  stock_adjust(db, a) {
+    const kind = String(a.p_kind || '');
+    if (['in','out','waste','count','return'].indexOf(kind) < 0) {
+      throw httpErr(400, 'Lloj lëvizjeje i panjohur: ' + kind);
+    }
+    if (!db.prepare('select 1 as x from stock_items where id=?').get(a.p_item)) {
+      throw httpErr(404, 'Artikulli nuk u gjet.');
+    }
+    const cur = Number(db.prepare('select coalesce(sum(qty),0) as q from stock_moves where item_id=?')
+      .get(a.p_item).q) || 0;
+    const q = Number(a.p_qty) || 0;
+    let delta;
+    if (kind === 'count') { delta = q - cur; if (!delta) return cur; }
+    else if (kind === 'out' || kind === 'waste') delta = -Math.abs(q);
+    else delta = Math.abs(q);
+
+    db.prepare(`insert into stock_moves (id,item_id,qty,kind,note,at) values (?,?,?,?,?,?)`)
+      .run(D.uuid(), a.p_item, delta, kind,
+           kind === 'count' ? ((a.p_note || '') + ' (numërim: ' + q + ')') : (a.p_note || null),
+           D.now());
+    return cur + delta;
+  },
+
+  /* Pranimi i blerjes: rreshtat bëhen hyrje dhe kostoja merr çmimin e fundit.
+     Thirrja e dytë nuk bën asgjë — fatura nuk hyn dy herë. */
+  receive_purchase(db, a) {
+    const p = db.prepare('select status from purchases where id=?').get(a.p_id);
+    if (!p) throw httpErr(404, 'Blerja nuk u gjet.');
+    if (p.status === 'received') return 0;
+    if (p.status === 'cancelled') throw httpErr(400, 'Blerja është anuluar.');
+
+    const lines = db.prepare('select * from purchase_lines where purchase_id=?').all(a.p_id);
+    const t = D.now();
+    lines.forEach((l) => {
+      db.prepare(`insert into stock_moves (id,item_id,qty,kind,unit_cost,ref_type,ref_id,note,at)
+                  values (?,?,?,?,?,?,?,?,?)`)
+        .run(D.uuid(), l.item_id, l.qty, 'in', l.unit_cost, 'purchase', a.p_id,
+             'Hyrje nga blerja', t);
+      if (Number(l.unit_cost) > 0) {
+        db.prepare('update stock_items set cost=?, updated_at=? where id=?')
+          .run(l.unit_cost, t, l.item_id);
+      }
+    });
+    const sum = lines.reduce((n, l) => n + (Number(l.total) || 0), 0);
+    db.prepare('update purchases set status=?, subtotal=?, total=?, updated_at=? where id=?')
+      .run('received', sum, sum, t, a.p_id);
+    return lines.length;
+  },
+
+  /* ---------- raportet ---------- */
+  report_day(db, a) {
+    const day = a.p_date || D.now().slice(0, 10);
+    const r = db.prepare(`select
+        count(case when status<>'cancelled' then 1 end) as orders_count,
+        coalesce(sum(case when status<>'cancelled' then total end),0) as revenue,
+        coalesce(sum(case when status<>'cancelled' and payment='cash' then total end),0) as cash,
+        coalesce(sum(case when status<>'cancelled' and payment<>'cash' then total end),0) as card,
+        count(case when status<>'cancelled' and kind='delivery' then 1 end) as delivery_count,
+        count(case when status<>'cancelled' and kind='pickup' then 1 end) as pickup_count,
+        count(case when status<>'cancelled' and channel='web' then 1 end) as web_count,
+        count(case when status<>'cancelled' and channel='phone' then 1 end) as phone_count,
+        count(case when status='cancelled' then 1 end) as cancelled_count,
+        coalesce(round(avg(case when status<>'cancelled' then total end)),0) as guests_avg
+      from orders where substr(created_at,1,10)=?`).get(day);
+
+    // Kohët nxirren veç: SQLite nuk ka zbritje datash, ndaj llogariten këtu.
+    const rows = db.prepare(`select created_at, ready_at, picked_at, delivered_at
+                               from orders where substr(created_at,1,10)=?`).all(day);
+    const avg = (list) => list.length
+      ? Math.round((list.reduce((n, x) => n + x, 0) / list.length) * 10) / 10 : null;
+    const mins = (a2, b2) => (new Date(b2) - new Date(a2)) / 60000;
+    r.avg_prep_minutes = avg(rows.filter((x) => x.ready_at)
+      .map((x) => mins(x.created_at, x.ready_at)));
+    r.avg_delivery_minutes = avg(rows.filter((x) => x.delivered_at && x.picked_at)
+      .map((x) => mins(x.picked_at, x.delivered_at)));
+    return [r];
+  },
+
+  report_range(db, a) {
+    return db.prepare(`select substr(created_at,1,10) as day, count(*) as orders_count,
+                              coalesce(sum(total),0) as revenue
+                         from orders
+                        where substr(created_at,1,10) between ? and ? and status<>'cancelled'
+                        group by 1 order by 1`).all(a.p_from, a.p_to);
+  },
+
+  report_items(db, a) {
+    const of = router(db);
+    const rows = db.prepare(`select items from orders
+                              where substr(created_at,1,10) between ? and ? and status<>'cancelled'`)
+      .all(a.p_from, a.p_to);
+    const acc = {};
+    rows.forEach((r) => {
+      let items = [];
+      try { items = JSON.parse(r.items) || []; } catch (e) {}
+      items.forEach((li) => {
+        const id = String(li.id == null ? '' : li.id);
+        const k = acc[id] || (acc[id] = { item_id: id, name: li.name || id, qty: 0,
+                                          revenue: 0, station: of(li) });
+        const q = Number(li.qty) || 0;
+        k.qty += q;
+        k.revenue += q * (Number(li.price) || 0);
+        if (li.name) k.name = li.name;
+      });
+    });
+    return Object.values(acc).sort((x, y) => y.qty - x.qty);
   },
 };
 

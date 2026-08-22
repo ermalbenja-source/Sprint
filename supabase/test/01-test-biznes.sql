@@ -329,5 +329,63 @@ select public.drv_start_run(:'drv_token', array[:'ord_c'::uuid]) as run_c \gset
 select public.drv_failed(:'drv_token', :'ord_c', 'Nuk përgjigjet në telefon') as rezultati;
 select status, run_id is null as u_lirua, fail_reason from public.orders where id = :'ord_c';
 
+
+\echo ''
+\echo '=== 12. MAGAZINA NË PUNË ==='
+insert into public.suppliers (name, nipt) values ('Bloja Test','K111') on conflict do nothing;
+insert into public.stock_items (sku, name, unit, min_qty, cost)
+values ('KUTI','Kuti pice','copë', 50, 22) on conflict (sku) do nothing;
+
+select id as sup_id from public.suppliers where name='Bloja Test' \gset
+select id as kuti_id from public.stock_items where sku='KUTI' \gset
+
+insert into public.purchases (supplier_id, date, doc_ref, status)
+values (:'sup_id', current_date, '2026/9', 'draft') returning id as pur_id \gset
+insert into public.purchase_lines (purchase_id, item_id, qty, unit_cost, total)
+values (:'pur_id', :'kuti_id', 500, 20, 10000);
+
+\echo '-- skica nuk e prek magazinën:'
+select qty from public.stock_levels where id = :'kuti_id';
+\echo '-- pas pranimit:'
+select public.receive_purchase(:'pur_id') as hyrje;
+select qty, cost, value, low from public.stock_levels where id = :'kuti_id';
+\echo '-- pranimi i dytë nuk e fut faturën dy herë:'
+select public.receive_purchase(:'pur_id') as hyrje_perseri;
+select qty from public.stock_levels where id = :'kuti_id';
+
+\echo '-- prishja zbret, numërimi barazon:'
+select public.stock_adjust(:'kuti_id', 12, 'waste', 'u shtypën') as pas_prishjes;
+select public.stock_adjust(:'kuti_id', 480, 'count', null) as pas_numerimit;
+\echo '-- numërimi la gjurmë si rresht i ri:'
+select kind, qty from public.stock_moves
+ where item_id = :'kuti_id' order by at desc limit 1;
+
+\echo ''
+\echo '=== 13. RAPORTI I DITËS ==='
+insert into public.orders (customer_name, phone, items, total, status, kind, payment, channel)
+values ('Raport A','069 900 0001','[{"id":"test-pica","name":"Pica Test","qty":2,"price":700}]'::jsonb,
+        1400,'done','delivery','cash','phone'),
+       ('Raport B','069 900 0002',
+        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700}]'::jsonb,
+        5000,'cancelled','pickup','cash','web');
+
+select orders_count, revenue, cash, cancelled_count, phone_count
+  from public.report_day(current_date);
+\echo '-- pjatët më të shitura (pica shkon te furra):'
+select name, qty, station from public.report_items(current_date, current_date)
+ order by qty desc limit 3;
+
+
+\echo ''
+\echo '=== 14. RRESHTI E MBAN VETË KATEGORINË ==='
+-- Para publikimit të parë, pjata nuk gjendet te menu_items. Rreshti i porosisë
+-- e mban kategorinë, ndaj furra nuk mbetet bosh.
+select public.order_stations(
+  '[{"id":"pa-publikuar","c":"pizza","qty":1}]'::jsonb) as duhet_furre;
+select public.order_stations(
+  '[{"id":"pa-publikuar-2","c":"trad","qty":1}]'::jsonb) as duhet_kuzhine;
+select public.order_stations(
+  '[{"id":"fare-e-panjohur","qty":1}]'::jsonb) as pa_kategori_bie_te_kuzhina;
+
 \echo ''
 \echo '=== TË GJITHA KALUAN ==='

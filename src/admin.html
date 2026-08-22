@@ -151,6 +151,45 @@ p.count{white-space:normal}
 .r-cashier{color:var(--ok)}
 .r-owner,.r-manager{color:var(--muted)}
 
+/* ─── magazina, blerjet, raportet ─── */
+.chk{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--muted);
+  white-space:nowrap;cursor:pointer}
+.strow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:.7rem;align-items:center;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.6rem .8rem}
+.strow.low{border-color:rgba(230,178,60,.5)}
+.strow .nm b{display:block;font-weight:600;font-size:.94rem}
+.strow .nm span{font-size:.72rem;color:var(--muted)}
+.qty{font-variant-numeric:tabular-nums;font-weight:700;font-size:1.05rem;white-space:nowrap}
+.qty.low{color:var(--warn)}
+.qty small{font-weight:400;font-size:.72rem;color:var(--muted);margin-left:.2rem}
+.mvbtns{display:flex;gap:.3rem;flex-wrap:wrap;justify-content:flex-end}
+.linerow{display:grid;grid-template-columns:minmax(0,2fr) 90px 110px auto auto;gap:.5rem;
+  align-items:center;background:var(--pan);border:1px solid var(--line);
+  border-radius:12px;padding:.5rem .65rem}
+.linerow input,.linerow select{background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;
+  padding:.4rem .5rem;font-size:.88rem;width:100%;outline:none}
+.linerow input:focus,.linerow select:focus{border-color:var(--brand)}
+.linerow .lt{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;text-align:right}
+.st-badge{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  border:1px solid currentColor;border-radius:999px;padding:.2rem .5rem;white-space:nowrap}
+.st-draft{color:var(--muted)}
+.st-received{color:var(--ok)}
+.st-cancelled{color:var(--bad)}
+
+.kpis{display:grid;gap:.7rem;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.kpi{background:var(--pan);border:1px solid var(--line);border-radius:16px;padding:.9rem 1rem}
+.kpi b{display:block;font-family:var(--display);font-size:1.7rem;line-height:1.1;font-weight:400}
+.kpi span{font-size:.72rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.kpi.good b{color:var(--ok)}
+.kpi.warn b{color:var(--warn)}
+
+.bars{display:flex;gap:.5rem;align-items:flex-end;min-height:150px;padding-top:.5rem}
+.bar{flex:1;display:grid;gap:.35rem;justify-items:center;min-width:0}
+.bar i{display:block;width:100%;background:linear-gradient(180deg,var(--brand),var(--brand-dk));
+  border-radius:6px 6px 0 0;min-height:3px}
+.bar em{font-style:normal;font-size:.68rem;color:var(--muted);white-space:nowrap}
+.bar u{text-decoration:none;font-size:.72rem;font-weight:600;font-variant-numeric:tabular-nums}
+
 /* ─── gatimi: kuzhina apo furra ─── */
 .ckrow{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;justify-content:space-between;
   background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.7rem .9rem}
@@ -505,6 +544,9 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         <button class="tab" data-tab="menu">Menuja</button>
         <button class="tab" data-tab="cats">Kategoritë</button>
         <button class="tab" data-tab="cook">Gatimi</button>
+        <button class="tab" data-tab="stock">Magazina</button>
+        <button class="tab" data-tab="buy">Blerjet</button>
+        <button class="tab" data-tab="rep">Raportet</button>
         <button class="tab" data-tab="staff">Stafi</button>
         <button class="tab" data-tab="phase">Fazat</button>
         <button class="tab" data-tab="set">Cilësimet</button>
@@ -682,6 +724,112 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
       <div class="tools">
         <button class="btn btn-p" id="saveCook">Ruaj ndarjen</button>
         <button class="btn btn-g btn-sm" id="resetCook">Rikthe te fillestarja</button>
+      </div>
+    </section>
+
+    <!-- ─────── MAGAZINA ─────── -->
+    <section class="view hide" id="v-stock">
+      <p class="count">Gjendja nuk shkruhet me dorë — llogaritet nga lëvizjet, që çdo copë
+        të ketë një pse. Kur numri te rafti nuk përputhet me ekranin, shtyp «Numërim» dhe
+        shkruaj sa gjete: programi e barazon vetë dhe e lë gjurmën.</p>
+
+      <div class="tools">
+        <input id="stkSearch" class="search f" placeholder="Kërko artikull…">
+        <label class="chk"><input type="checkbox" id="stkLow"> vetëm ato që po mbarojnë</label>
+        <span class="count" id="stkSum"></span>
+        <button class="btn btn-g btn-sm" id="addStock">+ Artikull i ri</button>
+      </div>
+      <div class="items" id="stockList"></div>
+
+      <div class="card" style="display:grid;gap:.7rem">
+        <h2 style="font-size:1.1rem">Furnitorët</h2>
+        <p class="count" style="margin:0">Kush ta sjell mallin. Emri mjafton; NIPT-i dhe
+          telefoni ndihmojnë kur duhet kërkuar fatura e vjetër.</p>
+        <div class="items" id="supList"></div>
+        <button class="btn btn-g btn-sm" id="addSup" style="justify-self:start">+ Furnitor i ri</button>
+      </div>
+
+      <div class="card" style="display:grid;gap:.7rem">
+        <h2 style="font-size:1.1rem">Recetat</h2>
+        <p class="count" style="margin:0">Sa lëndë e parë shkon për një pjatë. Kjo e lidh
+          shitjen me magazinën: kur porosia mbyllet, gjendja zbritet vetvetiu — pa e prekur
+          askush. Pjatat pa recetë thjesht nuk zbresin gjë.</p>
+        <div class="tools">
+          <select id="recDish" class="f" style="max-width:340px"></select>
+          <span class="count" id="recCount"></span>
+        </div>
+        <div class="items" id="recList"></div>
+        <div class="tools">
+          <button class="btn btn-g btn-sm" id="addRec">+ Përbërës</button>
+          <button class="btn btn-p btn-sm" id="saveRec">Ruaj recetën</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────── BLERJET ─────── -->
+    <section class="view hide" id="v-buy">
+      <p class="count">Një blerje rri «skicë» sa kohë e shkruan. Kur shtyp «Prano», rreshtat
+        bëhen hyrje magazine dhe kostoja e artikullit merr çmimin e fundit të blerë. Pranimi
+        i dytë nuk bën asgjë — e njëjta faturë nuk hyn dy herë.</p>
+
+      <div class="tools">
+        <button class="btn btn-p btn-sm" id="newBuy">+ Blerje e re</button>
+        <span class="count" id="buySum"></span>
+      </div>
+      <div class="items" id="buyList"></div>
+
+      <div class="card hide" id="buyEditor" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem" id="buyTitle">Blerje e re</h2>
+        <div class="row3">
+          <div class="f"><label>Furnitori</label><select id="buySup"></select></div>
+          <div class="f"><label>Data</label><input type="date" id="buyDate"></div>
+          <div class="f"><label>Nr. i faturës së furnitorit</label>
+            <input id="buyRef" maxlength="40" placeholder="p.sh. 2026/114"></div>
+        </div>
+        <div class="items" id="buyLines"></div>
+        <div class="tools">
+          <button class="btn btn-g btn-sm" id="addBuyLine">+ Rresht</button>
+          <span class="count" id="buyTotal"></span>
+        </div>
+        <div class="f"><label>Shënim</label><input id="buyNote" maxlength="200"></div>
+        <div class="tools">
+          <button class="btn btn-p btn-sm" id="saveBuy">Ruaj skicën</button>
+          <button class="btn btn-p btn-sm" id="recvBuy">Prano dhe fut në magazinë</button>
+          <button class="btn btn-g btn-sm" id="closeBuy">Mbyll</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────── RAPORTET ─────── -->
+    <section class="view hide" id="v-rep">
+      <div class="tools">
+        <div class="f"><label>Dita</label><input type="date" id="repDate"></div>
+        <button class="btn btn-g btn-sm" id="repToday">Sot</button>
+        <button class="btn btn-g btn-sm" id="repYest">Dje</button>
+      </div>
+
+      <div class="kpis" id="repKpi"></div>
+
+      <div class="card" style="display:grid;gap:.7rem">
+        <h2 style="font-size:1.1rem">Shtatë ditët e fundit</h2>
+        <div id="repChart" class="bars"></div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.7rem">
+        <h2 style="font-size:1.1rem">Motorristët sot</h2>
+        <p class="count" style="margin:0">Sa dorëzime bëri secili dhe sa para pret arka prej tij.
+          Numrat vijnë nga dorëzimet e shënuara në telefon, jo nga kujtesa e askujt.</p>
+        <div class="permwrap"><table class="perm" id="repDrivers"></table></div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.7rem">
+        <h2 style="font-size:1.1rem">Çfarë shitet vërtet</h2>
+        <div class="tools">
+          <label class="chk"><input type="radio" name="repRange" value="1" checked> sot</label>
+          <label class="chk"><input type="radio" name="repRange" value="7"> 7 ditë</label>
+          <label class="chk"><input type="radio" name="repRange" value="30"> 30 ditë</label>
+        </div>
+        <div class="permwrap"><table class="perm" id="repItems"></table></div>
       </div>
     </section>
 
@@ -985,5 +1133,6 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 <!--INCLUDE:src/admin.js-->
 <!--INCLUDE:src/admin-biznes.js-->
 <!--INCLUDE:src/admin-porosi.js-->
+<!--INCLUDE:src/admin-magazina.js-->
 </body>
 </html>
