@@ -39,8 +39,12 @@ function inline(html, depth = 0) {
 
 const kb = (s) => (Buffer.byteLength(s) / 1024).toFixed(0) + ' KB';
 
+/* Vula e ndërtimit. Kur diçka «nuk punon», e para që duhet ditur është nëse
+   shfletuesi po sheh faqen e re apo një kopje të vjetër në kujtesë. */
+const STAMP = new Date().toISOString().slice(0, 16).replace('T', ' ');
+
 function emit(srcPath, outPath) {
-  const out = inline(fs.readFileSync(srcPath, 'utf8'));
+  const out = inline(fs.readFileSync(srcPath, 'utf8')).split('__BUILD__').join(STAMP);
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, out);
   console.log('  ✓ ' + path.relative(root, outPath).replace(/\\/g, '/') + '  (' + kb(out) + ')');

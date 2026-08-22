@@ -170,7 +170,7 @@
   function renderPerms() {
     const SC = store.SCREENS;
     const keys = store.ALL_SCREENS;
-    const roles = ['manager', 'cashier', 'kitchen', 'driver'];
+    const roles = ['manager', 'cashier', 'kitchen', 'pizza', 'driver'];
     const R = store.STAFF_ROLES;
 
     const head = '<thead><tr><th style="text-align:left">Ekrani</th>'
@@ -207,6 +207,113 @@
       await store.saveRoleScreens(perms);
       renderPerms();
       toast('U kthyen te fillestaret.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  /* ══════════════════ GATIMI: KUZHINA APO FURRA ══════════════════
+     Furra e picës punon më vete brenda kuzhinës. Këtu vendoset se çfarë del
+     nga cila — sipas kategorisë, dhe me përjashtime për pjata të veçanta. */
+
+  let cook = null;          // { categories, items }
+  let cookMenu = [];        // menuja, për listën e pjatëve
+  let cookCats = [];        // kategoritë, me emrat e tyre
+  let cookLoaded = false;
+  let cookQ = '';
+
+  const STA_ORDER = ['kitchen', 'oven', 'none'];
+
+  async function loadCook(force) {
+    if (cookLoaded && !force) return;
+    try {
+      const [map, all] = await Promise.all([store.fetchStations(), store.fetchAll()]);
+      cook = { categories: Object.assign({}, map.categories), items: Object.assign({}, map.items) };
+      const D = window.SPRINT || {};
+      cookMenu = (all && all.menu && all.menu.length)
+        ? all.menu.map((m) => ({ id: m.id, name: m.name_sq || m.sq || m.id, category: m.category || m.c }))
+        : (D.menu || []).map((m) => ({ id: m.id, name: m.sq, category: m.c }));
+      cookCats = (all && all.settings && all.settings.categories && all.settings.categories.length)
+        ? all.settings.categories.map((c) => ({ id: c.id, name: c.sq || c.id }))
+        : (D.categories || []).map((c) => ({ id: c.id, name: c.sq }));
+      cookLoaded = true;
+      renderCook();
+    } catch (e) {
+      $('#cookCats').innerHTML = '<p class="count">Nuk u lexua ndarja: ' + esc(e.message) + '</p>';
+    }
+  }
+
+  /** Ku bie kjo pjatë sipas ndarjes së tanishme. */
+  const stationOf = (m) =>
+    cook.items[m.id] || cook.categories[m.category] || 'kitchen';
+
+  function stationPicker(value, attr) {
+    const ST = store.STATIONS;
+    return STA_ORDER.map((s) =>
+      `<button class="stbtn${value === s ? ' on' : ''}" ${attr}="${esc(s)}"
+        >${store.STATION_ICON[s]} ${esc(ST[s])}</button>`).join('');
+  }
+
+  function renderCook() {
+    // ---- kategoritë ----
+    $('#cookCats').innerHTML = cookCats.map((c) => {
+      const sta = cook.categories[c.id] || 'kitchen';
+      const n = cookMenu.filter((m) => m.category === c.id).length;
+      const veç = cookMenu.filter((m) => m.category === c.id && cook.items[m.id]).length;
+      return `<div class="row ckrow" data-cat="${esc(c.id)}">
+        <div class="who-n"><b>${esc(c.name)}</b>
+          <span class="count">${n} pjata${veç ? ` · ${veç} me përjashtim` : ''}</span></div>
+        <div class="stpick">${stationPicker(sta, 'data-catsta')}</div>
+      </div>`;
+    }).join('');
+
+    // ---- përjashtimet për pjatë ----
+    const q = cookQ.trim().toLowerCase();
+    const list = cookMenu.filter((m) =>
+      !q || m.name.toLowerCase().indexOf(q) >= 0 || String(m.id).toLowerCase().indexOf(q) >= 0);
+    const shown = q ? list : list.filter((m) => cook.items[m.id]);
+
+    if (!shown.length) {
+      $('#cookItems').innerHTML = '<tbody><tr><td class="count">'
+        + (q ? 'Asnjë pjatë me këtë emër.'
+             : 'Asnjë përjashtim — çdo pjatë ndjek kategorinë e vet. Kërko një pjatë për ta caktuar veç.')
+        + '</td></tr></tbody>';
+    } else {
+      $('#cookItems').innerHTML = '<tbody>' + shown.map((m) => {
+        const veç = cook.items[m.id];
+        const cat = cook.categories[m.category] || 'kitchen';
+        return `<tr>
+          <th style="text-align:left">${esc(m.name)}
+            <span class="count">${esc((cookCats.find((c) => c.id === m.category) || {}).name || m.category)}</span></th>
+          <td><div class="stpick">
+            <button class="stbtn${veç ? '' : ' on'}" data-itemsta="${esc(m.id)}" data-sta=""
+              >↳ Si kategoria (${esc(store.STATIONS[cat])})</button>
+            ${STA_ORDER.map((s) => `<button class="stbtn${veç === s ? ' on' : ''}"
+                data-itemsta="${esc(m.id)}" data-sta="${esc(s)}"
+              >${store.STATION_ICON[s]} ${esc(store.STATIONS[s])}</button>`).join('')}
+          </div></td>
+        </tr>`;
+      }).join('') + '</tbody>';
+    }
+
+    // ---- sa bie ku ----
+    const tally = { kitchen: 0, oven: 0, none: 0 };
+    cookMenu.forEach((m) => { tally[stationOf(m)] = (tally[stationOf(m)] || 0) + 1; });
+    $('#cookStats').innerHTML = STA_ORDER.map((s) =>
+      `<span class="st">${store.STATION_ICON[s]} ${esc(store.STATIONS[s])}: <b>${tally[s]}</b></span>`).join('');
+  }
+
+  async function saveCook() {
+    try {
+      await store.saveStations(cook);
+      toast('Ndarja u ruajt.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  async function resetCook() {
+    cook = { categories: Object.assign({}, store.DEFAULT_STATIONS), items: {} };
+    try {
+      await store.saveStations(cook);
+      renderCook();
+      toast('U kthye te fillestarja.', 'ok');
     } catch (e) { toast(e.message, 'err'); }
   }
 
@@ -301,6 +408,7 @@
     if (tab) {
       if (tab.dataset.tab === 'staff') { loadStaff(); loadPerms(); }
       if (tab.dataset.tab === 'phase') loadPhases();
+      if (tab.dataset.tab === 'cook') loadCook();
       return;
     }
 
@@ -309,6 +417,23 @@
     if (t.id === 'addStaff') return addStaff();
     if (t.id === 'savePerms') return savePerms();
     if (t.id === 'resetPerms') return resetPerms();
+    if (t.id === 'saveCook') return saveCook();
+    if (t.id === 'resetCook') return resetCook();
+
+    const cs = t.closest('[data-catsta]');
+    if (cs) {
+      cook.categories[cs.closest('[data-cat]').dataset.cat] = cs.dataset.catsta;
+      renderCook();
+      return;
+    }
+    const is = t.closest('[data-itemsta]');
+    if (is) {
+      const id = is.dataset.itemsta;
+      if (is.dataset.sta) cook.items[id] = is.dataset.sta; else delete cook.items[id];
+      renderCook();
+      return;
+    }
+
     if (t.id === 'savePhases') return savePhases();
     if (t.id === 'resetPhases') return resetPhases();
 
@@ -347,6 +472,7 @@
 
   document.addEventListener('input', (e) => {
     if (e.target.closest('#phaseList')) onPhaseInput(e);
+    if (e.target.id === 'cookSearch') { cookQ = e.target.value; renderCook(); }
   });
 
   document.addEventListener('change', (e) => {

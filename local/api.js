@@ -11,11 +11,11 @@
 const D = require('./db');
 
 /* Kolonat që ruhen si JSON në SQLite por udhëtojnë si objekte. */
-const JSON_COLS = { menu_items: ['tags'], settings: ['data'], orders: ['items'],
+const JSON_COLS = { menu_items: ['tags'], settings: ['data'], orders: ['items','station_ready'],
                     documents: ['data'] };
 
 const TABLES = ['menu_items','settings','order_phases','customers','customer_addresses',
-                'staff','role_screens','runs','run_points','orders','bookings','suppliers',
+                'staff','role_screens','category_stations','runs','run_points','orders','bookings','suppliers',
                 'stock_items','stock_moves','purchases','purchase_lines','recipes','documents'];
 
 const BOOL_COLS = ['available','enabled','customer_visible','is_core','active','blocked','is_default'];
@@ -152,7 +152,7 @@ function withDefaults(db, table, raw) {
 
 const norm = (c) => String(c || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
 const digits = (s) => String(s || '').replace(/\D/g, '');
-const ALL_SCREENS = ['neworder','orders','kds','runs','bookings','menu','stock','reports','staff','settings'];
+const ALL_SCREENS = ['neworder','orders','kds','oven','runs','bookings','menu','stock','reports','staff','settings'];
 
 function staffByToken(db, token) {
   const r = db.prepare(`select s.id as staff_id, s.name, s.role
@@ -168,6 +168,36 @@ function screensFor(db, role) {
   if (role === 'owner') return ALL_SCREENS.slice();
   return db.prepare('select screen from role_screens where role=? order by screen')
     .all(role).map((r) => r.screen);
+}
+
+/* ---------- stacionet e gatimit ---------- */
+const STATIONS = ['kitchen', 'oven', 'none'];
+const stationArg = (v) => (v === 'oven' ? 'oven' : 'kitchen');
+
+/** Kthen funksionin «ku gatuhet ky rresht?», me ndarjen e lexuar një herë. */
+function router(db) {
+  const cats = {};
+  db.prepare('select category, station from category_stations').all()
+    .forEach((r) => { cats[r.category] = r.station; });
+  const items = {};
+  db.prepare('select id, category, station from menu_items').all()
+    .forEach((r) => { items[r.id] = r; });
+  return (line) => {
+    if (!line) return 'kitchen';
+    if (STATIONS.indexOf(line.station) >= 0) return line.station;
+    const m = items[String(line.id)];
+    if (m && STATIONS.indexOf(m.station) >= 0) return m.station;
+    const c = (m && m.category) || line.category || line.c;
+    if (c && STATIONS.indexOf(cats[c]) >= 0) return cats[c];
+    return 'kitchen';
+  };
+}
+
+/** Cilat stacione duhet ta gatuajnë këtë porosi. Pijet nuk numërohen. */
+function stationsOf(of, items) {
+  const seen = {};
+  (items || []).forEach((li) => { const s = of(li); if (s !== 'none') seen[s] = 1; });
+  return Object.keys(seen).sort();
 }
 
 function needScreen(db, token, screen, msg) {
@@ -294,30 +324,57 @@ const RPC = {
     return c.id;
   },
 
-  /* ---------- kuzhina ---------- */
+  /* ---------- gatimi: kuzhina dhe furra e picës ----------
+     Dy stacione të ndara, secili me ekranin e vet. Një porosi mund të ketë
+     rreshta te të dyja dhe bëhet «gati» vetëm kur të dy e kanë dhënë. */
   kds_orders(db, a) {
-    needScreen(db, a.p_token, 'kds', 'Ky kod nuk e hap ekranin e kuzhinës.');
+    const sta = stationArg(a.p_station);
+    needScreen(db, a.p_token, sta === 'oven' ? 'oven' : 'kds', 'Ky kod nuk e hap këtë ekran.');
+    const of = router(db);
     const since = new Date(Date.now() - 12 * 3600e3).toISOString();
-    return db.prepare(`select id,number,status,kind,items,note,created_at,
-                              accepted_at,kitchen_at,ready_at,prep_minutes
+    return db.prepare(`select id,number,status,kind,items,note,created_at,accepted_at,
+                              kitchen_at,ready_at,prep_minutes,station_ready
                          from orders
                         where status in ('new','accepted','preparing','ready') and created_at > ?
-                        order by created_at`).all(since).map((r) => decode('orders', r));
+                        order by created_at`).all(since)
+      .map((r) => decode('orders', r))
+      .map((o) => {
+        const done = o.station_ready || {};
+        const need = stationsOf(of, o.items);
+        return Object.assign({}, o, {
+          items: (o.items || []).map((li) => Object.assign({}, li, { station: of(li) })),
+          need,
+          station_done: !!done[sta],
+          waiting_on: need.filter((s) => !done[s]),
+        });
+      })
+      .filter((o) => o.need.indexOf(sta) >= 0);
   },
   kds_bump(db, a) {
-    needScreen(db, a.p_token, 'kds', 'Ky kod nuk e hap ekranin e kuzhinës.');
-    const o = db.prepare('select status from orders where id=?').get(a.p_order);
-    if (!o) throw httpErr(404, 'Porosia nuk u gjet.');
-    const ok = (a.p_status === 'preparing' && ['new','accepted','ready'].indexOf(o.status) >= 0)
-            || (a.p_status === 'ready' && ['preparing','accepted'].indexOf(o.status) >= 0);
-    if (!ok) throw httpErr(400, `Kalimi ${o.status} → ${a.p_status} nuk lejohet nga kuzhina.`);
+    const sta = stationArg(a.p_station);
+    needScreen(db, a.p_token, sta === 'oven' ? 'oven' : 'kds', 'Ky kod nuk e hap këtë ekran.');
+    const raw = db.prepare('select status,items,station_ready,kitchen_at,ready_at from orders where id=?')
+      .get(a.p_order);
+    if (!raw) throw httpErr(404, 'Porosia nuk u gjet.');
+    const o = decode('orders', raw);
+    const need = stationsOf(router(db), o.items);
+    if (need.indexOf(sta) < 0) throw httpErr(400, 'Kjo porosi nuk ka asgjë për këtë stacion.');
+
+    const ok = (a.p_status === 'preparing' && ['new','accepted','preparing','ready'].indexOf(o.status) >= 0)
+            || (a.p_status === 'ready' && ['new','accepted','preparing'].indexOf(o.status) >= 0);
+    if (!ok) throw httpErr(400, `Kalimi ${o.status} → ${a.p_status} nuk lejohet nga gatimi.`);
+
     const t = D.now();
-    db.prepare(`update orders set status=?, updated_at=?,
-                  kitchen_at = case when ?='preparing' and kitchen_at is null then ? else kitchen_at end,
-                  ready_at = case when ?='ready' then ? when ?='preparing' then null else ready_at end
+    const done = Object.assign({}, o.station_ready || {});
+    if (a.p_status === 'ready') done[sta] = t; else delete done[sta];
+    const gati = need.every((s) => done[s]);
+
+    db.prepare(`update orders set status=?, station_ready=?, updated_at=?,
+                  kitchen_at=coalesce(kitchen_at,?), ready_at=?
                 where id=?`)
-      .run(a.p_status, t, a.p_status, t, a.p_status, t, a.p_status, a.p_order);
-    return a.p_status;
+      .run(gati ? 'ready' : 'preparing', JSON.stringify(done), t, t,
+           gati ? (o.ready_at || t) : null, a.p_order);
+    return gati ? 'ready' : 'preparing';
   },
 
   /* ---------- motorristi ---------- */

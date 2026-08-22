@@ -1,7 +1,8 @@
 /* ============================================================================
    SPRINT — Guaska e aplikacionit të stafit.
    Një hyrje për të gjithë. Kodi vendos se cilat pamje hapen: kuzhinieri sheh
-   furrën, motorristi sheh nisjen, pronari sheh të dyja dhe ndërron mes tyre.
+   kuzhinën, piceri furrën, motorristi nisjen; pronari i sheh të gjitha dhe
+   ndërron mes tyre.
    ========================================================================== */
 (function () {
   const S = window.SPRINT;
@@ -12,7 +13,7 @@
 
   // Pamjet që di ta hapë kjo faqe. Ekranet e tjera (porositë, menuja,
   // magazina) rrinë te paneli — këtu vijnë vetëm ato që përdoren në këmbë.
-  const HERE = ['kds', 'runs'];
+  const HERE = ['kds', 'oven', 'runs'];
 
   const A = { me: null, view: null, poll: null };
 
@@ -148,6 +149,19 @@
     document.querySelector('.gate-card').appendChild(box);
   }
   showDemoCodes();
+
+  /* Vula e ndërtimit plus dy fakte që i japin kuptim: a punon ruajtja e
+     shfletuesit, dhe a ka bazë të vërtetë pas faqes. Kur dikush thotë «kodi
+     nuk punon», kjo rresht e mbyll pyetjen «çfarë faqeje po sheh». */
+  (function showBuild() {
+    const el = $('#buildTag');
+    if (!el) return;
+    let ruajtja = 'kujtesë';
+    try { localStorage.setItem('sprint-provë', '1'); localStorage.removeItem('sprint-provë');
+          ruajtja = 'ruajtje'; } catch (e) {}
+    el.textContent = el.textContent + ' · ' + ruajtja
+      + ' · ' + (store.configured ? 'bazë' : 'provë');
+  })();
 
   /* Sesioni i ruajtur e kalon hyrjen — pajisja nuk e shkruan kodin çdo turn. */
   store.myScreens().then((me) => {

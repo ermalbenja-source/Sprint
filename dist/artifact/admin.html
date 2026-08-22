@@ -19,7 +19,8 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);
-  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
 a{color:var(--gold)}
 button,input,select,textarea{font:inherit;color:inherit}
 button{background:none;border:0;cursor:pointer}
@@ -55,7 +56,8 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1.1}
 
 /* ---------- hyrja ---------- */
 #gate{min-height:100dvh;display:grid;place-items:center;padding:1.4rem}
-.card{background:var(--pan);border:1px solid var(--line);border-radius:22px;padding:clamp(1.5rem,4vw,2.4rem)}
+.card{background:var(--pan);border:1px solid var(--line);border-radius:22px;padding:clamp(1.5rem,4vw,2.4rem);
+  min-width:0;grid-template-columns:minmax(0,1fr)}
 #gate .card{width:min(100%,420px);display:grid;gap:1rem}
 .brandmark{font-family:var(--display);font-size:2rem;letter-spacing:.02em}
 .brandmark em{font-style:normal;color:var(--brand)}
@@ -86,12 +88,17 @@ header{position:sticky;top:0;z-index:60;background:rgba(12,10,11,.94);backdrop-f
 .tab:hover{color:var(--txt)}
 .tab.on{color:var(--brand);border-bottom-color:var(--brand)}
 main{padding:1.4rem 0 5rem}
-.view{display:grid;gap:1.1rem}
+.view{display:grid;gap:1.1rem;grid-template-columns:minmax(0,1fr)}
+/* Pa këtë, një tabelë e gjerë brenda pamjes e zgjeron gjithë faqen dhe
+   shkaktohet rrëshqitje anash — tabela duhet të rrëshqasë brenda kutisë së vet. */
 
 /* ---------- shiriti i veglave ---------- */
 .tools{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
 .tools .search{flex:1;min-width:180px}
 .count{font-size:.78rem;color:var(--muted);white-space:nowrap}
+/* `nowrap` i takon etiketave të shkurtra pranë veglave, jo paragrafëve
+   shpjegues — pa këtë, teksti i gjatë e shtynte faqen anash. */
+p.count{white-space:normal}
 
 /* ---------- lista e pjatave ---------- */
 .items{display:grid;gap:.5rem}
@@ -135,8 +142,23 @@ main{padding:1.4rem 0 5rem}
   padding:.24rem .55rem;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
 .r-driver{color:var(--gold)}
 .r-kitchen{color:var(--brand)}
+.r-pizza{color:var(--warn)}
 .r-cashier{color:var(--ok)}
 .r-owner,.r-manager{color:var(--muted)}
+
+/* ─── gatimi: kuzhina apo furra ─── */
+.ckrow{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;justify-content:space-between;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.7rem .9rem}
+.ckrow .who-n{min-width:9rem;flex:1 1 9rem}
+.ckrow .who-n b{display:block;font-weight:600;font-size:.94rem}
+.ckrow .who-n .count{font-size:.74rem}
+.stpick{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end;flex:0 1 auto}
+.stbtn{border:1.5px solid var(--line);color:var(--muted);background:transparent;
+  border-radius:999px;padding:.34rem .7rem;font-size:.78rem;font-weight:600;white-space:nowrap;
+  cursor:pointer;transition:.15s}
+.stbtn:hover{border-color:var(--gold);color:var(--gold)}
+.stbtn.on{border-color:var(--brand);color:var(--brand);background:rgba(214,122,32,.12)}
+#cookItems th .count{display:block;font-size:.7rem;font-weight:400}
 .pinst{font-size:.72rem;color:var(--muted);white-space:nowrap}
 .pinst.set{color:var(--ok)}
 .pinst.locked{color:var(--bad)}
@@ -177,7 +199,7 @@ main{padding:1.4rem 0 5rem}
 .pin-err{color:#ff9a92;font-size:.82rem;min-height:1.15em;margin:0}
 
 /* ---------- kush sheh çfarë ---------- */
-.permwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+.permwrap{overflow-x:auto;min-width:0;border:1px solid var(--line);border-radius:12px}
 .perm{border-collapse:collapse;width:100%;min-width:520px;font-size:.86rem}
 .perm th,.perm td{padding:.55rem .7rem;border-bottom:1px solid var(--line);text-align:center}
 .perm tr:last-child td{border-bottom:none}
@@ -476,6 +498,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         <button class="tab" data-tab="book">Rezervimet <b class="tabn" id="tabBook"></b></button>
         <button class="tab" data-tab="menu">Menuja</button>
         <button class="tab" data-tab="cats">Kategoritë</button>
+        <button class="tab" data-tab="cook">Gatimi</button>
         <button class="tab" data-tab="staff">Stafi</button>
         <button class="tab" data-tab="phase">Fazat</button>
         <button class="tab" data-tab="set">Cilësimet</button>
@@ -626,6 +649,36 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
       <button class="btn btn-g" id="addCat">+ Kategori e re</button>
     </section>
 
+    <!-- ─────── GATIMI: KUZHINA APO FURRA ─────── -->
+    <section class="view hide" id="v-cook">
+      <p class="count">Brenda dyqanit gatuhet në dy vende të ndara. Këtu vendos ti se çfarë
+        del nga kuzhina dhe çfarë nga furra e picës — secili sheh vetëm rreshtat e vet te
+        ekrani i tij. Pijet nuk shkojnë askund: nuk gatuhen.</p>
+
+      <div class="items" id="cookCats"></div>
+
+      <div class="card" style="display:grid;gap:.7rem">
+        <h2 style="font-size:1.1rem">Pjata që bëjnë përjashtim</h2>
+        <p class="count" style="margin:0">Zakonisht mjafton kategoria. Por nëse një pjatë e
+          vetme gatuhet diku tjetër — një sanduiç me brumë pice te furra, një picë e ftohtë
+          te kuzhina — caktoje veç këtu. Bosh do të thotë «si gjithë kategoria».</p>
+        <div class="tools">
+          <input id="cookSearch" class="in" placeholder="Kërko pjatën…" style="max-width:320px">
+        </div>
+        <div class="permwrap"><table class="perm" id="cookItems"></table></div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.6rem">
+        <h2 style="font-size:1.1rem">Sa porosi prek kjo ndarje</h2>
+        <div id="cookStats" class="prev"></div>
+      </div>
+
+      <div class="tools">
+        <button class="btn btn-p" id="saveCook">Ruaj ndarjen</button>
+        <button class="btn btn-g btn-sm" id="resetCook">Rikthe te fillestarja</button>
+      </div>
+    </section>
+
     <!-- ─────── STAFI ─────── -->
     <section class="view hide" id="v-staff">
       <p class="count">Kuzhina dhe motorristët hyjnë vetëm me kod — askush nuk shkruan email
@@ -647,10 +700,10 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 
       <div class="card" style="display:grid;gap:.6rem">
         <h2 style="font-size:1.1rem">Ku do të hyjnë</h2>
-        <p class="count" style="margin:0">Kodet vendosen që tani, por ekranet e tyre vijnë me
-          fazën tjetër: kuzhina te <b class="mono">/kuzhina</b> dhe motorristi te
-          <b class="mono">/motorri</b>. Të dy do të shkruajnë vetëm kodin, dhe pajisja do ta
-          mbajë sesionin hapur 30 ditë, që të mos shkruhet kodi çdo turn.</p>
+        <p class="count" style="margin:0">Të gjithë hyjnë te e njëjta adresë:
+          <b class="mono">/staf</b>. Shkruajnë vetëm kodin, dhe ajo që u hapet varet nga
+          tabela më lart — kuzhinieri kuzhinën, piceri furrën, motorristi nisjen. Pajisja e
+          mban sesionin hapur 30 ditë, që të mos shkruhet kodi çdo turn.</p>
       </div>
     </section>
 
@@ -2684,6 +2737,7 @@ ${S('drink', `
     manager: 'Menaxher',
     cashier: 'Banak',
     kitchen: 'Kuzhinë',
+    pizza:   'Furra e picës',
     driver:  'Motorrist',
   };
 
@@ -2695,6 +2749,7 @@ ${S('drink', `
   const DEMO_STAFF = [
     { name: 'Pronari', role: 'owner',   pin: '7000' },
     { name: 'Kuzhina', role: 'kitchen', pin: '1199' },
+    { name: 'Furra',   role: 'pizza',   pin: '1155' },
     { name: 'Andrea',  role: 'driver',  pin: '4821' },
     { name: 'Gito',    role: 'driver',  pin: '4822' },
   ];
@@ -2812,16 +2867,20 @@ ${S('drink', `
 
   /* ---------- porositë shembull ----------
      Të shënuara me `demo`, që paneli ta thotë hapur se nuk janë të vërteta. */
+  /* Rreshtat e mbajnë vetë stacionin: pjatat shembull nuk gjenden te menuja,
+     ndaj pa këtë do të binin të gjitha te kuzhina dhe furra do të dukej bosh. */
   const DEMO_ORDERS = [
     { n: 1, st: 'accepted',  kind: 'delivery', pay: 'cash',
       name: 'Arben Hoxha',  phone: '069 555 1001', addr: 'Rruga Taulantia 14, kati 2',
-      note: 'pa qepë', items: [['Pica Margarita', 2, 320], ['Coca-Cola 0.5', 1, 120]] },
+      note: 'pa qepë',
+      items: [['Pica Margarita', 2, 320, 'oven'], ['Coca-Cola 0.5', 1, 120, 'none']] },
     { n: 2, st: 'preparing', kind: 'pickup',   pay: 'cash',
       name: 'Elona Meta',   phone: '069 555 1002', addr: null, note: null,
-      items: [['Sufllaqe Pule', 3, 250]] },
+      items: [['Sufllaqe Pule', 3, 250, 'oven'], ['Sallatë greke', 1, 300, 'kitchen']] },
     { n: 3, st: 'ready',     kind: 'delivery', pay: 'card',
       name: 'Genti Leka',   phone: '069 555 1003', addr: 'Plazh, pallati 7, hyrja B',
-      note: 'kambana s\'punon, telefono', items: [['Pica Kapriçoza', 1, 450], ['Patate', 2, 150]] },
+      note: 'kambana s\'punon, telefono',
+      items: [['Tavë kosi', 1, 450, 'kitchen'], ['Patate', 2, 150, 'kitchen']] },
   ];
 
   let demoRunning = null;
@@ -2837,7 +2896,8 @@ ${S('drink', `
         const total = d.items.reduce((n, [, q, p]) => n + q * p, 0);
         const row = await st.createOrder({
           kind: d.kind, name: d.name, phone: d.phone, address: d.addr, note: d.note,
-          items: d.items.map(([name, qty, price], i) => ({ id: 'demo' + d.n + i, name, qty, price })),
+          items: d.items.map(([name, qty, price, station], i) =>
+            ({ id: 'demo' + d.n + i, name, qty, price, station })),
           subtotal: total, total, payment: d.pay, channel: 'phone',
           lat: 41.32 + d.n / 200, lng: 19.44 + d.n / 200,
         });
@@ -2854,36 +2914,187 @@ ${S('drink', `
     return demoRunning;
   }
 
-  /* ══════════════════ EKRANI I KUZHINËS ══════════════════ */
+  /* ══════════════════ STACIONET E PËRGATITJES ══════════════════
+     Brenda dyqanit gatuhet në dy vende të ndara: kuzhina dhe furra e picës.
+     Furra ka njeriun e vet dhe ekranin e vet — picat dhe sanduiçët me brumë
+     pice nuk kalojnë fare nga kuzhina. Një porosi e vetme ndahet mes të dyve
+     dhe bëhet «gati» vetëm kur të dy e kanë dhënë të tyren. */
+
+  const STATIONS = {
+    kitchen: 'Kuzhina',
+    oven:    'Furra e picës',
+    none:    'Nuk gatuhet',
+  };
+  const STATION_ICON = { kitchen: '🍳', oven: '🔥', none: '🥤' };
+  const LS_STATIONS = 'sprint-stations';
+
+  /** Ndarja fillestare — ajo që përputhet me dyqanin sot. */
+  const DEFAULT_STATIONS = {
+    pizza: 'oven', fast: 'oven',
+    rest: 'kitchen', trad: 'kitchen', starter: 'kitchen',
+    pije: 'none',
+  };
+
+  /** Lexon ndarjen: kategoritë, plus përjashtimet për pjata të veçanta. */
+  async function fetchStations() {
+    if (!live) {
+      const saved = readLS(LS_STATIONS, null);
+      return saved && saved.categories
+        ? saved
+        : { categories: Object.assign({}, DEFAULT_STATIONS), items: {} };
+    }
+    const [cats, items] = await Promise.all([
+      st._req('/rest/v1/category_stations?select=category,station', { headers: st._headers() }),
+      st._req('/rest/v1/menu_items?select=id,station&station=not.is.null', { headers: st._headers() }),
+    ]);
+    const out = { categories: {}, items: {} };
+    (cats || []).forEach((r) => { out.categories[r.category] = r.station; });
+    (items || []).forEach((r) => { out.items[r.id] = r.station; });
+    if (!Object.keys(out.categories).length) out.categories = Object.assign({}, DEFAULT_STATIONS);
+    return out;
+  }
+
+  async function saveStations(map) {
+    const clean = {
+      categories: map.categories || {},
+      items: map.items || {},
+    };
+    if (!live) { writeLS(LS_STATIONS, clean); return clean; }
+    await st._ensureAuth();
+
+    // Kategoritë: zëvendësim i plotë, njësoj si te «Kush sheh çfarë».
+    await st._req('/rest/v1/category_stations?category=neq.__none__', {
+      method: 'DELETE', headers: st._headers(),
+    });
+    const rows = Object.keys(clean.categories)
+      .map((c) => ({ category: c, station: clean.categories[c] }));
+    if (rows.length) {
+      await st._req('/rest/v1/category_stations', {
+        method: 'POST', headers: st._headers({ Prefer: 'resolution=merge-duplicates' }),
+        body: JSON.stringify(rows),
+      });
+    }
+
+    // Përjashtimet e pjatëve: fillimisht hiqen të gjitha, pastaj vendosen ato
+    // që mbeten. Përjashtimet janë të pakta, ndaj kjo mbetet e lirë.
+    await st._req('/rest/v1/menu_items?station=not.is.null', {
+      method: 'PATCH', headers: st._headers({ Prefer: 'return=minimal' }),
+      body: JSON.stringify({ station: null }),
+    });
+    for (const id of Object.keys(clean.items)) {
+      await st._req('/rest/v1/menu_items?id=eq.' + encodeURIComponent(id), {
+        method: 'PATCH', headers: st._headers({ Prefer: 'return=minimal' }),
+        body: JSON.stringify({ station: clean.items[id] }),
+      });
+    }
+    return clean;
+  }
+
+  /** Ndërtuesi i përgjigjes «ku gatuhet kjo?». Merr ndarjen dhe menunë një
+      herë, pastaj u përgjigjet rreshtave të porosive pa kërkuar gjë tjetër. */
+  function stationRouter(map, menu) {
+    const cat = {};
+    (menu || []).forEach((m) => { cat[m.id] = m.category || m.c; });
+    const of = (line) => {
+      if (!line) return 'kitchen';
+      // Rreshti i porosisë mund ta mbajë vetë stacionin nga çasti i porosisë:
+      // porositë e vjetra nuk ndryshojnë vend sepse ndarja u ndryshua pas tyre.
+      if (STATIONS[line.station]) return line.station;
+      const id = line.id != null ? String(line.id) : '';
+      if (map.items && STATIONS[map.items[id]]) return map.items[id];
+      const c = line.category || line.c || cat[id];
+      if (c && STATIONS[map.categories[c]]) return map.categories[c];
+      return 'kitchen';
+    };
+    return {
+      of,
+      /** Rreshtat me stacionin e ngjitur secilit. */
+      tag: (items) => (items || []).map((li) => Object.assign({}, li, { station: of(li) })),
+      /** Cilat stacione duhet ta gatuajnë këtë porosi. Pijet nuk numërohen. */
+      stationsOf: (items) => {
+        const seen = {};
+        (items || []).forEach((li) => { const s = of(li); if (s !== 'none') seen[s] = 1; });
+        return Object.keys(seen).sort();
+      },
+    };
+  }
+
+  /** Ndihmës: një router i gatshëm, me menunë e ngarkuar vetë. */
+  async function loadRouter() {
+    const [map, all] = await Promise.all([
+      fetchStations(),
+      st.fetchAll().catch(() => null),
+    ]);
+    // Pa menu të publikuar mbetet menuja e ndërtuar brenda programit — pa të,
+    // çdo pjatë do të binte te kuzhina dhe furra do të mbetej bosh.
+    const menu = (all && all.menu && all.menu.length) ? all.menu
+      : ((window.SPRINT && window.SPRINT.menu) || []);
+    return stationRouter(map, menu);
+  }
+
+  /* ══════════════════ EKRANET E GATIMIT ══════════════════ */
 
   const KDS_STATES = ['new', 'accepted', 'preparing', 'ready'];
 
-  /** Porositë që i duhen kuzhinës — pa emër, pa telefon, pa adresë. */
-  async function kdsOrders() {
+  /** Porositë që i duhen këtij stacioni — pa emër, pa telefon, pa adresë.
+      Kthehen vetëm porositë që kanë të paktën një rresht për të, dhe rreshtat
+      vijnë të shënuar që ekrani të dijë cilat janë të tijat. */
+  async function kdsOrders(station) {
+    const sta = station === 'oven' ? 'oven' : 'kitchen';
     if (!live) {
       await ensureLocalOrders();
-      const from = new Date(Date.now() - 12 * 3600e3).toISOString();
-      const list = (await st.fetchOrders({ from })) || [];
-      return list
+      const [router, list] = await Promise.all([
+        loadRouter(),
+        st.fetchOrders({ from: new Date(Date.now() - 12 * 3600e3).toISOString() }),
+      ]);
+      return (list || [])
         .filter((o) => KDS_STATES.indexOf(o.status) >= 0)
+        .map((o) => {
+          const need = router.stationsOf(o.items);
+          const done = o.station_ready || {};
+          return Object.assign({}, o, {
+            items: router.tag(o.items),
+            need,
+            station_done: !!done[sta],
+            waiting_on: need.filter((s) => !done[s]),
+          });
+        })
+        .filter((o) => o.need.indexOf(sta) >= 0)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     }
     const sess = readLS(LS_DEVICE, null);
     if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
-    return st._rpc('kds_orders', { p_token: sess.token });
+    return st._rpc('kds_orders', { p_token: sess.token, p_station: sta });
   }
 
-  /** Kalimi i fazës nga kuzhina. Kthimi mbrapsht lejohet me qëllim. */
-  async function kdsBump(id, status) {
+  /** Kalimi i fazës nga një stacion. Kthimi mbrapsht lejohet me qëllim.
+      Porosia bëhet «gati» vetëm kur të gjithë stacionet e saj e kanë dhënë:
+      një picë e ftohtë duke pritur tavën është pikërisht ajo që kjo ndalon. */
+  async function kdsBump(id, status, station) {
+    const sta = station === 'oven' ? 'oven' : 'kitchen';
     if (!live) {
-      const patch = { status };
-      if (status === 'preparing') { patch.kitchen_at = new Date().toISOString(); patch.ready_at = null; }
-      if (status === 'ready') patch.ready_at = new Date().toISOString();
-      return st.updateOrder(id, patch);
+      const router = await loadRouter();
+      const list = (await st.fetchOrders({})) || [];
+      const o = list.find((x) => x.id === id);
+      if (!o) throw new Error('Porosia nuk u gjet.');
+      const need = router.stationsOf(o.items);
+      const done = Object.assign({}, o.station_ready || {});
+      if (status === 'ready') done[sta] = new Date().toISOString();
+      else delete done[sta];
+      const left = need.filter((s) => !done[s]);
+      const gati = left.length === 0;
+      await st.updateOrder(id, {
+        status: gati ? 'ready' : 'preparing',
+        station_ready: done,
+        kitchen_at: o.kitchen_at || new Date().toISOString(),
+        ready_at: gati ? (o.ready_at || new Date().toISOString()) : null,
+      });
+      return gati ? 'ready' : 'preparing';
     }
     const sess = readLS(LS_DEVICE, null);
     if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
-    return st._rpc('kds_bump', { p_token: sess.token, p_order: id, p_status: status });
+    return st._rpc('kds_bump', {
+      p_token: sess.token, p_order: id, p_status: status, p_station: sta });
   }
 
   /* ══════════════════ HIERARKIA E EKRANEVE ══════════════════ */
@@ -2892,6 +3103,7 @@ ${S('drink', `
     neworder: 'Porosi e re',
     orders:   'Porositë',
     kds:      'Kuzhina',
+    oven:     'Furra e picës',
     runs:     'Motorristi',
     bookings: 'Rezervimet',
     menu:     'Menuja',
@@ -2904,9 +3116,10 @@ ${S('drink', `
   const LS_ROLESCR = 'sprint-role-screens';
 
   const DEFAULT_ROLE_SCREENS = {
-    manager: ['neworder','orders','kds','runs','bookings','menu','stock','reports'],
+    manager: ['neworder','orders','kds','oven','runs','bookings','menu','stock','reports'],
     cashier: ['neworder','orders','bookings'],
     kitchen: ['kds'],
+    pizza:   ['oven'],
     driver:  ['runs'],
   };
 
@@ -2918,7 +3131,7 @@ ${S('drink', `
     }
     await st._ensureAuth();
     const rows = await st._req('/rest/v1/role_screens?select=role,screen', { headers: st._headers() });
-    const out = { manager: [], cashier: [], kitchen: [], driver: [] };
+    const out = { manager: [], cashier: [], kitchen: [], pizza: [], driver: [] };
     (rows || []).forEach((r) => { if (out[r.role]) out[r.role].push(r.screen); });
     return out;
   }
@@ -3139,6 +3352,8 @@ ${S('drink', `
     lookupCustomer, upsertCustomer,
     STAFF_ROLES: ROLES, fetchStaff, saveStaff, deleteStaff, setStaffPin,
     KDS_STATES, kdsOrders, kdsBump,
+    STATIONS, STATION_ICON, DEFAULT_STATIONS, fetchStations, saveStations,
+    stationRouter, loadRouter,
     DEMO_STAFF, ensureLocalStaff, ensureLocalOrders,
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
@@ -4637,7 +4852,7 @@ ${S('drink', `
   function renderPerms() {
     const SC = store.SCREENS;
     const keys = store.ALL_SCREENS;
-    const roles = ['manager', 'cashier', 'kitchen', 'driver'];
+    const roles = ['manager', 'cashier', 'kitchen', 'pizza', 'driver'];
     const R = store.STAFF_ROLES;
 
     const head = '<thead><tr><th style="text-align:left">Ekrani</th>'
@@ -4674,6 +4889,113 @@ ${S('drink', `
       await store.saveRoleScreens(perms);
       renderPerms();
       toast('U kthyen te fillestaret.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  /* ══════════════════ GATIMI: KUZHINA APO FURRA ══════════════════
+     Furra e picës punon më vete brenda kuzhinës. Këtu vendoset se çfarë del
+     nga cila — sipas kategorisë, dhe me përjashtime për pjata të veçanta. */
+
+  let cook = null;          // { categories, items }
+  let cookMenu = [];        // menuja, për listën e pjatëve
+  let cookCats = [];        // kategoritë, me emrat e tyre
+  let cookLoaded = false;
+  let cookQ = '';
+
+  const STA_ORDER = ['kitchen', 'oven', 'none'];
+
+  async function loadCook(force) {
+    if (cookLoaded && !force) return;
+    try {
+      const [map, all] = await Promise.all([store.fetchStations(), store.fetchAll()]);
+      cook = { categories: Object.assign({}, map.categories), items: Object.assign({}, map.items) };
+      const D = window.SPRINT || {};
+      cookMenu = (all && all.menu && all.menu.length)
+        ? all.menu.map((m) => ({ id: m.id, name: m.name_sq || m.sq || m.id, category: m.category || m.c }))
+        : (D.menu || []).map((m) => ({ id: m.id, name: m.sq, category: m.c }));
+      cookCats = (all && all.settings && all.settings.categories && all.settings.categories.length)
+        ? all.settings.categories.map((c) => ({ id: c.id, name: c.sq || c.id }))
+        : (D.categories || []).map((c) => ({ id: c.id, name: c.sq }));
+      cookLoaded = true;
+      renderCook();
+    } catch (e) {
+      $('#cookCats').innerHTML = '<p class="count">Nuk u lexua ndarja: ' + esc(e.message) + '</p>';
+    }
+  }
+
+  /** Ku bie kjo pjatë sipas ndarjes së tanishme. */
+  const stationOf = (m) =>
+    cook.items[m.id] || cook.categories[m.category] || 'kitchen';
+
+  function stationPicker(value, attr) {
+    const ST = store.STATIONS;
+    return STA_ORDER.map((s) =>
+      `<button class="stbtn${value === s ? ' on' : ''}" ${attr}="${esc(s)}"
+        >${store.STATION_ICON[s]} ${esc(ST[s])}</button>`).join('');
+  }
+
+  function renderCook() {
+    // ---- kategoritë ----
+    $('#cookCats').innerHTML = cookCats.map((c) => {
+      const sta = cook.categories[c.id] || 'kitchen';
+      const n = cookMenu.filter((m) => m.category === c.id).length;
+      const veç = cookMenu.filter((m) => m.category === c.id && cook.items[m.id]).length;
+      return `<div class="row ckrow" data-cat="${esc(c.id)}">
+        <div class="who-n"><b>${esc(c.name)}</b>
+          <span class="count">${n} pjata${veç ? ` · ${veç} me përjashtim` : ''}</span></div>
+        <div class="stpick">${stationPicker(sta, 'data-catsta')}</div>
+      </div>`;
+    }).join('');
+
+    // ---- përjashtimet për pjatë ----
+    const q = cookQ.trim().toLowerCase();
+    const list = cookMenu.filter((m) =>
+      !q || m.name.toLowerCase().indexOf(q) >= 0 || String(m.id).toLowerCase().indexOf(q) >= 0);
+    const shown = q ? list : list.filter((m) => cook.items[m.id]);
+
+    if (!shown.length) {
+      $('#cookItems').innerHTML = '<tbody><tr><td class="count">'
+        + (q ? 'Asnjë pjatë me këtë emër.'
+             : 'Asnjë përjashtim — çdo pjatë ndjek kategorinë e vet. Kërko një pjatë për ta caktuar veç.')
+        + '</td></tr></tbody>';
+    } else {
+      $('#cookItems').innerHTML = '<tbody>' + shown.map((m) => {
+        const veç = cook.items[m.id];
+        const cat = cook.categories[m.category] || 'kitchen';
+        return `<tr>
+          <th style="text-align:left">${esc(m.name)}
+            <span class="count">${esc((cookCats.find((c) => c.id === m.category) || {}).name || m.category)}</span></th>
+          <td><div class="stpick">
+            <button class="stbtn${veç ? '' : ' on'}" data-itemsta="${esc(m.id)}" data-sta=""
+              >↳ Si kategoria (${esc(store.STATIONS[cat])})</button>
+            ${STA_ORDER.map((s) => `<button class="stbtn${veç === s ? ' on' : ''}"
+                data-itemsta="${esc(m.id)}" data-sta="${esc(s)}"
+              >${store.STATION_ICON[s]} ${esc(store.STATIONS[s])}</button>`).join('')}
+          </div></td>
+        </tr>`;
+      }).join('') + '</tbody>';
+    }
+
+    // ---- sa bie ku ----
+    const tally = { kitchen: 0, oven: 0, none: 0 };
+    cookMenu.forEach((m) => { tally[stationOf(m)] = (tally[stationOf(m)] || 0) + 1; });
+    $('#cookStats').innerHTML = STA_ORDER.map((s) =>
+      `<span class="st">${store.STATION_ICON[s]} ${esc(store.STATIONS[s])}: <b>${tally[s]}</b></span>`).join('');
+  }
+
+  async function saveCook() {
+    try {
+      await store.saveStations(cook);
+      toast('Ndarja u ruajt.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  async function resetCook() {
+    cook = { categories: Object.assign({}, store.DEFAULT_STATIONS), items: {} };
+    try {
+      await store.saveStations(cook);
+      renderCook();
+      toast('U kthye te fillestarja.', 'ok');
     } catch (e) { toast(e.message, 'err'); }
   }
 
@@ -4768,6 +5090,7 @@ ${S('drink', `
     if (tab) {
       if (tab.dataset.tab === 'staff') { loadStaff(); loadPerms(); }
       if (tab.dataset.tab === 'phase') loadPhases();
+      if (tab.dataset.tab === 'cook') loadCook();
       return;
     }
 
@@ -4776,6 +5099,23 @@ ${S('drink', `
     if (t.id === 'addStaff') return addStaff();
     if (t.id === 'savePerms') return savePerms();
     if (t.id === 'resetPerms') return resetPerms();
+    if (t.id === 'saveCook') return saveCook();
+    if (t.id === 'resetCook') return resetCook();
+
+    const cs = t.closest('[data-catsta]');
+    if (cs) {
+      cook.categories[cs.closest('[data-cat]').dataset.cat] = cs.dataset.catsta;
+      renderCook();
+      return;
+    }
+    const is = t.closest('[data-itemsta]');
+    if (is) {
+      const id = is.dataset.itemsta;
+      if (is.dataset.sta) cook.items[id] = is.dataset.sta; else delete cook.items[id];
+      renderCook();
+      return;
+    }
+
     if (t.id === 'savePhases') return savePhases();
     if (t.id === 'resetPhases') return resetPhases();
 
@@ -4814,6 +5154,7 @@ ${S('drink', `
 
   document.addEventListener('input', (e) => {
     if (e.target.closest('#phaseList')) onPhaseInput(e);
+    if (e.target.id === 'cookSearch') { cookQ = e.target.value; renderCook(); }
   });
 
   document.addEventListener('change', (e) => {

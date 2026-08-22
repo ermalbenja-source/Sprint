@@ -9,7 +9,7 @@
 /* ============================================================================
    SPRINT — Hyrja e stafit.
    Një link i vetëm për të gjithë. Kodi vendos se çfarë sheh njeriu pas tij:
-   kuzhinieri sheh furrën, motorristi sheh nisjen, pronari sheh të dyja.
+   kuzhinieri kuzhinën, piceri furrën, motorristi nisjen; pronari të gjitha.
    ========================================================================== */
 :root{
   --brand:#DE7F1C; --gold:#FFC244;
@@ -46,6 +46,8 @@ a{color:var(--gold)}
 .keys .go{background:var(--brand);color:#1B0D02;border-color:var(--brand)}
 .gate-err{color:#ff9a92;font-size:.9rem;min-height:1.3em;margin:0}
 .gate-card .code{font-family:ui-monospace,monospace;letter-spacing:.14em;color:var(--txt)}
+.buildtag{margin:0;font-size:.68rem;color:var(--muted);opacity:.65;
+  font-family:ui-monospace,monospace;letter-spacing:.04em}
 
 /* ---------- shiriti ---------- */
 header{position:sticky;top:0;z-index:20;background:rgba(10,9,8,.96);
@@ -72,7 +74,7 @@ header .logo{font-size:1.4rem}
 #offline.on{transform:none}
 .empty{text-align:center;color:var(--muted);padding:4rem 1rem;font-size:1.05rem}
 
-/* ══════════════════ KUZHINA ══════════════════ */
+/* ══════════════════ GATIMI: KUZHINA DHE FURRA ══════════════════ */
 #v-kds{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
   grid-template-columns:repeat(auto-fill,minmax(290px,1fr));align-content:start}
 #v-kds .empty{grid-column:1/-1}
@@ -99,6 +101,12 @@ header .logo{font-size:1.4rem}
 .t-line.done{opacity:.38;text-decoration:line-through}
 .t-note{margin:.2rem 0 0;background:rgba(230,178,60,.14);border-left:3px solid var(--warn);
   border-radius:0 8px 8px 0;padding:.45rem .6rem;font-size:1rem;color:#f4dca6}
+/* Rreshtat e stacionit tjetër: kontekst, jo punë. Aq të zbehta sa të mos
+   tërheqin dorën, por aq të lexueshme sa të dish çfarë del bashkë me ty. */
+.t-other{margin-top:.35rem;padding-top:.5rem;border-top:1px dashed var(--line);
+  font-size:.85rem;color:var(--muted);line-height:1.5}
+.t-wait{margin-top:.4rem;font-size:.9rem;font-weight:700;color:var(--warn)}
+.tick.s-ready{border-color:var(--ok)}
 .t-act{display:grid;grid-template-columns:1fr auto;gap:.5rem;padding:.7rem .85rem;
   border-top:1px solid var(--line)}
 .big{border-radius:14px;padding:1rem;font-size:1.15rem;font-weight:700;letter-spacing:.02em;
@@ -194,6 +202,7 @@ header .logo{font-size:1.4rem}
     <p class="gate-sub">Shkruaj kodin tënd.</p>
     <div id="pinShow"></div>
     <p class="gate-err" id="gateErr"></p>
+    <p class="buildtag" id="buildTag">v__BUILD__</p>
     <div class="keys">
       <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
       <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
@@ -213,7 +222,7 @@ header .logo{font-size:1.4rem}
     <span class="who" id="whoTxt"></span>
     <div class="switch hide" id="switcher"></div>
     <div class="hact">
-      <span class="cbadge hide" id="kdsCount">Furrë <b id="cPrep">0</b> · Gati <b id="cReady">0</b></span>
+      <span class="cbadge hide" id="kdsCount">Në punë <b id="cPrep">0</b> · Dhënë <b id="cReady">0</b></span>
       <button class="hbtn hide" id="sndBtn" title="Zilja për porosi të reja">🔔</button>
       <button class="hbtn" id="refBtn" title="Rifresko">↻</button>
       <button class="hbtn" id="outBtn">Dil</button>

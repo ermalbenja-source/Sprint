@@ -124,7 +124,7 @@ const PUBLIC_RPC = ['track_order','find_orders_by_phone','public_phases',
                     'kds_orders','kds_bump',
                     'drv_ready','drv_start_run','drv_my_run','drv_delivered',
                     'drv_failed','drv_my_day'];
-const PUBLIC_READ = ['menu_items','settings','order_phases'];
+const PUBLIC_READ = ['menu_items','settings','order_phases','category_stations'];
 
 const server = http.createServer(async (req, res) => {
   const u = new URL(req.url, 'http://x');

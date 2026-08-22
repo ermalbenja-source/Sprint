@@ -11,9 +11,11 @@ insert into public.staff (name, role) values ('Banaku Test','cashier') on confli
 insert into public.staff (name, role) values ('Kuzhina Test','kitchen') on conflict do nothing;
 insert into public.staff (name, role) values ('Motorrist A','driver')   on conflict do nothing;
 insert into public.staff (name, role) values ('Motorrist B','driver')   on conflict do nothing;
+insert into public.staff (name, role) values ('Furra Test','pizza')     on conflict do nothing;
 
 select public.set_staff_pin((select id from public.staff where name='Motorrist A'), '4821');
 select public.set_staff_pin((select id from public.staff where name='Kuzhina Test'), '1199');
+select public.set_staff_pin((select id from public.staff where name='Furra Test'), '1155');
 
 \echo '-- hyrje e saktë:'
 select name, role from public.staff_login('4821','tablet-1');
@@ -151,13 +153,27 @@ returning number, kind, title;
 \echo '=== 9. EKRANI I KUZHINËS ==='
 select token as kds_token from public.staff_login('1199','tablet-kuzhine') \gset
 
+insert into public.menu_items (id, category, name_sq, price)
+values ('test-tave','trad','Tavë Test', 500) on conflict (id) do nothing;
+
+-- Një porosi e përzier: një picë (furra) dhe një tavë (kuzhina). Pikërisht kjo
+-- është porosia që duhet të ndahet mes dy ekraneve.
 insert into public.orders (customer_name, phone, address, items, total, status, note)
 values ('Klient Kuzhine','069 222 3344','Rruga X 5',
-        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700}]'::jsonb, 700, 'accepted', 'pa qepë')
+        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700},
+          {"id":"test-tave","name":"Tavë Test","qty":1,"price":500}]'::jsonb,
+        1200, 'accepted', 'pa qepë')
 returning id as kds_order \gset
+
+select token as ovn_token from public.staff_login('1155','tablet-furre') \gset
+
+\echo '-- ndarja e stacioneve për këtë porosi:'
+select public.order_stations(items) as stacionet from public.orders where id = :'kds_order';
 
 \echo '-- kuzhina sheh porosinë, POR jo emrin/telefonin/adresën:'
 select number, status, kind, note from public.kds_orders(:'kds_token') where id = :'kds_order';
+\echo '-- edhe furra e sheh të njëjtën porosi (secili ka rreshtin e vet):'
+select number, station_done, waiting_on from public.kds_orders(:'ovn_token','oven') where id = :'kds_order';
 \echo '-- kolonat e kthyera (nuk duhet të ketë customer_name, phone, address):'
 select array_to_string(proargnames, ', ') as kolonat
   from pg_proc where proname = 'kds_orders';
@@ -166,13 +182,35 @@ select array_to_string(proargnames, ', ') as kolonat
 select public.kds_bump(:'kds_token', :'kds_order', 'preparing') as faza;
 select status, kitchen_at is not null as nisi_kuzhina from public.orders where id = :'kds_order';
 
-\echo '-- kalimi i lejuar: preparing → ready'
+\echo '-- kuzhina e jep të vetën, POR furra jo — porosia NUK bëhet ende gati:'
 select public.kds_bump(:'kds_token', :'kds_order', 'ready') as faza;
+select status, ready_at is null as ende_pa_ore,
+       station_ready ? 'kitchen' as kuzhina_e_dha,
+       station_ready ? 'oven'    as furra_e_dha
+  from public.orders where id = :'kds_order';
+
+\echo '-- edhe furra e jep — tani porosia është gati:'
+select public.kds_bump(:'ovn_token', :'kds_order', 'ready', 'oven') as faza;
 select status, ready_at is not null as u_be_gati from public.orders where id = :'kds_order';
 
 \echo '-- kthimi mbrapsht lejohet (preket gabimisht shpesh):'
 select public.kds_bump(:'kds_token', :'kds_order', 'preparing') as faza;
 select status, ready_at is null as ora_u_pastrua from public.orders where id = :'kds_order';
+
+\echo '-- furra NUK e prek dot ekranin e kuzhinës:'
+select set_config('test.ovn_token', :'ovn_token', false);
+do $$ begin
+  perform public.kds_orders(current_setting('test.ovn_token')::uuid, 'kitchen');
+  raise exception 'DËSHTIM: furra hapi kuzhinën';
+exception when others then
+  if sqlerrm = 'DËSHTIM: furra hapi kuzhinën' then raise; end if;
+  raise notice 'OK — u refuzua: %', sqlerrm;
+end $$;
+
+\echo '-- pijet nuk shkojnë në asnjë ekran:'
+insert into public.menu_items (id, category, name_sq, price)
+values ('test-uje','pije','Ujë Test', 60) on conflict (id) do nothing;
+select public.order_stations('[{"id":"test-uje","qty":2}]'::jsonb) as vetem_pije;
 
 select set_config('test.kds_token', :'kds_token', false),
        set_config('test.kds_order', :'kds_order', false);

@@ -9,7 +9,7 @@
 /* ============================================================================
    SPRINT — Hyrja e stafit.
    Një link i vetëm për të gjithë. Kodi vendos se çfarë sheh njeriu pas tij:
-   kuzhinieri sheh furrën, motorristi sheh nisjen, pronari sheh të dyja.
+   kuzhinieri kuzhinën, piceri furrën, motorristi nisjen; pronari të gjitha.
    ========================================================================== */
 :root{
   --brand:#DE7F1C; --gold:#FFC244;
@@ -46,6 +46,8 @@ a{color:var(--gold)}
 .keys .go{background:var(--brand);color:#1B0D02;border-color:var(--brand)}
 .gate-err{color:#ff9a92;font-size:.9rem;min-height:1.3em;margin:0}
 .gate-card .code{font-family:ui-monospace,monospace;letter-spacing:.14em;color:var(--txt)}
+.buildtag{margin:0;font-size:.68rem;color:var(--muted);opacity:.65;
+  font-family:ui-monospace,monospace;letter-spacing:.04em}
 
 /* ---------- shiriti ---------- */
 header{position:sticky;top:0;z-index:20;background:rgba(10,9,8,.96);
@@ -72,7 +74,7 @@ header .logo{font-size:1.4rem}
 #offline.on{transform:none}
 .empty{text-align:center;color:var(--muted);padding:4rem 1rem;font-size:1.05rem}
 
-/* ══════════════════ KUZHINA ══════════════════ */
+/* ══════════════════ GATIMI: KUZHINA DHE FURRA ══════════════════ */
 #v-kds{padding:clamp(.7rem,2vw,1.2rem);display:grid;gap:.9rem;
   grid-template-columns:repeat(auto-fill,minmax(290px,1fr));align-content:start}
 #v-kds .empty{grid-column:1/-1}
@@ -99,6 +101,12 @@ header .logo{font-size:1.4rem}
 .t-line.done{opacity:.38;text-decoration:line-through}
 .t-note{margin:.2rem 0 0;background:rgba(230,178,60,.14);border-left:3px solid var(--warn);
   border-radius:0 8px 8px 0;padding:.45rem .6rem;font-size:1rem;color:#f4dca6}
+/* Rreshtat e stacionit tjetër: kontekst, jo punë. Aq të zbehta sa të mos
+   tërheqin dorën, por aq të lexueshme sa të dish çfarë del bashkë me ty. */
+.t-other{margin-top:.35rem;padding-top:.5rem;border-top:1px dashed var(--line);
+  font-size:.85rem;color:var(--muted);line-height:1.5}
+.t-wait{margin-top:.4rem;font-size:.9rem;font-weight:700;color:var(--warn)}
+.tick.s-ready{border-color:var(--ok)}
 .t-act{display:grid;grid-template-columns:1fr auto;gap:.5rem;padding:.7rem .85rem;
   border-top:1px solid var(--line)}
 .big{border-radius:14px;padding:1rem;font-size:1.15rem;font-weight:700;letter-spacing:.02em;
@@ -194,6 +202,7 @@ header .logo{font-size:1.4rem}
     <p class="gate-sub">Shkruaj kodin tënd.</p>
     <div id="pinShow"></div>
     <p class="gate-err" id="gateErr"></p>
+    <p class="buildtag" id="buildTag">v2026-08-22 11:55</p>
     <div class="keys">
       <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
       <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
@@ -213,7 +222,7 @@ header .logo{font-size:1.4rem}
     <span class="who" id="whoTxt"></span>
     <div class="switch hide" id="switcher"></div>
     <div class="hact">
-      <span class="cbadge hide" id="kdsCount">Furrë <b id="cPrep">0</b> · Gati <b id="cReady">0</b></span>
+      <span class="cbadge hide" id="kdsCount">Në punë <b id="cPrep">0</b> · Dhënë <b id="cReady">0</b></span>
       <button class="hbtn hide" id="sndBtn" title="Zilja për porosi të reja">🔔</button>
       <button class="hbtn" id="refBtn" title="Rifresko">↻</button>
       <button class="hbtn" id="outBtn">Dil</button>
@@ -1561,6 +1570,7 @@ window.SPRINT = (function () {
     manager: 'Menaxher',
     cashier: 'Banak',
     kitchen: 'Kuzhinë',
+    pizza:   'Furra e picës',
     driver:  'Motorrist',
   };
 
@@ -1572,6 +1582,7 @@ window.SPRINT = (function () {
   const DEMO_STAFF = [
     { name: 'Pronari', role: 'owner',   pin: '7000' },
     { name: 'Kuzhina', role: 'kitchen', pin: '1199' },
+    { name: 'Furra',   role: 'pizza',   pin: '1155' },
     { name: 'Andrea',  role: 'driver',  pin: '4821' },
     { name: 'Gito',    role: 'driver',  pin: '4822' },
   ];
@@ -1689,16 +1700,20 @@ window.SPRINT = (function () {
 
   /* ---------- porositë shembull ----------
      Të shënuara me `demo`, që paneli ta thotë hapur se nuk janë të vërteta. */
+  /* Rreshtat e mbajnë vetë stacionin: pjatat shembull nuk gjenden te menuja,
+     ndaj pa këtë do të binin të gjitha te kuzhina dhe furra do të dukej bosh. */
   const DEMO_ORDERS = [
     { n: 1, st: 'accepted',  kind: 'delivery', pay: 'cash',
       name: 'Arben Hoxha',  phone: '069 555 1001', addr: 'Rruga Taulantia 14, kati 2',
-      note: 'pa qepë', items: [['Pica Margarita', 2, 320], ['Coca-Cola 0.5', 1, 120]] },
+      note: 'pa qepë',
+      items: [['Pica Margarita', 2, 320, 'oven'], ['Coca-Cola 0.5', 1, 120, 'none']] },
     { n: 2, st: 'preparing', kind: 'pickup',   pay: 'cash',
       name: 'Elona Meta',   phone: '069 555 1002', addr: null, note: null,
-      items: [['Sufllaqe Pule', 3, 250]] },
+      items: [['Sufllaqe Pule', 3, 250, 'oven'], ['Sallatë greke', 1, 300, 'kitchen']] },
     { n: 3, st: 'ready',     kind: 'delivery', pay: 'card',
       name: 'Genti Leka',   phone: '069 555 1003', addr: 'Plazh, pallati 7, hyrja B',
-      note: 'kambana s\'punon, telefono', items: [['Pica Kapriçoza', 1, 450], ['Patate', 2, 150]] },
+      note: 'kambana s\'punon, telefono',
+      items: [['Tavë kosi', 1, 450, 'kitchen'], ['Patate', 2, 150, 'kitchen']] },
   ];
 
   let demoRunning = null;
@@ -1714,7 +1729,8 @@ window.SPRINT = (function () {
         const total = d.items.reduce((n, [, q, p]) => n + q * p, 0);
         const row = await st.createOrder({
           kind: d.kind, name: d.name, phone: d.phone, address: d.addr, note: d.note,
-          items: d.items.map(([name, qty, price], i) => ({ id: 'demo' + d.n + i, name, qty, price })),
+          items: d.items.map(([name, qty, price, station], i) =>
+            ({ id: 'demo' + d.n + i, name, qty, price, station })),
           subtotal: total, total, payment: d.pay, channel: 'phone',
           lat: 41.32 + d.n / 200, lng: 19.44 + d.n / 200,
         });
@@ -1731,36 +1747,187 @@ window.SPRINT = (function () {
     return demoRunning;
   }
 
-  /* ══════════════════ EKRANI I KUZHINËS ══════════════════ */
+  /* ══════════════════ STACIONET E PËRGATITJES ══════════════════
+     Brenda dyqanit gatuhet në dy vende të ndara: kuzhina dhe furra e picës.
+     Furra ka njeriun e vet dhe ekranin e vet — picat dhe sanduiçët me brumë
+     pice nuk kalojnë fare nga kuzhina. Një porosi e vetme ndahet mes të dyve
+     dhe bëhet «gati» vetëm kur të dy e kanë dhënë të tyren. */
+
+  const STATIONS = {
+    kitchen: 'Kuzhina',
+    oven:    'Furra e picës',
+    none:    'Nuk gatuhet',
+  };
+  const STATION_ICON = { kitchen: '🍳', oven: '🔥', none: '🥤' };
+  const LS_STATIONS = 'sprint-stations';
+
+  /** Ndarja fillestare — ajo që përputhet me dyqanin sot. */
+  const DEFAULT_STATIONS = {
+    pizza: 'oven', fast: 'oven',
+    rest: 'kitchen', trad: 'kitchen', starter: 'kitchen',
+    pije: 'none',
+  };
+
+  /** Lexon ndarjen: kategoritë, plus përjashtimet për pjata të veçanta. */
+  async function fetchStations() {
+    if (!live) {
+      const saved = readLS(LS_STATIONS, null);
+      return saved && saved.categories
+        ? saved
+        : { categories: Object.assign({}, DEFAULT_STATIONS), items: {} };
+    }
+    const [cats, items] = await Promise.all([
+      st._req('/rest/v1/category_stations?select=category,station', { headers: st._headers() }),
+      st._req('/rest/v1/menu_items?select=id,station&station=not.is.null', { headers: st._headers() }),
+    ]);
+    const out = { categories: {}, items: {} };
+    (cats || []).forEach((r) => { out.categories[r.category] = r.station; });
+    (items || []).forEach((r) => { out.items[r.id] = r.station; });
+    if (!Object.keys(out.categories).length) out.categories = Object.assign({}, DEFAULT_STATIONS);
+    return out;
+  }
+
+  async function saveStations(map) {
+    const clean = {
+      categories: map.categories || {},
+      items: map.items || {},
+    };
+    if (!live) { writeLS(LS_STATIONS, clean); return clean; }
+    await st._ensureAuth();
+
+    // Kategoritë: zëvendësim i plotë, njësoj si te «Kush sheh çfarë».
+    await st._req('/rest/v1/category_stations?category=neq.__none__', {
+      method: 'DELETE', headers: st._headers(),
+    });
+    const rows = Object.keys(clean.categories)
+      .map((c) => ({ category: c, station: clean.categories[c] }));
+    if (rows.length) {
+      await st._req('/rest/v1/category_stations', {
+        method: 'POST', headers: st._headers({ Prefer: 'resolution=merge-duplicates' }),
+        body: JSON.stringify(rows),
+      });
+    }
+
+    // Përjashtimet e pjatëve: fillimisht hiqen të gjitha, pastaj vendosen ato
+    // që mbeten. Përjashtimet janë të pakta, ndaj kjo mbetet e lirë.
+    await st._req('/rest/v1/menu_items?station=not.is.null', {
+      method: 'PATCH', headers: st._headers({ Prefer: 'return=minimal' }),
+      body: JSON.stringify({ station: null }),
+    });
+    for (const id of Object.keys(clean.items)) {
+      await st._req('/rest/v1/menu_items?id=eq.' + encodeURIComponent(id), {
+        method: 'PATCH', headers: st._headers({ Prefer: 'return=minimal' }),
+        body: JSON.stringify({ station: clean.items[id] }),
+      });
+    }
+    return clean;
+  }
+
+  /** Ndërtuesi i përgjigjes «ku gatuhet kjo?». Merr ndarjen dhe menunë një
+      herë, pastaj u përgjigjet rreshtave të porosive pa kërkuar gjë tjetër. */
+  function stationRouter(map, menu) {
+    const cat = {};
+    (menu || []).forEach((m) => { cat[m.id] = m.category || m.c; });
+    const of = (line) => {
+      if (!line) return 'kitchen';
+      // Rreshti i porosisë mund ta mbajë vetë stacionin nga çasti i porosisë:
+      // porositë e vjetra nuk ndryshojnë vend sepse ndarja u ndryshua pas tyre.
+      if (STATIONS[line.station]) return line.station;
+      const id = line.id != null ? String(line.id) : '';
+      if (map.items && STATIONS[map.items[id]]) return map.items[id];
+      const c = line.category || line.c || cat[id];
+      if (c && STATIONS[map.categories[c]]) return map.categories[c];
+      return 'kitchen';
+    };
+    return {
+      of,
+      /** Rreshtat me stacionin e ngjitur secilit. */
+      tag: (items) => (items || []).map((li) => Object.assign({}, li, { station: of(li) })),
+      /** Cilat stacione duhet ta gatuajnë këtë porosi. Pijet nuk numërohen. */
+      stationsOf: (items) => {
+        const seen = {};
+        (items || []).forEach((li) => { const s = of(li); if (s !== 'none') seen[s] = 1; });
+        return Object.keys(seen).sort();
+      },
+    };
+  }
+
+  /** Ndihmës: një router i gatshëm, me menunë e ngarkuar vetë. */
+  async function loadRouter() {
+    const [map, all] = await Promise.all([
+      fetchStations(),
+      st.fetchAll().catch(() => null),
+    ]);
+    // Pa menu të publikuar mbetet menuja e ndërtuar brenda programit — pa të,
+    // çdo pjatë do të binte te kuzhina dhe furra do të mbetej bosh.
+    const menu = (all && all.menu && all.menu.length) ? all.menu
+      : ((window.SPRINT && window.SPRINT.menu) || []);
+    return stationRouter(map, menu);
+  }
+
+  /* ══════════════════ EKRANET E GATIMIT ══════════════════ */
 
   const KDS_STATES = ['new', 'accepted', 'preparing', 'ready'];
 
-  /** Porositë që i duhen kuzhinës — pa emër, pa telefon, pa adresë. */
-  async function kdsOrders() {
+  /** Porositë që i duhen këtij stacioni — pa emër, pa telefon, pa adresë.
+      Kthehen vetëm porositë që kanë të paktën një rresht për të, dhe rreshtat
+      vijnë të shënuar që ekrani të dijë cilat janë të tijat. */
+  async function kdsOrders(station) {
+    const sta = station === 'oven' ? 'oven' : 'kitchen';
     if (!live) {
       await ensureLocalOrders();
-      const from = new Date(Date.now() - 12 * 3600e3).toISOString();
-      const list = (await st.fetchOrders({ from })) || [];
-      return list
+      const [router, list] = await Promise.all([
+        loadRouter(),
+        st.fetchOrders({ from: new Date(Date.now() - 12 * 3600e3).toISOString() }),
+      ]);
+      return (list || [])
         .filter((o) => KDS_STATES.indexOf(o.status) >= 0)
+        .map((o) => {
+          const need = router.stationsOf(o.items);
+          const done = o.station_ready || {};
+          return Object.assign({}, o, {
+            items: router.tag(o.items),
+            need,
+            station_done: !!done[sta],
+            waiting_on: need.filter((s) => !done[s]),
+          });
+        })
+        .filter((o) => o.need.indexOf(sta) >= 0)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     }
     const sess = readLS(LS_DEVICE, null);
     if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
-    return st._rpc('kds_orders', { p_token: sess.token });
+    return st._rpc('kds_orders', { p_token: sess.token, p_station: sta });
   }
 
-  /** Kalimi i fazës nga kuzhina. Kthimi mbrapsht lejohet me qëllim. */
-  async function kdsBump(id, status) {
+  /** Kalimi i fazës nga një stacion. Kthimi mbrapsht lejohet me qëllim.
+      Porosia bëhet «gati» vetëm kur të gjithë stacionet e saj e kanë dhënë:
+      një picë e ftohtë duke pritur tavën është pikërisht ajo që kjo ndalon. */
+  async function kdsBump(id, status, station) {
+    const sta = station === 'oven' ? 'oven' : 'kitchen';
     if (!live) {
-      const patch = { status };
-      if (status === 'preparing') { patch.kitchen_at = new Date().toISOString(); patch.ready_at = null; }
-      if (status === 'ready') patch.ready_at = new Date().toISOString();
-      return st.updateOrder(id, patch);
+      const router = await loadRouter();
+      const list = (await st.fetchOrders({})) || [];
+      const o = list.find((x) => x.id === id);
+      if (!o) throw new Error('Porosia nuk u gjet.');
+      const need = router.stationsOf(o.items);
+      const done = Object.assign({}, o.station_ready || {});
+      if (status === 'ready') done[sta] = new Date().toISOString();
+      else delete done[sta];
+      const left = need.filter((s) => !done[s]);
+      const gati = left.length === 0;
+      await st.updateOrder(id, {
+        status: gati ? 'ready' : 'preparing',
+        station_ready: done,
+        kitchen_at: o.kitchen_at || new Date().toISOString(),
+        ready_at: gati ? (o.ready_at || new Date().toISOString()) : null,
+      });
+      return gati ? 'ready' : 'preparing';
     }
     const sess = readLS(LS_DEVICE, null);
     if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
-    return st._rpc('kds_bump', { p_token: sess.token, p_order: id, p_status: status });
+    return st._rpc('kds_bump', {
+      p_token: sess.token, p_order: id, p_status: status, p_station: sta });
   }
 
   /* ══════════════════ HIERARKIA E EKRANEVE ══════════════════ */
@@ -1769,6 +1936,7 @@ window.SPRINT = (function () {
     neworder: 'Porosi e re',
     orders:   'Porositë',
     kds:      'Kuzhina',
+    oven:     'Furra e picës',
     runs:     'Motorristi',
     bookings: 'Rezervimet',
     menu:     'Menuja',
@@ -1781,9 +1949,10 @@ window.SPRINT = (function () {
   const LS_ROLESCR = 'sprint-role-screens';
 
   const DEFAULT_ROLE_SCREENS = {
-    manager: ['neworder','orders','kds','runs','bookings','menu','stock','reports'],
+    manager: ['neworder','orders','kds','oven','runs','bookings','menu','stock','reports'],
     cashier: ['neworder','orders','bookings'],
     kitchen: ['kds'],
+    pizza:   ['oven'],
     driver:  ['runs'],
   };
 
@@ -1795,7 +1964,7 @@ window.SPRINT = (function () {
     }
     await st._ensureAuth();
     const rows = await st._req('/rest/v1/role_screens?select=role,screen', { headers: st._headers() });
-    const out = { manager: [], cashier: [], kitchen: [], driver: [] };
+    const out = { manager: [], cashier: [], kitchen: [], pizza: [], driver: [] };
     (rows || []).forEach((r) => { if (out[r.role]) out[r.role].push(r.screen); });
     return out;
   }
@@ -2016,6 +2185,8 @@ window.SPRINT = (function () {
     lookupCustomer, upsertCustomer,
     STAFF_ROLES: ROLES, fetchStaff, saveStaff, deleteStaff, setStaffPin,
     KDS_STATES, kdsOrders, kdsBump,
+    STATIONS, STATION_ICON, DEFAULT_STATIONS, fetchStations, saveStations,
+    stationRouter, loadRouter,
     DEMO_STAFF, ensureLocalStaff, ensureLocalOrders,
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
@@ -2027,8 +2198,14 @@ window.SPRINT = (function () {
 </script>
 <script>
 /* ============================================================================
-   SPRINT — Pamja e kuzhinës brenda aplikacionit të stafit.
-   Regjistrohet te SPRINT.views.kds; guaska e nis dhe e ndal sipas rolit.
+   SPRINT — Pamjet e gatimit brenda aplikacionit të stafit.
+
+   Dy stacione, i njëjti ekran: kuzhina (SPRINT.views.kds) dhe furra e picës
+   (SPRINT.views.oven). Secili sheh vetëm rreshtat e vet; rreshtat e stacionit
+   tjetër shfaqen të zbehta, vetëm si kontekst — që furra ta dijë se pica del
+   bashkë me një tavë, dhe të mos e nxjerrë dhjetë minuta para saj.
+
+   Guaska te staf.js e nis dhe e ndal atë që i takon rolit.
    ========================================================================== */
 (function () {
   const S = window.SPRINT;
@@ -2040,16 +2217,17 @@ window.SPRINT = (function () {
   const LS_TICK = 'sprint-kds-ticks';
   const LS_SND  = 'sprint-kds-sound';
 
-  const K = { orders: [], phases: [], ticked: {}, sound: true, seen: new Set(),
-              lastBump: null, timer: null, undoT: null, live: false };
+  const STATION_NAME = { kitchen: 'kuzhinën', oven: 'furrën' };
 
-  try { K.ticked = JSON.parse(localStorage.getItem(LS_TICK) || '{}') || {}; } catch (e) {}
-  try { K.sound = localStorage.getItem(LS_SND) !== '0'; } catch (e) {}
+  let sound = true;
+  let ticked = {};
+  try { ticked = JSON.parse(localStorage.getItem(LS_TICK) || '{}') || {}; } catch (e) {}
+  try { sound = localStorage.getItem(LS_SND) !== '0'; } catch (e) {}
 
   /* ---------- zilja ---------- */
   let ac;
   function beep() {
-    if (!K.sound) return;
+    if (!sound) return;
     try {
       ac = ac || new (window.AudioContext || window.webkitAudioContext)();
       [0, 0.18].forEach((t, i) => {
@@ -2069,162 +2247,195 @@ window.SPRINT = (function () {
     const s = Math.max(0, Math.round(ms / 1000));
     return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   };
-  function targetFor(status) {
-    const p = K.phases.find((x) => x.key === status);
-    return (p && p.target_minutes) || (status === 'preparing' ? 20 : 5);
-  }
-  function clockOf(o) {
-    const since = new Date(o.kitchen_at || o.accepted_at || o.created_at).getTime();
-    const mins = (Date.now() - since) / 60000;
-    const t = targetFor(o.status === 'ready' ? 'ready' : 'preparing');
-    return { txt: mmss(Date.now() - since),
-             cls: mins > t ? 'late' : mins > t * 0.7 ? 'warn' : '' };
-  }
 
-  /* ---------- vizatimi ---------- */
   const KIND = { pickup: 'Marr vetë', delivery: 'Dërgesë' };
-  const itemsOf = (o) => (Array.isArray(o.items) ? o.items : [])
-    .map((x) => ({ q: Number(x.qty) || 1, n: x.name || x.id || '' }));
 
-  function render() {
-    const list = K.orders;
-    if (!list.length) {
-      $('#v-kds').innerHTML = '<p class="empty">Asnjë porosi në pritje. 🍕</p>';
-    } else {
-      $('#v-kds').innerHTML = list.map((o) => {
-        const c = clockOf(o);
-        const ticks = K.ticked[o.id] || [];
-        const items = itemsOf(o).map((it, i) =>
-          `<div class="t-line${ticks.indexOf(i) >= 0 ? ' done' : ''}" data-tick="${esc(o.id)}" data-i="${i}">
-             <span class="q">${it.q}×</span><span>${esc(it.n)}</span></div>`).join('');
-        const act = o.status === 'ready'
-          ? `<button class="big b-start" data-bump="${esc(o.id)}" data-to="preparing">↩ Kthe në furrë</button>`
-          : o.status === 'preparing'
-            ? `<button class="big b-ready" data-bump="${esc(o.id)}" data-to="ready">GATI</button>
-               <button class="b-back" data-bump="${esc(o.id)}" data-to="preparing" title="Rinis kohën">↺</button>`
-            : `<button class="big b-start" data-bump="${esc(o.id)}" data-to="preparing">Fillo</button>`;
-        return `<article class="tick s-${esc(o.status)} ${c.cls}" data-ord="${esc(o.id)}">
-          <div class="t-hd">
-            <span class="t-no">#${o.number}</span>
-            <span class="t-kind${o.kind === 'pickup' ? ' pick' : ''}">${KIND[o.kind] || ''}</span>
-            <span class="t-clock" data-clock="${esc(o.id)}">${c.txt}</span>
-          </div>
-          <div class="t-items">${items}${o.note ? `<p class="t-note">📝 ${esc(o.note)}</p>` : ''}</div>
-          <div class="t-act">${act}</div>
-        </article>`;
-      }).join('');
+  /* Cili stacion është aktiv tani — te ky shkojnë klikimet. */
+  let active = null;
+
+  /* ---------- një stacion ---------- */
+  function makeStation(station, label, icon) {
+    const K = { orders: [], phases: [], seen: new Set(),
+                lastBump: null, timer: null, undoT: null, live: false };
+
+    const mine = (o) => (Array.isArray(o.items) ? o.items : [])
+      .filter((x) => (x.station || 'kitchen') === station);
+    const theirs = (o) => (Array.isArray(o.items) ? o.items : [])
+      .filter((x) => (x.station || 'kitchen') !== station && x.station !== 'none');
+
+    function targetFor(status) {
+      const p = K.phases.find((x) => x.key === status);
+      return (p && p.target_minutes) || (status === 'preparing' ? 20 : 5);
     }
-    $('#cPrep').textContent = list.filter((o) => o.status === 'preparing').length;
-    $('#cReady').textContent = list.filter((o) => o.status === 'ready').length;
-  }
-
-  /* Vetëm orët rifreskohen çdo sekondë, që prekja të mos humbasë nën gisht. */
-  function tickClocks() {
-    K.orders.forEach((o) => {
-      const el = document.querySelector(`[data-clock="${CSS.escape(o.id)}"]`);
-      if (!el) return;
-      const c = clockOf(o);
-      el.textContent = c.txt;
-      const card = el.closest('.tick');
-      card.classList.toggle('warn', c.cls === 'warn');
-      card.classList.toggle('late', c.cls === 'late');
-    });
-  }
-
-  async function load(silent) {
-    if (!K.live) return;
-    try {
-      const rows = (await store.kdsOrders()) || [];
-      S.staf.offline(false);
-      const fresh = rows.filter((o) => !K.seen.has(o.id) && o.status !== 'ready');
-      rows.forEach((o) => K.seen.add(o.id));
-      if (!silent && fresh.length) beep();
-      K.orders = rows;
-      render();
-    } catch (e) {
-      S.staf.offline(true);
-      if (/kod|Hyr|esion/i.test(e.message)) S.staf.logout();
+    function clockOf(o) {
+      const since = new Date(o.kitchen_at || o.accepted_at || o.created_at).getTime();
+      const mins = (Date.now() - since) / 60000;
+      const t = targetFor(o.station_done ? 'ready' : 'preparing');
+      return { txt: mmss(Date.now() - since),
+               cls: mins > t ? 'late' : mins > t * 0.7 ? 'warn' : '' };
     }
-  }
 
-  async function bump(id, to) {
-    const o = K.orders.find((x) => x.id === id);
-    if (!o) return;
-    const from = o.status;
-    o.status = to;
-    if (to === 'preparing') o.kitchen_at = new Date().toISOString();
-    render();
-    try {
-      await store.kdsBump(id, to);
-      if (to === 'ready') {
-        K.lastBump = { id, from };
-        $('#undoNo').textContent = '#' + o.number;
-        $('#undo').classList.add('on');
-        clearTimeout(K.undoT);
-        K.undoT = setTimeout(() => $('#undo').classList.remove('on'), 7000);
+    function render() {
+      const list = K.orders;
+      if (!list.length) {
+        $('#v-kds').innerHTML = `<p class="empty">Asnjë porosi në pritje. ${icon}</p>`;
+      } else {
+        $('#v-kds').innerHTML = list.map((o) => {
+          const c = clockOf(o);
+          const tk = ticked[station + ':' + o.id] || [];
+          const items = mine(o).map((it, i) =>
+            `<div class="t-line${tk.indexOf(i) >= 0 ? ' done' : ''}" data-tick="${esc(o.id)}" data-i="${i}">
+               <span class="q">${Number(it.qty) || 1}×</span><span>${esc(it.name || it.id || '')}</span></div>`).join('');
+
+          // Rreshtat e stacionit tjetër: kontekst, jo punë. Nuk klikohen.
+          const other = theirs(o);
+          const otherHtml = other.length
+            ? `<div class="t-other">edhe: ${other.map((it) =>
+                 `${Number(it.qty) || 1}× ${esc(it.name || it.id || '')}`).join(' · ')}</div>`
+            : '';
+
+          // Pritja e stacionit tjetër: e jona u dha, porosia ende jo gati.
+          const waiting = (o.waiting_on || []).filter((s) => s !== station);
+          const wait = o.station_done && waiting.length
+            ? `<div class="t-wait">⏳ Pret ${waiting.map((s) => STATION_NAME[s] || s).join(' dhe ')}</div>`
+            : '';
+
+          const act = o.station_done
+            ? `<button class="big b-start" data-bump="${esc(o.id)}" data-to="preparing">↩ Kthe mbrapsht</button>`
+            : `<button class="big b-ready" data-bump="${esc(o.id)}" data-to="ready">GATI</button>
+               <button class="b-back" data-bump="${esc(o.id)}" data-to="preparing" title="Rinis kohën">↺</button>`;
+
+          return `<article class="tick s-${o.station_done ? 'ready' : esc(o.status)} ${c.cls}" data-ord="${esc(o.id)}">
+            <div class="t-hd">
+              <span class="t-no">#${o.number}</span>
+              <span class="t-kind${o.kind === 'pickup' ? ' pick' : ''}">${KIND[o.kind] || ''}</span>
+              <span class="t-clock" data-clock="${esc(o.id)}">${c.txt}</span>
+            </div>
+            <div class="t-items">${items}${o.note ? `<p class="t-note">📝 ${esc(o.note)}</p>` : ''}${otherHtml}${wait}</div>
+            <div class="t-act">${act}</div>
+          </article>`;
+        }).join('');
       }
-      load(true);
-    } catch (e) {
-      o.status = from; render();
-      S.staf.offline(true);
+      $('#cPrep').textContent = list.filter((o) => !o.station_done).length;
+      $('#cReady').textContent = list.filter((o) => o.station_done).length;
     }
+
+    /* Vetëm orët rifreskohen çdo sekondë, që prekja të mos humbasë nën gisht. */
+    function tickClocks() {
+      K.orders.forEach((o) => {
+        const el = document.querySelector(`[data-clock="${CSS.escape(o.id)}"]`);
+        if (!el) return;
+        const c = clockOf(o);
+        el.textContent = c.txt;
+        const card = el.closest('.tick');
+        card.classList.toggle('warn', c.cls === 'warn');
+        card.classList.toggle('late', c.cls === 'late');
+      });
+    }
+
+    async function load(silent) {
+      if (!K.live) return;
+      try {
+        const rows = (await store.kdsOrders(station)) || [];
+        S.staf.offline(false);
+        const fresh = rows.filter((o) => !K.seen.has(o.id) && !o.station_done);
+        rows.forEach((o) => K.seen.add(o.id));
+        if (!silent && fresh.length) beep();
+        K.orders = rows;
+        render();
+      } catch (e) {
+        S.staf.offline(true);
+        if (/kod|Hyr|esion/i.test(e.message)) S.staf.logout();
+      }
+    }
+
+    async function bump(id, to) {
+      const o = K.orders.find((x) => x.id === id);
+      if (!o) return;
+      const was = o.station_done;
+      o.station_done = to === 'ready';
+      if (to === 'preparing') o.kitchen_at = o.kitchen_at || new Date().toISOString();
+      render();
+      try {
+        await store.kdsBump(id, to, station);
+        if (to === 'ready') {
+          K.lastBump = { id };
+          $('#undoNo').textContent = '#' + o.number;
+          $('#undo').classList.add('on');
+          clearTimeout(K.undoT);
+          K.undoT = setTimeout(() => $('#undo').classList.remove('on'), 7000);
+        }
+        load(true);
+      } catch (e) {
+        o.station_done = was; render();
+        S.staf.offline(true);
+      }
+    }
+
+    return {
+      label, station, bump,
+      tick(id, i) {
+        const key = station + ':' + id;
+        const arr = ticked[key] || (ticked[key] = []);
+        const at = arr.indexOf(i);
+        if (at >= 0) arr.splice(at, 1); else arr.push(i);
+        try { localStorage.setItem(LS_TICK, JSON.stringify(ticked)); } catch (err) {}
+        return at < 0;
+      },
+      undo() {
+        if (!K.lastBump) return;
+        bump(K.lastBump.id, 'preparing');
+        K.lastBump = null;
+        $('#undo').classList.remove('on');
+      },
+      start() {
+        K.live = true;
+        active = this;
+        $('#v-kds').classList.remove('hide');
+        $('#kdsCount').classList.remove('hide');
+        $('#sndBtn').classList.remove('hide');
+        $('#sndBtn').classList.toggle('off', !sound);
+        store.fetchPhases().then((p) => { K.phases = p || []; }).catch(() => {});
+        load();
+        clearInterval(K.timer);
+        K.timer = setInterval(tickClocks, 1000);
+      },
+      stop() {
+        K.live = false;
+        if (active === this) active = null;
+        clearInterval(K.timer);
+        $('#v-kds').classList.add('hide');
+        $('#kdsCount').classList.add('hide');
+        $('#sndBtn').classList.add('hide');
+        $('#undo').classList.remove('on');
+      },
+      refresh: () => load(true),
+    };
   }
 
-  /* ---------- lidhjet ---------- */
+  /* ---------- lidhjet: një dëgjues, i drejtuar te stacioni aktiv ---------- */
   document.addEventListener('click', (e) => {
-    if (!K.live) return;
-    const b = e.target.closest('[data-bump]');
-    if (b) return bump(b.dataset.bump, b.dataset.to);
-
-    const t = e.target.closest('[data-tick]');
-    if (t) {
-      const id = t.dataset.tick, i = Number(t.dataset.i);
-      const arr = K.ticked[id] || (K.ticked[id] = []);
-      const at = arr.indexOf(i);
-      if (at >= 0) arr.splice(at, 1); else arr.push(i);
-      try { localStorage.setItem(LS_TICK, JSON.stringify(K.ticked)); } catch (err) {}
-      t.classList.toggle('done', at < 0);
+    if (e.target.closest('#sndBtn')) {
+      sound = !sound;
+      try { localStorage.setItem(LS_SND, sound ? '1' : '0'); } catch (err) {}
+      $('#sndBtn').classList.toggle('off', !sound);
+      if (sound) beep();
       return;
     }
-    if (e.target.closest('#sndBtn')) {
-      K.sound = !K.sound;
-      try { localStorage.setItem(LS_SND, K.sound ? '1' : '0'); } catch (err) {}
-      $('#sndBtn').classList.toggle('off', !K.sound);
-      if (K.sound) beep();
-    }
+    if (!active) return;
+
+    const b = e.target.closest('[data-bump]');
+    if (b) return active.bump(b.dataset.bump, b.dataset.to);
+
+    const t = e.target.closest('[data-tick]');
+    if (t) t.classList.toggle('done', active.tick(t.dataset.tick, Number(t.dataset.i)));
   });
 
-  $('#undoBtn').addEventListener('click', () => {
-    if (!K.lastBump) return;
-    bump(K.lastBump.id, 'preparing');
-    K.lastBump = null;
-    $('#undo').classList.remove('on');
-  });
+  $('#undoBtn').addEventListener('click', () => { if (active) active.undo(); });
 
   S.views = S.views || {};
-  S.views.kds = {
-    label: 'Kuzhina',
-    start() {
-      K.live = true;
-      $('#v-kds').classList.remove('hide');
-      $('#kdsCount').classList.remove('hide');
-      $('#sndBtn').classList.remove('hide');
-      $('#sndBtn').classList.toggle('off', !K.sound);
-      store.fetchPhases().then((p) => { K.phases = p || []; }).catch(() => {});
-      load();
-      clearInterval(K.timer);
-      K.timer = setInterval(tickClocks, 1000);
-    },
-    stop() {
-      K.live = false;
-      clearInterval(K.timer);
-      $('#v-kds').classList.add('hide');
-      $('#kdsCount').classList.add('hide');
-      $('#sndBtn').classList.add('hide');
-      $('#undo').classList.remove('on');
-    },
-    refresh: () => load(true),
-  };
+  S.views.kds  = makeStation('kitchen', 'Kuzhina', '🍳');
+  S.views.oven = makeStation('oven', 'Furra e picës', '🍕');
 })();
 
 </script>
@@ -2486,7 +2697,8 @@ window.SPRINT = (function () {
 /* ============================================================================
    SPRINT — Guaska e aplikacionit të stafit.
    Një hyrje për të gjithë. Kodi vendos se cilat pamje hapen: kuzhinieri sheh
-   furrën, motorristi sheh nisjen, pronari sheh të dyja dhe ndërron mes tyre.
+   kuzhinën, piceri furrën, motorristi nisjen; pronari i sheh të gjitha dhe
+   ndërron mes tyre.
    ========================================================================== */
 (function () {
   const S = window.SPRINT;
@@ -2497,7 +2709,7 @@ window.SPRINT = (function () {
 
   // Pamjet që di ta hapë kjo faqe. Ekranet e tjera (porositë, menuja,
   // magazina) rrinë te paneli — këtu vijnë vetëm ato që përdoren në këmbë.
-  const HERE = ['kds', 'runs'];
+  const HERE = ['kds', 'oven', 'runs'];
 
   const A = { me: null, view: null, poll: null };
 
@@ -2633,6 +2845,19 @@ window.SPRINT = (function () {
     document.querySelector('.gate-card').appendChild(box);
   }
   showDemoCodes();
+
+  /* Vula e ndërtimit plus dy fakte që i japin kuptim: a punon ruajtja e
+     shfletuesit, dhe a ka bazë të vërtetë pas faqes. Kur dikush thotë «kodi
+     nuk punon», kjo rresht e mbyll pyetjen «çfarë faqeje po sheh». */
+  (function showBuild() {
+    const el = $('#buildTag');
+    if (!el) return;
+    let ruajtja = 'kujtesë';
+    try { localStorage.setItem('sprint-provë', '1'); localStorage.removeItem('sprint-provë');
+          ruajtja = 'ruajtje'; } catch (e) {}
+    el.textContent = el.textContent + ' · ' + ruajtja
+      + ' · ' + (store.configured ? 'bazë' : 'provë');
+  })();
 
   /* Sesioni i ruajtur e kalon hyrjen — pajisja nuk e shkruan kodin çdo turn. */
   store.myScreens().then((me) => {

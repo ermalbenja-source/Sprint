@@ -36,13 +36,13 @@ async function provo(b, emri, bllokoStorage) {
 
   const para = await p.evaluate(() => ({
     kodetNeEkran: (() => { const el = [...document.querySelectorAll('.gate-card p')].pop();
-      return el ? el.textContent.replace(/\s+/g, ' ').trim().slice(0, 60) : '(asnjë)'; })(),
+      return el ? el.textContent.replace(/\s+/g, ' ').trim().slice(0, 90) : '(asnjë)'; })(),
     gate: !document.querySelector('#gate').classList.contains('hide'),
   }));
   console.log(`\n══ ${emri} ══`);
   console.log('  para hyrjes:', JSON.stringify(para));
 
-  for (const kodi of ['1199', '4821']) {
+  for (const kodi of ['1199', '1155', '4821']) {
     await type(p, kodi);
     await p.waitForTimeout(900);
     const r = await p.evaluate(() => ({

@@ -31,11 +31,15 @@ Serveri të thotë vetë adresat kur niset:
 |---|---|
 | Klientët | `http://ADRESA:8787` |
 | Ti, te paneli | `http://ADRESA:8787/admin` — me email dhe fjalëkalim |
-| Kuzhina dhe motorristët | `http://ADRESA:8787/staf` — vetëm me kod |
+| Kuzhina, furra e picës dhe motorristët | `http://ADRESA:8787/staf` — vetëm me kod |
 
-Mbi vetë kompjuterin adresa është `localhost`. **Nga tableti i kuzhinës dhe nga
-telefonat e motorristëve** përdor adresën tjetër që shfaqet — ajo që fillon me
-`192.168...` — dhe kujdes që të gjitha pajisjet të jenë në të njëjtin WiFi.
+Mbi vetë kompjuterin adresa është `localhost`. **Nga tableti i kuzhinës, ai i
+furrës dhe telefonat e motorristëve** përdor adresën tjetër që shfaqet — ajo që
+fillon me `192.168...` — dhe kujdes që të gjitha pajisjet të jenë në të njëjtin WiFi.
+
+Të gjithë hyjnë te i njëjti link. Ajo që u hapet varet nga roli dhe nga tabela
+«Kush sheh çfarë» te paneli: kuzhinieri sheh kuzhinën, piceri furrën, motorristi
+nisjen. Çfarë gatuhet ku e vendos ti te **Paneli → Gatimi**.
 
 Këshillë: ruaje adresën si faqe fillestare te tableti, dhe në telefonat e
 motorristëve shtoje në ekranin bazë. Sesioni mbahet 30 ditë, ndaj kodi nuk

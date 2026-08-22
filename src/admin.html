@@ -24,7 +24,8 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);
-  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
 a{color:var(--gold)}
 button,input,select,textarea{font:inherit;color:inherit}
 button{background:none;border:0;cursor:pointer}
@@ -60,7 +61,8 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1.1}
 
 /* ---------- hyrja ---------- */
 #gate{min-height:100dvh;display:grid;place-items:center;padding:1.4rem}
-.card{background:var(--pan);border:1px solid var(--line);border-radius:22px;padding:clamp(1.5rem,4vw,2.4rem)}
+.card{background:var(--pan);border:1px solid var(--line);border-radius:22px;padding:clamp(1.5rem,4vw,2.4rem);
+  min-width:0;grid-template-columns:minmax(0,1fr)}
 #gate .card{width:min(100%,420px);display:grid;gap:1rem}
 .brandmark{font-family:var(--display);font-size:2rem;letter-spacing:.02em}
 .brandmark em{font-style:normal;color:var(--brand)}
@@ -91,12 +93,17 @@ header{position:sticky;top:0;z-index:60;background:rgba(12,10,11,.94);backdrop-f
 .tab:hover{color:var(--txt)}
 .tab.on{color:var(--brand);border-bottom-color:var(--brand)}
 main{padding:1.4rem 0 5rem}
-.view{display:grid;gap:1.1rem}
+.view{display:grid;gap:1.1rem;grid-template-columns:minmax(0,1fr)}
+/* Pa këtë, një tabelë e gjerë brenda pamjes e zgjeron gjithë faqen dhe
+   shkaktohet rrëshqitje anash — tabela duhet të rrëshqasë brenda kutisë së vet. */
 
 /* ---------- shiriti i veglave ---------- */
 .tools{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
 .tools .search{flex:1;min-width:180px}
 .count{font-size:.78rem;color:var(--muted);white-space:nowrap}
+/* `nowrap` i takon etiketave të shkurtra pranë veglave, jo paragrafëve
+   shpjegues — pa këtë, teksti i gjatë e shtynte faqen anash. */
+p.count{white-space:normal}
 
 /* ---------- lista e pjatave ---------- */
 .items{display:grid;gap:.5rem}
@@ -140,8 +147,23 @@ main{padding:1.4rem 0 5rem}
   padding:.24rem .55rem;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
 .r-driver{color:var(--gold)}
 .r-kitchen{color:var(--brand)}
+.r-pizza{color:var(--warn)}
 .r-cashier{color:var(--ok)}
 .r-owner,.r-manager{color:var(--muted)}
+
+/* ─── gatimi: kuzhina apo furra ─── */
+.ckrow{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;justify-content:space-between;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.7rem .9rem}
+.ckrow .who-n{min-width:9rem;flex:1 1 9rem}
+.ckrow .who-n b{display:block;font-weight:600;font-size:.94rem}
+.ckrow .who-n .count{font-size:.74rem}
+.stpick{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end;flex:0 1 auto}
+.stbtn{border:1.5px solid var(--line);color:var(--muted);background:transparent;
+  border-radius:999px;padding:.34rem .7rem;font-size:.78rem;font-weight:600;white-space:nowrap;
+  cursor:pointer;transition:.15s}
+.stbtn:hover{border-color:var(--gold);color:var(--gold)}
+.stbtn.on{border-color:var(--brand);color:var(--brand);background:rgba(214,122,32,.12)}
+#cookItems th .count{display:block;font-size:.7rem;font-weight:400}
 .pinst{font-size:.72rem;color:var(--muted);white-space:nowrap}
 .pinst.set{color:var(--ok)}
 .pinst.locked{color:var(--bad)}
@@ -182,7 +204,7 @@ main{padding:1.4rem 0 5rem}
 .pin-err{color:#ff9a92;font-size:.82rem;min-height:1.15em;margin:0}
 
 /* ---------- kush sheh çfarë ---------- */
-.permwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+.permwrap{overflow-x:auto;min-width:0;border:1px solid var(--line);border-radius:12px}
 .perm{border-collapse:collapse;width:100%;min-width:520px;font-size:.86rem}
 .perm th,.perm td{padding:.55rem .7rem;border-bottom:1px solid var(--line);text-align:center}
 .perm tr:last-child td{border-bottom:none}
@@ -482,6 +504,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         <button class="tab" data-tab="book">Rezervimet <b class="tabn" id="tabBook"></b></button>
         <button class="tab" data-tab="menu">Menuja</button>
         <button class="tab" data-tab="cats">Kategoritë</button>
+        <button class="tab" data-tab="cook">Gatimi</button>
         <button class="tab" data-tab="staff">Stafi</button>
         <button class="tab" data-tab="phase">Fazat</button>
         <button class="tab" data-tab="set">Cilësimet</button>
@@ -632,6 +655,36 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
       <button class="btn btn-g" id="addCat">+ Kategori e re</button>
     </section>
 
+    <!-- ─────── GATIMI: KUZHINA APO FURRA ─────── -->
+    <section class="view hide" id="v-cook">
+      <p class="count">Brenda dyqanit gatuhet në dy vende të ndara. Këtu vendos ti se çfarë
+        del nga kuzhina dhe çfarë nga furra e picës — secili sheh vetëm rreshtat e vet te
+        ekrani i tij. Pijet nuk shkojnë askund: nuk gatuhen.</p>
+
+      <div class="items" id="cookCats"></div>
+
+      <div class="card" style="display:grid;gap:.7rem">
+        <h2 style="font-size:1.1rem">Pjata që bëjnë përjashtim</h2>
+        <p class="count" style="margin:0">Zakonisht mjafton kategoria. Por nëse një pjatë e
+          vetme gatuhet diku tjetër — një sanduiç me brumë pice te furra, një picë e ftohtë
+          te kuzhina — caktoje veç këtu. Bosh do të thotë «si gjithë kategoria».</p>
+        <div class="tools">
+          <input id="cookSearch" class="in" placeholder="Kërko pjatën…" style="max-width:320px">
+        </div>
+        <div class="permwrap"><table class="perm" id="cookItems"></table></div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.6rem">
+        <h2 style="font-size:1.1rem">Sa porosi prek kjo ndarje</h2>
+        <div id="cookStats" class="prev"></div>
+      </div>
+
+      <div class="tools">
+        <button class="btn btn-p" id="saveCook">Ruaj ndarjen</button>
+        <button class="btn btn-g btn-sm" id="resetCook">Rikthe te fillestarja</button>
+      </div>
+    </section>
+
     <!-- ─────── STAFI ─────── -->
     <section class="view hide" id="v-staff">
       <p class="count">Kuzhina dhe motorristët hyjnë vetëm me kod — askush nuk shkruan email
@@ -653,10 +706,10 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 
       <div class="card" style="display:grid;gap:.6rem">
         <h2 style="font-size:1.1rem">Ku do të hyjnë</h2>
-        <p class="count" style="margin:0">Kodet vendosen që tani, por ekranet e tyre vijnë me
-          fazën tjetër: kuzhina te <b class="mono">/kuzhina</b> dhe motorristi te
-          <b class="mono">/motorri</b>. Të dy do të shkruajnë vetëm kodin, dhe pajisja do ta
-          mbajë sesionin hapur 30 ditë, që të mos shkruhet kodi çdo turn.</p>
+        <p class="count" style="margin:0">Të gjithë hyjnë te e njëjta adresë:
+          <b class="mono">/staf</b>. Shkruajnë vetëm kodin, dhe ajo që u hapet varet nga
+          tabela më lart — kuzhinieri kuzhinën, piceri furrën, motorristi nisjen. Pajisja e
+          mban sesionin hapur 30 ditë, që të mos shkruhet kodi çdo turn.</p>
       </div>
     </section>
 

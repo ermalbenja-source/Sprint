@@ -130,11 +130,18 @@ create table if not exists public.staff (
   created_at   timestamptz not null default now(),
   updated_at   timestamptz not null default now(),
 
-  constraint staff_role_ok check (role in ('owner','manager','cashier','kitchen','driver')),
+  constraint staff_role_ok check (role in ('owner','manager','cashier','kitchen','pizza','driver')),
   constraint staff_name_ok check (char_length(name) between 2 and 60)
 );
 
-comment on table public.staff is 'Personat që përdorin programin: pronar, menaxher, banak, kuzhinë, motorrist.';
+-- Furra e picës u nda nga kuzhina më vonë. Instalimet e vjetra e kanë kufirin
+-- pa 'pizza', ndaj vendoset sërish — pa këtë, personi i furrës nuk krijohet dot.
+alter table public.staff drop constraint if exists staff_role_ok;
+alter table public.staff add constraint staff_role_ok check (role in
+  ('owner','manager','cashier','kitchen','pizza','driver'));
+
+comment on table public.staff is
+  'Personat që përdorin programin: pronar, menaxher, banak, kuzhinë, furrë, motorrist.';
 
 create index if not exists staff_role_idx on public.staff (role) where active;
 
@@ -764,10 +771,19 @@ create table if not exists public.role_screens (
   screen text not null,
   primary key (role, screen),
 
-  constraint role_screens_role_ok check (role in ('manager','cashier','kitchen','driver')),
+  constraint role_screens_role_ok check (role in ('manager','cashier','kitchen','pizza','driver')),
   constraint role_screens_screen_ok check (screen in
-    ('neworder','orders','kds','runs','bookings','menu','stock','reports','staff','settings'))
+    ('neworder','orders','kds','oven','runs','bookings','menu','stock','reports','staff','settings'))
 );
+
+-- Po ashtu vetërregullim për instalimet e mëparshme: roli 'pizza' dhe ekrani
+-- 'oven' nuk ekzistonin kur u ngrit tabela.
+alter table public.role_screens drop constraint if exists role_screens_role_ok;
+alter table public.role_screens add constraint role_screens_role_ok check (role in
+  ('manager','cashier','kitchen','pizza','driver'));
+alter table public.role_screens drop constraint if exists role_screens_screen_ok;
+alter table public.role_screens add constraint role_screens_screen_ok check (screen in
+  ('neworder','orders','kds','oven','runs','bookings','menu','stock','reports','staff','settings'));
 
 comment on table public.role_screens is
   'Cilat ekrane sheh secili rol. Pronari nuk figuron këtu — ai sheh gjithçka.';
@@ -778,7 +794,12 @@ insert into public.role_screens (role, screen) values
   ('manager','bookings'), ('manager','menu'), ('manager','stock'), ('manager','reports'),
   ('cashier','neworder'), ('cashier','orders'), ('cashier','bookings'),
   ('kitchen','kds'),
+  ('pizza','oven'),
   ('driver','runs')
+on conflict do nothing;
+
+insert into public.role_screens (role, screen) values
+  ('manager','oven')
 on conflict do nothing;
 
 alter table public.role_screens enable row level security;
@@ -801,7 +822,7 @@ begin
 
   if s.role = 'owner' then
     return query select s.staff_id, s.name, s.role, array[
-      'neworder','orders','kds','runs','bookings','menu','stock','reports','staff','settings'];
+      'neworder','orders','kds','oven','runs','bookings','menu','stock','reports','staff','settings'];
   else
     return query
       select s.staff_id, s.name, s.role,
@@ -831,84 +852,212 @@ revoke all on function public.has_screen(uuid, text) from public;
 grant execute on function public.has_screen(uuid, text) to anon, authenticated;
 
 
--- ═══════════════════════ 20. EKRANI I KUZHINËS ═══════════════════════
--- Kuzhina nuk e prek tabelën drejtpërdrejt: hyn me kod dhe punon përmes këtyre
--- dy funksioneve. Ato kthejnë VETËM atë që i duhet për të gatuar — pa emër,
--- pa telefon, pa adresë. Një ekran i varur në mur nuk ka pse t'i mbajë ato të
--- dukshme gjithë ditën.
+-- ═══════════════════════ 20. STACIONET E PËRGATITJES ═══════════════════════
+-- Brenda dyqanit gatuhet në dy vende të ndara: kuzhina dhe furra e picës.
+-- Furra ka njeriun e vet, ritmin e vet dhe ekranin e vet; picat dhe sanduiçët
+-- me brumë pice nuk kalojnë fare nga kuzhina. Prandaj çdo pjatë i përket një
+-- stacioni, dhe një porosi e vetme mund të ndahet mes të dyve.
+--
+--   kitchen — kuzhina
+--   oven    — furra e picës
+--   none    — nuk gatuhet fare (pijet, uji, birra) — nuk shfaqet në asnjë ekran
+--
+-- Ndarjen e vendos pronari te paneli, jo kodi. Këtu ruhet vetëm ajo që ai zgjedh.
 
-create or replace function public.kds_orders(p_token uuid)
+create table if not exists public.category_stations (
+  category text primary key,
+  station  text not null default 'kitchen',
+  constraint category_stations_ok check (station in ('kitchen','oven','none'))
+);
+
+comment on table public.category_stations is
+  'Cila kategori gatuhet ku. Pronari e ndryshon te Paneli → Kategoritë.';
+
+-- Ndarja e parë, ajo që përputhet me dyqanin sot. Rreshtat nuk mbishkruhen më
+-- pas: nëse pronari e ka lëvizur një kategori, zgjedhja e tij mbetet.
+insert into public.category_stations (category, station) values
+  ('pizza','oven'), ('fast','oven'),
+  ('rest','kitchen'), ('trad','kitchen'), ('starter','kitchen'),
+  ('pije','none')
+on conflict (category) do nothing;
+
+alter table public.category_stations enable row level security;
+drop policy if exists "stacionet lexohen nga te gjithe" on public.category_stations;
+create policy "stacionet lexohen nga te gjithe"
+  on public.category_stations for select to anon, authenticated using (true);
+drop policy if exists "stacionet shkruhen vetem nga admini" on public.category_stations;
+create policy "stacionet shkruhen vetem nga admini"
+  on public.category_stations for all to authenticated using (true) with check (true);
+
+-- Përjashtimi për një pjatë të vetme: një pjatë mund të mos e ndjekë kategorinë
+-- e vet. Bosh do të thotë «si gjithë kategoria».
+alter table public.menu_items add column if not exists station text;
+alter table public.menu_items drop constraint if exists menu_items_station_ok;
+alter table public.menu_items add constraint menu_items_station_ok
+  check (station is null or station in ('kitchen','oven','none'));
+
+/* Ku gatuhet kjo pjatë? Përgjigjja: përjashtimi i pjatës, përndryshe kategoria,
+   përndryshe kuzhina — që një pjatë e panjohur të mos humbasë pa u parë. */
+create or replace function public.item_station(p_item_id text)
+returns text
+language sql
+stable
+set search_path = public
+as $$
+  select coalesce(mi.station, cs.station, 'kitchen')
+    from public.menu_items mi
+    left join public.category_stations cs on cs.category = mi.category
+   where mi.id = p_item_id;
+$$;
+
+/* Rreshtat e porosisë me stacionin e ngjitur secilit. Nëse rreshti e mban
+   tashmë stacionin nga çasti i porosisë, ai respektohet — porositë e vjetra
+   nuk ndryshojnë vend sepse ndarja u ndryshua pas tyre. */
+create or replace function public.order_lines_tagged(p_items jsonb)
+returns jsonb
+language sql
+stable
+set search_path = public
+as $$
+  select coalesce(jsonb_agg(
+           case when li->>'station' in ('kitchen','oven','none') then li
+                else li || jsonb_build_object('station',
+                       coalesce(public.item_station(li->>'id'), 'kitchen')) end
+           order by ord), '[]'::jsonb)
+    from jsonb_array_elements(coalesce(p_items, '[]'::jsonb)) with ordinality t(li, ord);
+$$;
+
+/* Cilat stacione duhet ta gatuajnë këtë porosi. Pijet nuk numërohen. */
+create or replace function public.order_stations(p_items jsonb)
+returns text[]
+language sql
+stable
+set search_path = public
+as $$
+  select coalesce(array_agg(distinct li->>'station' order by li->>'station'), '{}')
+    from jsonb_array_elements(public.order_lines_tagged(p_items)) li
+   where li->>'station' in ('kitchen','oven');
+$$;
+
+-- Cili stacion e ka mbaruar pjesën e vet. `{"oven":"2026-…"}` do të thotë që
+-- furra e ka dhënë, kuzhina jo — porosia nuk është ende gati për motorristin.
+alter table public.orders add column if not exists station_ready jsonb not null default '{}'::jsonb;
+
+
+-- ═══════════════════════ 20b. EKRANET E GATIMIT ═══════════════════════
+-- Kuzhina dhe furra nuk e prekin tabelën drejtpërdrejt: hyjnë me kod dhe
+-- punojnë përmes këtyre dy funksioneve. Ato kthejnë VETËM atë që u duhet për
+-- të gatuar — pa emër, pa telefon, pa adresë. Një ekran i varur në mur nuk ka
+-- pse t'i mbajë ato të dukshme gjithë ditën.
+--
+-- Kush hyn ku e vendos pronari te «Kush sheh çfarë»: ekrani 'kds' është
+-- kuzhina, ekrani 'oven' është furra. Roli nuk është i ngurtë.
+
+drop function if exists public.kds_orders(uuid);
+create or replace function public.kds_orders(p_token uuid, p_station text default 'kitchen')
 returns table (
   id uuid, number int, status text, kind text, items jsonb, note text,
   created_at timestamptz, accepted_at timestamptz, kitchen_at timestamptz,
-  ready_at timestamptz, prep_minutes int
+  ready_at timestamptz, prep_minutes int,
+  station_done boolean, waiting_on text[]
 )
 language plpgsql
 security definer
 stable
 set search_path = public
 as $$
-declare r text;
 begin
-  select s.role into r from public.staff_by_token(p_token) s;
-  if r not in ('kitchen','manager','owner') then
-    raise exception 'Ky kod nuk e hap ekranin e kuzhinës.';
+  if p_station not in ('kitchen','oven') then
+    raise exception 'Stacion i panjohur: %', p_station;
+  end if;
+  if not public.has_screen(p_token, case p_station when 'oven' then 'oven' else 'kds' end) then
+    raise exception 'Ky kod nuk e hap këtë ekran.';
   end if;
 
   return query
-    select o.id, o.number, o.status, o.kind, o.items, o.note,
-           o.created_at, o.accepted_at, o.kitchen_at, o.ready_at, o.prep_minutes
-      from public.orders o
-     where o.status in ('new','accepted','preparing','ready')
-       and o.created_at > now() - interval '12 hours'
+    with o as (
+      select ord.*, public.order_lines_tagged(ord.items) as tagged
+        from public.orders ord
+       where ord.status in ('new','accepted','preparing','ready')
+         and ord.created_at > now() - interval '12 hours'
+    )
+    select o.id, o.number, o.status, o.kind, o.tagged, o.note,
+           o.created_at, o.accepted_at, o.kitchen_at, o.ready_at, o.prep_minutes,
+           (o.station_ready ? p_station) as station_done,
+           array(select s from unnest(public.order_stations(o.items)) s
+                  where not (o.station_ready ? s)) as waiting_on
+      from o
+     where p_station = any(public.order_stations(o.items))
      order by o.created_at;
 end;
 $$;
 
-revoke all on function public.kds_orders(uuid) from public;
-grant execute on function public.kds_orders(uuid) to anon, authenticated;
+revoke all on function public.kds_orders(uuid, text) from public;
+grant execute on function public.kds_orders(uuid, text) to anon, authenticated;
 
-/* Kalimi i fazës nga kuzhina. Lejohen vetëm hapat që kuzhina ka të drejtë të
-   bëjë — që një prekje e gabuar te tableti të mos e shpallë porosinë të
-   dorëzuar. Kthimi mbrapsht lejohet, sepse butoni preket gabimisht shpesh. */
-create or replace function public.kds_bump(p_token uuid, p_order uuid, p_status text)
+/* Kalimi i fazës nga një stacion. Lejohen vetëm hapat që gatimi ka të drejtë
+   të bëjë — që një prekje e gabuar te tableti të mos e shpallë porosinë të
+   dorëzuar. Kthimi mbrapsht lejohet, sepse butoni preket gabimisht shpesh.
+   Porosia bëhet «gati» vetëm kur TË GJITHË stacionet e saj e kanë dhënë:
+   një picë e ftohtë duke pritur tavën në kuzhinë është pikërisht ajo që kjo
+   pjesë ndalon. */
+drop function if exists public.kds_bump(uuid, uuid, text);
+create or replace function public.kds_bump(
+  p_token uuid, p_order uuid, p_status text, p_station text default 'kitchen')
 returns text
 language plpgsql
 security definer
 set search_path = public
 as $$
-declare r text; cur text;
+declare cur text; need text[]; ready jsonb; mbetur text[];
 begin
-  select s.role into r from public.staff_by_token(p_token) s;
-  if r not in ('kitchen','manager','owner') then
-    raise exception 'Ky kod nuk e hap ekranin e kuzhinës.';
+  if p_station not in ('kitchen','oven') then
+    raise exception 'Stacion i panjohur: %', p_station;
+  end if;
+  if not public.has_screen(p_token, case p_station when 'oven' then 'oven' else 'kds' end) then
+    raise exception 'Ky kod nuk e hap këtë ekran.';
   end if;
 
-  select status into cur from public.orders where id = p_order;
+  select o.status, public.order_stations(o.items), o.station_ready
+    into cur, need, ready
+    from public.orders o where o.id = p_order;
   if cur is null then raise exception 'Porosia nuk u gjet.'; end if;
+  if not (p_station = any(need)) then
+    raise exception 'Kjo porosi nuk ka asgjë për këtë stacion.';
+  end if;
 
   if not (
-       (p_status = 'preparing' and cur in ('new','accepted','ready'))
-    or (p_status = 'ready'     and cur in ('preparing','accepted'))
+       (p_status = 'preparing' and cur in ('new','accepted','preparing','ready'))
+    or (p_status = 'ready'     and cur in ('new','accepted','preparing'))
   ) then
-    raise exception 'Kalimi % → % nuk lejohet nga kuzhina.', cur, p_status;
+    raise exception 'Kalimi % → % nuk lejohet nga gatimi.', cur, p_status;
   end if;
 
+  if p_status = 'ready' then
+    ready := ready || jsonb_build_object(p_station, to_char(now() at time zone 'utc',
+                        'YYYY-MM-DD"T"HH24:MI:SS"Z"'));
+  else
+    ready := ready - p_station;          -- kthim mbrapsht: ky stacion po e rimerr
+  end if;
+
+  select array(select s from unnest(need) s where not (ready ? s)) into mbetur;
+
   update public.orders
-     set status      = p_status,
-         kitchen_at  = case when p_status = 'preparing' and kitchen_at is null
-                            then now() else kitchen_at end,
-         ready_at    = case when p_status = 'ready' then now()
-                            when p_status = 'preparing' then null
-                            else ready_at end
+     set station_ready = ready,
+         status = case when cardinality(mbetur) = 0 then 'ready' else 'preparing' end,
+         kitchen_at = coalesce(kitchen_at, now()),
+         ready_at = case when cardinality(mbetur) = 0 then coalesce(ready_at, now())
+                         else null end
    where id = p_order;
 
-  return p_status;
+  -- Kthehet gjendja e vërtetë e porosisë, jo ajo që u kërkua: nëse stacioni
+  -- tjetër ende po punon, ekrani duhet ta dijë se porosia s'është gati.
+  return case when cardinality(mbetur) = 0 then 'ready' else 'preparing' end;
 end;
 $$;
 
-revoke all on function public.kds_bump(uuid, uuid, text) from public;
-grant execute on function public.kds_bump(uuid, uuid, text) to anon, authenticated;
+revoke all on function public.kds_bump(uuid, uuid, text, text) from public;
+grant execute on function public.kds_bump(uuid, uuid, text, text) to anon, authenticated;
 
 
 -- ═══════════════════════ 21. EKRANI I MOTORRISTIT ═══════════════════════

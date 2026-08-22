@@ -42,8 +42,11 @@ create table if not exists menu_items (
   art text not null default 'pizza', name_sq text not null, name_en text,
   desc_sq text not null default '', desc_en text not null default '',
   price real not null default 0, unit text, note text,
-  tags text not null default '[]', image_url text,
+  tags text not null default '[]', image_url text, station text,
   available integer not null default 1, updated_at text not null);
+
+create table if not exists category_stations (
+  category text primary key, station text not null default 'kitchen');
 
 create table if not exists settings (
   id text primary key, data text not null default '{}', updated_at text not null);
@@ -103,6 +106,7 @@ create table if not exists orders (
   lang text not null default 'sq', channel text not null default 'web',
   customer_id text, created_by text, driver_id text, run_id text,
   lat real, lng real, accuracy integer, cash_collected real,
+  station_ready text not null default '{}',
   created_at text not null, updated_at text not null);
 
 create table if not exists bookings (
@@ -174,16 +178,33 @@ const DEFAULT_PHASES = [
 ];
 
 const DEFAULT_ROLE_SCREENS = {
-  manager: ['neworder','orders','kds','runs','bookings','menu','stock','reports'],
+  manager: ['neworder','orders','kds','oven','runs','bookings','menu','stock','reports'],
   cashier: ['neworder','orders','bookings'],
   kitchen: ['kds'],
+  pizza:   ['oven'],
   driver:  ['runs'],
+};
+
+// Ndarja fillestare e gatimit: picat dhe sanduiçët në furrë, pjesa tjetër në
+// kuzhinë, pijet askund. Pronari e ndryshon te paneli.
+const DEFAULT_STATIONS = {
+  pizza: 'oven', fast: 'oven',
+  rest: 'kitchen', trad: 'kitchen', starter: 'kitchen', pije: 'none',
 };
 
 function open(file) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const db = new DatabaseSync(file);
   db.exec(SCHEMA);
+
+  // Kolonat e shtuara pas instalimit të parë. `create table if not exists` nuk
+  // i shton dot te një bazë që ekziston, ndaj shtohen këtu një nga një — nëse
+  // janë tashmë aty, SQLite ankohet dhe ne e kalojmë pa zhurmë.
+  [['menu_items', 'station text'],
+   ['orders', "station_ready text not null default '{}'"],
+  ].forEach(([tbl, col]) => {
+    try { db.exec(`alter table ${tbl} add column ${col}`); } catch (e) {}
+  });
 
   const t = now();
   const ins = db.prepare(`insert or ignore into order_phases
@@ -195,6 +216,9 @@ function open(file) {
   const rs = db.prepare('insert or ignore into role_screens (role,screen) values (?,?)');
   Object.keys(DEFAULT_ROLE_SCREENS).forEach((role) =>
     DEFAULT_ROLE_SCREENS[role].forEach((screen) => rs.run(role, screen)));
+
+  const cs = db.prepare('insert or ignore into category_stations (category,station) values (?,?)');
+  Object.keys(DEFAULT_STATIONS).forEach((c) => cs.run(c, DEFAULT_STATIONS[c]));
 
   db.prepare('insert or ignore into settings (id,data,updated_at) values (?,?,?)')
     .run('main', '{}', t);

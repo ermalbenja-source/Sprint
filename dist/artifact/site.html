@@ -2720,6 +2720,7 @@ ${S('drink', `
     manager: 'Menaxher',
     cashier: 'Banak',
     kitchen: 'Kuzhinë',
+    pizza:   'Furra e picës',
     driver:  'Motorrist',
   };
 
@@ -2731,6 +2732,7 @@ ${S('drink', `
   const DEMO_STAFF = [
     { name: 'Pronari', role: 'owner',   pin: '7000' },
     { name: 'Kuzhina', role: 'kitchen', pin: '1199' },
+    { name: 'Furra',   role: 'pizza',   pin: '1155' },
     { name: 'Andrea',  role: 'driver',  pin: '4821' },
     { name: 'Gito',    role: 'driver',  pin: '4822' },
   ];
@@ -2848,16 +2850,20 @@ ${S('drink', `
 
   /* ---------- porositë shembull ----------
      Të shënuara me `demo`, që paneli ta thotë hapur se nuk janë të vërteta. */
+  /* Rreshtat e mbajnë vetë stacionin: pjatat shembull nuk gjenden te menuja,
+     ndaj pa këtë do të binin të gjitha te kuzhina dhe furra do të dukej bosh. */
   const DEMO_ORDERS = [
     { n: 1, st: 'accepted',  kind: 'delivery', pay: 'cash',
       name: 'Arben Hoxha',  phone: '069 555 1001', addr: 'Rruga Taulantia 14, kati 2',
-      note: 'pa qepë', items: [['Pica Margarita', 2, 320], ['Coca-Cola 0.5', 1, 120]] },
+      note: 'pa qepë',
+      items: [['Pica Margarita', 2, 320, 'oven'], ['Coca-Cola 0.5', 1, 120, 'none']] },
     { n: 2, st: 'preparing', kind: 'pickup',   pay: 'cash',
       name: 'Elona Meta',   phone: '069 555 1002', addr: null, note: null,
-      items: [['Sufllaqe Pule', 3, 250]] },
+      items: [['Sufllaqe Pule', 3, 250, 'oven'], ['Sallatë greke', 1, 300, 'kitchen']] },
     { n: 3, st: 'ready',     kind: 'delivery', pay: 'card',
       name: 'Genti Leka',   phone: '069 555 1003', addr: 'Plazh, pallati 7, hyrja B',
-      note: 'kambana s\'punon, telefono', items: [['Pica Kapriçoza', 1, 450], ['Patate', 2, 150]] },
+      note: 'kambana s\'punon, telefono',
+      items: [['Tavë kosi', 1, 450, 'kitchen'], ['Patate', 2, 150, 'kitchen']] },
   ];
 
   let demoRunning = null;
@@ -2873,7 +2879,8 @@ ${S('drink', `
         const total = d.items.reduce((n, [, q, p]) => n + q * p, 0);
         const row = await st.createOrder({
           kind: d.kind, name: d.name, phone: d.phone, address: d.addr, note: d.note,
-          items: d.items.map(([name, qty, price], i) => ({ id: 'demo' + d.n + i, name, qty, price })),
+          items: d.items.map(([name, qty, price, station], i) =>
+            ({ id: 'demo' + d.n + i, name, qty, price, station })),
           subtotal: total, total, payment: d.pay, channel: 'phone',
           lat: 41.32 + d.n / 200, lng: 19.44 + d.n / 200,
         });
@@ -2890,36 +2897,187 @@ ${S('drink', `
     return demoRunning;
   }
 
-  /* ══════════════════ EKRANI I KUZHINËS ══════════════════ */
+  /* ══════════════════ STACIONET E PËRGATITJES ══════════════════
+     Brenda dyqanit gatuhet në dy vende të ndara: kuzhina dhe furra e picës.
+     Furra ka njeriun e vet dhe ekranin e vet — picat dhe sanduiçët me brumë
+     pice nuk kalojnë fare nga kuzhina. Një porosi e vetme ndahet mes të dyve
+     dhe bëhet «gati» vetëm kur të dy e kanë dhënë të tyren. */
+
+  const STATIONS = {
+    kitchen: 'Kuzhina',
+    oven:    'Furra e picës',
+    none:    'Nuk gatuhet',
+  };
+  const STATION_ICON = { kitchen: '🍳', oven: '🔥', none: '🥤' };
+  const LS_STATIONS = 'sprint-stations';
+
+  /** Ndarja fillestare — ajo që përputhet me dyqanin sot. */
+  const DEFAULT_STATIONS = {
+    pizza: 'oven', fast: 'oven',
+    rest: 'kitchen', trad: 'kitchen', starter: 'kitchen',
+    pije: 'none',
+  };
+
+  /** Lexon ndarjen: kategoritë, plus përjashtimet për pjata të veçanta. */
+  async function fetchStations() {
+    if (!live) {
+      const saved = readLS(LS_STATIONS, null);
+      return saved && saved.categories
+        ? saved
+        : { categories: Object.assign({}, DEFAULT_STATIONS), items: {} };
+    }
+    const [cats, items] = await Promise.all([
+      st._req('/rest/v1/category_stations?select=category,station', { headers: st._headers() }),
+      st._req('/rest/v1/menu_items?select=id,station&station=not.is.null', { headers: st._headers() }),
+    ]);
+    const out = { categories: {}, items: {} };
+    (cats || []).forEach((r) => { out.categories[r.category] = r.station; });
+    (items || []).forEach((r) => { out.items[r.id] = r.station; });
+    if (!Object.keys(out.categories).length) out.categories = Object.assign({}, DEFAULT_STATIONS);
+    return out;
+  }
+
+  async function saveStations(map) {
+    const clean = {
+      categories: map.categories || {},
+      items: map.items || {},
+    };
+    if (!live) { writeLS(LS_STATIONS, clean); return clean; }
+    await st._ensureAuth();
+
+    // Kategoritë: zëvendësim i plotë, njësoj si te «Kush sheh çfarë».
+    await st._req('/rest/v1/category_stations?category=neq.__none__', {
+      method: 'DELETE', headers: st._headers(),
+    });
+    const rows = Object.keys(clean.categories)
+      .map((c) => ({ category: c, station: clean.categories[c] }));
+    if (rows.length) {
+      await st._req('/rest/v1/category_stations', {
+        method: 'POST', headers: st._headers({ Prefer: 'resolution=merge-duplicates' }),
+        body: JSON.stringify(rows),
+      });
+    }
+
+    // Përjashtimet e pjatëve: fillimisht hiqen të gjitha, pastaj vendosen ato
+    // që mbeten. Përjashtimet janë të pakta, ndaj kjo mbetet e lirë.
+    await st._req('/rest/v1/menu_items?station=not.is.null', {
+      method: 'PATCH', headers: st._headers({ Prefer: 'return=minimal' }),
+      body: JSON.stringify({ station: null }),
+    });
+    for (const id of Object.keys(clean.items)) {
+      await st._req('/rest/v1/menu_items?id=eq.' + encodeURIComponent(id), {
+        method: 'PATCH', headers: st._headers({ Prefer: 'return=minimal' }),
+        body: JSON.stringify({ station: clean.items[id] }),
+      });
+    }
+    return clean;
+  }
+
+  /** Ndërtuesi i përgjigjes «ku gatuhet kjo?». Merr ndarjen dhe menunë një
+      herë, pastaj u përgjigjet rreshtave të porosive pa kërkuar gjë tjetër. */
+  function stationRouter(map, menu) {
+    const cat = {};
+    (menu || []).forEach((m) => { cat[m.id] = m.category || m.c; });
+    const of = (line) => {
+      if (!line) return 'kitchen';
+      // Rreshti i porosisë mund ta mbajë vetë stacionin nga çasti i porosisë:
+      // porositë e vjetra nuk ndryshojnë vend sepse ndarja u ndryshua pas tyre.
+      if (STATIONS[line.station]) return line.station;
+      const id = line.id != null ? String(line.id) : '';
+      if (map.items && STATIONS[map.items[id]]) return map.items[id];
+      const c = line.category || line.c || cat[id];
+      if (c && STATIONS[map.categories[c]]) return map.categories[c];
+      return 'kitchen';
+    };
+    return {
+      of,
+      /** Rreshtat me stacionin e ngjitur secilit. */
+      tag: (items) => (items || []).map((li) => Object.assign({}, li, { station: of(li) })),
+      /** Cilat stacione duhet ta gatuajnë këtë porosi. Pijet nuk numërohen. */
+      stationsOf: (items) => {
+        const seen = {};
+        (items || []).forEach((li) => { const s = of(li); if (s !== 'none') seen[s] = 1; });
+        return Object.keys(seen).sort();
+      },
+    };
+  }
+
+  /** Ndihmës: një router i gatshëm, me menunë e ngarkuar vetë. */
+  async function loadRouter() {
+    const [map, all] = await Promise.all([
+      fetchStations(),
+      st.fetchAll().catch(() => null),
+    ]);
+    // Pa menu të publikuar mbetet menuja e ndërtuar brenda programit — pa të,
+    // çdo pjatë do të binte te kuzhina dhe furra do të mbetej bosh.
+    const menu = (all && all.menu && all.menu.length) ? all.menu
+      : ((window.SPRINT && window.SPRINT.menu) || []);
+    return stationRouter(map, menu);
+  }
+
+  /* ══════════════════ EKRANET E GATIMIT ══════════════════ */
 
   const KDS_STATES = ['new', 'accepted', 'preparing', 'ready'];
 
-  /** Porositë që i duhen kuzhinës — pa emër, pa telefon, pa adresë. */
-  async function kdsOrders() {
+  /** Porositë që i duhen këtij stacioni — pa emër, pa telefon, pa adresë.
+      Kthehen vetëm porositë që kanë të paktën një rresht për të, dhe rreshtat
+      vijnë të shënuar që ekrani të dijë cilat janë të tijat. */
+  async function kdsOrders(station) {
+    const sta = station === 'oven' ? 'oven' : 'kitchen';
     if (!live) {
       await ensureLocalOrders();
-      const from = new Date(Date.now() - 12 * 3600e3).toISOString();
-      const list = (await st.fetchOrders({ from })) || [];
-      return list
+      const [router, list] = await Promise.all([
+        loadRouter(),
+        st.fetchOrders({ from: new Date(Date.now() - 12 * 3600e3).toISOString() }),
+      ]);
+      return (list || [])
         .filter((o) => KDS_STATES.indexOf(o.status) >= 0)
+        .map((o) => {
+          const need = router.stationsOf(o.items);
+          const done = o.station_ready || {};
+          return Object.assign({}, o, {
+            items: router.tag(o.items),
+            need,
+            station_done: !!done[sta],
+            waiting_on: need.filter((s) => !done[s]),
+          });
+        })
+        .filter((o) => o.need.indexOf(sta) >= 0)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     }
     const sess = readLS(LS_DEVICE, null);
     if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
-    return st._rpc('kds_orders', { p_token: sess.token });
+    return st._rpc('kds_orders', { p_token: sess.token, p_station: sta });
   }
 
-  /** Kalimi i fazës nga kuzhina. Kthimi mbrapsht lejohet me qëllim. */
-  async function kdsBump(id, status) {
+  /** Kalimi i fazës nga një stacion. Kthimi mbrapsht lejohet me qëllim.
+      Porosia bëhet «gati» vetëm kur të gjithë stacionet e saj e kanë dhënë:
+      një picë e ftohtë duke pritur tavën është pikërisht ajo që kjo ndalon. */
+  async function kdsBump(id, status, station) {
+    const sta = station === 'oven' ? 'oven' : 'kitchen';
     if (!live) {
-      const patch = { status };
-      if (status === 'preparing') { patch.kitchen_at = new Date().toISOString(); patch.ready_at = null; }
-      if (status === 'ready') patch.ready_at = new Date().toISOString();
-      return st.updateOrder(id, patch);
+      const router = await loadRouter();
+      const list = (await st.fetchOrders({})) || [];
+      const o = list.find((x) => x.id === id);
+      if (!o) throw new Error('Porosia nuk u gjet.');
+      const need = router.stationsOf(o.items);
+      const done = Object.assign({}, o.station_ready || {});
+      if (status === 'ready') done[sta] = new Date().toISOString();
+      else delete done[sta];
+      const left = need.filter((s) => !done[s]);
+      const gati = left.length === 0;
+      await st.updateOrder(id, {
+        status: gati ? 'ready' : 'preparing',
+        station_ready: done,
+        kitchen_at: o.kitchen_at || new Date().toISOString(),
+        ready_at: gati ? (o.ready_at || new Date().toISOString()) : null,
+      });
+      return gati ? 'ready' : 'preparing';
     }
     const sess = readLS(LS_DEVICE, null);
     if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
-    return st._rpc('kds_bump', { p_token: sess.token, p_order: id, p_status: status });
+    return st._rpc('kds_bump', {
+      p_token: sess.token, p_order: id, p_status: status, p_station: sta });
   }
 
   /* ══════════════════ HIERARKIA E EKRANEVE ══════════════════ */
@@ -2928,6 +3086,7 @@ ${S('drink', `
     neworder: 'Porosi e re',
     orders:   'Porositë',
     kds:      'Kuzhina',
+    oven:     'Furra e picës',
     runs:     'Motorristi',
     bookings: 'Rezervimet',
     menu:     'Menuja',
@@ -2940,9 +3099,10 @@ ${S('drink', `
   const LS_ROLESCR = 'sprint-role-screens';
 
   const DEFAULT_ROLE_SCREENS = {
-    manager: ['neworder','orders','kds','runs','bookings','menu','stock','reports'],
+    manager: ['neworder','orders','kds','oven','runs','bookings','menu','stock','reports'],
     cashier: ['neworder','orders','bookings'],
     kitchen: ['kds'],
+    pizza:   ['oven'],
     driver:  ['runs'],
   };
 
@@ -2954,7 +3114,7 @@ ${S('drink', `
     }
     await st._ensureAuth();
     const rows = await st._req('/rest/v1/role_screens?select=role,screen', { headers: st._headers() });
-    const out = { manager: [], cashier: [], kitchen: [], driver: [] };
+    const out = { manager: [], cashier: [], kitchen: [], pizza: [], driver: [] };
     (rows || []).forEach((r) => { if (out[r.role]) out[r.role].push(r.screen); });
     return out;
   }
@@ -3175,6 +3335,8 @@ ${S('drink', `
     lookupCustomer, upsertCustomer,
     STAFF_ROLES: ROLES, fetchStaff, saveStaff, deleteStaff, setStaffPin,
     KDS_STATES, kdsOrders, kdsBump,
+    STATIONS, STATION_ICON, DEFAULT_STATIONS, fetchStations, saveStations,
+    stationRouter, loadRouter,
     DEMO_STAFF, ensureLocalStaff, ensureLocalOrders,
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
