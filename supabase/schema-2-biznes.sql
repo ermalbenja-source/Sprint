@@ -754,7 +754,84 @@ revoke all on function public.public_phases() from public;
 grant execute on function public.public_phases() to anon, authenticated;
 
 
--- ═══════════════════════ 19. EKRANI I KUZHINËS ═══════════════════════
+-- ═══════════════════════ 19. HIERARKIA E EKRANEVE ═══════════════════════
+-- Rregulli i artë: pronari sheh gjithçka, gjithmonë, dhe kjo nuk konfigurohet
+-- dot — përndryshe një gabim i vetëm te cilësimet do të mbyllte jashtë të
+-- vetmin person që i rregullon cilësimet. Të tjerët shohin atë që cakton ai.
+
+create table if not exists public.role_screens (
+  role   text not null,
+  screen text not null,
+  primary key (role, screen),
+
+  constraint role_screens_role_ok check (role in ('manager','cashier','kitchen','driver')),
+  constraint role_screens_screen_ok check (screen in
+    ('neworder','orders','kds','runs','bookings','menu','stock','reports','staff','settings'))
+);
+
+comment on table public.role_screens is
+  'Cilat ekrane sheh secili rol. Pronari nuk figuron këtu — ai sheh gjithçka.';
+
+-- Vlerat fillestare: secili sheh atë që i duhet për punën e vet, jo më shumë.
+insert into public.role_screens (role, screen) values
+  ('manager','neworder'), ('manager','orders'), ('manager','kds'), ('manager','runs'),
+  ('manager','bookings'), ('manager','menu'), ('manager','stock'), ('manager','reports'),
+  ('cashier','neworder'), ('cashier','orders'), ('cashier','bookings'),
+  ('kitchen','kds'),
+  ('driver','runs')
+on conflict do nothing;
+
+alter table public.role_screens enable row level security;
+drop policy if exists "stafi i identifikuar" on public.role_screens;
+create policy "stafi i identifikuar" on public.role_screens
+  for all to authenticated using (true) with check (true);
+
+/* Ekranet që i lejohen mbajtësit të një tokeni. Pronari i merr të gjitha
+   pa i kërkuar askund — kjo është e ngurtë me qëllim. */
+create or replace function public.my_screens(p_token uuid)
+returns table (staff_id uuid, name text, role text, screens text[])
+language plpgsql
+security definer
+stable
+set search_path = public
+as $$
+declare s record;
+begin
+  select st.staff_id, st.name, st.role into s from public.staff_by_token(p_token) st;
+
+  if s.role = 'owner' then
+    return query select s.staff_id, s.name, s.role, array[
+      'neworder','orders','kds','runs','bookings','menu','stock','reports','staff','settings'];
+  else
+    return query
+      select s.staff_id, s.name, s.role,
+             coalesce(array_agg(rs.screen order by rs.screen), '{}')
+        from public.role_screens rs
+       where rs.role = s.role;
+  end if;
+end;
+$$;
+
+revoke all on function public.my_screens(uuid) from public;
+grant execute on function public.my_screens(uuid) to anon, authenticated;
+
+/* Ndihmës i brendshëm: a e ka ky token të drejtën e këtij ekrani? */
+create or replace function public.has_screen(p_token uuid, p_screen text)
+returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select coalesce(bool_or(p_screen = any(s.screens)), false)
+    from public.my_screens(p_token) s;
+$$;
+
+revoke all on function public.has_screen(uuid, text) from public;
+grant execute on function public.has_screen(uuid, text) to anon, authenticated;
+
+
+-- ═══════════════════════ 20. EKRANI I KUZHINËS ═══════════════════════
 -- Kuzhina nuk e prek tabelën drejtpërdrejt: hyn me kod dhe punon përmes këtyre
 -- dy funksioneve. Ato kthejnë VETËM atë që i duhet për të gatuar — pa emër,
 -- pa telefon, pa adresë. Një ekran i varur në mur nuk ka pse t'i mbajë ato të
@@ -832,6 +909,232 @@ $$;
 
 revoke all on function public.kds_bump(uuid, uuid, text) from public;
 grant execute on function public.kds_bump(uuid, uuid, text) to anon, authenticated;
+
+
+-- ═══════════════════════ 21. EKRANI I MOTORRISTIT ═══════════════════════
+-- Ndryshe nga kuzhina, motorristi i SHEH të dhënat e klientit: pa emër,
+-- telefon dhe adresë nuk dorëzon dot. Kufiri këtu është koha — sheh vetëm
+-- porositë e hapura, jo historikun e dyqanit.
+
+create or replace function public.drv_ready(p_token uuid)
+returns table (
+  id uuid, number int, kind text, customer_name text, phone text, address text,
+  lat double precision, lng double precision, total numeric, payment text,
+  note text, ready_at timestamptz
+)
+language plpgsql
+security definer
+stable
+set search_path = public
+as $$
+begin
+  if not public.has_screen(p_token, 'runs') then
+    raise exception 'Ky kod nuk e hap ekranin e motorristit.';
+  end if;
+
+  return query
+    select o.id, o.number, o.kind, o.customer_name, o.phone, o.address,
+           o.lat, o.lng, o.total, o.payment, o.note, o.ready_at
+      from public.orders o
+     where o.status = 'ready' and o.kind = 'delivery' and o.run_id is null
+       and o.created_at > now() - interval '12 hours'
+     order by o.ready_at nulls last, o.created_at;
+end;
+$$;
+
+revoke all on function public.drv_ready(uuid) from public;
+grant execute on function public.drv_ready(uuid) to anon, authenticated;
+
+/* Nisja: disa porosi merren bashkë. Kjo është njësia e vërtetë e punës këtu,
+   jo porosia e vetme — motorristët dalin me 2–3 dhe i mbyllin një nga një. */
+create or replace function public.drv_start_run(
+  p_token uuid, p_orders uuid[],
+  p_lat double precision default null, p_lng double precision default null)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare s record; rid uuid; n int;
+begin
+  select st.staff_id, st.role into s from public.staff_by_token(p_token) st;
+  if not public.has_screen(p_token, 'runs') then
+    raise exception 'Ky kod nuk e hap ekranin e motorristit.';
+  end if;
+  if p_orders is null or array_length(p_orders, 1) is null then
+    raise exception 'Zgjidh të paktën një porosi.';
+  end if;
+
+  -- Një motorrist ka të shumtën një nisje të hapur. Përndryshe ndalesat e dy
+  -- daljeve përzihen dhe arka e ditës nuk mbyllet dot.
+  if exists (select 1 from public.runs where driver_id = s.staff_id and closed_at is null) then
+    raise exception 'Ke ende një nisje të hapur. Mbylle atë përpara se të nisesh sërish.';
+  end if;
+
+  insert into public.runs (driver_id) values (s.staff_id) returning id into rid;
+
+  update public.orders
+     set run_id = rid, driver_id = s.staff_id,
+         status = 'delivering', picked_at = now()
+   where id = any(p_orders) and status = 'ready' and run_id is null;
+  get diagnostics n = row_count;
+
+  if n = 0 then
+    delete from public.runs where id = rid;
+    raise exception 'Këto porosi u morën nga dikush tjetër. Rifresko listën.';
+  end if;
+
+  update public.runs set cash_due = (
+    select coalesce(sum(total), 0) from public.orders
+     where run_id = rid and payment = 'cash') where id = rid;
+
+  insert into public.run_points (run_id, kind, lat, lng)
+  values (rid, 'start', p_lat, p_lng);
+
+  return rid;
+end;
+$$;
+
+revoke all on function public.drv_start_run(uuid, uuid[], double precision, double precision) from public;
+grant execute on function public.drv_start_run(uuid, uuid[], double precision, double precision) to anon, authenticated;
+
+/* Nisja e hapur e këtij motorristi, me ndalesat e mbetura. */
+create or replace function public.drv_my_run(p_token uuid)
+returns table (
+  run_id uuid, started_at timestamptz, cash_due numeric,
+  id uuid, number int, status text, customer_name text, phone text, address text,
+  lat double precision, lng double precision, total numeric, payment text,
+  note text, delivered_at timestamptz, fail_reason text
+)
+language plpgsql
+security definer
+stable
+set search_path = public
+as $$
+declare s record;
+begin
+  select st.staff_id into s from public.staff_by_token(p_token) st;
+  if not public.has_screen(p_token, 'runs') then
+    raise exception 'Ky kod nuk e hap ekranin e motorristit.';
+  end if;
+
+  return query
+    select r.id, r.started_at, r.cash_due,
+           o.id, o.number, o.status, o.customer_name, o.phone, o.address,
+           o.lat, o.lng, o.total, o.payment, o.note, o.delivered_at, o.fail_reason
+      from (select * from public.runs
+             where driver_id = s.staff_id and closed_at is null
+             order by started_at desc limit 1) r
+      left join public.orders o on o.run_id = r.id
+     order by o.delivered_at nulls first, o.number;
+end;
+$$;
+
+revoke all on function public.drv_my_run(uuid) from public;
+grant execute on function public.drv_my_run(uuid) to anon, authenticated;
+
+/* Dorëzimi. Vendndodhja regjistrohet në çastin kur motorristi e ka faqen
+   hapur gjithsesi — pa aplikacion, pa gjurmim të fshehtë. */
+create or replace function public.drv_delivered(
+  p_token uuid, p_order uuid,
+  p_lat double precision default null, p_lng double precision default null,
+  p_cash numeric default null)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare s record; rid uuid; left_n int;
+begin
+  select st.staff_id into s from public.staff_by_token(p_token) st;
+  if not public.has_screen(p_token, 'runs') then
+    raise exception 'Ky kod nuk e hap ekranin e motorristit.';
+  end if;
+
+  update public.orders
+     set status = 'done', delivered_at = now(), done_at = now(),
+         cash_collected = p_cash
+   where id = p_order and driver_id = s.staff_id and status = 'delivering'
+  returning run_id into rid;
+
+  if rid is null then raise exception 'Kjo porosi nuk është në nisjen tënde.'; end if;
+
+  insert into public.run_points (run_id, order_id, kind, lat, lng)
+  values (rid, p_order, 'delivered', p_lat, p_lng);
+
+  -- Nisja mbyllet vetë te ndalesa e fundit; askush s'ka pse ta kujtojë.
+  select count(*) into left_n from public.orders
+   where run_id = rid and status not in ('done','cancelled');
+  if left_n = 0 then
+    update public.runs set closed_at = now() where id = rid;
+    insert into public.run_points (run_id, kind, lat, lng) values (rid, 'end', p_lat, p_lng);
+  end if;
+
+  return 'done';
+end;
+$$;
+
+revoke all on function public.drv_delivered(uuid, uuid, double precision, double precision, numeric) from public;
+grant execute on function public.drv_delivered(uuid, uuid, double precision, double precision, numeric) to anon, authenticated;
+
+/* Klienti nuk u gjend. Porosia kthehet te banaku me arsyen, në vend që të
+   mbetet e varur në rrugë. */
+create or replace function public.drv_failed(p_token uuid, p_order uuid, p_reason text)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare s record; rid uuid;
+begin
+  select st.staff_id into s from public.staff_by_token(p_token) st;
+  if not public.has_screen(p_token, 'runs') then
+    raise exception 'Ky kod nuk e hap ekranin e motorristit.';
+  end if;
+
+  update public.orders
+     set status = 'ready', run_id = null, picked_at = null,
+         fail_reason = left(coalesce(p_reason, 'Nuk u gjend'), 200)
+   where id = p_order and driver_id = s.staff_id and status = 'delivering'
+  returning run_id into rid;
+
+  if not found then raise exception 'Kjo porosi nuk është në nisjen tënde.'; end if;
+  return 'ready';
+end;
+$$;
+
+revoke all on function public.drv_failed(uuid, uuid, text) from public;
+grant execute on function public.drv_failed(uuid, uuid, text) to anon, authenticated;
+
+/* Fleta e ditës së vetë motorristit — sa dorëzime dhe sa para në xhep. */
+create or replace function public.drv_my_day(p_token uuid, p_date date default current_date)
+returns table (deliveries bigint, cash numeric, card numeric, avg_minutes numeric)
+language plpgsql
+security definer
+stable
+set search_path = public
+as $$
+declare s record;
+begin
+  select st.staff_id into s from public.staff_by_token(p_token) st;
+  if not public.has_screen(p_token, 'runs') then
+    raise exception 'Ky kod nuk e hap ekranin e motorristit.';
+  end if;
+
+  return query
+    select count(*),
+           coalesce(sum(o.total) filter (where o.payment = 'cash'), 0),
+           coalesce(sum(o.total) filter (where o.payment = 'card'), 0),
+           round(avg(extract(epoch from (o.delivered_at - o.picked_at)) / 60.0)::numeric, 1)
+      from public.orders o
+     where o.driver_id = s.staff_id
+       and o.delivered_at is not null
+       and o.delivered_at::date = p_date;
+end;
+$$;
+
+revoke all on function public.drv_my_day(uuid, date) from public;
+grant execute on function public.drv_my_day(uuid, date) to anon, authenticated;
 
 
 -- ============================================================================

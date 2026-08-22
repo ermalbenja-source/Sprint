@@ -199,4 +199,97 @@ exception when others then
 end $$;
 
 \echo ''
+\echo '=== 10. HIERARKIA E EKRANEVE ==='
+insert into public.staff (name, role) values ('Pronari Test','owner') on conflict do nothing;
+select public.set_staff_pin((select id from public.staff where name='Pronari Test'), '7000');
+select token as own_token from public.staff_login('7000','pc') \gset
+
+\echo '-- pronari i sheh të gjitha (dhe kjo nuk konfigurohet dot):'
+select name, role, array_length(screens,1) as sa_ekrane from public.my_screens(:'own_token');
+\echo '-- kuzhinieri sheh vetëm të vetin:'
+select name, role, screens from public.my_screens(:'kds_token');
+\echo '-- motorristi sheh vetëm të vetin:'
+select name, role, screens from public.my_screens(:'drv_token');
+
+\echo '-- admini heq një ekran nga një rol dhe kjo ndikon menjëherë:'
+insert into public.role_screens (role, screen) values ('driver','orders') on conflict do nothing;
+select screens from public.my_screens(:'drv_token');
+delete from public.role_screens where role='driver' and screen='orders';
+select screens from public.my_screens(:'drv_token');
+
+\echo '-- pronari mbetet i plotë edhe nëse fshihen të gjitha rregullat:'
+select array_length(screens,1) as ekrane_te_pronarit from public.my_screens(:'own_token');
+
+\echo ''
+\echo '=== 11. NISJA E MOTORRISTIT ==='
+-- mbyll nisjen artificiale të seksionit 6, që të nisemi nga një gjendje e pastër
+update public.runs set closed_at = now() where closed_at is null;
+insert into public.orders (customer_name, phone, address, items, total, status, kind, payment, lat, lng)
+values ('Klient A','069 111 1111','Rruga A 1',
+        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700}]'::jsonb, 700, 'ready','delivery','cash', 41.32, 19.44),
+       ('Klient B','069 222 2222','Rruga B 2',
+        '[{"id":"test-pica","name":"Pica Test","qty":2,"price":700}]'::jsonb, 1400,'ready','delivery','card', 41.33, 19.45);
+
+\echo '-- motorristi sheh porositë gati (dhe I DUHEN të dhënat e klientit):'
+select number, customer_name, address, payment from public.drv_ready(:'drv_token') order by number;
+
+\echo '-- kuzhinieri NUK e hap dot ekranin e motorristit:'
+do $$ begin
+  perform public.drv_ready(current_setting('test.kds_token')::uuid);
+  raise exception 'DËSHTIM: kuzhinieri hapi motorristin';
+exception when others then
+  if sqlerrm = 'DËSHTIM: kuzhinieri hapi motorristin' then raise; end if;
+  raise notice 'OK — u refuzua: %', sqlerrm;
+end $$;
+
+\echo '-- nisje me të dyja porositë bashkë:'
+select public.drv_start_run(:'drv_token',
+  array(select id from public.orders where status='ready' and kind='delivery' and run_id is null),
+  41.3231, 19.4414) as run_id \gset
+select count(*) as ne_rruge, sum(total) as vlera from public.orders where run_id = :'run_id';
+select cash_due as para_ne_dore from public.runs where id = :'run_id';
+
+\echo '-- nisja e hapur me ndalesat:'
+select number, status, customer_name, address from public.drv_my_run(:'drv_token') order by number;
+
+\echo '-- dy motorristë nuk marrin dot të njëjtën porosi:'
+select token as drv2 from public.staff_login('4821','moto-2') \gset
+select set_config('test.drv2', :'drv2', false);
+do $$ begin
+  perform public.drv_start_run(current_setting('test.drv2')::uuid,
+    array(select id from public.orders where run_id is not null limit 1));
+  raise exception 'DËSHTIM: porosia u mor dy herë';
+exception when others then
+  if sqlerrm = 'DËSHTIM: porosia u mor dy herë' then raise; end if;
+  raise notice 'OK — u refuzua: %', sqlerrm;
+end $$;
+
+\echo '-- dorëzimi i parë (nisja mbetet e hapur):'
+select public.drv_delivered(:'drv_token',
+  (select id from public.orders where run_id = :'run_id' order by number limit 1),
+  41.325, 19.441, 700) as rezultati;
+select closed_at is null as nisja_ende_hapur from public.runs where id = :'run_id';
+
+\echo '-- dorëzimi i fundit e mbyll nisjen vetvetiu:'
+select public.drv_delivered(:'drv_token',
+  (select id from public.orders where run_id = :'run_id' and status='delivering' limit 1),
+  41.335, 19.451, null) as rezultati;
+select closed_at is not null as nisja_u_mbyll from public.runs where id = :'run_id';
+
+\echo '-- gjurma e ndalesave (start, dy dorëzime, fund):'
+select kind, lat, lng from public.run_points where run_id = :'run_id' order by at;
+
+\echo '-- fleta e ditës së motorristit:'
+select deliveries, cash, card from public.drv_my_day(:'drv_token');
+
+\echo '-- «nuk u gjend» e kthen porosinë te banaku me arsyen:'
+insert into public.orders (customer_name, phone, address, items, total, status, kind)
+values ('Klient C','069 333 3333','Rruga C 3',
+        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700}]'::jsonb, 700, 'ready','delivery')
+returning id as ord_c \gset
+select public.drv_start_run(:'drv_token', array[:'ord_c'::uuid]) as run_c \gset
+select public.drv_failed(:'drv_token', :'ord_c', 'Nuk përgjigjet në telefon') as rezultati;
+select status, run_id is null as u_lirua, fail_reason from public.orders where id = :'ord_c';
+
+\echo ''
 \echo '=== TË GJITHA KALUAN ==='
