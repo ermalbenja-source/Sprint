@@ -39,6 +39,7 @@ a{color:var(--gold)}
 .keys button:active{background:var(--brand);color:#1B0D02;transform:scale(.96)}
 .keys .go{background:var(--brand);color:#1B0D02;border-color:var(--brand)}
 .gate-err{color:#ff9a92;font-size:.9rem;min-height:1.3em;margin:0}
+.gate-card .code{font-family:ui-monospace,monospace;letter-spacing:.14em;color:var(--txt)}
 
 /* ---------- shiriti ---------- */
 header{position:sticky;top:0;z-index:20;background:rgba(10,9,8,.96);
@@ -1532,8 +1533,30 @@ window.SPRINT = (function () {
     driver:  'Motorrist',
   };
 
+  /* ---------- ekipi shembull ----------
+     Pa Supabase dhe pa serverin lokal, programi duhet të jetë i provueshëm
+     menjëherë — përndryshe ekrani i stafit është një tastierë që nuk hap asgjë.
+     Prandaj ekipi krijohet vetë herën e parë, me kode të dukshme. Kjo NUK
+     ndodh kurrë kur baza është e vërtetë. */
+  const DEMO_STAFF = [
+    { name: 'Pronari', role: 'owner',   pin: '7000' },
+    { name: 'Kuzhina', role: 'kitchen', pin: '1199' },
+    { name: 'Andrea',  role: 'driver',  pin: '4821' },
+    { name: 'Gito',    role: 'driver',  pin: '4822' },
+  ];
+
+  function ensureLocalStaff() {
+    if (live) return [];
+    const all = readLS(LS_STAFF, []);
+    if (all.length) return all;
+    const seeded = DEMO_STAFF.map((s) =>
+      Object.assign({ id: uid('s'), active: true, pin_hash: 'local', demo: true }, s));
+    writeLS(LS_STAFF, seeded);
+    return seeded;
+  }
+
   async function fetchStaff() {
-    if (!live) return readLS(LS_STAFF, []);
+    if (!live) return ensureLocalStaff();
     await st._ensureAuth();
     return st._req('/rest/v1/staff?select=id,name,role,active,phone,pin_hash,locked_until&order=role,name',
       { headers: st._headers() });
@@ -1596,7 +1619,7 @@ window.SPRINT = (function () {
   /** Hyrja e kuzhinës ose e motorristit, vetëm me kod. */
   async function staffLogin(pin, device) {
     if (!live) {
-      const s2 = readLS(LS_STAFF, []).find((x) => x.pin === String(pin) && x.active !== false);
+      const s2 = ensureLocalStaff().find((x) => x.pin === String(pin) && x.active !== false);
       if (!s2) throw new Error('Kod i gabuar.');
       const sess = { token: 'local-' + s2.id, staff_id: s2.id, name: s2.name, role: s2.role };
       writeLS(LS_DEVICE, sess);
@@ -1633,6 +1656,50 @@ window.SPRINT = (function () {
     }
   }
 
+  /* ---------- porositë shembull ----------
+     Të shënuara me `demo`, që paneli ta thotë hapur se nuk janë të vërteta. */
+  const DEMO_ORDERS = [
+    { n: 1, st: 'accepted',  kind: 'delivery', pay: 'cash',
+      name: 'Arben Hoxha',  phone: '069 555 1001', addr: 'Rruga Taulantia 14, kati 2',
+      note: 'pa qepë', items: [['Pica Margarita', 2, 320], ['Coca-Cola 0.5', 1, 120]] },
+    { n: 2, st: 'preparing', kind: 'pickup',   pay: 'cash',
+      name: 'Elona Meta',   phone: '069 555 1002', addr: null, note: null,
+      items: [['Sufllaqe Pule', 3, 250]] },
+    { n: 3, st: 'ready',     kind: 'delivery', pay: 'card',
+      name: 'Genti Leka',   phone: '069 555 1003', addr: 'Plazh, pallati 7, hyrja B',
+      note: 'kambana s\'punon, telefono', items: [['Pica Kapriçoza', 1, 450], ['Patate', 2, 150]] },
+  ];
+
+  let demoRunning = null;
+  /** Krijon një herë të vetme porositë shembull, kur s'ka asnjë të vërtetë. */
+  function ensureLocalOrders() {
+    if (live) return Promise.resolve();
+    if (demoRunning) return demoRunning;
+    demoRunning = (async () => {
+      const from = new Date(Date.now() - 12 * 3600e3).toISOString();
+      const have = (await st.fetchOrders({ from })) || [];
+      if (have.length) return;
+      for (const d of DEMO_ORDERS) {
+        const total = d.items.reduce((n, [, q, p]) => n + q * p, 0);
+        const row = await st.createOrder({
+          kind: d.kind, name: d.name, phone: d.phone, address: d.addr, note: d.note,
+          items: d.items.map(([name, qty, price], i) => ({ id: 'demo' + d.n + i, name, qty, price })),
+          subtotal: total, total, payment: d.pay, channel: 'phone',
+          lat: 41.32 + d.n / 200, lng: 19.44 + d.n / 200,
+        });
+        const patch = { status: d.st, demo: true,
+          accepted_at: new Date(Date.now() - 6 * 60000).toISOString() };
+        if (d.st === 'preparing') patch.kitchen_at = new Date(Date.now() - 4 * 60000).toISOString();
+        if (d.st === 'ready') {
+          patch.kitchen_at = new Date(Date.now() - 9 * 60000).toISOString();
+          patch.ready_at = new Date(Date.now() - 2 * 60000).toISOString();
+        }
+        await st.updateOrder(row.id, patch);
+      }
+    })().catch(() => {}).then(() => { demoRunning = null; });
+    return demoRunning;
+  }
+
   /* ══════════════════ EKRANI I KUZHINËS ══════════════════ */
 
   const KDS_STATES = ['new', 'accepted', 'preparing', 'ready'];
@@ -1640,6 +1707,7 @@ window.SPRINT = (function () {
   /** Porositë që i duhen kuzhinës — pa emër, pa telefon, pa adresë. */
   async function kdsOrders() {
     if (!live) {
+      await ensureLocalOrders();
       const from = new Date(Date.now() - 12 * 3600e3).toISOString();
       const list = (await st.fetchOrders({ from })) || [];
       return list
@@ -1750,6 +1818,7 @@ window.SPRINT = (function () {
   /** Porositë gati për t'u marrë, ende pa motorrist. */
   async function drvReady() {
     if (!live) {
+      await ensureLocalOrders();
       const from = new Date(Date.now() - 12 * 3600e3).toISOString();
       const list = (await st.fetchOrders({ from })) || [];
       return list
@@ -1916,6 +1985,7 @@ window.SPRINT = (function () {
     lookupCustomer, upsertCustomer,
     STAFF_ROLES: ROLES, fetchStaff, saveStaff, deleteStaff, setStaffPin,
     KDS_STATES, kdsOrders, kdsBump,
+    DEMO_STAFF, ensureLocalStaff, ensureLocalOrders,
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
     staffLogin, staffSession, staffLogout,
@@ -2517,6 +2587,21 @@ window.SPRINT = (function () {
     if (e.target.closest('#outBtn')) return logout();
     if (e.target.closest('#refBtn') && A.view && S.views[A.view]) return S.views[A.view].refresh();
   });
+
+  /* Pa bazë të vërtetë kjo faqe do të ishte një tastierë që nuk hap asgjë.
+     Prandaj kodet shembull thuhen hapur — dhe vetëm atëherë. */
+  function showDemoCodes() {
+    if (store.configured || !store.DEMO_STAFF) return;
+    const box = document.createElement('p');
+    box.className = 'gate-sub';
+    box.style.cssText = 'border:1px dashed var(--line);border-radius:12px;padding:.7rem;'
+      + 'font-size:.82rem;line-height:1.6';
+    box.innerHTML = '<b style="color:var(--gold)">Provë pa bazë të dhënash</b><br>'
+      + store.DEMO_STAFF.map((s) =>
+          `${esc(s.name)} · <b class="code">${esc(s.pin)}</b>`).join('<br>');
+    document.querySelector('.gate-card').appendChild(box);
+  }
+  showDemoCodes();
 
   /* Sesioni i ruajtur e kalon hyrjen — pajisja nuk e shkruan kodin çdo turn. */
   store.myScreens().then((me) => {

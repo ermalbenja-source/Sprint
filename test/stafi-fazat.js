@@ -26,15 +26,15 @@ const out = '/tmp/claude-0/-home-user-Sprint/c53b462c-5ae8-5e47-bcb5-d1a2a85c160
   await p.fill('#pinIn', '12');
   await p.click('#pinSave'); await p.waitForTimeout(300);
   console.log('KOD I SHKURTËR ->', await p.evaluate(() => document.querySelector('#pinErr').textContent));
-  await p.fill('#pinIn', '4821');
+  await p.fill('#pinIn', '5150');
   await p.screenshot({ path: out + 's-pin.png' });
   await p.click('#pinSave'); await p.waitForTimeout(700);
   console.log('PAS KODIT', await p.evaluate(() =>
     document.querySelector('.srow .pinst').textContent.trim()));
 
-  // kod i dyfishtë te personi i dytë
+  // kod i dyfishtë te personi i dytë — 5150 sapo u zu nga i pari
   await p.click('.srow:nth-child(2) [data-pin]'); await p.waitForTimeout(400);
-  await p.fill('#pinIn', '4821');
+  await p.fill('#pinIn', '5150');
   await p.click('#pinSave'); await p.waitForTimeout(500);
   console.log('KOD I DYFISHTË ->', await p.evaluate(() => document.querySelector('#pinErr').textContent));
   await p.keyboard.press('Escape'); await p.waitForTimeout(300);

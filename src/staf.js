@@ -134,6 +134,21 @@
     if (e.target.closest('#refBtn') && A.view && S.views[A.view]) return S.views[A.view].refresh();
   });
 
+  /* Pa bazë të vërtetë kjo faqe do të ishte një tastierë që nuk hap asgjë.
+     Prandaj kodet shembull thuhen hapur — dhe vetëm atëherë. */
+  function showDemoCodes() {
+    if (store.configured || !store.DEMO_STAFF) return;
+    const box = document.createElement('p');
+    box.className = 'gate-sub';
+    box.style.cssText = 'border:1px dashed var(--line);border-radius:12px;padding:.7rem;'
+      + 'font-size:.82rem;line-height:1.6';
+    box.innerHTML = '<b style="color:var(--gold)">Provë pa bazë të dhënash</b><br>'
+      + store.DEMO_STAFF.map((s) =>
+          `${esc(s.name)} · <b class="code">${esc(s.pin)}</b>`).join('<br>');
+    document.querySelector('.gate-card').appendChild(box);
+  }
+  showDemoCodes();
+
   /* Sesioni i ruajtur e kalon hyrjen — pajisja nuk e shkruan kodin çdo turn. */
   store.myScreens().then((me) => {
     if (me && (me.screens || []).some((s) => HERE.indexOf(s) >= 0)) enter(me);

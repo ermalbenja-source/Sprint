@@ -5,20 +5,8 @@ const B = 'http://127.0.0.1:8899';
 async function seed(p) {
   await p.goto(B + '/admin/', { waitUntil: 'load' });
   await p.click('#localBtn'); await p.waitForTimeout(1200);
-  await p.evaluate(async () => {
-    const s = SPRINT.store;
-    const want = [['Kuzhina','kitchen','1199'], ['Andrea','driver','4821'],
-                  ['Gito','driver','4822'], ['Ermal','owner','7000']];
-    for (const [name, role] of want) {
-      const all = await s.fetchStaff();
-      if (!all.find(x => x.name === name)) await s.saveStaff({ name, role });
-    }
-    const all = await s.fetchStaff();
-    for (const [name, , pin] of want) {
-      const x = all.find(y => y.name === name);
-      if (x) await s.setStaffPin(x.id, pin);
-    }
-  });
+  // ekipi shembull krijohet vetë nga shtresa; testi vetëm e prek një herë
+  await p.evaluate(() => SPRINT.store.ensureLocalStaff());
   await p.evaluate(async () => {
     const s = SPRINT.store;
     for (let n = 1; n <= 3; n++) {

@@ -26,20 +26,11 @@
   let staff = [];
   let staffLoaded = false;
 
-  // Në modalitetin lokal fillojmë me ekipin e vërtetë, që skeda të mos jetë bosh.
-  const SEED = [
-    { name: 'Andrea', role: 'driver' },
-    { name: 'Gito',   role: 'driver' },
-  ];
-
   async function loadStaff(force) {
     if (staffLoaded && !force) return;
     try {
+      // Pa bazë të vërtetë, fetchStaff e krijon vetë ekipin shembull.
       staff = (await store.fetchStaff()) || [];
-      if (!staff.length && !store.configured) {
-        for (const s of SEED) await store.saveStaff(s);
-        staff = (await store.fetchStaff()) || [];
-      }
       staffLoaded = true;
       renderStaff();
     } catch (e) {
