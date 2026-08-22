@@ -15,11 +15,21 @@
   const LS_STAFF     = 'sprint-staff';
   const LS_DEVICE    = 'sprint-device';
 
+  /* Si te shared/store.js: kur ruajtja e shfletuesit është e mbyllur, gjithçka
+     rri në kujtesë. Sesioni i hyrjes kalon këndej, ndaj pa këtë rezervë kodi
+     pranohej dhe sesioni humbte në të njëjtin çast. */
+  const mem = {};
   const readLS = (k, fb) => {
-    try { return JSON.parse(localStorage.getItem(k) || 'null') || fb; }
-    catch (e) { return fb; }
+    try {
+      const raw = localStorage.getItem(k);
+      if (raw != null) return JSON.parse(raw) || fb;
+    } catch (e) {}
+    return k in mem ? mem[k] : fb;
   };
-  const writeLS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const writeLS = (k, v) => {
+    mem[k] = v;
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  };
 
   // Identifikues i vetëm për modalitetin lokal. Date.now() nuk mjafton: dy rreshta
   // të krijuar brenda të njëjtit milisekond do të merrnin të njëjtin id.

@@ -2250,8 +2250,22 @@ ${S('drink', `
   const LS_ORDERS = 'sprint-local-orders';
   const LS_BOOKINGS = 'sprint-local-bookings';
 
-  const readLS = (k) => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
-  const writeLS = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+  /* Ruajtja e shfletuesit nuk është gjithmonë e hapur: dritare private, të
+     dhëna faqeje të ndaluara, ose një kornizë pa origjinë — te secila prej
+     tyre localStorage-i hedh gabim. Programi duhet të punojë gjithsesi, ndaj
+     mban një kopje në kujtesë dhe ruajtja bëhet kur mundet. */
+  const mem = {};
+  const readLS = (k) => {
+    try {
+      const raw = localStorage.getItem(k);
+      if (raw != null) return JSON.parse(raw);
+    } catch (e) {}
+    return k in mem ? mem[k] : [];
+  };
+  const writeLS = (k, v) => {
+    mem[k] = v;
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  };
   const rid = () => 'loc-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
   /** I njëjti format kodi si te baza: 8 shenja pa I, O, 0, 1. */
@@ -2498,11 +2512,21 @@ ${S('drink', `
   const LS_STAFF     = 'sprint-staff';
   const LS_DEVICE    = 'sprint-device';
 
+  /* Si te shared/store.js: kur ruajtja e shfletuesit është e mbyllur, gjithçka
+     rri në kujtesë. Sesioni i hyrjes kalon këndej, ndaj pa këtë rezervë kodi
+     pranohej dhe sesioni humbte në të njëjtin çast. */
+  const mem = {};
   const readLS = (k, fb) => {
-    try { return JSON.parse(localStorage.getItem(k) || 'null') || fb; }
-    catch (e) { return fb; }
+    try {
+      const raw = localStorage.getItem(k);
+      if (raw != null) return JSON.parse(raw) || fb;
+    } catch (e) {}
+    return k in mem ? mem[k] : fb;
   };
-  const writeLS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const writeLS = (k, v) => {
+    mem[k] = v;
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  };
 
   // Identifikues i vetëm për modalitetin lokal. Date.now() nuk mjafton: dy rreshta
   // të krijuar brenda të njëjtit milisekond do të merrnin të njëjtin id.

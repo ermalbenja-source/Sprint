@@ -262,8 +262,22 @@
   const LS_ORDERS = 'sprint-local-orders';
   const LS_BOOKINGS = 'sprint-local-bookings';
 
-  const readLS = (k) => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
-  const writeLS = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+  /* Ruajtja e shfletuesit nuk është gjithmonë e hapur: dritare private, të
+     dhëna faqeje të ndaluara, ose një kornizë pa origjinë — te secila prej
+     tyre localStorage-i hedh gabim. Programi duhet të punojë gjithsesi, ndaj
+     mban një kopje në kujtesë dhe ruajtja bëhet kur mundet. */
+  const mem = {};
+  const readLS = (k) => {
+    try {
+      const raw = localStorage.getItem(k);
+      if (raw != null) return JSON.parse(raw);
+    } catch (e) {}
+    return k in mem ? mem[k] : [];
+  };
+  const writeLS = (k, v) => {
+    mem[k] = v;
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  };
   const rid = () => 'loc-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
   /** I njëjti format kodi si te baza: 8 shenja pa I, O, 0, 1. */
