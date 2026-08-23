@@ -1,0 +1,26 @@
+/* ============================================================================
+   SPRINT — Pamja e hartës së vogël. E ndarë që ta përdorin njësoj faqja e
+   klientit dhe paneli, pa u kopjuar dy herë.
+   ========================================================================== */
+.smap{position:relative;height:200px;border-radius:14px;overflow:hidden;background:#20303a;
+  cursor:grab;touch-action:none;user-select:none;border:1px solid var(--line)}
+.smap.grab{cursor:grabbing}
+.smap-tiles{position:absolute;inset:0}
+.smap-tiles img{position:absolute;width:256px;height:256px;pointer-events:none}
+.smap-pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-92%);
+  font-size:2rem;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55));z-index:2}
+.smap-pin::after{content:'';position:absolute;left:50%;bottom:.1rem;width:6px;height:6px;
+  transform:translateX(-50%);border-radius:50%;background:rgba(0,0,0,.5)}
+.smap-zoom{position:absolute;right:.5rem;bottom:.5rem;display:grid;gap:.25rem;z-index:3}
+.smap-zoom button{width:30px;height:30px;border-radius:8px;background:rgba(12,10,11,.82);
+  border:1px solid var(--line);color:#fff;font-size:1.05rem;font-weight:700;line-height:1;
+  display:grid;place-items:center}
+.smap-zoom button:hover{background:var(--gold);color:#241703}
+
+/* Mbivendosja: kufij zonash, ndalesa, dyqani. Nuk i kap klikimet, përveç
+   pikave që tërhiqen — përndryshe nuk do të mund të lëvizje hartën poshtë. */
+.smap-over{position:absolute;inset:0;z-index:1;pointer-events:none}
+.smap-over circle[data-vertex]{pointer-events:auto}
+/* Gjatë vizatimit të një zone, kursori thotë hapur se klikimi shton pikë. */
+.smap.draw{cursor:crosshair}
+.smap.draw .smap-tiles{opacity:.85}

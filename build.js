@@ -43,8 +43,27 @@ const kb = (s) => (Buffer.byteLength(s) / 1024).toFixed(0) + ' KB';
    shfletuesi po sheh faqen e re apo një kopje të vjetër në kujtesë. */
 const STAMP = new Date().toISOString().slice(0, 16).replace('T', ' ');
 
+/* Një skedar .css inlinohet i mbështjellë me <style>. Nëse shënjuesi vihet
+   brenda një blloku stilesh, del <style> brenda <style> — dhe shfletuesi e
+   ndal leximin aty, pa asnjë gabim të dukshëm. Ka ndodhur dy herë; tani
+   ndalohet nga vetë ndërtimi. */
+function guardStyles(html, where) {
+  let depth = 0;
+  for (const m of html.matchAll(/<\/?style[\s>]/g)) {
+    depth += m[0].startsWith('</') ? -1 : 1;
+    if (depth > 1) {
+      throw new Error('<style> brenda <style> te ' + where
+        + ' — një INCLUDE .css është vendosur brenda një blloku stilesh.');
+    }
+  }
+  if (depth !== 0) throw new Error('<style> i pambyllur te ' + where);
+  return html;
+}
+
 function emit(srcPath, outPath) {
-  const out = inline(fs.readFileSync(srcPath, 'utf8')).split('__BUILD__').join(STAMP);
+  const out = guardStyles(
+    inline(fs.readFileSync(srcPath, 'utf8')).split('__BUILD__').join(STAMP),
+    path.relative(root, srcPath));
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, out);
   console.log('  ✓ ' + path.relative(root, outPath).replace(/\\/g, '/') + '  (' + kb(out) + ')');

@@ -151,6 +151,27 @@ p.count{white-space:normal}
 .r-cashier{color:var(--ok)}
 .r-owner,.r-manager{color:var(--muted)}
 
+/* ─── zonat e dërgesës ─── */
+.zwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1rem;align-items:start}
+@media(max-width:860px){.zwrap{grid-template-columns:minmax(0,1fr)}}
+.zrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.7rem;align-items:center;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.6rem .8rem;
+  cursor:pointer;transition:.15s}
+.zrow:hover{border-color:rgba(222,127,28,.5)}
+.zrow.on{border-color:var(--brand);background:var(--pan-2)}
+.zdot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.zrow .nm b{display:block;font-weight:600;font-size:.94rem}
+.zrow .nm span{font-size:.72rem;color:var(--muted);display:block;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zrow input[type=text]{background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;
+  padding:.35rem .5rem;font-size:.86rem;width:100%;outline:none;color:var(--txt)}
+.zrow input[type=text]:focus{border-color:var(--brand)}
+.zrow .zact{display:flex;gap:.3rem}
+.zmark{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid currentColor;border-radius:999px;padding:.15rem .45rem;white-space:nowrap}
+.zmark.has{color:var(--ok)}
+.zmark.no{color:var(--muted)}
+
 /* ─── magazina, blerjet, raportet ─── */
 .chk{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--muted);
   white-space:nowrap;cursor:pointer}
@@ -509,6 +530,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 }
 @media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 </style>
+<!--INCLUDE:shared/map.css-->
 <!--INCLUDE:shared/dokumente.css-->
 </head>
 <body>
@@ -548,6 +570,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         <button class="tab" data-tab="menu">Menuja</button>
         <button class="tab" data-tab="cats">Kategoritë</button>
         <button class="tab" data-tab="cook">Gatimi</button>
+        <button class="tab" data-tab="zone">Zonat</button>
         <button class="tab" data-tab="stock">Magazina</button>
         <button class="tab" data-tab="buy">Blerjet</button>
         <button class="tab" data-tab="rep">Raportet</button>
@@ -728,6 +751,47 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
       <div class="tools">
         <button class="btn btn-p" id="saveCook">Ruaj ndarjen</button>
         <button class="btn btn-g btn-sm" id="resetCook">Rikthe te fillestarja</button>
+      </div>
+    </section>
+
+    <!-- ─────── ZONAT E DËRGESËS ─────── -->
+    <section class="view hide" id="v-zone">
+      <p class="count">Durrësi është 8 × 11 km. Në një qytet kaq të vogël, radha
+        matematikore e ndalesave ndryshon pak minuta — ajo që ndryshon shumë është
+        të mos shkosh Plazh, të kthehesh Shkozet dhe të ngjitesh sërish Plazh.
+        Prandaj motorristi i sheh ndalesat të grupuara sipas zonës.</p>
+
+      <div class="zwrap">
+        <div class="items" id="zoneList"></div>
+
+        <div class="card" style="display:grid;gap:.7rem;align-content:start">
+          <h2 style="font-size:1.1rem" id="zmTitle">Kufiri i zonës</h2>
+          <p class="count" style="margin:0" id="zmHint">Zgjidh një zonë majtas,
+            pastaj kliko mbi hartë për të vendosur qoshet e saj. Vija e hollë
+            është kufiri i Durrësit, vetëm për orientim.</p>
+          <div id="zoneMap" class="smap" style="height:380px"></div>
+          <div class="tools">
+            <button class="btn btn-g btn-sm" id="zmUndo">↶ Hiq pikën e fundit</button>
+            <button class="btn btn-g btn-sm" id="zmClear">Fshi kufirin</button>
+            <span class="count" id="zmCount"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.6rem">
+        <h2 style="font-size:1.1rem">Provoje</h2>
+        <p class="count" style="margin:0">Shkruaj një adresë siç e thonë klientët
+          dhe shiko te cila zonë bie. Kështu e kupton nëse fjalët kyçe mjaftojnë.</p>
+        <div class="tools">
+          <input id="ztest" class="in search f" placeholder="p.sh. Te plazhi, pallati 7">
+          <span class="count" id="ztestOut"></span>
+        </div>
+      </div>
+
+      <div class="tools">
+        <button class="btn btn-g btn-sm" id="addZone">+ Zonë e re</button>
+        <button class="btn btn-p" id="saveZones">Ruaj zonat</button>
+        <button class="btn btn-g btn-sm" id="resetZones">Rikthe te fillestaret</button>
       </div>
     </section>
 
@@ -1138,7 +1202,10 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 <!--INCLUDE:src/admin.js-->
 <!--INCLUDE:src/admin-biznes.js-->
 <!--INCLUDE:src/admin-porosi.js-->
+<!--INCLUDE:shared/map.js-->
+<!--INCLUDE:shared/durres.js-->
 <!--INCLUDE:src/admin-magazina.js-->
+<!--INCLUDE:src/admin-zonat.js-->
 <div id="printBox"></div>
 </body>
 </html>

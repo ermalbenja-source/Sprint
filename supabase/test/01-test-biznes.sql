@@ -388,4 +388,66 @@ select public.order_stations(
   '[{"id":"fare-e-panjohur","qty":1}]'::jsonb) as pa_kategori_bie_te_kuzhina;
 
 \echo ''
+\echo '=== 15. ZONAT E DËRGESËS ==='
+insert into public.zones (name, sort, keywords, outline) values
+  ('Qendra', 10, array['qendër','qendra','taulantia','sheshi'],
+   '[[41.318,19.438],[41.318,19.452],[41.330,19.452],[41.330,19.438]]'::jsonb),
+  ('Plazh',  20, array['plazh','currila','iliria'],
+   '[[41.295,19.480],[41.295,19.505],[41.312,19.505],[41.312,19.480]]'::jsonb),
+  ('Shkozet',30, array['shkozet','spitallë'], null)
+on conflict do nothing;
+
+\echo '-- pika brenda kufirit e cakton zonën:'
+select public.zone_for(null, 41.324, 19.445) as duhet_qendra;
+select public.zone_for(null, 41.303, 19.492) as duhet_plazh;
+select public.zone_for(null, 41.200, 19.600) as jashte_te_gjithave;
+
+\echo '-- pa koordinata, fjalët e adresës e caktojnë:'
+select public.zone_for('Rruga Taulantia 14, kati 2') as duhet_qendra;
+select public.zone_for('Te plazhi, pallati 7')       as duhet_plazh;
+select public.zone_for('Shkozet, prapa shkollës')    as duhet_shkozet;
+select public.zone_for('Diku pa emër')               as pa_zone;
+
+\echo '-- pika mbizotëron mbi fjalët (adresa thotë Plazh, pini është te Qendra):'
+select public.zone_for('Te plazhi, por gabim', 41.324, 19.445) as duhet_qendra;
+
+\echo '-- porosia e re e merr zonën vetvetiu:'
+insert into public.orders (customer_name, phone, address, items, total, kind)
+values ('Zona Test','069 700 0001','Rruga Taulantia 90',
+        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700}]'::jsonb, 700, 'delivery')
+returning zone as zona_e_caktuar \gset
+select :'zona_e_caktuar' as zona;
+
+\echo ''
+\echo '=== 16. HARTA QË MËSON ==='
+select public.upsert_customer('069 800 0002','Mësimi Test','Rruga e Mësimit 5') as learn_cust \gset
+\echo '-- adresa nis pa koordinata:'
+select address, lat, lng, confirmed_at is null as e_pakonfirmuar
+  from public.customer_addresses where customer_id = :'learn_cust';
+
+insert into public.orders (customer_name, phone, address, items, total, status,
+                           kind, payment, customer_id)
+values ('Mësimi Test','069 800 0002','Rruga e Mësimit 5',
+        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700}]'::jsonb,
+        700, 'ready', 'delivery', 'cash', :'learn_cust')
+returning id as learn_order \gset
+
+-- Motorristi i seksioneve të mëparshme mund ta ketë një nisje ende hapur;
+-- këtu përdoret i dyti, që testi të mos varet nga radha e seksioneve.
+select public.set_staff_pin((select id from public.staff where name='Motorrist B'), '4822');
+select token as learn_tok from public.staff_login('4822','moto-mesimi') \gset
+select public.drv_start_run(:'learn_tok', array[:'learn_order']::uuid[], 41.3231, 19.4414) as run;
+\echo '-- motorristi dorëzon, telefoni i tij është te dera:'
+select public.drv_delivered(:'learn_tok', :'learn_order', 41.30712, 19.49233, 700) as fund;
+
+\echo '-- adresa e mësoi pikën vetvetiu:'
+select address, lat, lng, confirmed_at is not null as u_konfirmua
+  from public.customer_addresses where customer_id = :'learn_cust';
+
+\echo '-- dhe tani ajo adresë e njeh zonën e vet:'
+select public.zone_for('Rruga e Mësimit 5',
+  (select lat from public.customer_addresses where customer_id = :'learn_cust'),
+  (select lng from public.customer_addresses where customer_id = :'learn_cust')) as zona_e_mesuar;
+
+\echo ''
 \echo '=== TË GJITHA KALUAN ==='

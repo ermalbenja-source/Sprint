@@ -12,13 +12,14 @@ const D = require('./db');
 
 /* Kolonat që ruhen si JSON në SQLite por udhëtojnë si objekte. */
 const JSON_COLS = { menu_items: ['tags'], settings: ['data'], orders: ['items','station_ready'],
+                    zones: ['keywords','outline'],
                     documents: ['data'] };
 
 const TABLES = ['menu_items','settings','order_phases','customers','customer_addresses',
                 'staff','role_screens','category_stations','runs','run_points','orders','bookings','suppliers',
                 'stock_levels',
                 'stock_items','stock_moves','purchases','purchase_lines','recipes','documents',
-                'push_subs'];
+                'push_subs','zones'];
 
 const BOOL_COLS = ['available','enabled','customer_visible','is_core','active','blocked','is_default','low'];
 
@@ -148,6 +149,9 @@ function rest(db, method, table, params, body, headers) {
     const out = [];
     for (const raw of rows) {
       check(table, raw);
+      if (table === 'orders' && raw.zone == null) {
+        raw.zone = zoneFor(db, raw.address, raw.lat, raw.lng);
+      }
       const row = encode(table, withDefaults(db, table, raw));
       const cols = Object.keys(row);
       const verb = merge ? 'insert or replace' : ignore ? 'insert or ignore' : 'insert';
@@ -236,6 +240,42 @@ function screensFor(db, role) {
   if (role === 'owner') return ALL_SCREENS.slice();
   return db.prepare('select screen from role_screens where role=? order by screen')
     .all(role).map((r) => r.screen);
+}
+
+/* ---------- zonat e dërgesës ----------
+   I njëjti algoritëm si te Postgres-i (ray casting), që përgjigjja të mos
+   ndryshojë sipas vendit ku llogaritet. */
+function pointInOutline(lat, lng, outline) {
+  if (!Array.isArray(outline) || outline.length < 3
+      || lat == null || lng == null) return false;
+  let inside = false;
+  for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) {
+    const yi = Number(outline[i][0]), xi = Number(outline[i][1]);
+    const yj = Number(outline[j][0]), xj = Number(outline[j][1]);
+    if ((yi > lat) !== (yj > lat)
+        && lng < (xj - xi) * (lat - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+/** Pika mbizotëron mbi fjalët: adresa e shkruar gabim nuk e zhvendos zonën. */
+function zoneFor(db, address, lat, lng) {
+  const zs = db.prepare('select * from zones where active=1 order by sort').all()
+    .map((z) => decode('zones', z));
+  if (lat != null && lng != null) {
+    for (const z of zs) {
+      if (z.outline && pointInOutline(Number(lat), Number(lng), z.outline)) return z.name;
+    }
+  }
+  const a = String(address || '').toLowerCase();
+  if (a) {
+    for (const z of zs) {
+      for (const k of (z.keywords || [])) {
+        if (k && a.indexOf(String(k).toLowerCase()) >= 0) return z.name;
+      }
+    }
+  }
+  return null;
 }
 
 /* ---------- kutia e njoftimeve ----------
@@ -469,7 +509,7 @@ const RPC = {
     needScreen(db, a.p_token, 'runs', 'Ky kod nuk e hap ekranin e motorristit.');
     const since = new Date(Date.now() - 12 * 3600e3).toISOString();
     return db.prepare(`select id,number,kind,customer_name,phone,address,lat,lng,
-                              total,payment,note,ready_at
+                              total,payment,note,ready_at,zone
                          from orders
                         where status='ready' and kind='delivery' and run_id is null and created_at > ?
                         order by ready_at, created_at`).all(since);
@@ -506,7 +546,7 @@ const RPC = {
                             order by started_at desc limit 1`).get(me.staff_id);
     if (!run) return [];
     const stops = db.prepare(`select id,number,status,customer_name,phone,address,lat,lng,
-                                     total,payment,note,delivered_at,fail_reason
+                                     total,payment,note,delivered_at,fail_reason,zone
                                 from orders where run_id=?
                                order by (delivered_at is not null), number`).all(run.id);
     if (!stops.length) return [{ run_id: run.id, started_at: run.started_at, cash_due: run.cash_due }];
@@ -522,9 +562,20 @@ const RPC = {
       .run(t, t, a.p_cash == null ? null : Number(a.p_cash), t, a.p_order, me.staff_id);
     if (!r.changes) throw httpErr(400, 'Kjo porosi nuk është në nisjen tënde.');
 
-    const o = db.prepare('select run_id from orders where id=?').get(a.p_order);
+    const o = db.prepare('select run_id, customer_id, address from orders where id=?').get(a.p_order);
     db.prepare('insert into run_points (id,run_id,order_id,kind,lat,lng,at) values (?,?,?,?,?,?,?)')
       .run(D.uuid(), o.run_id, a.p_order, 'delivered', a.p_lat, a.p_lng, t);
+
+    // HARTA QË MËSON. Në çastin e dorëzimit telefoni është te dera; ajo pikë
+    // i ngjitet adresës dhe herën tjetër e dimë saktësisht ku është.
+    if (a.p_lat != null && a.p_lng != null && o.customer_id && o.address) {
+      const dita = new Date(Date.now() - 864e5).toISOString();
+      db.prepare(`update customer_addresses
+                     set lat=?, lng=?, accuracy=null, confirmed_at=?, confirmed_by=?
+                   where customer_id=? and lower(trim(address))=lower(trim(?))
+                     and (confirmed_at is null or confirmed_at < ?)`)
+        .run(a.p_lat, a.p_lng, t, me.staff_id, o.customer_id, o.address, dita);
+    }
 
     const left = db.prepare(`select count(*) as n from orders
                               where run_id=? and status not in ('done','cancelled')`).get(o.run_id).n;
@@ -642,6 +693,8 @@ const RPC = {
     return lines.length;
   },
 
+  zone_for(db, a) { return zoneFor(db, a.p_address, a.p_lat, a.p_lng); },
+
   /* ---------- njoftimet push ---------- */
   push_subscribe(db, a) {
     const me = staffByToken(db, a.p_token);
@@ -732,4 +785,4 @@ function httpErr(status, message) {
   return e;
 }
 
-module.exports = { rest, RPC, httpErr, decode, outbox, notify };
+module.exports = { rest, RPC, httpErr, decode, outbox, notify, zoneFor, pointInOutline };

@@ -69,6 +69,7 @@ create table if not exists customer_addresses (
   id text primary key, customer_id text not null references customers(id) on delete cascade,
   label text not null default '', address text not null,
   lat real, lng real, accuracy integer,
+  confirmed_at text, confirmed_by text,
   is_default integer not null default 0, created_at text not null);
 
 create table if not exists staff (
@@ -106,7 +107,7 @@ create table if not exists orders (
   lang text not null default 'sq', channel text not null default 'web',
   customer_id text, created_by text, driver_id text, run_id text,
   lat real, lng real, accuracy integer, cash_collected real,
-  station_ready text not null default '{}',
+  station_ready text not null default '{}', zone text,
   created_at text not null, updated_at text not null);
 
 create table if not exists bookings (
@@ -148,6 +149,12 @@ create table if not exists purchases (
   status text not null default 'draft', subtotal real not null default 0,
   vat real not null default 0, total real not null default 0,
   doc_ref text, note text, staff_id text, created_at text not null, updated_at text not null);
+
+create table if not exists zones (
+  id text primary key, name text not null, sort integer not null default 0,
+  color text not null default '#DE7F1C', keywords text not null default '[]',
+  outline text, lat real, lng real, fee real not null default 0,
+  active integer not null default 1, created_at text not null, updated_at text not null);
 
 create table if not exists push_subs (
   id text primary key, staff_id text not null references staff(id) on delete cascade,
@@ -218,6 +225,9 @@ function open(file) {
   // janë tashmë aty, SQLite ankohet dhe ne e kalojmë pa zhurmë.
   [['menu_items', 'station text'],
    ['orders', "station_ready text not null default '{}'"],
+   ['orders', 'zone text'],
+   ['customer_addresses', 'confirmed_at text'],
+   ['customer_addresses', 'confirmed_by text'],
   ].forEach(([tbl, col]) => {
     try { db.exec(`alter table ${tbl} add column ${col}`); } catch (e) {}
   });

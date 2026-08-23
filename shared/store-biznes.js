@@ -1024,6 +1024,105 @@
     return { staff_id: row.staff_id, name: row.name, role: row.role, screens: row.screens || [] };
   }
 
+  /* ══════════════════ ZONAT E DËRGESËS ══════════════════
+     Zona vjen para koordinatës. Fjalët e adresës punojnë që në porosinë e parë;
+     kufiri i vizatuar merr përparësi kur pika njihet. */
+
+  const LS_ZONES = 'sprint-zones';
+
+  /** Ndarja fillestare e Durrësit — emrat dhe fjalët kyçe, pa kufij.
+      Kufijtë i vizaton pronari; këta emra janë vetëm pikënisje për t'i
+      riemërtuar, sepse ai e di më mirë se çdo hartë se ku shkojnë porositë. */
+  const DEFAULT_ZONES = [
+    { name: 'Qendra',  sort: 10, color: '#DE7F1C',
+      keywords: ['qendër', 'qendra', 'taulantia', 'sheshi', 'rruga a. goga'] },
+    { name: 'Plazh',   sort: 20, color: '#3AA6C9',
+      keywords: ['plazh', 'iliria', 'teuta', 'hekurudha'] },
+    { name: 'Currila', sort: 30, color: '#8E6BC9',
+      keywords: ['currila', 'kodra', 'vollga'] },
+    { name: 'Shkozet', sort: 40, color: '#4CAF6D',
+      keywords: ['shkozet', 'spitallë', 'spitalle'] },
+    { name: 'Kënetë',  sort: 50, color: '#E6B23C',
+      keywords: ['kënetë', 'kenete', 'nishtulla'] },
+    { name: 'Porti',   sort: 60, color: '#E5544B',
+      keywords: ['port', 'porti', 'doganë'] },
+  ];
+
+  const cloneZones = () => DEFAULT_ZONES.map((z, i) =>
+    Object.assign({ id: 'z' + i, outline: null, fee: 0, active: true }, z,
+                  { keywords: z.keywords.slice() }));
+
+  async function fetchZones() {
+    if (!live) {
+      const saved = readLS(LS_ZONES, null);
+      return (saved && saved.length) ? saved : cloneZones();
+    }
+    const rows = await st._req('/rest/v1/zones?select=*&order=sort', { headers: st._headers() });
+    return (rows && rows.length) ? rows : [];
+  }
+
+  async function saveZones(list) {
+    const clean = (list || []).map((z, i) => ({
+      name: String(z.name || '').trim().slice(0, 60),
+      sort: Number(z.sort) || (i + 1) * 10,
+      color: String(z.color || '#DE7F1C').slice(0, 20),
+      keywords: (z.keywords || []).map((k) => String(k).trim().toLowerCase())
+        .filter(Boolean).slice(0, 30),
+      outline: (z.outline && z.outline.length >= 3) ? z.outline : null,
+      fee: Number(z.fee) || 0,
+      active: z.active !== false,
+    })).filter((z) => z.name.length >= 2);
+
+    if (!live) {
+      const withIds = clean.map((z, i) => Object.assign({ id: 'z' + i }, z));
+      writeLS(LS_ZONES, withIds);
+      return withIds;
+    }
+    await st._ensureAuth();
+    // Zëvendësim i plotë, njësoj si te fazat dhe lejet.
+    await st._req('/rest/v1/zones?name=neq.__none__', {
+      method: 'DELETE', headers: st._headers({ Prefer: 'return=minimal' }) });
+    if (!clean.length) return [];
+    return st._req('/rest/v1/zones', {
+      method: 'POST', headers: st._headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(clean) });
+  }
+
+  async function resetZones() { return saveZones(cloneZones()); }
+
+  /** I njëjti algoritëm si te serveri, që përgjigjja të mos ndryshojë. */
+  function pointInOutline(lat, lng, outline) {
+    if (!Array.isArray(outline) || outline.length < 3 || lat == null || lng == null) return false;
+    let inside = false;
+    for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) {
+      const yi = Number(outline[i][0]), xi = Number(outline[i][1]);
+      const yj = Number(outline[j][0]), xj = Number(outline[j][1]);
+      if ((yi > lat) !== (yj > lat)
+          && lng < (xj - xi) * (lat - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+
+  /** Cila zonë i takon kësaj adrese. Pika mbizotëron mbi fjalët. */
+  function zoneOf(zones, address, lat, lng) {
+    const zs = (zones || []).filter((z) => z.active !== false)
+      .slice().sort((a, b) => (a.sort || 0) - (b.sort || 0));
+    if (lat != null && lng != null) {
+      for (const z of zs) {
+        if (z.outline && pointInOutline(Number(lat), Number(lng), z.outline)) return z.name;
+      }
+    }
+    const a = String(address || '').toLowerCase();
+    if (a) {
+      for (const z of zs) {
+        for (const k of (z.keywords || [])) {
+          if (k && a.indexOf(String(k).toLowerCase()) >= 0) return z.name;
+        }
+      }
+    }
+    return null;
+  }
+
   /* ══════════════════ NJOFTIMET ══════════════════
      Abonimi i takon pajisjes, jo personit: i njëjti tablet i ndarë mes dy
      turneve nuk krijon dy abonime, thjesht kalon te ai që është brenda. */
@@ -1112,7 +1211,7 @@
       id: r.id, number: r.number, status: r.status, customer_name: r.customer_name,
       phone: r.phone, address: r.address, lat: r.lat, lng: r.lng,
       total: r.total, payment: r.payment, note: r.note,
-      delivered_at: r.delivered_at, fail_reason: r.fail_reason,
+      delivered_at: r.delivered_at, fail_reason: r.fail_reason, zone: r.zone || null,
     }));
     return { run, stops };
   }
@@ -1234,6 +1333,7 @@
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
     staffLogin, staffSession, staffLogout,
     pushSubscribe, pushUnsubscribe,
+    DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, pointInOutline,
     getLocation, locationQuality, navLink,
   });
 })();

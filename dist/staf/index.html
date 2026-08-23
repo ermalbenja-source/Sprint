@@ -147,6 +147,10 @@ header .logo{font-size:1.4rem}
 .s-bd{padding:.7rem .9rem;display:grid;gap:.4rem}
 .s-name{font-weight:600}
 .s-addr{color:var(--muted);font-size:.92rem;line-height:1.35}
+/* Numri i radhës: motorristi e sheh me një sy nga t'ia nisë, pa lexuar asgjë. */
+.s-seq{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
+  background:var(--brand);color:#1B0D02;font-weight:700;font-size:.9rem;flex-shrink:0}
+.s-zone{font-size:.78rem;color:var(--gold);opacity:.9}
 .s-note{background:rgba(230,178,60,.14);border-left:3px solid var(--warn);border-radius:0 8px 8px 0;
   padding:.4rem .55rem;font-size:.9rem;color:#f4dca6;margin:.1rem 0 0}
 .s-act{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:0 .9rem .9rem}
@@ -265,7 +269,7 @@ header .logo{font-size:1.4rem}
     <p class="gate-sub">Shkruaj kodin tënd.</p>
     <div id="pinShow"></div>
     <p class="gate-err" id="gateErr"></p>
-    <p class="buildtag" id="buildTag">v2026-08-23 08:09</p>
+    <p class="buildtag" id="buildTag">v2026-08-23 09:09</p>
     <div class="keys">
       <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
       <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
@@ -2471,6 +2475,105 @@ window.SPRINT = (function () {
     return { staff_id: row.staff_id, name: row.name, role: row.role, screens: row.screens || [] };
   }
 
+  /* ══════════════════ ZONAT E DËRGESËS ══════════════════
+     Zona vjen para koordinatës. Fjalët e adresës punojnë që në porosinë e parë;
+     kufiri i vizatuar merr përparësi kur pika njihet. */
+
+  const LS_ZONES = 'sprint-zones';
+
+  /** Ndarja fillestare e Durrësit — emrat dhe fjalët kyçe, pa kufij.
+      Kufijtë i vizaton pronari; këta emra janë vetëm pikënisje për t'i
+      riemërtuar, sepse ai e di më mirë se çdo hartë se ku shkojnë porositë. */
+  const DEFAULT_ZONES = [
+    { name: 'Qendra',  sort: 10, color: '#DE7F1C',
+      keywords: ['qendër', 'qendra', 'taulantia', 'sheshi', 'rruga a. goga'] },
+    { name: 'Plazh',   sort: 20, color: '#3AA6C9',
+      keywords: ['plazh', 'iliria', 'teuta', 'hekurudha'] },
+    { name: 'Currila', sort: 30, color: '#8E6BC9',
+      keywords: ['currila', 'kodra', 'vollga'] },
+    { name: 'Shkozet', sort: 40, color: '#4CAF6D',
+      keywords: ['shkozet', 'spitallë', 'spitalle'] },
+    { name: 'Kënetë',  sort: 50, color: '#E6B23C',
+      keywords: ['kënetë', 'kenete', 'nishtulla'] },
+    { name: 'Porti',   sort: 60, color: '#E5544B',
+      keywords: ['port', 'porti', 'doganë'] },
+  ];
+
+  const cloneZones = () => DEFAULT_ZONES.map((z, i) =>
+    Object.assign({ id: 'z' + i, outline: null, fee: 0, active: true }, z,
+                  { keywords: z.keywords.slice() }));
+
+  async function fetchZones() {
+    if (!live) {
+      const saved = readLS(LS_ZONES, null);
+      return (saved && saved.length) ? saved : cloneZones();
+    }
+    const rows = await st._req('/rest/v1/zones?select=*&order=sort', { headers: st._headers() });
+    return (rows && rows.length) ? rows : [];
+  }
+
+  async function saveZones(list) {
+    const clean = (list || []).map((z, i) => ({
+      name: String(z.name || '').trim().slice(0, 60),
+      sort: Number(z.sort) || (i + 1) * 10,
+      color: String(z.color || '#DE7F1C').slice(0, 20),
+      keywords: (z.keywords || []).map((k) => String(k).trim().toLowerCase())
+        .filter(Boolean).slice(0, 30),
+      outline: (z.outline && z.outline.length >= 3) ? z.outline : null,
+      fee: Number(z.fee) || 0,
+      active: z.active !== false,
+    })).filter((z) => z.name.length >= 2);
+
+    if (!live) {
+      const withIds = clean.map((z, i) => Object.assign({ id: 'z' + i }, z));
+      writeLS(LS_ZONES, withIds);
+      return withIds;
+    }
+    await st._ensureAuth();
+    // Zëvendësim i plotë, njësoj si te fazat dhe lejet.
+    await st._req('/rest/v1/zones?name=neq.__none__', {
+      method: 'DELETE', headers: st._headers({ Prefer: 'return=minimal' }) });
+    if (!clean.length) return [];
+    return st._req('/rest/v1/zones', {
+      method: 'POST', headers: st._headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(clean) });
+  }
+
+  async function resetZones() { return saveZones(cloneZones()); }
+
+  /** I njëjti algoritëm si te serveri, që përgjigjja të mos ndryshojë. */
+  function pointInOutline(lat, lng, outline) {
+    if (!Array.isArray(outline) || outline.length < 3 || lat == null || lng == null) return false;
+    let inside = false;
+    for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) {
+      const yi = Number(outline[i][0]), xi = Number(outline[i][1]);
+      const yj = Number(outline[j][0]), xj = Number(outline[j][1]);
+      if ((yi > lat) !== (yj > lat)
+          && lng < (xj - xi) * (lat - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+
+  /** Cila zonë i takon kësaj adrese. Pika mbizotëron mbi fjalët. */
+  function zoneOf(zones, address, lat, lng) {
+    const zs = (zones || []).filter((z) => z.active !== false)
+      .slice().sort((a, b) => (a.sort || 0) - (b.sort || 0));
+    if (lat != null && lng != null) {
+      for (const z of zs) {
+        if (z.outline && pointInOutline(Number(lat), Number(lng), z.outline)) return z.name;
+      }
+    }
+    const a = String(address || '').toLowerCase();
+    if (a) {
+      for (const z of zs) {
+        for (const k of (z.keywords || [])) {
+          if (k && a.indexOf(String(k).toLowerCase()) >= 0) return z.name;
+        }
+      }
+    }
+    return null;
+  }
+
   /* ══════════════════ NJOFTIMET ══════════════════
      Abonimi i takon pajisjes, jo personit: i njëjti tablet i ndarë mes dy
      turneve nuk krijon dy abonime, thjesht kalon te ai që është brenda. */
@@ -2559,7 +2662,7 @@ window.SPRINT = (function () {
       id: r.id, number: r.number, status: r.status, customer_name: r.customer_name,
       phone: r.phone, address: r.address, lat: r.lat, lng: r.lng,
       total: r.total, payment: r.payment, note: r.note,
-      delivered_at: r.delivered_at, fail_reason: r.fail_reason,
+      delivered_at: r.delivered_at, fail_reason: r.fail_reason, zone: r.zone || null,
     }));
     return { run, stops };
   }
@@ -2681,6 +2784,7 @@ window.SPRINT = (function () {
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
     staffLogin, staffSession, staffLogout,
     pushSubscribe, pushUnsubscribe,
+    DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, pointInOutline,
     getLocation, locationQuality, navLink,
   });
 })();
@@ -3290,17 +3394,89 @@ window.SPRINT = (function () {
     </div>` + dayBox() + privacy();
   }
 
+  /* ══════════════════ RADHA E NDALESAVE ══════════════════
+     Durrësi është 8 × 11 km. Në një qytet kaq të vogël radha matematikore e
+     ndalesave ndryshon pak minuta; ajo që ndryshon shumë është të mos shkosh
+     Plazh, të kthehesh Shkozet, dhe të ngjitesh sërish Plazh. Prandaj:
+
+       1. ndalesat grupohen sipas zonës
+       2. zonat renditen sipas largësisë nga dyqani, më e afërta e para
+       3. brenda zonës, gjithmonë te më e afërta nga aty ku je
+
+     Ndalesat pa koordinatë nuk humbin — shkojnë në fund të grupit të tyre, me
+     shënimin që të kërkohen me sy. */
+
+  const SHOP = (S.config && S.config.geo) || { lat: 41.3236, lng: 19.4432 };
+
+  /** Largësi e përafërt në kilometra. Brenda një qyteti të vogël, vija e
+      drejtë dhe rruga e vërtetë japin të njëjtën radhë ndalesash. */
+  function km(a, b) {
+    if (!a || !b || a.lat == null || b.lat == null) return Infinity;
+    const R2 = 6371;
+    const dLat = (b.lat - a.lat) * Math.PI / 180;
+    const dLng = (b.lng - a.lng) * Math.PI / 180;
+    const la = a.lat * Math.PI / 180, lb = b.lat * Math.PI / 180;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(la) * Math.cos(lb) * Math.sin(dLng / 2) ** 2;
+    return 2 * R2 * Math.asin(Math.sqrt(h));
+  }
+
+  const hasPin = (o) => o && o.lat != null && o.lng != null;
+
+  /** Rendit ndalesat: zonat sipas afërsisë, brenda zonës gjithmonë më e afërta. */
+  function ordered(list) {
+    const groups = new Map();
+    (list || []).forEach((o) => {
+      const key = o.zone || '—';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(o);
+    });
+
+    // Sa larg është zona: mesatarja e pikave që njohim.
+    const dist = (arr) => {
+      const p = arr.filter(hasPin);
+      if (!p.length) return Infinity;          // pa pika, zona shkon në fund
+      const lat = p.reduce((n, o) => n + o.lat, 0) / p.length;
+      const lng = p.reduce((n, o) => n + o.lng, 0) / p.length;
+      return km(SHOP, { lat, lng });
+    };
+
+    const zones = [...groups.entries()]
+      .map(([name, arr]) => ({ name, arr, d: dist(arr) }))
+      .sort((a, b) => (a.d - b.d) || a.name.localeCompare(b.name, 'sq'));
+
+    const out = [];
+    let from = SHOP;
+    zones.forEach((z) => {
+      const left = z.arr.filter(hasPin);
+      const blind = z.arr.filter((o) => !hasPin(o));
+      while (left.length) {
+        let bi = 0, bd = Infinity;
+        left.forEach((o, i) => { const d = km(from, o); if (d < bd) { bd = d; bi = i; } });
+        const pick = left.splice(bi, 1)[0];
+        pick._km = bd;
+        out.push(pick);
+        from = pick;
+      }
+      blind.forEach((o) => out.push(o));        // pa pin: në fund të zonës së vet
+    });
+    return out;
+  }
+
   function renderRun() {
-    const left = R.stops.filter((o) => o.status === 'delivering');
+    const left = ordered(R.stops.filter((o) => o.status === 'delivering'));
     const done = R.stops.filter((o) => o.status === 'done');
+    const noPin = left.filter((o) => !hasPin(o)).length;
 
     const head = `<div class="rsec">
       <h2>Nisja jote — ${left.length} ndalesa</h2>
       <p class="sub">Para në dorë për t'u arkëtuar: <b>${esc(money(R.run.cash_due || 0))}</b></p>
+      <p class="sub">Radha është sipas zonës dhe afërsisë${noPin
+        ? ` · ${noPin} pa pikë në hartë` : ''}. Nuk je i detyruar ta ndjekësh.</p>
     </div>`;
 
-    const card = (o, gone) => `<article class="stop${gone ? ' gone' : ''}" data-stop="${esc(o.id)}">
+    const card = (o, gone, i) => `<article class="stop${gone ? ' gone' : ''}" data-stop="${esc(o.id)}">
       <div class="s-hd">
+        ${gone ? '' : `<span class="s-seq">${i + 1}</span>`}
         <span class="s-no">#${o.number}</span>
         <span class="s-pay ${o.payment === 'cash' ? 'cash' : 'card'}">${o.payment === 'cash' ? 'Para në dorë' : 'Me kartë'}</span>
         <span class="s-tot">${esc(money(o.total))}</span>
@@ -3308,6 +3484,9 @@ window.SPRINT = (function () {
       <div class="s-bd">
         <span class="s-name">${esc(o.customer_name)}</span>
         <span class="s-addr">${esc(o.address || '')}</span>
+        <span class="s-zone">${o.zone ? '📍 ' + esc(o.zone) : '📍 pa zonë'}${
+          o._km != null && isFinite(o._km) ? ' · ' + o._km.toFixed(1) + ' km' : ''}${
+          hasPin(o) ? '' : ' · pa pikë në hartë'}</span>
         ${o.note ? `<p class="s-note">📝 ${esc(o.note)}</p>` : ''}
       </div>
       ${gone ? '' : `<div class="s-act">
@@ -3319,9 +3498,9 @@ window.SPRINT = (function () {
     </article>`;
 
     return head
-      + left.map((o) => card(o, false)).join('')
+      + left.map((o, i) => card(o, false, i)).join('')
       + (done.length ? `<div class="rsec"><h2>Dorëzuar — ${done.length}</h2></div>`
-                        + done.map((o) => card(o, true)).join('') : '')
+                        + done.map((o, i) => card(o, true, i)).join('') : '')
       + dayBox() + privacy();
   }
 

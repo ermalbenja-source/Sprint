@@ -1073,11 +1073,12 @@ grant execute on function public.kds_bump(uuid, uuid, text, text) to anon, authe
 -- telefon dhe adresë nuk dorëzon dot. Kufiri këtu është koha — sheh vetëm
 -- porositë e hapura, jo historikun e dyqanit.
 
+drop function if exists public.drv_ready(uuid);
 create or replace function public.drv_ready(p_token uuid)
 returns table (
   id uuid, number int, kind text, customer_name text, phone text, address text,
   lat double precision, lng double precision, total numeric, payment text,
-  note text, ready_at timestamptz
+  note text, ready_at timestamptz, zone text
 )
 language plpgsql
 security definer
@@ -1091,7 +1092,7 @@ begin
 
   return query
     select o.id, o.number, o.kind, o.customer_name, o.phone, o.address,
-           o.lat, o.lng, o.total, o.payment, o.note, o.ready_at
+           o.lat, o.lng, o.total, o.payment, o.note, o.ready_at, o.zone
       from public.orders o
      where o.status = 'ready' and o.kind = 'delivery' and o.run_id is null
        and o.created_at > now() - interval '12 hours'
@@ -1156,12 +1157,13 @@ revoke all on function public.drv_start_run(uuid, uuid[], double precision, doub
 grant execute on function public.drv_start_run(uuid, uuid[], double precision, double precision) to anon, authenticated;
 
 /* Nisja e hapur e këtij motorristi, me ndalesat e mbetura. */
+drop function if exists public.drv_my_run(uuid);
 create or replace function public.drv_my_run(p_token uuid)
 returns table (
   run_id uuid, started_at timestamptz, cash_due numeric,
   id uuid, number int, status text, customer_name text, phone text, address text,
   lat double precision, lng double precision, total numeric, payment text,
-  note text, delivered_at timestamptz, fail_reason text
+  note text, delivered_at timestamptz, fail_reason text, zone text
 )
 language plpgsql
 security definer
@@ -1178,7 +1180,7 @@ begin
   return query
     select r.id, r.started_at, r.cash_due,
            o.id, o.number, o.status, o.customer_name, o.phone, o.address,
-           o.lat, o.lng, o.total, o.payment, o.note, o.delivered_at, o.fail_reason
+           o.lat, o.lng, o.total, o.payment, o.note, o.delivered_at, o.fail_reason, o.zone
       from (select * from public.runs
              where driver_id = s.staff_id and closed_at is null
              order by started_at desc limit 1) r
@@ -1218,6 +1220,24 @@ begin
 
   insert into public.run_points (run_id, order_id, kind, lat, lng)
   values (rid, p_order, 'delivered', p_lat, p_lng);
+
+  -- HARTA QË MËSON. Në çastin që motorristi shtyp «U dorëzua», telefoni i tij
+  -- është te dera. Ajo pikë i ngjitet adresës së klientit dhe herën tjetër e
+  -- dimë saktësisht ku është — pa kërkuar askund, pa paguar asgjë, pa i shtuar
+  -- askujt asnjë sekondë pune. Kjo është e vetmja mënyrë e besueshme për të
+  -- ndërtuar hartën e adresave në Durrës, ku rrugët nuk kanë numra.
+  if p_lat is not null and p_lng is not null then
+    update public.customer_addresses ca
+       set lat = p_lat, lng = p_lng, accuracy = null,
+           confirmed_at = now(), confirmed_by = s.staff_id
+      from public.orders o
+     where o.id = p_order
+       and ca.customer_id = o.customer_id
+       and lower(trim(ca.address)) = lower(trim(o.address))
+       -- Një pikë e konfirmuar nuk mbishkruhet nga një tjetër brenda ditës:
+       -- adresa nuk lëviz, dhe një dorëzim i shënuar me vonesë do ta prishte.
+       and (ca.confirmed_at is null or ca.confirmed_at < now() - interval '1 day');
+  end if;
 
   -- Nisja mbyllet vetë te ndalesa e fundit; askush s'ka pse ta kujtojë.
   select count(*) into left_n from public.orders
@@ -1555,3 +1575,146 @@ $$;
 
 revoke all on function public.push_unsubscribe(uuid, text) from public;
 grant execute on function public.push_unsubscribe(uuid, text) to anon, authenticated;
+
+
+-- ═══════════════════════ 25. ZONAT E DËRGESËS ═══════════════════════
+-- Durrësi është 8 × 11 km. Në një qytet kaq të vogël, radha matematikore e
+-- ndalesave ndryshon pak minuta; ajo që ndryshon shumë është të mos shkosh
+-- Plazh, të kthehesh Shkozet, dhe të ngjitesh sërish Plazh.
+--
+-- Prandaj zona vjen para koordinatës. Zona caktohet në dy mënyra, sipas asaj
+-- që dihet për porosinë:
+--   1. fjalët e adresës  — punon që në porosinë e parë, pa asnjë koordinatë
+--   2. pika brenda kufirit — kur klienti ka ndarë vendndodhjen ose adresa
+--      është mësuar nga një dorëzim i mëparshëm
+--
+-- Kufijtë i vizaton pronari mbi hartë. Kufiri administrativ i Durrësit NUK
+-- përdoret për këtë: zona ku dorëzohet është vendim biznesi, jo ndarje
+-- administrative — dhe u vërtetua se ato dy nuk përputhen.
+
+create table if not exists public.zones (
+  id         uuid primary key default gen_random_uuid(),
+  name       text        not null,
+  sort       integer     not null default 0,
+  color      text        not null default '#DE7F1C',
+  keywords   text[]      not null default '{}',
+  outline    jsonb,                              -- [[lat,lng], …] ose null
+  lat        double precision,
+  lng        double precision,
+  fee        numeric(10,2) not null default 0,   -- për më vonë; sot dërgesa falas
+  active     boolean     not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  constraint zones_name_ok check (char_length(name) between 2 and 60)
+);
+
+comment on table public.zones is
+  'Zonat e dërgesës në Durrës. Kufijtë i vizaton pronari; fjalët kyçe e caktojnë zonën edhe pa koordinata.';
+
+create index if not exists zones_sort_idx on public.zones (sort) where active;
+
+alter table public.zones enable row level security;
+drop policy if exists "zonat lexohen nga te gjithe" on public.zones;
+create policy "zonat lexohen nga te gjithe"
+  on public.zones for select to anon, authenticated using (true);
+drop policy if exists "zonat shkruhen vetem nga admini" on public.zones;
+create policy "zonat shkruhen vetem nga admini"
+  on public.zones for all to authenticated using (true) with check (true);
+
+alter table public.orders add column if not exists zone text;
+
+-- Adresa e mësuar: kur motorristi shtyp «U dorëzua», telefoni i tij është te
+-- dera. Ajo pikë vlen më shumë se çdo kërkim adresash — dhe nuk kushton asgjë.
+alter table public.customer_addresses add column if not exists confirmed_at timestamptz;
+alter table public.customer_addresses add column if not exists confirmed_by uuid
+  references public.staff(id) on delete set null;
+
+/* A bie pika brenda kufirit? Ray casting — i njëjti algoritëm si te shfletuesi,
+   që përgjigjja të mos ndryshojë sipas vendit ku llogaritet. */
+create or replace function public.point_in_outline(
+  p_lat double precision, p_lng double precision, p_outline jsonb)
+returns boolean
+language plpgsql
+immutable
+as $$
+declare n int; i int; j int; inside boolean := false;
+        xi double precision; yi double precision;
+        xj double precision; yj double precision;
+begin
+  if p_outline is null or p_lat is null or p_lng is null then return false; end if;
+  n := jsonb_array_length(p_outline);
+  if n < 3 then return false; end if;
+
+  j := n - 1;
+  for i in 0 .. n - 1 loop
+    yi := (p_outline -> i ->> 0)::double precision;   -- lat
+    xi := (p_outline -> i ->> 1)::double precision;   -- lng
+    yj := (p_outline -> j ->> 0)::double precision;
+    xj := (p_outline -> j ->> 1)::double precision;
+    if ((yi > p_lat) <> (yj > p_lat))
+       and (p_lng < (xj - xi) * (p_lat - yi) / (yj - yi) + xi) then
+      inside := not inside;
+    end if;
+    j := i;
+  end loop;
+  return inside;
+end;
+$$;
+
+/* Cila zonë i takon kësaj porosie. Pika mbizotëron mbi fjalët: një adresë e
+   shkruar «Plazh» por me pin te Currila është te Currila. */
+create or replace function public.zone_for(
+  p_address text, p_lat double precision default null, p_lng double precision default null)
+returns text
+language plpgsql
+stable
+set search_path = public
+as $$
+declare z record; a text;
+begin
+  if p_lat is not null and p_lng is not null then
+    for z in select * from public.zones
+              where active and outline is not null order by sort loop
+      if public.point_in_outline(p_lat, p_lng, z.outline) then return z.name; end if;
+    end loop;
+  end if;
+
+  a := lower(coalesce(p_address, ''));
+  if a <> '' then
+    for z in select * from public.zones where active order by sort loop
+      if exists (select 1 from unnest(z.keywords) k
+                  where k <> '' and position(lower(k) in a) > 0) then
+        return z.name;
+      end if;
+    end loop;
+  end if;
+
+  return null;
+end;
+$$;
+
+revoke all on function public.zone_for(text, double precision, double precision) from public;
+grant execute on function public.zone_for(text, double precision, double precision)
+  to anon, authenticated;
+
+/* Porosia e re e merr zonën vetvetiu — banaku nuk ka pse ta zgjedhë me dorë
+   sa herë, dhe nuk ka pse ta harrojë. */
+create or replace function public.set_order_zone()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.zone is null then
+    new.zone := public.zone_for(new.address, new.lat, new.lng);
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists orders_zone on public.orders;
+create trigger orders_zone
+  before insert on public.orders
+  for each row execute function public.set_order_zone();

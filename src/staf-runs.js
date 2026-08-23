@@ -65,17 +65,89 @@
     </div>` + dayBox() + privacy();
   }
 
+  /* ══════════════════ RADHA E NDALESAVE ══════════════════
+     Durrësi është 8 × 11 km. Në një qytet kaq të vogël radha matematikore e
+     ndalesave ndryshon pak minuta; ajo që ndryshon shumë është të mos shkosh
+     Plazh, të kthehesh Shkozet, dhe të ngjitesh sërish Plazh. Prandaj:
+
+       1. ndalesat grupohen sipas zonës
+       2. zonat renditen sipas largësisë nga dyqani, më e afërta e para
+       3. brenda zonës, gjithmonë te më e afërta nga aty ku je
+
+     Ndalesat pa koordinatë nuk humbin — shkojnë në fund të grupit të tyre, me
+     shënimin që të kërkohen me sy. */
+
+  const SHOP = (S.config && S.config.geo) || { lat: 41.3236, lng: 19.4432 };
+
+  /** Largësi e përafërt në kilometra. Brenda një qyteti të vogël, vija e
+      drejtë dhe rruga e vërtetë japin të njëjtën radhë ndalesash. */
+  function km(a, b) {
+    if (!a || !b || a.lat == null || b.lat == null) return Infinity;
+    const R2 = 6371;
+    const dLat = (b.lat - a.lat) * Math.PI / 180;
+    const dLng = (b.lng - a.lng) * Math.PI / 180;
+    const la = a.lat * Math.PI / 180, lb = b.lat * Math.PI / 180;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(la) * Math.cos(lb) * Math.sin(dLng / 2) ** 2;
+    return 2 * R2 * Math.asin(Math.sqrt(h));
+  }
+
+  const hasPin = (o) => o && o.lat != null && o.lng != null;
+
+  /** Rendit ndalesat: zonat sipas afërsisë, brenda zonës gjithmonë më e afërta. */
+  function ordered(list) {
+    const groups = new Map();
+    (list || []).forEach((o) => {
+      const key = o.zone || '—';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(o);
+    });
+
+    // Sa larg është zona: mesatarja e pikave që njohim.
+    const dist = (arr) => {
+      const p = arr.filter(hasPin);
+      if (!p.length) return Infinity;          // pa pika, zona shkon në fund
+      const lat = p.reduce((n, o) => n + o.lat, 0) / p.length;
+      const lng = p.reduce((n, o) => n + o.lng, 0) / p.length;
+      return km(SHOP, { lat, lng });
+    };
+
+    const zones = [...groups.entries()]
+      .map(([name, arr]) => ({ name, arr, d: dist(arr) }))
+      .sort((a, b) => (a.d - b.d) || a.name.localeCompare(b.name, 'sq'));
+
+    const out = [];
+    let from = SHOP;
+    zones.forEach((z) => {
+      const left = z.arr.filter(hasPin);
+      const blind = z.arr.filter((o) => !hasPin(o));
+      while (left.length) {
+        let bi = 0, bd = Infinity;
+        left.forEach((o, i) => { const d = km(from, o); if (d < bd) { bd = d; bi = i; } });
+        const pick = left.splice(bi, 1)[0];
+        pick._km = bd;
+        out.push(pick);
+        from = pick;
+      }
+      blind.forEach((o) => out.push(o));        // pa pin: në fund të zonës së vet
+    });
+    return out;
+  }
+
   function renderRun() {
-    const left = R.stops.filter((o) => o.status === 'delivering');
+    const left = ordered(R.stops.filter((o) => o.status === 'delivering'));
     const done = R.stops.filter((o) => o.status === 'done');
+    const noPin = left.filter((o) => !hasPin(o)).length;
 
     const head = `<div class="rsec">
       <h2>Nisja jote — ${left.length} ndalesa</h2>
       <p class="sub">Para në dorë për t'u arkëtuar: <b>${esc(money(R.run.cash_due || 0))}</b></p>
+      <p class="sub">Radha është sipas zonës dhe afërsisë${noPin
+        ? ` · ${noPin} pa pikë në hartë` : ''}. Nuk je i detyruar ta ndjekësh.</p>
     </div>`;
 
-    const card = (o, gone) => `<article class="stop${gone ? ' gone' : ''}" data-stop="${esc(o.id)}">
+    const card = (o, gone, i) => `<article class="stop${gone ? ' gone' : ''}" data-stop="${esc(o.id)}">
       <div class="s-hd">
+        ${gone ? '' : `<span class="s-seq">${i + 1}</span>`}
         <span class="s-no">#${o.number}</span>
         <span class="s-pay ${o.payment === 'cash' ? 'cash' : 'card'}">${o.payment === 'cash' ? 'Para në dorë' : 'Me kartë'}</span>
         <span class="s-tot">${esc(money(o.total))}</span>
@@ -83,6 +155,9 @@
       <div class="s-bd">
         <span class="s-name">${esc(o.customer_name)}</span>
         <span class="s-addr">${esc(o.address || '')}</span>
+        <span class="s-zone">${o.zone ? '📍 ' + esc(o.zone) : '📍 pa zonë'}${
+          o._km != null && isFinite(o._km) ? ' · ' + o._km.toFixed(1) + ' km' : ''}${
+          hasPin(o) ? '' : ' · pa pikë në hartë'}</span>
         ${o.note ? `<p class="s-note">📝 ${esc(o.note)}</p>` : ''}
       </div>
       ${gone ? '' : `<div class="s-act">
@@ -94,9 +169,9 @@
     </article>`;
 
     return head
-      + left.map((o) => card(o, false)).join('')
+      + left.map((o, i) => card(o, false, i)).join('')
       + (done.length ? `<div class="rsec"><h2>Dorëzuar — ${done.length}</h2></div>`
-                        + done.map((o) => card(o, true)).join('') : '')
+                        + done.map((o, i) => card(o, true, i)).join('') : '')
       + dayBox() + privacy();
   }
 

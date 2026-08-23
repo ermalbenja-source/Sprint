@@ -151,6 +151,27 @@ p.count{white-space:normal}
 .r-cashier{color:var(--ok)}
 .r-owner,.r-manager{color:var(--muted)}
 
+/* ─── zonat e dërgesës ─── */
+.zwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1rem;align-items:start}
+@media(max-width:860px){.zwrap{grid-template-columns:minmax(0,1fr)}}
+.zrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.7rem;align-items:center;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.6rem .8rem;
+  cursor:pointer;transition:.15s}
+.zrow:hover{border-color:rgba(222,127,28,.5)}
+.zrow.on{border-color:var(--brand);background:var(--pan-2)}
+.zdot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.zrow .nm b{display:block;font-weight:600;font-size:.94rem}
+.zrow .nm span{font-size:.72rem;color:var(--muted);display:block;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zrow input[type=text]{background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;
+  padding:.35rem .5rem;font-size:.86rem;width:100%;outline:none;color:var(--txt)}
+.zrow input[type=text]:focus{border-color:var(--brand)}
+.zrow .zact{display:flex;gap:.3rem}
+.zmark{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid currentColor;border-radius:999px;padding:.15rem .45rem;white-space:nowrap}
+.zmark.has{color:var(--ok)}
+.zmark.no{color:var(--muted)}
+
 /* ─── magazina, blerjet, raportet ─── */
 .chk{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--muted);
   white-space:nowrap;cursor:pointer}
@@ -511,6 +532,35 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 </style>
 <style>
 /* ============================================================================
+   SPRINT — Pamja e hartës së vogël. E ndarë që ta përdorin njësoj faqja e
+   klientit dhe paneli, pa u kopjuar dy herë.
+   ========================================================================== */
+.smap{position:relative;height:200px;border-radius:14px;overflow:hidden;background:#20303a;
+  cursor:grab;touch-action:none;user-select:none;border:1px solid var(--line)}
+.smap.grab{cursor:grabbing}
+.smap-tiles{position:absolute;inset:0}
+.smap-tiles img{position:absolute;width:256px;height:256px;pointer-events:none}
+.smap-pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-92%);
+  font-size:2rem;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55));z-index:2}
+.smap-pin::after{content:'';position:absolute;left:50%;bottom:.1rem;width:6px;height:6px;
+  transform:translateX(-50%);border-radius:50%;background:rgba(0,0,0,.5)}
+.smap-zoom{position:absolute;right:.5rem;bottom:.5rem;display:grid;gap:.25rem;z-index:3}
+.smap-zoom button{width:30px;height:30px;border-radius:8px;background:rgba(12,10,11,.82);
+  border:1px solid var(--line);color:#fff;font-size:1.05rem;font-weight:700;line-height:1;
+  display:grid;place-items:center}
+.smap-zoom button:hover{background:var(--gold);color:#241703}
+
+/* Mbivendosja: kufij zonash, ndalesa, dyqani. Nuk i kap klikimet, përveç
+   pikave që tërhiqen — përndryshe nuk do të mund të lëvizje hartën poshtë. */
+.smap-over{position:absolute;inset:0;z-index:1;pointer-events:none}
+.smap-over circle[data-vertex]{pointer-events:auto}
+/* Gjatë vizatimit të një zone, kursori thotë hapur se klikimi shton pikë. */
+.smap.draw{cursor:crosshair}
+.smap.draw .smap-tiles{opacity:.85}
+
+</style>
+<style>
+/* ============================================================================
    SPRINT — Pamja e dokumenteve të brendshme.
    Në ekran fshihen krejt; dalin vetëm nën printer. Gjerësia parazgjedhur
    80 mm — sa rrotulla e printerit termik të banakut. `.dk-a4` e kalon në A4
@@ -609,6 +659,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         <button class="tab" data-tab="menu">Menuja</button>
         <button class="tab" data-tab="cats">Kategoritë</button>
         <button class="tab" data-tab="cook">Gatimi</button>
+        <button class="tab" data-tab="zone">Zonat</button>
         <button class="tab" data-tab="stock">Magazina</button>
         <button class="tab" data-tab="buy">Blerjet</button>
         <button class="tab" data-tab="rep">Raportet</button>
@@ -789,6 +840,47 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
       <div class="tools">
         <button class="btn btn-p" id="saveCook">Ruaj ndarjen</button>
         <button class="btn btn-g btn-sm" id="resetCook">Rikthe te fillestarja</button>
+      </div>
+    </section>
+
+    <!-- ─────── ZONAT E DËRGESËS ─────── -->
+    <section class="view hide" id="v-zone">
+      <p class="count">Durrësi është 8 × 11 km. Në një qytet kaq të vogël, radha
+        matematikore e ndalesave ndryshon pak minuta — ajo që ndryshon shumë është
+        të mos shkosh Plazh, të kthehesh Shkozet dhe të ngjitesh sërish Plazh.
+        Prandaj motorristi i sheh ndalesat të grupuara sipas zonës.</p>
+
+      <div class="zwrap">
+        <div class="items" id="zoneList"></div>
+
+        <div class="card" style="display:grid;gap:.7rem;align-content:start">
+          <h2 style="font-size:1.1rem" id="zmTitle">Kufiri i zonës</h2>
+          <p class="count" style="margin:0" id="zmHint">Zgjidh një zonë majtas,
+            pastaj kliko mbi hartë për të vendosur qoshet e saj. Vija e hollë
+            është kufiri i Durrësit, vetëm për orientim.</p>
+          <div id="zoneMap" class="smap" style="height:380px"></div>
+          <div class="tools">
+            <button class="btn btn-g btn-sm" id="zmUndo">↶ Hiq pikën e fundit</button>
+            <button class="btn btn-g btn-sm" id="zmClear">Fshi kufirin</button>
+            <span class="count" id="zmCount"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.6rem">
+        <h2 style="font-size:1.1rem">Provoje</h2>
+        <p class="count" style="margin:0">Shkruaj një adresë siç e thonë klientët
+          dhe shiko te cila zonë bie. Kështu e kupton nëse fjalët kyçe mjaftojnë.</p>
+        <div class="tools">
+          <input id="ztest" class="in search f" placeholder="p.sh. Te plazhi, pallati 7">
+          <span class="count" id="ztestOut"></span>
+        </div>
+      </div>
+
+      <div class="tools">
+        <button class="btn btn-g btn-sm" id="addZone">+ Zonë e re</button>
+        <button class="btn btn-p" id="saveZones">Ruaj zonat</button>
+        <button class="btn btn-g btn-sm" id="resetZones">Rikthe te fillestaret</button>
       </div>
     </section>
 
@@ -3793,6 +3885,105 @@ ${S('drink', `
     return { staff_id: row.staff_id, name: row.name, role: row.role, screens: row.screens || [] };
   }
 
+  /* ══════════════════ ZONAT E DËRGESËS ══════════════════
+     Zona vjen para koordinatës. Fjalët e adresës punojnë që në porosinë e parë;
+     kufiri i vizatuar merr përparësi kur pika njihet. */
+
+  const LS_ZONES = 'sprint-zones';
+
+  /** Ndarja fillestare e Durrësit — emrat dhe fjalët kyçe, pa kufij.
+      Kufijtë i vizaton pronari; këta emra janë vetëm pikënisje për t'i
+      riemërtuar, sepse ai e di më mirë se çdo hartë se ku shkojnë porositë. */
+  const DEFAULT_ZONES = [
+    { name: 'Qendra',  sort: 10, color: '#DE7F1C',
+      keywords: ['qendër', 'qendra', 'taulantia', 'sheshi', 'rruga a. goga'] },
+    { name: 'Plazh',   sort: 20, color: '#3AA6C9',
+      keywords: ['plazh', 'iliria', 'teuta', 'hekurudha'] },
+    { name: 'Currila', sort: 30, color: '#8E6BC9',
+      keywords: ['currila', 'kodra', 'vollga'] },
+    { name: 'Shkozet', sort: 40, color: '#4CAF6D',
+      keywords: ['shkozet', 'spitallë', 'spitalle'] },
+    { name: 'Kënetë',  sort: 50, color: '#E6B23C',
+      keywords: ['kënetë', 'kenete', 'nishtulla'] },
+    { name: 'Porti',   sort: 60, color: '#E5544B',
+      keywords: ['port', 'porti', 'doganë'] },
+  ];
+
+  const cloneZones = () => DEFAULT_ZONES.map((z, i) =>
+    Object.assign({ id: 'z' + i, outline: null, fee: 0, active: true }, z,
+                  { keywords: z.keywords.slice() }));
+
+  async function fetchZones() {
+    if (!live) {
+      const saved = readLS(LS_ZONES, null);
+      return (saved && saved.length) ? saved : cloneZones();
+    }
+    const rows = await st._req('/rest/v1/zones?select=*&order=sort', { headers: st._headers() });
+    return (rows && rows.length) ? rows : [];
+  }
+
+  async function saveZones(list) {
+    const clean = (list || []).map((z, i) => ({
+      name: String(z.name || '').trim().slice(0, 60),
+      sort: Number(z.sort) || (i + 1) * 10,
+      color: String(z.color || '#DE7F1C').slice(0, 20),
+      keywords: (z.keywords || []).map((k) => String(k).trim().toLowerCase())
+        .filter(Boolean).slice(0, 30),
+      outline: (z.outline && z.outline.length >= 3) ? z.outline : null,
+      fee: Number(z.fee) || 0,
+      active: z.active !== false,
+    })).filter((z) => z.name.length >= 2);
+
+    if (!live) {
+      const withIds = clean.map((z, i) => Object.assign({ id: 'z' + i }, z));
+      writeLS(LS_ZONES, withIds);
+      return withIds;
+    }
+    await st._ensureAuth();
+    // Zëvendësim i plotë, njësoj si te fazat dhe lejet.
+    await st._req('/rest/v1/zones?name=neq.__none__', {
+      method: 'DELETE', headers: st._headers({ Prefer: 'return=minimal' }) });
+    if (!clean.length) return [];
+    return st._req('/rest/v1/zones', {
+      method: 'POST', headers: st._headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(clean) });
+  }
+
+  async function resetZones() { return saveZones(cloneZones()); }
+
+  /** I njëjti algoritëm si te serveri, që përgjigjja të mos ndryshojë. */
+  function pointInOutline(lat, lng, outline) {
+    if (!Array.isArray(outline) || outline.length < 3 || lat == null || lng == null) return false;
+    let inside = false;
+    for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) {
+      const yi = Number(outline[i][0]), xi = Number(outline[i][1]);
+      const yj = Number(outline[j][0]), xj = Number(outline[j][1]);
+      if ((yi > lat) !== (yj > lat)
+          && lng < (xj - xi) * (lat - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+
+  /** Cila zonë i takon kësaj adrese. Pika mbizotëron mbi fjalët. */
+  function zoneOf(zones, address, lat, lng) {
+    const zs = (zones || []).filter((z) => z.active !== false)
+      .slice().sort((a, b) => (a.sort || 0) - (b.sort || 0));
+    if (lat != null && lng != null) {
+      for (const z of zs) {
+        if (z.outline && pointInOutline(Number(lat), Number(lng), z.outline)) return z.name;
+      }
+    }
+    const a = String(address || '').toLowerCase();
+    if (a) {
+      for (const z of zs) {
+        for (const k of (z.keywords || [])) {
+          if (k && a.indexOf(String(k).toLowerCase()) >= 0) return z.name;
+        }
+      }
+    }
+    return null;
+  }
+
   /* ══════════════════ NJOFTIMET ══════════════════
      Abonimi i takon pajisjes, jo personit: i njëjti tablet i ndarë mes dy
      turneve nuk krijon dy abonime, thjesht kalon te ai që është brenda. */
@@ -3881,7 +4072,7 @@ ${S('drink', `
       id: r.id, number: r.number, status: r.status, customer_name: r.customer_name,
       phone: r.phone, address: r.address, lat: r.lat, lng: r.lng,
       total: r.total, payment: r.payment, note: r.note,
-      delivered_at: r.delivered_at, fail_reason: r.fail_reason,
+      delivered_at: r.delivered_at, fail_reason: r.fail_reason, zone: r.zone || null,
     }));
     return { run, stops };
   }
@@ -4003,6 +4194,7 @@ ${S('drink', `
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
     staffLogin, staffSession, staffLogout,
     pushSubscribe, pushUnsubscribe,
+    DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, pointInOutline,
     getLocation, locationQuality, navLink,
   });
 })();
@@ -6451,6 +6643,253 @@ ${S('drink', `
 </script>
 <script>
 /* ============================================================================
+   SPRINT — Hartë e vogël me pin që lëvizet, mbi pllakat e OpenStreetMap.
+   Pa asnjë bibliotekë: vetëm matematika e pllakave dhe tërheqja me gisht.
+
+   Pse pin që lëvizet dhe jo thjesht «merr vendndodhjen»: GPS-i i telefonit
+   shpesh bie 30–100 metra larg, dhe në Durrës ku rrugët s'kanë numra, kjo do
+   të thotë motorrist që endet. Korrigjimi me dorë është pjesa që i shpëton
+   porositë — jo marrja e koordinatës.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const TS = 256;                       // përmasa e një pllake
+  const TILES = 'https://tile.openstreetmap.org/';
+
+  /* Konvertimi lat/lng ↔ njësi pllake (Web Mercator). */
+  function project(lat, lng, z) {
+    const n = Math.pow(2, z);
+    const r = lat * Math.PI / 180;
+    return {
+      x: (lng + 180) / 360 * n,
+      y: (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n,
+    };
+  }
+  function unproject(x, y, z) {
+    const n = Math.pow(2, z);
+    return {
+      lng: x / n * 360 - 180,
+      lat: Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI,
+    };
+  }
+
+  const clampLat = (v) => Math.max(-85, Math.min(85, v));
+  const clampLng = (v) => ((v + 180) % 360 + 360) % 360 - 180;
+
+  /**
+   * Krijon hartën brenda `el`.
+   * @returns {{setView:Function, get:Function, destroy:Function}}
+   */
+  function miniMap(el, opts) {
+    const o = Object.assign({ lat: 41.3231, lng: 19.4414, zoom: 17, onMove: null }, opts || {});
+    let z = o.zoom;
+    let c = project(clampLat(o.lat), clampLng(o.lng), z);
+
+    el.classList.add('smap');
+    el.innerHTML =
+      '<div class="smap-tiles"></div>' +
+      '<svg class="smap-over" aria-hidden="true"></svg>' +
+      '<div class="smap-pin" aria-hidden="true">📍</div>' +
+      '<div class="smap-zoom">' +
+        '<button type="button" data-z="1" aria-label="Afro">+</button>' +
+        '<button type="button" data-z="-1" aria-label="Largo">−</button>' +
+      '</div>';
+    const layer = el.querySelector('.smap-tiles');
+    const over = el.querySelector('.smap-over');
+
+    /* Format e vizatuara mbi hartë: kufij zonash, pika ndalesash, dyqani.
+       Mbahen në koordinata gjeografike dhe rillogariten në çdo lëvizje —
+       përndryshe do të rrëshqisnin veç nga harta poshtë tyre. */
+    let shapes = [];
+
+    function draw() {
+      const w = el.clientWidth || 300;
+      const h = el.clientHeight || 200;
+      const left = c.x - w / (2 * TS);
+      const top = c.y - h / (2 * TS);
+      const n = Math.pow(2, z);
+      let html = '';
+      for (let ix = Math.floor(left); ix < left + w / TS; ix++) {
+        for (let iy = Math.floor(top); iy < top + h / TS; iy++) {
+          if (iy < 0 || iy >= n) continue;
+          const tx = ((ix % n) + n) % n;             // hartat mbështillen horizontalisht
+          html += `<img alt="" draggable="false" src="${TILES}${z}/${tx}/${iy}.png"
+                    style="left:${Math.round((ix - left) * TS)}px;top:${Math.round((iy - top) * TS)}px">`;
+        }
+      }
+      layer.innerHTML = html;
+      drawShapes(w, h, left, top);
+    }
+
+    /** lat/lng → pikselë brenda kutisë, për zoom-in e tanishëm. */
+    function toPx(lat, lng, left, top) {
+      const p = project(clampLat(lat), clampLng(lng), z);
+      return [(p.x - left) * TS, (p.y - top) * TS];
+    }
+
+    function drawShapes(w, h, left, top) {
+      if (!over) return;
+      over.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+      over.setAttribute('width', w);
+      over.setAttribute('height', h);
+      if (!shapes.length) { over.innerHTML = ''; return; }
+
+      let out = '';
+      shapes.forEach((sh) => {
+        if (sh.kind === 'poly' && sh.points && sh.points.length > 1) {
+          const d = sh.points.map((pt) => toPx(pt[0], pt[1], left, top).map(Math.round).join(','));
+          out += `<polygon points="${d.join(' ')}" fill="${sh.fill || 'rgba(222,127,28,.18)'}"`
+            + ` stroke="${sh.stroke || '#DE7F1C'}" stroke-width="${sh.width || 2}"`
+            + ` stroke-dasharray="${sh.dash || ''}"></polygon>`;
+          if (sh.handles) {
+            sh.points.forEach((pt, i) => {
+              const [x, y] = toPx(pt[0], pt[1], left, top);
+              out += `<circle cx="${Math.round(x)}" cy="${Math.round(y)}" r="7"`
+                + ` fill="#fff" stroke="${sh.stroke || '#DE7F1C'}" stroke-width="2"`
+                + ` data-vertex="${i}" style="cursor:pointer;pointer-events:auto"></circle>`;
+            });
+          }
+        } else if (sh.kind === 'dot') {
+          const [x, y] = toPx(sh.lat, sh.lng, left, top);
+          out += `<circle cx="${Math.round(x)}" cy="${Math.round(y)}" r="${sh.r || 6}"`
+            + ` fill="${sh.fill || '#DE7F1C'}" stroke="#0C0A0B" stroke-width="2"></circle>`;
+          if (sh.label) {
+            out += `<text x="${Math.round(x) + 10}" y="${Math.round(y) + 4}" fill="${sh.fill || '#DE7F1C'}"`
+              + ` font-size="12" font-weight="700"`
+              + ` style="paint-order:stroke;stroke:#0C0A0B;stroke-width:3">${sh.label}</text>`;
+          }
+        }
+      });
+      over.innerHTML = out;
+    }
+
+    function emit() {
+      const p = unproject(c.x, c.y, z);
+      if (o.onMove) o.onMove({ lat: +p.lat.toFixed(6), lng: +p.lng.toFixed(6) });
+    }
+
+    /* Tërheqja: me gisht ose me mi, i njëjti kod. */
+    let drag = null;
+    let moved = false;
+    const start = (e) => {
+      const t = e.touches ? e.touches[0] : e;
+      drag = { x: t.clientX, y: t.clientY };
+      moved = false;
+      el.classList.add('grab');
+    };
+    const move = (e) => {
+      if (!drag) return;
+      const t = e.touches ? e.touches[0] : e;
+      if (Math.abs(t.clientX - drag.x) > 2 || Math.abs(t.clientY - drag.y) > 2) moved = true;
+      c.x -= (t.clientX - drag.x) / TS;
+      c.y -= (t.clientY - drag.y) / TS;
+      const n = Math.pow(2, z);
+      c.y = Math.max(0, Math.min(n, c.y));
+      drag = { x: t.clientX, y: t.clientY };
+      draw();
+      if (e.cancelable) e.preventDefault();
+    };
+    /* Prekja pa lëvizje është klikim, jo tërheqje. Pa këtë dallim, çdo ngritje
+       gishti rivizatonte mbivendosjen dhe e fshinte elementin nën kursor
+       përpara se klikimi të mbërrinte — pikat e kufirit nuk klikoheshin dot. */
+    const end = () => {
+      if (!drag) return;
+      drag = null;
+      el.classList.remove('grab');
+      if (moved) emit();
+      moved = false;
+    };
+
+    el.addEventListener('mousedown', start);
+    el.addEventListener('touchstart', start, { passive: true });
+    window.addEventListener('mousemove', move);
+    el.addEventListener('touchmove', move, { passive: false });
+    window.addEventListener('mouseup', end);
+    el.addEventListener('touchend', end);
+
+    el.addEventListener('click', (e) => {
+      const vx = e.target.closest && e.target.closest('[data-vertex]');
+      if (vx && o.onVertex) { o.onVertex(Number(vx.dataset.vertex)); return; }
+
+      const b = e.target.closest('[data-z]');
+      if (!b) {
+        // Klikim mbi hartë: kthen pikën e prekur, që zona të vizatohet me gisht.
+        if (o.onClick && !drag) {
+          const r = el.getBoundingClientRect();
+          const w = el.clientWidth || 300, h = el.clientHeight || 200;
+          const left = c.x - w / (2 * TS), top = c.y - h / (2 * TS);
+          const p = unproject(left + (e.clientX - r.left) / TS,
+                              top + (e.clientY - r.top) / TS, z);
+          o.onClick({ lat: +p.lat.toFixed(6), lng: +p.lng.toFixed(6) });
+        }
+        return;
+      }
+      const nz = Math.max(3, Math.min(19, z + Number(b.dataset.z)));
+      if (nz === z) return;
+      const p = unproject(c.x, c.y, z);
+      z = nz;
+      c = project(p.lat, p.lng, z);
+      draw();
+    });
+
+    draw();
+
+    return {
+      setView(lat, lng, zoom) {
+        if (zoom) z = zoom;
+        c = project(clampLat(lat), clampLng(lng), z);
+        draw();
+      },
+      get() { const p = unproject(c.x, c.y, z); return { lat: +p.lat.toFixed(6), lng: +p.lng.toFixed(6) }; },
+      redraw: draw,
+      /** Vendos format që vizatohen mbi hartë dhe i rifreskon. */
+      setShapes(list) { shapes = list || []; draw(); },
+      /** Përshtat pamjen që të gjitha pikat e dhëna të hyjnë brenda. */
+      fit(points, pad) {
+        const pts = (points || []).filter((p) => p && isFinite(p[0]) && isFinite(p[1]));
+        if (!pts.length) return;
+        const la = pts.map((p) => p[0]), lo = pts.map((p) => p[1]);
+        const cLat = (Math.min(...la) + Math.max(...la)) / 2;
+        const cLng = (Math.min(...lo) + Math.max(...lo)) / 2;
+        const w = el.clientWidth || 300, h = el.clientHeight || 200;
+        for (let zz = 18; zz >= 3; zz--) {
+          const a = project(Math.min(...la), Math.min(...lo), zz);
+          const b2 = project(Math.max(...la), Math.max(...lo), zz);
+          if (Math.abs(b2.x - a.x) * TS < w - (pad || 40)
+              && Math.abs(b2.y - a.y) * TS < h - (pad || 40)) { z = zz; break; }
+        }
+        c = project(clampLat(cLat), clampLng(cLng), z);
+        draw();
+      },
+      destroy() {
+        window.removeEventListener('mousemove', move);
+        window.removeEventListener('mouseup', end);
+        el.innerHTML = '';
+      },
+    };
+  }
+
+  S.miniMap = miniMap;
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Kufiri i Durrësit.
+
+   Burimi: geoBoundaries ADM3 (CC BY 4.0) — wmgeolab.github.io/geoBoundaries
+   I thjeshtuar nga 834 pika në 49, sa duhet për të thënë «brenda apo jashtë».
+
+   KUJDES: ky është kufiri ADMINISTRATIV. Zona ku dorëzoni NUK përputhet me të —
+   u provua se Shkozeti dhe plazhi jugor bien jashtë tij. Prandaj përdoret vetëm
+   si vijë orientuese mbi hartë kur pronari vizaton zonat e veta, kurrë për të
+   vendosur nëse një adresë shërbehet apo jo.
+   ========================================================================== */
+window.SPRINT_DURRES = {"emri":"Durrës","burimi":"geoBoundaries ADM3 (CC BY 4.0) · wmgeolab.github.io/geoBoundaries","qendra":[41.33107,19.46672],"kutia":[41.28162,19.41843,41.38052,19.515],"kufiri":[[19.45853,41.37635],[19.44971,41.37227],[19.44405,41.38052],[19.4287,41.37437],[19.42142,41.37425],[19.41939,41.3729],[19.41843,41.36985],[19.42062,41.36255],[19.41861,41.34636],[19.41972,41.34055],[19.41867,41.3395],[19.41976,41.33825],[19.42037,41.32505],[19.42811,41.32259],[19.43199,41.31916],[19.43275,41.31289],[19.43511,41.31079],[19.44481,41.30853],[19.4526,41.30235],[19.45536,41.30239],[19.44949,41.30727],[19.45371,41.31474],[19.45969,41.31356],[19.45775,41.30986],[19.45844,41.30803],[19.4606,41.31183],[19.46417,41.31179],[19.46745,41.31489],[19.48031,41.31126],[19.49393,41.30144],[19.49225,41.30016],[19.49418,41.30129],[19.49741,41.29863],[19.51152,41.28162],[19.51496,41.28179],[19.51337,41.28888],[19.515,41.2898],[19.51437,41.29504],[19.51226,41.29683],[19.51012,41.2967],[19.50941,41.29959],[19.50355,41.30416],[19.50271,41.3169],[19.49737,41.32408],[19.49751,41.32704],[19.4938,41.32975],[19.49239,41.33732],[19.48751,41.33689],[19.45853,41.37635]]};
+
+</script>
+<script>
+/* ============================================================================
    SPRINT — Magazina, blerjet dhe raportet te paneli.
 
    Rregulli që mban gjithçka të ndershme: gjendja e magazinës nuk shkruhet
@@ -7060,6 +7499,243 @@ ${S('drink', `
       renderRecipe();
     }
   });
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Zonat e dërgesës te paneli.
+
+   Zona vjen para koordinatës. Fjalët e adresës punojnë që në porosinë e parë,
+   pa asnjë pikë mbi hartë; kufiri i vizatuar merr përparësi kur pika njihet.
+
+   Kufirin e vizaton pronari, jo një hartë e gatshme: ai e di se ku shkojnë
+   vërtet porositë. Vija e hollë e Durrësit është vetëm për orientim — u
+   vërtetua se kufiri administrativ nuk përputhet me zonën ku dorëzohet.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const store = S.store;
+  const $ = (s) => document.querySelector(s);
+  const esc = (t) => String(t == null ? '' : t)
+    .replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+  const toast = (m, k) => {
+    const el = $('#toast');
+    if (!el) return;
+    el.textContent = m; el.className = 'on ' + (k || '');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { el.className = k || ''; }, 3800);
+  };
+
+  const Z = { list: [], sel: null, map: null, loaded: false };
+
+  /* Kufiri i Durrësit, i marrë nga geoBoundaries (CC BY 4.0). Nuk e cakton
+     zonën — vetëm ndihmon syrin të kuptojë ku është duke vizatuar. */
+  const DURRES = SPRINT_DURRES || null;
+
+  const shop = () => (S.config && S.config.geo) || { lat: 41.3236, lng: 19.4432 };
+
+  async function load(force) {
+    if (Z.loaded && !force) return;
+    try {
+      Z.list = (await store.fetchZones()) || [];
+      if (!Z.list.length) Z.list = store.DEFAULT_ZONES.map((z, i) =>
+        Object.assign({ id: 'z' + i, outline: null, active: true }, z,
+                      { keywords: z.keywords.slice() }));
+      Z.loaded = true;
+      if (!Z.sel && Z.list.length) Z.sel = Z.list[0].id || Z.list[0].name;
+      render();
+      ensureMap();
+    } catch (e) {
+      $('#zoneList').innerHTML = '<p class="count">Nuk u lexuan zonat: ' + esc(e.message) + '</p>';
+    }
+  }
+
+  const key = (z) => z.id || z.name;
+  const current = () => Z.list.find((z) => key(z) === Z.sel) || null;
+
+  function render() {
+    if (!Z.list.length) {
+      $('#zoneList').innerHTML = '<p class="count">Ende pa zona. Shto të parën më poshtë.</p>';
+      return;
+    }
+    $('#zoneList').innerHTML = Z.list.map((z) => {
+      const n = (z.outline || []).length;
+      return `<div class="row zrow${key(z) === Z.sel ? ' on' : ''}" data-zone="${esc(key(z))}">
+        <span class="zdot" style="background:${esc(z.color || '#DE7F1C')}"></span>
+        <div class="nm">
+          <input type="text" data-zf="name" value="${esc(z.name)}" maxlength="60"
+                 aria-label="Emri i zonës">
+          <input type="text" data-zf="keywords" value="${esc((z.keywords || []).join(', '))}"
+                 placeholder="fjalë të adresës, të ndara me presje"
+                 aria-label="Fjalët kyçe" style="margin-top:.3rem">
+        </div>
+        <div class="zact">
+          <span class="zmark ${n ? 'has' : 'no'}">${n ? n + ' pika' : 'pa kufi'}</span>
+          <button class="btn btn-d btn-sm" data-zdel="${esc(key(z))}" title="Fshi zonën">×</button>
+        </div>
+      </div>`;
+    }).join('');
+    paintMap();
+  }
+
+  /* ---------- harta ---------- */
+
+  function ensureMap() {
+    const el = $('#zoneMap');
+    if (!el || Z.map) return;
+    const c = shop();
+    Z.map = S.miniMap(el, {
+      lat: c.lat, lng: c.lng, zoom: 13,
+      onMove: () => paintMap(),
+      onVertex: (i) => {
+        // Klikim mbi një qoshe e heq atë — mënyra më e shkurtër për të
+        // rregulluar një pikë të vendosur gabim.
+        const z = current();
+        if (!z || !z.outline) return;
+        z.outline = z.outline.filter((_, k) => k !== i);
+        if (!z.outline.length) z.outline = null;
+        render();
+      },
+      onClick: (p) => {
+        const z = current();
+        if (!z) { toast('Zgjidh një zonë së pari.', 'err'); return; }
+        z.outline = (z.outline || []).concat([[p.lat, p.lng]]);
+        render();
+      },
+    });
+    el.classList.add('draw');
+    // Kufiri i Durrësit e ndihmon syrin që në hapje.
+    if (DURRES) Z.map.fit(DURRES.kufiri.map((p) => [p[1], p[0]]), 60);
+    paintMap();
+  }
+
+  function paintMap() {
+    if (!Z.map) return;
+    const shapes = [];
+
+    if (DURRES) {
+      shapes.push({ kind: 'poly', points: DURRES.kufiri.map((p) => [p[1], p[0]]),
+        fill: 'rgba(255,255,255,.04)', stroke: 'rgba(255,255,255,.35)', width: 1, dash: '5 5' });
+    }
+    Z.list.forEach((z) => {
+      if (!z.outline || z.outline.length < 2) return;
+      const on = key(z) === Z.sel;
+      shapes.push({ kind: 'poly', points: z.outline,
+        fill: hexA(z.color, on ? 0.3 : 0.12), stroke: z.color || '#DE7F1C',
+        width: on ? 3 : 1.5, handles: on });
+    });
+    const c = shop();
+    shapes.push({ kind: 'dot', lat: c.lat, lng: c.lng, r: 7, fill: '#FFC244', label: 'dyqani' });
+
+    Z.map.setShapes(shapes);
+    const z = current();
+    $('#zmTitle').textContent = z ? 'Kufiri i zonës — ' + z.name : 'Kufiri i zonës';
+    $('#zmCount').textContent = z
+      ? ((z.outline || []).length
+          ? (z.outline.length + ' pika · kliko një pikë për ta hequr')
+          : 'Kliko mbi hartë për të vendosur qoshen e parë.')
+      : '';
+  }
+
+  const hexA = (hex, a) => {
+    const h = String(hex || '#DE7F1C').replace('#', '');
+    const n = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16);
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+  };
+
+  /* ---------- prova ---------- */
+  function testAddress() {
+    const v = $('#ztest').value.trim();
+    if (!v) { $('#ztestOut').textContent = ''; return; }
+    const z = store.zoneOf(Z.list, v, null, null);
+    $('#ztestOut').innerHTML = z
+      ? `→ <b style="color:var(--ok)">${esc(z)}</b>`
+      : '→ <b style="color:var(--warn)">pa zonë</b> — shto një fjalë kyçe që e kap';
+  }
+
+  /* ---------- ruajtja ---------- */
+  async function save() {
+    try {
+      const saved = await store.saveZones(Z.list);
+      if (saved && saved.length) Z.list = saved;
+      Z.sel = Z.list.length ? key(Z.list[0]) : null;
+      render();
+      toast('Zonat u ruajtën.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  async function reset() {
+    try {
+      Z.list = (await store.resetZones()) || [];
+      if (!Z.list.length) Z.list = store.DEFAULT_ZONES.map((z, i) =>
+        Object.assign({ id: 'z' + i, outline: null, active: true }, z,
+                      { keywords: z.keywords.slice() }));
+      Z.sel = key(Z.list[0]);
+      render();
+      toast('U kthyen te fillestaret.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  /* ---------- lidhjet ---------- */
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+
+    const tab = t.closest('.tab');
+    if (tab) { if (tab.dataset.tab === 'zone') load(); return; }
+
+    const del = t.closest('[data-zdel]');
+    if (del) {
+      const z = Z.list.find((x) => key(x) === del.dataset.zdel);
+      if (z && confirm('Të fshihet zona «' + z.name + '»? Porositë e vjetra nuk preken.')) {
+        Z.list = Z.list.filter((x) => key(x) !== key(z));
+        if (Z.sel === key(z)) Z.sel = Z.list.length ? key(Z.list[0]) : null;
+        render();
+      }
+      return;
+    }
+
+    const row = t.closest('[data-zone]');
+    if (row && !t.closest('input')) { Z.sel = row.dataset.zone; render(); return; }
+
+    if (t.id === 'addZone') {
+      const colors = ['#DE7F1C', '#3AA6C9', '#8E6BC9', '#4CAF6D', '#E6B23C', '#E5544B'];
+      const z = { id: 'z' + Date.now().toString(36), name: 'Zonë e re',
+        sort: (Z.list.length + 1) * 10, color: colors[Z.list.length % colors.length],
+        keywords: [], outline: null, active: true };
+      Z.list.push(z); Z.sel = key(z); render();
+      return;
+    }
+    if (t.id === 'zmUndo') {
+      const z = current();
+      if (z && z.outline && z.outline.length) { z.outline = z.outline.slice(0, -1); render(); }
+      return;
+    }
+    if (t.id === 'zmClear') {
+      const z = current();
+      if (z) { z.outline = null; render(); }
+      return;
+    }
+    if (t.id === 'saveZones') return save();
+    if (t.id === 'resetZones') return reset();
+  });
+
+  document.addEventListener('input', (e) => {
+    const row = e.target.closest('[data-zone]');
+    if (row && e.target.dataset.zf) {
+      const z = Z.list.find((x) => key(x) === row.dataset.zone);
+      if (!z) return;
+      if (e.target.dataset.zf === 'name') z.name = e.target.value;
+      else z.keywords = e.target.value.split(',').map((k) => k.trim()).filter(Boolean);
+      paintMap();
+      testAddress();
+      return;
+    }
+    if (e.target.id === 'ztest') testAddress();
+  });
+
+  S.zonat = { load, list: () => Z.list };
 })();
 
 </script>

@@ -64,6 +64,30 @@ Fletët dalin në gjerësi 80 mm — sa rrotulla e printerit termik. Të gjitha 
 **dokumente të brendshme** dhe e mbajnë këtë shënim në fund: fatura tatimore
 lëshohet nga programi yt i certifikuar, jo nga ky.
 
+## Zonat e dërgesës
+
+Durrësi është 8 × 11 km. Në një qytet kaq të vogël radha matematikore e
+ndalesave ndryshon pak minuta — ajo që ndryshon shumë është të mos shkosh
+Plazh, të kthehesh Shkozet dhe të ngjitesh sërish Plazh.
+
+Te **Paneli → Zonat** ke gjashtë zona fillestare me fjalët e tyre kyçe. Zona
+caktohet në dy mënyra:
+
+1. **Fjalët e adresës** — punon që në porosinë e parë, pa asnjë koordinatë.
+   «Te plazhi, pallati 7» → Plazh.
+2. **Kufiri i vizatuar** — kliko mbi hartë për të vendosur qoshet. Kur pika
+   njihet, kufiri merr përparësi mbi fjalët.
+
+Motorristi i sheh ndalesat të grupuara sipas zonës, zonat sipas afërsisë nga
+dyqani, dhe brenda zonës gjithmonë te më e afërta. Numri i madh te çdo ndalesë
+thotë nga t'ia nisë. Nuk është urdhër — vetëm propozim.
+
+**Harta që mëson.** Në çastin që motorristi shtyp «U dorëzua», telefoni i tij
+është te dera. Ajo pikë i ngjitet adresës së klientit, dhe herën tjetër që i
+njëjti numër telefonon, e dimë saktësisht ku është. Pas dy-tri javësh adresat e
+shpeshta i kanë pikat e sakta — pa kërkuar askund, pa paguar asgjë, pa i shtuar
+askujt asnjë sekondë pune.
+
 ## Njoftimet
 
 Butoni **🔔 Njoftime** te ekrani i stafit ka dy gjendje, dhe e thotë hapur cilën
