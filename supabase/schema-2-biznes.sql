@@ -1473,3 +1473,85 @@ $$;
 
 revoke all on function public.report_items(date, date) from public, anon;
 grant execute on function public.report_items(date, date) to authenticated;
+
+
+-- ═══════════════════════ 24. NJOFTIMET PUSH ═══════════════════════
+-- Abonimi i një pajisjeje. Kuzhina dhe furra e mbajnë ekranin hapur gjithë
+-- ditën, por motorristi jo — telefoni i rri në xhep, ndaj njoftimi është e
+-- vetmja mënyrë që ta marrë vesh një porosi të re pa e kontrolluar vetë.
+--
+-- KUFIRI: shfletuesi e ndez këtë vetëm mbi HTTPS ose te localhost. Në një
+-- rrjet lokal me http://192.168.x.x nuk ndizet dot — rregull i shfletuesit,
+-- jo i programit. Prandaj ekrani ka gjithmonë edhe zilen brenda faqes.
+
+create table if not exists public.push_subs (
+  id         uuid primary key default gen_random_uuid(),
+  staff_id   uuid        not null references public.staff(id) on delete cascade,
+  endpoint   text        not null unique,
+  p256dh     text        not null,
+  auth       text        not null,
+  device     text,
+  created_at timestamptz not null default now(),
+  last_ok_at timestamptz,
+  fails      integer     not null default 0
+);
+
+comment on table public.push_subs is
+  'Pajisjet që presin njoftime. Çelësat janë të pajisjes, jo të personit.';
+
+create index if not exists push_subs_staff_idx on public.push_subs (staff_id);
+
+alter table public.push_subs enable row level security;
+drop policy if exists "abonimet vetem nga serveri" on public.push_subs;
+create policy "abonimet vetem nga serveri" on public.push_subs
+  for all to authenticated using (true) with check (true);
+
+/* Pajisja abonohet vetë, me kodin e saj. Nëse i njëjti endpoint ekziston,
+   thjesht kalon te personi i tanishëm — një tablet i ndarë mes dy turneve
+   nuk duhet të krijojë dy abonime. */
+create or replace function public.push_subscribe(
+  p_token uuid, p_endpoint text, p_p256dh text, p_auth text, p_device text default null)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare s record; id uuid;
+begin
+  select st.staff_id into s from public.staff_by_token(p_token) st;
+  if s.staff_id is null then raise exception 'Hyr me kodin tënd.'; end if;
+
+  insert into public.push_subs (staff_id, endpoint, p256dh, auth, device)
+  values (s.staff_id, p_endpoint, p_p256dh, p_auth, p_device)
+  on conflict (endpoint) do update
+    set staff_id = excluded.staff_id,
+        p256dh   = excluded.p256dh,
+        auth     = excluded.auth,
+        device   = excluded.device,
+        fails    = 0
+  returning public.push_subs.id into id;
+
+  return id;
+end;
+$$;
+
+revoke all on function public.push_subscribe(uuid, text, text, text, text) from public;
+grant execute on function public.push_subscribe(uuid, text, text, text, text) to anon, authenticated;
+
+create or replace function public.push_unsubscribe(p_token uuid, p_endpoint text)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare n integer;
+begin
+  perform 1 from public.staff_by_token(p_token);
+  delete from public.push_subs where endpoint = p_endpoint;
+  get diagnostics n = row_count;
+  return n;
+end;
+$$;
+
+revoke all on function public.push_unsubscribe(uuid, text) from public;
+grant execute on function public.push_unsubscribe(uuid, text) to anon, authenticated;

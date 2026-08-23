@@ -16,6 +16,7 @@ const os = require('node:os');
 const crypto = require('node:crypto');
 const D = require('./db');
 const API = require('./api');
+const PUSH = require('./push');
 
 const ROOT = path.join(__dirname, '..');
 const WEB = path.join(ROOT, 'dist');
@@ -123,12 +124,51 @@ const PUBLIC_RPC = ['track_order','find_orders_by_phone','public_phases',
                     'staff_login','staff_by_token','staff_logout','my_screens',
                     'kds_orders','kds_bump',
                     'drv_ready','drv_start_run','drv_my_run','drv_delivered',
-                    'drv_failed','drv_my_day'];
+                    'drv_failed','drv_my_day',
+                    'push_subscribe','push_unsubscribe'];
 const PUBLIC_READ = ['menu_items','settings','order_phases','category_stations'];
+
+/* ---------- zbrazja e kutisë së njoftimeve ----------
+   Thirret pas çdo kërkese, jo brenda saj: ekrani që sapo shtypi «GATI» nuk ka
+   pse të presë sa të përgjigjet Google-i. Abonimet e vdekura (404/410) hiqen
+   vetë — një telefon i ndërruar nuk duhet të mbetet përgjithmonë në listë. */
+let draining = false;
+async function drain() {
+  if (draining || !API.outbox.length) return;
+  draining = true;
+  try {
+    const k = PUSH.keys(DATA);
+    while (API.outbox.length) {
+      const { screens, msg } = API.outbox.shift();
+      const roles = db.prepare('select distinct role from role_screens where screen in ('
+        + screens.map(() => '?').join(',') + ')').all(...screens).map((r) => r.role);
+      roles.push('owner');           // pronari i sheh të gjitha, gjithmonë
+      if (!roles.length) continue;
+
+      const subs = db.prepare('select ps.* from push_subs ps join staff s on s.id = ps.staff_id'
+        + ' where s.active = 1 and s.role in (' + roles.map(() => '?').join(',') + ')')
+        .all(...roles);
+
+      for (const sub of subs) {
+        const r = await PUSH.send(k, sub, Object.assign({ url: '/staf/' }, msg));
+        if (r.status === 404 || r.status === 410) {
+          db.prepare('delete from push_subs where id=?').run(sub.id);
+        } else if (r.ok) {
+          db.prepare('update push_subs set last_ok_at=?, fails=0 where id=?').run(D.now(), sub.id);
+        } else {
+          db.prepare('update push_subs set fails=fails+1 where id=?').run(sub.id);
+        }
+      }
+    }
+  } catch (e) {
+    // Njoftimi është shtesë, jo thelbi: dështimi i tij nuk prish asnjë porosi.
+  } finally { draining = false; }
+}
 
 const server = http.createServer(async (req, res) => {
   const u = new URL(req.url, 'http://x');
   const p = u.pathname;
+  res.on('finish', () => { drain(); });
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
@@ -197,6 +237,12 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       const out = API.rest(db, req.method, table, u.searchParams, body, req.headers);
       return json(res, out === null ? 204 : 200, out);
+    }
+
+    /* ---------- njoftimet ---------- */
+    if (p === '/api/vapid') {
+      // Çelësi publik: shfletuesi e do për të krijuar abonimin. Publik me qëllim.
+      return json(res, 200, { publicKey: PUSH.keys(DATA).publicKey, secure: true });
     }
 
     /* ---------- gjendja ---------- */

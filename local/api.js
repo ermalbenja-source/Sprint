@@ -17,7 +17,8 @@ const JSON_COLS = { menu_items: ['tags'], settings: ['data'], orders: ['items','
 const TABLES = ['menu_items','settings','order_phases','customers','customer_addresses',
                 'staff','role_screens','category_stations','runs','run_points','orders','bookings','suppliers',
                 'stock_levels',
-                'stock_items','stock_moves','purchases','purchase_lines','recipes','documents'];
+                'stock_items','stock_moves','purchases','purchase_lines','recipes','documents',
+                'push_subs'];
 
 const BOOL_COLS = ['available','enabled','customer_visible','is_core','active','blocked','is_default','low'];
 
@@ -109,6 +110,24 @@ function guardDelete(db, table, w) {
   }
 }
 
+/* Porosia e re prek vetëm stacionet që kanë vërtet diçka për të gatuar. Një
+   porosi vetëm me pije nuk zgjon askënd. */
+function afterOrder(db, row) {
+  let items = row.items;
+  if (typeof items === 'string') { try { items = JSON.parse(items); } catch (e) { items = []; } }
+  const need = stationsOf(router(db), items || []);
+  const label = { kitchen: 'kds', oven: 'oven' };
+  need.forEach((st2) => {
+    notify([label[st2]], {
+      title: st2 === 'oven' ? 'Porosi e re — furra' : 'Porosi e re — kuzhina',
+      body: '#' + (row.number || '') + ' · '
+        + (items || []).filter((x) => (x.station || st2) === st2 || !x.station)
+            .slice(0, 3).map((x) => (Number(x.qty) || 1) + '× ' + (x.name || '')).join(', '),
+      tag: 'e-re-' + (row.id || row.number || Date.now()),
+    });
+  });
+}
+
 function rest(db, method, table, params, body, headers) {
   if (TABLES.indexOf(table) < 0) throw httpErr(404, 'Tabelë e panjohur: ' + table);
   const prefer = String(headers['prefer'] || '');
@@ -135,8 +154,15 @@ function rest(db, method, table, params, body, headers) {
       const sql = `${verb} into "${table}" (${cols.map((c) => `"${c}"`).join(',')})
                    values (${cols.map(() => '?').join(',')})`;
       db.prepare(sql).run(...cols.map((c) => row[c]));
-      if (row.id) out.push(decode(table, db.prepare(`select * from "${table}" where id=?`).get(row.id)));
-      else if (row.key) out.push(decode(table, db.prepare(`select * from "${table}" where key=?`).get(row.key)));
+      const saved = row.id
+        ? decode(table, db.prepare(`select * from "${table}" where id=?`).get(row.id))
+        : row.key
+          ? decode(table, db.prepare(`select * from "${table}" where key=?`).get(row.key))
+          : null;
+      // Njoftimi nis pas ruajtjes, jo para: numri i porosisë jepet nga baza,
+      // dhe pa të njoftimi do të thoshte thjesht «porosi e re #».
+      if (table === 'orders' && saved) afterOrder(db, saved);
+      if (saved) out.push(saved);
     }
     return wantBack ? out : null;
   }
@@ -149,6 +175,10 @@ function rest(db, method, table, params, body, headers) {
     if (!cols.length) return wantBack ? [] : null;
     db.prepare(`update "${table}" set ${cols.map((c) => `"${c}"=?`).join(',')}${w.sql}`)
       .run(...cols.map((c) => row[c]), ...w.args);
+    if (table === 'orders' && body && body.status === 'accepted') {
+      db.prepare(`select id, number, items, note from "orders"${w.sql}`).all(...w.args)
+        .forEach((r) => afterOrder(db, decode('orders', r)));
+    }
     if (!wantBack) return null;
     return db.prepare(`select * from "${table}"${w.sql}`).all(...w.args).map((r) => decode(table, r));
   }
@@ -206,6 +236,15 @@ function screensFor(db, role) {
   if (role === 'owner') return ALL_SCREENS.slice();
   return db.prepare('select screen from role_screens where role=? order by screen')
     .all(role).map((r) => r.screen);
+}
+
+/* ---------- kutia e njoftimeve ----------
+   Funksionet nuk dërgojnë vetë njoftime: lënë një shënim këtu dhe serveri e
+   zbraz pasi t'i jetë përgjigjur kërkesës. Kështu një njoftim i ngadaltë nuk e
+   mban në pritje ekranin që sapo shtypi një buton. */
+const outbox = [];
+function notify(screens, msg) {
+  outbox.push({ screens, msg });
 }
 
 /* ---------- stacionet e gatimit ---------- */
@@ -412,6 +451,16 @@ const RPC = {
                 where id=?`)
       .run(gati ? 'ready' : 'preparing', JSON.stringify(done), t, t,
            gati ? (o.ready_at || t) : null, a.p_order);
+
+    if (gati) {
+      const full = db.prepare('select number, kind, address from orders where id=?').get(a.p_order);
+      notify(['runs'], {
+        title: 'Porosi gati për nisje',
+        body: '#' + full.number + (full.kind === 'pickup' ? ' · merr vetë'
+              : (full.address ? ' · ' + full.address : '')),
+        tag: 'gati-' + a.p_order,
+      });
+    }
     return gati ? 'ready' : 'preparing';
   },
 
@@ -593,6 +642,30 @@ const RPC = {
     return lines.length;
   },
 
+  /* ---------- njoftimet push ---------- */
+  push_subscribe(db, a) {
+    const me = staffByToken(db, a.p_token);
+    const ep = String(a.p_endpoint || '');
+    if (!ep) throw httpErr(400, 'Mungon adresa e abonimit.');
+    const had = db.prepare('select id from push_subs where endpoint=?').get(ep);
+    if (had) {
+      db.prepare(`update push_subs set staff_id=?, p256dh=?, auth=?, device=?, fails=0
+                  where endpoint=?`)
+        .run(me.staff_id, a.p_p256dh, a.p_auth, a.p_device || null, ep);
+      return had.id;
+    }
+    const id = D.uuid();
+    db.prepare(`insert into push_subs (id,staff_id,endpoint,p256dh,auth,device,created_at)
+                values (?,?,?,?,?,?,?)`)
+      .run(id, me.staff_id, ep, a.p_p256dh, a.p_auth, a.p_device || null, D.now());
+    return id;
+  },
+  push_unsubscribe(db, a) {
+    staffByToken(db, a.p_token);
+    db.prepare('delete from push_subs where endpoint=?').run(String(a.p_endpoint || ''));
+    return 1;
+  },
+
   /* ---------- raportet ---------- */
   report_day(db, a) {
     const day = a.p_date || D.now().slice(0, 10);
@@ -659,4 +732,4 @@ function httpErr(status, message) {
   return e;
 }
 
-module.exports = { rest, RPC, httpErr, decode };
+module.exports = { rest, RPC, httpErr, decode, outbox, notify };

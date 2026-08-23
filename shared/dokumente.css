@@ -1,0 +1,59 @@
+/* ============================================================================
+   SPRINT — Pamja e dokumenteve të brendshme.
+   Në ekran fshihen krejt; dalin vetëm nën printer. Gjerësia parazgjedhur
+   80 mm — sa rrotulla e printerit termik të banakut. `.dk-a4` e kalon në A4
+   për fletët që shkojnë te zyra ose te furnitori.
+   ========================================================================== */
+#printBox{display:none}
+
+@media print{
+  /* Gjatë printimit del vetëm fleta. Pa këtë do të printohej i gjithë paneli. */
+  body>*{display:none!important}
+  body>#printBox{display:block!important}
+  #printBox{position:static;color:#000;background:#fff}
+
+  @page{size:80mm auto;margin:4mm}
+  .dk-a4{}
+  .dk-a4 .dk-page{max-width:170mm;font-size:11pt}
+
+  html,body{background:#fff!important;margin:0;padding:0}
+
+  .dk-page{font-family:ui-monospace,'Courier New',monospace;color:#000;
+    font-size:10pt;line-height:1.35;width:100%}
+
+  .dk-hd{text-align:center;margin-bottom:2mm}
+  .dk-brand{font-size:16pt;font-weight:700;letter-spacing:.08em}
+  .dk-sub{font-size:8pt}
+  .dk-title{font-size:12pt;font-weight:700;margin-top:1.5mm;
+    text-transform:uppercase;letter-spacing:.06em}
+
+  .dk-big{font-size:26pt;font-weight:700;text-align:center;line-height:1.1;margin:1mm 0}
+  .dk-sep{border-top:1px dashed #000;margin:2mm 0}
+  .dk-row{display:flex;justify-content:space-between;gap:3mm;font-size:9pt}
+  .dk-row.big{font-size:12pt;font-weight:700}
+  .dk-kv{display:flex;justify-content:space-between;gap:3mm;font-size:9pt;
+    padding:.6mm 0;border-bottom:1px dotted #999}
+  .dk-kv span{color:#333}
+
+  .dk-t{width:100%;border-collapse:collapse}
+  .dk-t td{padding:.9mm 0;vertical-align:top;font-size:11pt}
+  .dk-t td.q{width:11mm;font-weight:700}
+  .dk-t td.p{text-align:right;white-space:nowrap;font-size:9pt}
+
+  /* Shënimi i klientit është arsyeja më e shpeshtë e një porosie të kthyer.
+     Prandaj del me kornizë, jo si rresht i zakonshëm. */
+  .dk-note{border:1.5px solid #000;padding:1.5mm;margin-top:2mm;
+    font-size:10pt;font-weight:700}
+  .dk-other{margin-top:2mm;font-size:8pt;color:#333;font-style:italic}
+  .dk-addr{font-size:11pt;font-weight:700}
+  .dk-stop{border-bottom:1px dashed #000;padding:1.5mm 0}
+  .dk-stop:last-of-type{border-bottom:0}
+
+  .dk-sign{display:flex;gap:6mm;margin-top:8mm;font-size:8pt}
+  .dk-sign div{flex:1}
+  .dk-sign span{display:block;border-top:1px solid #000;margin-top:9mm}
+
+  .dk-ft{margin-top:4mm;padding-top:2mm;border-top:1px dashed #000;
+    text-align:center;font-size:7.5pt;display:grid;gap:.6mm}
+  .dk-ft b{font-size:8pt}
+}

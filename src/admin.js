@@ -472,6 +472,11 @@
           ${o.wanted_at && o.wanted_at !== 'asap' ? `<span>Për orën ${esc(o.wanted_at)}</span>` : '<span>Sa më shpejt</span>'}
           ${o.prep_minutes ? `<span>${o.prep_minutes}′ përgatitje</span>` : ''}
           <a href="${wa}" target="_blank" rel="noopener">WhatsApp klientit →</a>
+          <button class="lnk" data-print="slip" data-o="${o.id}">🖨 Fletë porosie</button>
+          <button class="lnk" data-print="kitchen" data-o="${o.id}">🍳 Kuzhina</button>
+          <button class="lnk" data-print="oven" data-o="${o.id}">🔥 Furra</button>
+          ${o.kind === 'delivery'
+            ? `<button class="lnk" data-print="delivery" data-o="${o.id}">🛵 Fletë dorëzimi</button>` : ''}
         </div>
       </div>
       ${actions}
@@ -500,6 +505,29 @@
     }));
     $$('[data-reopen]').forEach((b) => b.addEventListener('click', () =>
       setStatus(b.dataset.reopen, 'preparing', { done_at: null })));
+
+    // Fletët e brendshme: kuzhina dhe furra marrin secila vetëm rreshtat e veta,
+    // fleta e dorëzimit mban adresën dhe sa para priten.
+    $$('[data-print]').forEach((b) => b.addEventListener('click', async () => {
+      const o = ORD.list.find((x) => x.id === b.dataset.o);
+      if (!o || !S.docs) return;
+      const kind = b.dataset.print;
+      try {
+        if (kind === 'slip') await S.docs.printOrder(await tagged(o));
+        else if (kind === 'delivery') await S.docs.printDelivery(o);
+        else await S.docs.printStationTicket(await tagged(o), kind);
+      } catch (e) { toast('Printimi nuk u hap: ' + e.message, 'err'); }
+    }));
+  }
+
+  /* Rreshtat e porosisë vijnë pa stacion nga tabela; këtu marrin atë që u
+     takon, që fleta e kuzhinës të mos përfundojë me picat brenda. */
+  async function tagged(o) {
+    if ((o.items || []).every((x) => x.station)) return o;
+    try {
+      const r = await store.loadRouter();
+      return Object.assign({}, o, { items: r.tag(o.items) });
+    } catch (e) { return o; }
   }
 
   async function setStatus(id, status, patch) {

@@ -67,6 +67,7 @@ header .logo{font-size:1.4rem}
 .hbtn{border:1.5px solid var(--line);border-radius:11px;padding:.45rem .8rem;font-size:.82rem;font-weight:600}
 .hbtn:hover{border-color:var(--gold);color:var(--gold)}
 .hbtn.off{opacity:.45}
+.hbtn.on{border-color:var(--ok);color:var(--ok)}
 
 #offline{position:fixed;top:0;left:0;right:0;background:var(--bad);color:#fff;
   text-align:center;padding:.4rem;font-size:.85rem;font-weight:600;z-index:50;
@@ -192,6 +193,7 @@ header .logo{font-size:1.4rem}
 .modal-card input:focus,.modal-card select:focus{border-color:var(--brand);outline:none}
 .modal-act{display:grid;grid-template-columns:1fr auto;gap:.5rem}
 </style>
+<!--INCLUDE:shared/dokumente.css-->
 </head>
 <body>
 
@@ -224,6 +226,7 @@ header .logo{font-size:1.4rem}
     <div class="hact">
       <span class="cbadge hide" id="kdsCount">Në punë <b id="cPrep">0</b> · Dhënë <b id="cReady">0</b></span>
       <button class="hbtn hide" id="sndBtn" title="Zilja për porosi të reja">🔔</button>
+      <button class="hbtn off" id="notifBtn" title="Njoftimet">🔕 Njoftime</button>
       <button class="hbtn" id="refBtn" title="Rifresko">↻</button>
       <button class="hbtn" id="outBtn">Dil</button>
     </div>
@@ -279,8 +282,11 @@ header .logo{font-size:1.4rem}
 <!--INCLUDE:shared/data.js-->
 <!--INCLUDE:shared/store.js-->
 <!--INCLUDE:shared/store-biznes.js-->
+<!--INCLUDE:shared/dokumente.js-->
 <!--INCLUDE:src/staf-kds.js-->
 <!--INCLUDE:src/staf-runs.js-->
+<!--INCLUDE:src/staf-njoftim.js-->
 <!--INCLUDE:src/staf.js-->
+<div id="printBox"></div>
 </body>
 </html>

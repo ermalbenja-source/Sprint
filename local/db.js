@@ -149,6 +149,11 @@ create table if not exists purchases (
   vat real not null default 0, total real not null default 0,
   doc_ref text, note text, staff_id text, created_at text not null, updated_at text not null);
 
+create table if not exists push_subs (
+  id text primary key, staff_id text not null references staff(id) on delete cascade,
+  endpoint text not null unique, p256dh text not null, auth text not null,
+  device text, created_at text not null, last_ok_at text, fails integer not null default 0);
+
 create table if not exists purchase_lines (
   id text primary key, purchase_id text not null references purchases(id) on delete cascade,
   item_id text not null, qty real not null, unit_cost real not null default 0,

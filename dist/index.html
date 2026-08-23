@@ -3569,6 +3569,26 @@ ${S('drink', `
     return { staff_id: row.staff_id, name: row.name, role: row.role, screens: row.screens || [] };
   }
 
+  /* ══════════════════ NJOFTIMET ══════════════════
+     Abonimi i takon pajisjes, jo personit: i njëjti tablet i ndarë mes dy
+     turneve nuk krijon dy abonime, thjesht kalon te ai që është brenda. */
+
+  async function pushSubscribe(endpoint, p256dh, auth, device) {
+    if (!live) return null;                       // pa bazë s'ka ku të ruhet
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
+    return st._rpc('push_subscribe', {
+      p_token: sess.token, p_endpoint: endpoint,
+      p_p256dh: p256dh, p_auth: auth, p_device: device || null });
+  }
+
+  async function pushUnsubscribe(endpoint) {
+    if (!live) return null;
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) return null;
+    return st._rpc('push_unsubscribe', { p_token: sess.token, p_endpoint: endpoint });
+  }
+
   /* ══════════════════ MOTORRISTI ══════════════════ */
 
   const tok = () => {
@@ -3758,6 +3778,7 @@ ${S('drink', `
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
     staffLogin, staffSession, staffLogout,
+    pushSubscribe, pushUnsubscribe,
     getLocation, locationQuality, navLink,
   });
 })();

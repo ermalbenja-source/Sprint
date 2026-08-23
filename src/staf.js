@@ -101,6 +101,10 @@
     try { want = localStorage.getItem('sprint-staf-view'); } catch (e) {}
     setView(mine.indexOf(want) >= 0 ? want : mine[0]);
 
+    // Njoftimet rilidhen pas hyrjes: abonimi i takon pajisjes, por serveri
+    // duhet të dijë se cili person është brenda tani.
+    if (S.njoftim) S.njoftim.restore();
+
     clearInterval(A.poll);
     A.poll = setInterval(() => {
       if (!document.hidden && A.view && S.views[A.view]) S.views[A.view].refresh();
@@ -114,6 +118,7 @@
     clearInterval(A.poll);
     if (A.view && S.views[A.view]) S.views[A.view].stop();
     A.view = null; A.me = null;
+    if (S.njoftim) S.njoftim.keepAwake(false);
     await store.staffLogout();
     pin = ''; showPin(); gateErr('');
     $('#app').classList.add('hide');
@@ -126,6 +131,9 @@
     offline: (on) => $('#offline').classList.toggle('on', !!on),
     logout,
     me: () => A.me,
+    // Service worker-i e thërret kur preket njoftimi: ekrani duhet ta tregojë
+    // porosinë e re menjëherë, jo pas ciklit tjetër prej tetë sekondash.
+    refresh: () => { if (A.view && S.views[A.view]) S.views[A.view].refresh(); },
   };
 
   document.addEventListener('click', (e) => {

@@ -61,6 +61,7 @@ header .logo{font-size:1.4rem}
 .hbtn{border:1.5px solid var(--line);border-radius:11px;padding:.45rem .8rem;font-size:.82rem;font-weight:600}
 .hbtn:hover{border-color:var(--gold);color:var(--gold)}
 .hbtn.off{opacity:.45}
+.hbtn.on{border-color:var(--ok);color:var(--ok)}
 
 #offline{position:fixed;top:0;left:0;right:0;background:var(--bad);color:#fff;
   text-align:center;padding:.4rem;font-size:.85rem;font-weight:600;z-index:50;
@@ -186,6 +187,68 @@ header .logo{font-size:1.4rem}
 .modal-card input:focus,.modal-card select:focus{border-color:var(--brand);outline:none}
 .modal-act{display:grid;grid-template-columns:1fr auto;gap:.5rem}
 </style>
+<style>
+/* ============================================================================
+   SPRINT — Pamja e dokumenteve të brendshme.
+   Në ekran fshihen krejt; dalin vetëm nën printer. Gjerësia parazgjedhur
+   80 mm — sa rrotulla e printerit termik të banakut. `.dk-a4` e kalon në A4
+   për fletët që shkojnë te zyra ose te furnitori.
+   ========================================================================== */
+#printBox{display:none}
+
+@media print{
+  /* Gjatë printimit del vetëm fleta. Pa këtë do të printohej i gjithë paneli. */
+  body>*{display:none!important}
+  body>#printBox{display:block!important}
+  #printBox{position:static;color:#000;background:#fff}
+
+  @page{size:80mm auto;margin:4mm}
+  .dk-a4{}
+  .dk-a4 .dk-page{max-width:170mm;font-size:11pt}
+
+  html,body{background:#fff!important;margin:0;padding:0}
+
+  .dk-page{font-family:ui-monospace,'Courier New',monospace;color:#000;
+    font-size:10pt;line-height:1.35;width:100%}
+
+  .dk-hd{text-align:center;margin-bottom:2mm}
+  .dk-brand{font-size:16pt;font-weight:700;letter-spacing:.08em}
+  .dk-sub{font-size:8pt}
+  .dk-title{font-size:12pt;font-weight:700;margin-top:1.5mm;
+    text-transform:uppercase;letter-spacing:.06em}
+
+  .dk-big{font-size:26pt;font-weight:700;text-align:center;line-height:1.1;margin:1mm 0}
+  .dk-sep{border-top:1px dashed #000;margin:2mm 0}
+  .dk-row{display:flex;justify-content:space-between;gap:3mm;font-size:9pt}
+  .dk-row.big{font-size:12pt;font-weight:700}
+  .dk-kv{display:flex;justify-content:space-between;gap:3mm;font-size:9pt;
+    padding:.6mm 0;border-bottom:1px dotted #999}
+  .dk-kv span{color:#333}
+
+  .dk-t{width:100%;border-collapse:collapse}
+  .dk-t td{padding:.9mm 0;vertical-align:top;font-size:11pt}
+  .dk-t td.q{width:11mm;font-weight:700}
+  .dk-t td.p{text-align:right;white-space:nowrap;font-size:9pt}
+
+  /* Shënimi i klientit është arsyeja më e shpeshtë e një porosie të kthyer.
+     Prandaj del me kornizë, jo si rresht i zakonshëm. */
+  .dk-note{border:1.5px solid #000;padding:1.5mm;margin-top:2mm;
+    font-size:10pt;font-weight:700}
+  .dk-other{margin-top:2mm;font-size:8pt;color:#333;font-style:italic}
+  .dk-addr{font-size:11pt;font-weight:700}
+  .dk-stop{border-bottom:1px dashed #000;padding:1.5mm 0}
+  .dk-stop:last-of-type{border-bottom:0}
+
+  .dk-sign{display:flex;gap:6mm;margin-top:8mm;font-size:8pt}
+  .dk-sign div{flex:1}
+  .dk-sign span{display:block;border-top:1px solid #000;margin-top:9mm}
+
+  .dk-ft{margin-top:4mm;padding-top:2mm;border-top:1px dashed #000;
+    text-align:center;font-size:7.5pt;display:grid;gap:.6mm}
+  .dk-ft b{font-size:8pt}
+}
+
+</style>
 
 
 <!-- ─────── HYRJA (e njëjtë për të gjithë) ─────── -->
@@ -195,7 +258,7 @@ header .logo{font-size:1.4rem}
     <p class="gate-sub">Shkruaj kodin tënd.</p>
     <div id="pinShow"></div>
     <p class="gate-err" id="gateErr"></p>
-    <p class="buildtag" id="buildTag">v2026-08-22 13:49</p>
+    <p class="buildtag" id="buildTag">v2026-08-23 08:09</p>
     <div class="keys">
       <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
       <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
@@ -217,6 +280,7 @@ header .logo{font-size:1.4rem}
     <div class="hact">
       <span class="cbadge hide" id="kdsCount">Në punë <b id="cPrep">0</b> · Dhënë <b id="cReady">0</b></span>
       <button class="hbtn hide" id="sndBtn" title="Zilja për porosi të reja">🔔</button>
+      <button class="hbtn off" id="notifBtn" title="Njoftimet">🔕 Njoftime</button>
       <button class="hbtn" id="refBtn" title="Rifresko">↻</button>
       <button class="hbtn" id="outBtn">Dil</button>
     </div>
@@ -2400,6 +2464,26 @@ window.SPRINT = (function () {
     return { staff_id: row.staff_id, name: row.name, role: row.role, screens: row.screens || [] };
   }
 
+  /* ══════════════════ NJOFTIMET ══════════════════
+     Abonimi i takon pajisjes, jo personit: i njëjti tablet i ndarë mes dy
+     turneve nuk krijon dy abonime, thjesht kalon te ai që është brenda. */
+
+  async function pushSubscribe(endpoint, p256dh, auth, device) {
+    if (!live) return null;                       // pa bazë s'ka ku të ruhet
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
+    return st._rpc('push_subscribe', {
+      p_token: sess.token, p_endpoint: endpoint,
+      p_p256dh: p256dh, p_auth: auth, p_device: device || null });
+  }
+
+  async function pushUnsubscribe(endpoint) {
+    if (!live) return null;
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) return null;
+    return st._rpc('push_unsubscribe', { p_token: sess.token, p_endpoint: endpoint });
+  }
+
   /* ══════════════════ MOTORRISTI ══════════════════ */
 
   const tok = () => {
@@ -2589,8 +2673,302 @@ window.SPRINT = (function () {
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
     staffLogin, staffSession, staffLogout,
+    pushSubscribe, pushUnsubscribe,
     getLocation, locationQuality, navLink,
   });
+})();
+
+</script>
+<script>
+/* ============================================================================
+   SPRINT — Dokumentet e brendshme.
+
+   Fletë porosie për kuzhinën, fletë dorëzimi për motorristin, urdhërblerje për
+   furnitorin. Asnjëra NUK është faturë tatimore: nuk kalojnë nga fiskalizimi
+   dhe nuk mbajnë NIVF/NSLF. Prandaj çdo fletë del e shënuar hapur në fund —
+   që të mos ngatërrohet kurrë me faturën që lëshon programi i certifikuar.
+
+   Printimi bëhet nga vetë faqja: dokumenti ndërtohet te një kuti e fshehur dhe
+   shfaqet vetëm gjatë printimit. Pa dritare të re, pa bllokues dritaresh.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const st = S.store;
+  const live = st.configured;
+
+  const esc = (t) => String(t == null ? '' : t)
+    .replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const num = (v) => Number(v) || 0;
+  const L = (n) => (Math.round(num(n) * 100) / 100).toLocaleString('sq-AL') + ' L';
+
+  const KINDS = {
+    order_slip:     'Fletë porosie',
+    kitchen_ticket: 'Fletë kuzhine',
+    delivery_note:  'Fletë dorëzimi',
+    purchase_order: 'Urdhërblerje',
+    stock_count:    'Fletë numërimi',
+    internal_receipt: 'Vërtetim i brendshëm',
+  };
+
+  const LS_DOCS = 'sprint-documents';
+  const mem = {};
+  const readLS = (k, fb) => {
+    try { const r = localStorage.getItem(k); if (r != null) return JSON.parse(r) || fb; } catch (e) {}
+    return k in mem ? mem[k] : fb;
+  };
+  const writeLS = (k, v) => {
+    mem[k] = v;
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  };
+
+  /** Regjistron dokumentin që të ketë numër dhe të gjendet më vonë. */
+  async function record(kind, refType, refId, title, total) {
+    if (!live) {
+      const all = readLS(LS_DOCS, []);
+      const row = { id: 'd' + Date.now().toString(36), number: all.length + 1,
+                    kind, ref_type: refType, ref_id: refId, title, total,
+                    created_at: new Date().toISOString() };
+      all.push(row); writeLS(LS_DOCS, all);
+      return row;
+    }
+    try {
+      await st._ensureAuth();
+      const rows = await st._req('/rest/v1/documents', {
+        method: 'POST', headers: st._headers({ Prefer: 'return=representation' }),
+        body: JSON.stringify({ kind, ref_type: refType, ref_id: refId, title,
+                               total: total == null ? null : num(total) }) });
+      return (Array.isArray(rows) ? rows[0] : rows) || null;
+    } catch (e) {
+      // Numri i dokumentit është i mirë për gjurmim, por nuk ia vlen të
+      // ndalohet printimi për të: fleta duhet dalë edhe kur baza nuk përgjigjet.
+      return null;
+    }
+  }
+
+  /* ---------- pjesët e përbashkëta ---------- */
+
+  const cfg = () => (S.config || {});
+
+  const head = (title, sub) => `
+    <div class="dk-hd">
+      <div class="dk-brand">${esc(cfg().brand || 'SPRINT')}</div>
+      <div class="dk-sub">${esc((cfg().tagline && cfg().tagline.sq) || '')}</div>
+      <div class="dk-sub">${esc((cfg().address && cfg().address.sq) || '')}
+        ${cfg().phone ? ' · ' + esc(cfg().phone) : ''}</div>
+      <div class="dk-title">${esc(title)}</div>
+      ${sub ? `<div class="dk-sub">${esc(sub)}</div>` : ''}
+    </div>`;
+
+  const foot = (docNo) => `
+    <div class="dk-ft">
+      <b>DOKUMENT I BRENDSHËM — NUK ËSHTË FATURË TATIMORE</b>
+      <span>Fatura zyrtare lëshohet nga programi i certifikuar.</span>
+      <span>${docNo ? 'Nr. ' + esc(docNo) + ' · ' : ''}${esc(stamp())}</span>
+    </div>`;
+
+  const stamp = () => {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, '0');
+    return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  };
+
+  const linesTable = (items, showPrice) => `
+    <table class="dk-t">
+      <tbody>
+        ${(items || []).map((it) => `<tr>
+          <td class="q">${esc(num(it.qty) || 1)}×</td>
+          <td>${esc(it.name || it.id || '')}</td>
+          ${showPrice ? `<td class="p">${esc(L(num(it.qty) * num(it.price)))}</td>` : ''}
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  /* ---------- fletët ---------- */
+
+  /** Fletë porosie: çfarë të gatuhet dhe ku shkon. Pa çmime nëse është
+      për kuzhinën — atje çmimi vetëm zë vend dhe ngadalëson leximin. */
+  function orderSlip(o, opt) {
+    const only = (opt && opt.station) || null;
+    const items = only
+      ? (o.items || []).filter((x) => (x.station || 'kitchen') === only)
+      : (o.items || []);
+    const others = only
+      ? (o.items || []).filter((x) => (x.station || 'kitchen') !== only && x.station !== 'none')
+      : [];
+    const STN = { kitchen: 'KUZHINA', oven: 'FURRA E PICËS' };
+    const KIND = { pickup: 'MARR VETË', delivery: 'DËRGESË' };
+
+    return `
+      ${head(only ? STN[only] : 'Fletë porosie', null)}
+      <div class="dk-big">#${esc(o.number || '')}</div>
+      <div class="dk-row"><b>${esc(KIND[o.kind] || '')}</b>
+        <span>${esc(stamp())}</span></div>
+      ${o.wanted_at && o.wanted_at !== 'asap'
+        ? `<div class="dk-row"><b>PËR ORËN ${esc(o.wanted_at)}</b></div>` : ''}
+      <div class="dk-sep"></div>
+      ${linesTable(items, !only)}
+      ${o.note ? `<div class="dk-note">SHËNIM: ${esc(o.note)}</div>` : ''}
+      ${others.length ? `<div class="dk-other">Bashkë me: ${others.map((x) =>
+        `${num(x.qty) || 1}× ${esc(x.name || '')}`).join(' · ')}</div>` : ''}
+      ${!only ? `<div class="dk-sep"></div>
+        <div class="dk-row big"><b>GJITHSEJ</b><b>${esc(L(o.total))}</b></div>
+        <div class="dk-row"><span>${o.payment === 'cash' ? 'Në dorë' : 'Me kartë'}</span></div>` : ''}
+    `;
+  }
+
+  /** Fletë dorëzimi: adresa, telefoni dhe sa para priten. Kjo është fleta
+      që motorristi mban në xhep — përmbajtja është ajo që i duhet në rrugë. */
+  function deliveryNote(o) {
+    return `
+      ${head('Fletë dorëzimi', null)}
+      <div class="dk-big">#${esc(o.number || '')}</div>
+      <div class="dk-sep"></div>
+      <div class="dk-kv"><span>Klienti</span><b>${esc(o.customer_name || '')}</b></div>
+      <div class="dk-kv"><span>Telefoni</span><b>${esc(o.phone || '')}</b></div>
+      <div class="dk-kv"><span>Adresa</span><b>${esc(o.address || '')}</b></div>
+      ${o.lat && o.lng
+        ? `<div class="dk-kv"><span>Pika në hartë</span><b>${esc(num(o.lat).toFixed(5))}, ${esc(num(o.lng).toFixed(5))}</b></div>`
+        : ''}
+      ${o.note ? `<div class="dk-note">SHËNIM: ${esc(o.note)}</div>` : ''}
+      <div class="dk-sep"></div>
+      ${linesTable(o.items, true)}
+      <div class="dk-sep"></div>
+      <div class="dk-row big"><b>${o.payment === 'cash' ? 'ARKËTO' : 'PAGUAR ME KARTË'}</b>
+        <b>${esc(o.payment === 'cash' ? L(o.total) : '—')}</b></div>
+      <div class="dk-sign">
+        <div>Dorëzoi<br><span></span></div>
+        <div>Mori<br><span></span></div>
+      </div>`;
+  }
+
+  /** E gjithë nisja në një fletë: motorristi merr një letër, jo pesë. */
+  function runSheet(stops, driverName) {
+    const cash = (stops || []).filter((s) => s.payment === 'cash')
+      .reduce((n, s) => n + num(s.total), 0);
+    return `
+      ${head('Fletë nisjeje', driverName ? 'Motorristi: ' + driverName : null)}
+      <div class="dk-row"><b>${esc((stops || []).length)} ndalesa</b><span>${esc(stamp())}</span></div>
+      <div class="dk-sep"></div>
+      ${(stops || []).map((s, i) => `
+        <div class="dk-stop">
+          <div class="dk-row"><b>${i + 1}. #${esc(s.number || '')}</b>
+            <b>${esc(s.payment === 'cash' ? L(s.total) : 'me kartë')}</b></div>
+          <div>${esc(s.customer_name || '')} · ${esc(s.phone || '')}</div>
+          <div class="dk-addr">${esc(s.address || '')}</div>
+          ${s.note ? `<div class="dk-note">${esc(s.note)}</div>` : ''}
+        </div>`).join('')}
+      <div class="dk-sep"></div>
+      <div class="dk-row big"><b>ARKA E PRITUR</b><b>${esc(L(cash))}</b></div>
+      <div class="dk-sign">
+        <div>Mori nisjen<br><span></span></div>
+        <div>Dorëzoi arkën<br><span></span></div>
+      </div>`;
+  }
+
+  /** Urdhërblerje: çfarë i kërkohet furnitorit. */
+  function purchaseOrder(p, lines, supplier, items) {
+    const name = (id) => {
+      const it = (items || []).find((x) => x.id === id);
+      return it ? it.name : '—';
+    };
+    const unit = (id) => {
+      const it = (items || []).find((x) => x.id === id);
+      return it ? it.unit : '';
+    };
+    const sum = (lines || []).reduce((n, l) => n + num(l.qty) * num(l.unit_cost), 0);
+    return `
+      ${head('Urdhërblerje', p.number ? 'Nr. ' + p.number : null)}
+      <div class="dk-kv"><span>Furnitori</span><b>${esc(supplier ? supplier.name : '—')}</b></div>
+      ${supplier && supplier.nipt ? `<div class="dk-kv"><span>NIPT</span><b>${esc(supplier.nipt)}</b></div>` : ''}
+      <div class="dk-kv"><span>Data</span><b>${esc(p.date || '')}</b></div>
+      ${p.doc_ref ? `<div class="dk-kv"><span>Fatura e furnitorit</span><b>${esc(p.doc_ref)}</b></div>` : ''}
+      <div class="dk-sep"></div>
+      <table class="dk-t">
+        <tbody>
+          ${(lines || []).map((l) => `<tr>
+            <td class="q">${esc(num(l.qty))}${esc(unit(l.item_id))}</td>
+            <td>${esc(name(l.item_id))}</td>
+            <td class="p">${esc(L(num(l.qty) * num(l.unit_cost)))}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="dk-sep"></div>
+      <div class="dk-row big"><b>GJITHSEJ</b><b>${esc(L(sum))}</b></div>
+      ${p.note ? `<div class="dk-note">${esc(p.note)}</div>` : ''}
+      <div class="dk-sign">
+        <div>Porositi<br><span></span></div>
+        <div>Pranoi<br><span></span></div>
+      </div>`;
+  }
+
+  /* ---------- printimi ---------- */
+
+  /** Ndërton fletën, e shfaq vetëm gjatë printimit, pastaj e heq.
+      `wide` = A4 për zyrën; pa të = 80mm, sa gjerësia e printerit termik. */
+  function print(html, opt) {
+    const box = document.getElementById('printBox');
+    if (!box) return false;
+    box.className = 'dk' + ((opt && opt.wide) ? ' dk-a4' : '');
+    box.innerHTML = '<div class="dk-page">' + html
+      + foot(opt && opt.docNo) + '</div>';
+    // Printimi i dytë brenda së njëjtës faqe e gjen kutinë tashmë të mbushur;
+    // pastrimi bëhet pas mbylljes së dritares së printimit, jo para saj.
+    const done = () => { box.innerHTML = ''; window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    window.print();
+    return true;
+  }
+
+  /* ---------- pikat e përdorimit ---------- */
+
+  async function printOrder(o, opt) {
+    const d = await record('order_slip', 'order', o.id,
+      'Fletë porosie #' + (o.number || ''), o.total);
+    return print(orderSlip(o, opt), { docNo: d && d.number, wide: opt && opt.wide });
+  }
+
+  async function printStationTicket(o, station) {
+    const d = await record('kitchen_ticket', 'order', o.id,
+      'Fletë ' + (station === 'oven' ? 'furre' : 'kuzhine') + ' #' + (o.number || ''), null);
+    return print(orderSlip(o, { station }), { docNo: d && d.number });
+  }
+
+  async function printDelivery(o) {
+    const d = await record('delivery_note', 'order', o.id,
+      'Fletë dorëzimi #' + (o.number || ''), o.total);
+    return print(deliveryNote(o), { docNo: d && d.number });
+  }
+
+  async function printRun(stops, driverName) {
+    const total = (stops || []).reduce((n, s) => n + num(s.total), 0);
+    const d = await record('delivery_note', null, null,
+      'Fletë nisjeje · ' + (driverName || ''), total);
+    return print(runSheet(stops, driverName), { docNo: d && d.number });
+  }
+
+  async function printPurchase(p, lines, supplier, items) {
+    const sum = (lines || []).reduce((n, l) => n + num(l.qty) * num(l.unit_cost), 0);
+    const d = await record('purchase_order', 'purchase', p.id,
+      'Urdhërblerje ' + (p.number ? '#' + p.number : ''), sum);
+    return print(purchaseOrder(p, lines, supplier, items),
+      { docNo: d && d.number, wide: true });
+  }
+
+  async function fetchDocuments(limit) {
+    const n = limit || 50;
+    if (!live) {
+      return readLS(LS_DOCS, []).slice().reverse().slice(0, n);
+    }
+    await st._ensureAuth();
+    return st._req('/rest/v1/documents?select=*&order=number.desc&limit=' + n,
+      { headers: st._headers() });
+  }
+
+  S.docs = {
+    KINDS, print, fetchDocuments,
+    orderSlip, deliveryNote, runSheet, purchaseOrder,
+    printOrder, printStationTicket, printDelivery, printRun, printPurchase,
+  };
 })();
 
 </script>
@@ -3093,6 +3471,180 @@ window.SPRINT = (function () {
 </script>
 <script>
 /* ============================================================================
+   SPRINT — Njoftimet për ekranin e stafit.
+
+   Dy rrugë, sepse asnjëra nuk mjafton vetëm:
+
+   1. NJOFTIM I VËRTETË (push). Del edhe kur faqja është e mbyllur dhe telefoni
+      në xhep. Kjo është ajo që i duhet motorristit. POR shfletuesi e lejon
+      vetëm mbi HTTPS ose te localhost — në një rrjet lokal me http://192.168…
+      nuk ndizet dot. Rregull i shfletuesit, jo zgjedhje e programit.
+      Te iPhone kërkon edhe që faqja të jetë shtuar në ekranin bazë.
+
+   2. ZILJA BRENDA FAQES. Punon kudo, edhe mbi http të thjeshtë, sa kohë ekrani
+      rri hapur — si tableti i murit te kuzhina. Bie zilja, dridhet telefoni,
+      dhe ekrani mbahet ndezur sa jemi në punë.
+
+   Butoni e thotë hapur cilën nga të dyja e ka të ndezur, që askush të mos rrijë
+   duke pritur një njoftim që nuk vjen dot.
+   ========================================================================== */
+(function () {
+  const S = window.SPRINT;
+  const store = S.store;
+  const $ = (s) => document.querySelector(s);
+
+  const N = { reg: null, sub: null, vapid: null, wake: null, on: false };
+
+  const b64ToU8 = (s) => {
+    const pad = '='.repeat((4 - (s.length % 4)) % 4);
+    const raw = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
+    return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+  };
+  const u8ToB64 = (buf) => {
+    const b = new Uint8Array(buf);
+    let s = '';
+    for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  };
+
+  /* `isSecureContext` është përgjigjja e saktë: localhost e ka true edhe mbi
+     http, ndaj provat te vetë kompjuteri punojnë. */
+  const canPush = () => !!(window.isSecureContext && 'serviceWorker' in navigator
+    && 'PushManager' in window && 'Notification' in window);
+
+  /* ---------- ekrani i ndezur ----------
+     Kuzhina dhe furra e kanë tabletin në mur gjithë ditën. Pa këtë, ekrani
+     fiket dhe porosia e re shihet me dhjetë minuta vonesë. */
+  async function keepAwake(on) {
+    try {
+      if (on && !N.wake && 'wakeLock' in navigator) {
+        N.wake = await navigator.wakeLock.request('screen');
+        N.wake.addEventListener('release', () => { N.wake = null; });
+      } else if (!on && N.wake) {
+        await N.wake.release(); N.wake = null;
+      }
+    } catch (e) { N.wake = null; }
+  }
+  // Bllokimi bie kur faqja kalon prapa; kur kthehet, rikthehet.
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && N.on) keepAwake(true);
+  });
+
+  /* ---------- gjendja e butonit ---------- */
+  function paint(state, why) {
+    const b = $('#notifBtn');
+    if (!b) return;
+    b.classList.toggle('on', state === 'push');
+    b.classList.toggle('off', state === 'off');
+    b.textContent = state === 'push' ? '🔔 Njoftime'
+      : state === 'zile' ? '🔊 Zile' : '🔕 Njoftime';
+    b.title = why || '';
+    b.setAttribute('aria-label', why || 'Njoftimet');
+  }
+
+  /* ---------- abonimi ---------- */
+  async function subscribe() {
+    if (!canPush()) {
+      throw new Error(window.isSecureContext
+        ? 'Ky shfletues nuk i mbështet njoftimet.'
+        : 'Njoftimet kërkojnë HTTPS. Mbi rrjetin lokal punon zilja e faqes.');
+    }
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') throw new Error('Nuk u dha leja për njoftimet.');
+
+    if (!N.vapid) {
+      const r = await fetch('/api/vapid').then((x) => x.json()).catch(() => null);
+      if (!r || !r.publicKey) throw new Error('Serveri nuk dha çelësin e njoftimeve.');
+      N.vapid = r.publicKey;
+    }
+
+    N.reg = await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+
+    N.sub = await N.reg.pushManager.getSubscription();
+    if (!N.sub) {
+      N.sub = await N.reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: b64ToU8(N.vapid),
+      });
+    }
+    const j = N.sub.toJSON();
+    await store.pushSubscribe(j.endpoint, j.keys.p256dh, j.keys.auth,
+      navigator.userAgent.slice(0, 100));
+    return true;
+  }
+
+  async function unsubscribe() {
+    try {
+      if (N.sub) {
+        await store.pushUnsubscribe(N.sub.endpoint).catch(() => {});
+        await N.sub.unsubscribe().catch(() => {});
+        N.sub = null;
+      }
+    } catch (e) {}
+  }
+
+  /* ---------- ndezja dhe fikja ---------- */
+  async function toggle() {
+    if (N.on) {
+      N.on = false;
+      await unsubscribe();
+      await keepAwake(false);
+      save(false);
+      paint('off', 'Njoftimet janë të fikura.');
+      return;
+    }
+    N.on = true;
+    save(true);
+    await keepAwake(true);
+    try {
+      await subscribe();
+      paint('push', 'Njoftimet vijnë edhe kur faqja është e mbyllur.');
+    } catch (e) {
+      // Zilja mbetet: më mirë një ekran që bërtet sesa asgjë.
+      paint('zile', e.message + ' Zilja e faqes është e ndezur.');
+    }
+  }
+
+  const save = (v) => { try { localStorage.setItem('sprint-njoftime', v ? '1' : '0'); } catch (e) {} };
+  const load = () => { try { return localStorage.getItem('sprint-njoftime') === '1'; } catch (e) { return false; } };
+
+  /* Rilidhja pa pyetur: nëse leja është dhënë më parë, abonimi rifreskohet vetë
+     në heshtje — sesioni i pajisjes mund të jetë ndërruar. */
+  async function restore() {
+    if (!load()) { paint('off', 'Njoftimet janë të fikura.'); return; }
+    N.on = true;
+    keepAwake(true);
+    if (canPush() && Notification.permission === 'granted') {
+      try {
+        await subscribe();
+        paint('push', 'Njoftimet vijnë edhe kur faqja është e mbyllur.');
+        return;
+      } catch (e) {}
+    }
+    paint('zile', canPush()
+      ? 'Zilja e faqes është e ndezur.'
+      : 'Mbi rrjetin lokal punon vetëm zilja e faqes (njoftimet kërkojnë HTTPS).');
+  }
+
+  /* Kur njoftimi preket, service worker-i kërkon rifreskim — ekrani duhet të
+     tregojë porosinë e re menjëherë, jo pas ciklit tjetër. */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (e) => {
+      if (e.data && e.data.sprint === 'refresh' && S.staf && S.staf.refresh) S.staf.refresh();
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#notifBtn')) toggle();
+  });
+
+  S.njoftim = { toggle, restore, canPush, keepAwake, state: () => N.on };
+})();
+
+</script>
+<script>
+/* ============================================================================
    SPRINT — Guaska e aplikacionit të stafit.
    Një hyrje për të gjithë. Kodi vendos se cilat pamje hapen: kuzhinieri sheh
    kuzhinën, piceri furrën, motorristi nisjen; pronari i sheh të gjitha dhe
@@ -3195,6 +3747,10 @@ window.SPRINT = (function () {
     try { want = localStorage.getItem('sprint-staf-view'); } catch (e) {}
     setView(mine.indexOf(want) >= 0 ? want : mine[0]);
 
+    // Njoftimet rilidhen pas hyrjes: abonimi i takon pajisjes, por serveri
+    // duhet të dijë se cili person është brenda tani.
+    if (S.njoftim) S.njoftim.restore();
+
     clearInterval(A.poll);
     A.poll = setInterval(() => {
       if (!document.hidden && A.view && S.views[A.view]) S.views[A.view].refresh();
@@ -3208,6 +3764,7 @@ window.SPRINT = (function () {
     clearInterval(A.poll);
     if (A.view && S.views[A.view]) S.views[A.view].stop();
     A.view = null; A.me = null;
+    if (S.njoftim) S.njoftim.keepAwake(false);
     await store.staffLogout();
     pin = ''; showPin(); gateErr('');
     $('#app').classList.add('hide');
@@ -3220,6 +3777,9 @@ window.SPRINT = (function () {
     offline: (on) => $('#offline').classList.toggle('on', !!on),
     logout,
     me: () => A.me,
+    // Service worker-i e thërret kur preket njoftimi: ekrani duhet ta tregojë
+    // porosinë e re menjëherë, jo pas ciklit tjetër prej tetë sekondash.
+    refresh: () => { if (A.view && S.views[A.view]) S.views[A.view].refresh(); },
   };
 
   document.addEventListener('click', (e) => {
@@ -3265,3 +3825,4 @@ window.SPRINT = (function () {
 })();
 
 </script>
+<div id="printBox"></div>

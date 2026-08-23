@@ -54,6 +54,36 @@ Gjendja e magazinës nuk shkruhet me dorë: llogaritet nga lëvizjet. Kur numri 
 rafti nuk përputhet, shtyp «Numërim» dhe shkruaj sa gjete — programi e barazon
 dhe e lë gjurmën, pa fshirë asgjë.
 
+## Fletët e printuara
+
+Te çdo porosi ke katër butona: **Fletë porosie**, **Kuzhina**, **Furra**,
+**Fletë dorëzimi**. Kuzhina dhe furra marrin secila vetëm rreshtat e veta;
+fleta e dorëzimit mban adresën, telefonin dhe sa para të arkëtohen.
+
+Fletët dalin në gjerësi 80 mm — sa rrotulla e printerit termik. Të gjitha janë
+**dokumente të brendshme** dhe e mbajnë këtë shënim në fund: fatura tatimore
+lëshohet nga programi yt i certifikuar, jo nga ky.
+
+## Njoftimet
+
+Butoni **🔔 Njoftime** te ekrani i stafit ka dy gjendje, dhe e thotë hapur cilën
+ka ndezur:
+
+- **🔔 Njoftime** — njoftim i vërtetë, del edhe kur faqja është e mbyllur dhe
+  telefoni në xhep. Kjo është ajo që i duhet motorristit.
+- **🔊 Zile** — zilja dhe dridhja brenda faqes, plus ekrani që nuk fiket.
+  Punon kudo, sa kohë ekrani rri hapur — si tableti i murit te kuzhina.
+
+**Pse ndonjëherë del vetëm «Zile»:** shfletuesi i lejon njoftimet e vërteta
+vetëm mbi **HTTPS** ose te **localhost**. Në rrjetin lokal me
+`http://192.168…` nuk ndizen dot — ky është rregull i shfletuesit, jo zgjedhje
+e programit. Te vetë kompjuteri ku punon serveri, njoftimet punojnë; nga tableti
+apo telefoni në WiFi, punon zilja. Kur të kalojmë online me HTTPS, njoftimet
+ndizen kudo pa ndryshuar asgjë.
+
+Te iPhone kërkohet edhe që faqja të jetë shtuar në **ekranin bazë**
+(Share → Add to Home Screen) — Apple i lejon njoftimet vetëm atëherë.
+
 Këshillë: ruaje adresën si faqe fillestare te tableti, dhe në telefonat e
 motorristëve shtoje në ekranin bazë. Sesioni mbahet 30 ditë, ndaj kodi nuk
 shkruhet çdo turn.

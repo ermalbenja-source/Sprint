@@ -55,6 +55,15 @@ function emit(srcPath, outPath) {
 emit(path.join(root, 'src', 'site.html'), path.join(outDir, 'index.html'));
 emit(path.join(root, 'src', 'admin.html'), path.join(outDir, 'admin', 'index.html'));
 emit(path.join(root, 'src', 'staf.html'), path.join(outDir, 'staf', 'index.html'));
+
+/* Service worker-i shkon i veçuar, jo i futur brenda faqes: shfletuesi e do si
+   skedar më vete, dhe fusha e tij e veprimit është dosja ku ndodhet. */
+{
+  const sw = fs.readFileSync(path.join(root, 'src', 'sw.js'), 'utf8')
+    .split('__BUILD__').join(STAMP);
+  fs.writeFileSync(path.join(outDir, 'staf', 'sw.js'), sw);
+  console.log('  ✓ dist/staf/sw.js  (' + kb(sw) + ')');
+}
 emit(path.join(root, 'src', 'kuzhina.html'), path.join(outDir, 'kuzhina', 'index.html'));
 
 /* ── mockup-et (ruhen si referencë) ── */

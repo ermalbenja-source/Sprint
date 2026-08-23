@@ -429,6 +429,9 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
   border-top:1px solid var(--line)}
 .ord-act .btn{flex:1;min-width:96px}
 .ord-meta{font-size:.72rem;color:var(--muted);display:flex;gap:.7rem;flex-wrap:wrap}
+.ord-meta .lnk{font-size:.72rem;color:var(--gold);padding:0;background:none;border:0;
+  cursor:pointer;white-space:nowrap}
+.ord-meta .lnk:hover{text-decoration:underline}
 
 /* ---------- zgjedhja e kohës së përgatitjes ---------- */
 .prep{display:grid;gap:.5rem;padding:.7rem .9rem;background:#0F0B0C;border-top:1px solid var(--line)}
@@ -506,6 +509,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 }
 @media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 </style>
+<!--INCLUDE:shared/dokumente.css-->
 </head>
 <body>
 
@@ -1129,10 +1133,12 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
 
 <!--INCLUDE:shared/store.js-->
 <!--INCLUDE:shared/store-biznes.js-->
+<!--INCLUDE:shared/dokumente.js-->
 <!--INCLUDE:shared/reviews.js-->
 <!--INCLUDE:src/admin.js-->
 <!--INCLUDE:src/admin-biznes.js-->
 <!--INCLUDE:src/admin-porosi.js-->
 <!--INCLUDE:src/admin-magazina.js-->
+<div id="printBox"></div>
 </body>
 </html>
