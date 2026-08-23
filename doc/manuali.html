@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dorëzimi i Sprintit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bakbak+One&family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+/* ============================================================================
+   Manuali i SPRINT — Durrës.
+   Bardha e ngrohtë e faqes zbret nga kafja e paneleve të programit, që manuali
+   të ndihet pjesë e të njëjtit mjet. Çdo profil ka ngjyrën e vet, sepse këtë
+   faqe do ta hapin gjashtë veta të ndryshëm dhe secili kërkon vetëm të vetin.
+   ========================================================================== */
+:root{
+  --ground:#FAF6F4;
+  --surface:#FFFFFF;
+  --surface-2:#F3ECE8;
+  --ink:#241B18;
+  --muted:#7A6B65;
+  --line:#E9DFDA;
+  --line-2:#D8C9C2;
+  --accent:#C25E10;
+  --accent-soft:rgba(194,94,16,.10);
+
+  --r-owner:#584842;
+  --r-cash:#2E7D51;
+  --r-kitchen:#C25E10;
+  --r-oven:#A63A22;
+  --r-driver:#1F6F8B;
+  --r-client:#7A5CA8;
+
+  --display:'Bakbak One',Impact,Haettenschweiler,sans-serif;
+  --body:'Outfit',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Courier New',monospace;
+
+  --shadow:0 1px 2px rgba(36,27,24,.05),0 8px 24px -16px rgba(36,27,24,.22);
+}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#100C0B;
+    --surface:#191312;
+    --surface-2:#221A18;
+    --ink:#F3EAE3;
+    --muted:#A4938C;
+    --line:#2E2422;
+    --line-2:#3E312D;
+    --accent:#E8892B;
+    --accent-soft:rgba(232,137,43,.13);
+
+    --r-owner:#B9A79F;
+    --r-cash:#5CC188;
+    --r-kitchen:#E8892B;
+    --r-oven:#E0664C;
+    --r-driver:#5EB4D2;
+    --r-client:#B294E0;
+
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 30px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#100C0B;
+  --surface:#191312;
+  --surface-2:#221A18;
+  --ink:#F3EAE3;
+  --muted:#A4938C;
+  --line:#2E2422;
+  --line-2:#3E312D;
+  --accent:#E8892B;
+  --accent-soft:rgba(232,137,43,.13);
+
+  --r-owner:#B9A79F;
+  --r-cash:#5CC188;
+  --r-kitchen:#E8892B;
+  --r-oven:#E0664C;
+  --r-driver:#5EB4D2;
+  --r-client:#B294E0;
+
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 30px -18px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--body);font-size:17px;line-height:1.62;font-weight:350;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0;text-wrap:balance;line-height:1.15}
+p{margin:0}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+.wrap{width:min(100% - 2.4rem,72rem);margin-inline:auto}
+.col{max-width:44rem}
+
+/* ---------- shiriti i kërcimit ---------- */
+.bar{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--ground) 92%,transparent);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.bar-in{display:flex;align-items:center;gap:1.4rem;padding:.62rem 0;flex-wrap:wrap}
+.mark{font-family:var(--display);font-size:1.16rem;letter-spacing:.015em;white-space:nowrap}
+.mark em{font-style:normal;color:var(--accent)}
+.jump{display:flex;gap:.28rem;flex-wrap:wrap;margin-left:auto}
+.jump a{
+  font-size:.775rem;font-weight:500;text-decoration:none;color:var(--muted);
+  padding:.3rem .62rem;border-radius:999px;border:1px solid transparent;
+  transition:.16s;white-space:nowrap;
+}
+.jump a:hover{border-color:var(--line-2);color:var(--ink)}
+.jump a b{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:.42rem;vertical-align:middle}
+
+/* ---------- hyrja ---------- */
+.hero{padding:3.4rem 0 2.2rem}
+.kick{
+  font-family:var(--mono);font-size:.74rem;font-weight:500;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:1rem;
+}
+.hero h1{font-family:var(--display);font-size:clamp(2.4rem,6.4vw,4rem);letter-spacing:.005em}
+.hero .lede{margin-top:1.1rem;font-size:1.16rem;color:var(--muted);max-width:36rem;line-height:1.55}
+
+/* ---------- seksionet ---------- */
+section{padding:2.6rem 0;border-top:1px solid var(--line)}
+.sec-head{display:flex;align-items:baseline;gap:.9rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.sec-head h2{font-size:1.62rem;font-weight:600;letter-spacing:-.012em}
+.sec-head .note{font-size:.83rem;color:var(--muted)}
+
+/* ---------- figura ---------- */
+figure{margin:0}
+.figbox{
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:1.3rem;overflow-x:auto;box-shadow:var(--shadow);
+}
+.figbox svg{display:block;width:100%;min-width:760px;height:auto;color:var(--ink)}
+figcaption{margin-top:.9rem;font-size:.86rem;color:var(--muted);max-width:44rem;line-height:1.5}
+
+/* ---------- dyert ---------- */
+.doors{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(19rem,1fr))}
+.door{
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:1.15rem 1.25rem;display:grid;gap:.45rem;box-shadow:var(--shadow);
+}
+.door .url{font-family:var(--mono);font-size:1.02rem;font-weight:600;color:var(--accent)}
+.door h3{font-size:1rem;font-weight:600}
+.door p{font-size:.88rem;color:var(--muted);line-height:1.5}
+
+/* ---------- kapitujt e roleve ---------- */
+.role{
+  --hue:var(--accent);
+  background:var(--surface);border:1px solid var(--line);
+  border-left:4px solid var(--hue);border-radius:4px 14px 14px 4px;
+  padding:1.5rem 1.5rem 1.35rem;margin-bottom:1.1rem;box-shadow:var(--shadow);
+  scroll-margin-top:5rem;
+}
+.role[data-r="owner"]{--hue:var(--r-owner)}
+.role[data-r="cash"]{--hue:var(--r-cash)}
+.role[data-r="kitchen"]{--hue:var(--r-kitchen)}
+.role[data-r="oven"]{--hue:var(--r-oven)}
+.role[data-r="driver"]{--hue:var(--r-driver)}
+.role[data-r="client"]{--hue:var(--r-client)}
+
+.role-head{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;margin-bottom:.3rem}
+.role-head h3{font-size:1.34rem;font-weight:600;color:var(--hue);letter-spacing:-.01em}
+.role-head .where{
+  font-family:var(--mono);font-size:.76rem;font-weight:500;color:var(--muted);
+  border:1px solid var(--line-2);border-radius:999px;padding:.16rem .58rem;
+}
+.role > p.intro{font-size:.95rem;color:var(--muted);margin-bottom:1.15rem;max-width:42rem}
+
+.sub{
+  font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);margin:1.35rem 0 .6rem;
+}
+.sub:first-of-type{margin-top:0}
+
+ol.steps{margin:0;padding:0;list-style:none;display:grid;gap:.7rem;counter-reset:s}
+ol.steps li{
+  counter-increment:s;position:relative;padding-left:2.3rem;font-size:.95rem;line-height:1.55;
+}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:.06rem;
+  width:1.55rem;height:1.55rem;border-radius:50%;
+  /* Sfondi është ngjyra e rolit; teksti merr sipërfaqen — e bardhë mbi dritë,
+     e errët mbi errësirë. Një rregull i vetëm mjafton për të tria gjendjet. */
+  background:var(--hue);color:var(--surface);
+  font-family:var(--mono);font-size:.78rem;font-weight:600;
+  display:grid;place-items:center;
+}
+
+ul.plain{margin:0;padding:0;list-style:none;display:grid;gap:.55rem}
+ul.plain li{
+  position:relative;padding-left:1.15rem;font-size:.94rem;line-height:1.55;color:var(--ink);
+}
+ul.plain li::before{
+  content:'';position:absolute;left:0;top:.62em;
+  width:5px;height:5px;border-radius:50%;background:var(--hue);
+}
+
+kbd{
+  font-family:var(--mono);font-size:.83em;font-weight:600;
+  background:var(--surface-2);border:1px solid var(--line-2);
+  border-bottom-width:2px;border-radius:6px;padding:.08em .42em;
+  white-space:nowrap;color:var(--ink);
+}
+code{font-family:var(--mono);font-size:.86em;color:var(--accent);word-break:break-word}
+
+.rule{
+  margin-top:1.15rem;padding:.85rem 1rem;border-radius:10px;
+  background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--hue) 26%,transparent);
+  font-size:.9rem;line-height:1.55;
+}
+.rule b{color:var(--hue)}
+
+/* ---------- tabelat ---------- */
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:34rem;font-size:.9rem}
+th,td{text-align:left;padding:.68rem .95rem;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{
+  font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);background:var(--surface-2);
+  border-bottom-color:var(--line-2);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td.tab{font-weight:600;white-space:nowrap}
+td.who{color:var(--muted);white-space:nowrap;font-size:.84rem}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:.5rem;vertical-align:baseline}
+
+/* ---------- fundi ---------- */
+footer{padding:2.4rem 0 3.4rem;border-top:1px solid var(--line);color:var(--muted);font-size:.86rem}
+footer p + p{margin-top:.5rem}
+
+@media (max-width:640px){
+  body{font-size:16px}
+  .hero{padding:2.4rem 0 1.6rem}
+  .role{padding:1.2rem 1.1rem 1.1rem}
+  .jump{margin-left:0;width:100%}
+}
+
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .bar{display:none}
+  section{page-break-inside:avoid;border-top:1px solid #ccc}
+  .role{page-break-inside:avoid;box-shadow:none;border-color:#ccc}
+  .figbox{box-shadow:none;border-color:#ccc}
+  a{color:#000;text-decoration:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<header class="bar">
+  <div class="wrap bar-in">
+    <span class="mark">SPR<em>I</em>NT · Manuali</span>
+    <nav class="jump" aria-label="Kërce te profili yt">
+      <a href="#zinxhiri">Zinxhiri</a>
+      <a href="#pronari"><b style="background:var(--r-owner)"></b>Pronari</a>
+      <a href="#banaku"><b style="background:var(--r-cash)"></b>Banaku</a>
+      <a href="#kuzhina"><b style="background:var(--r-kitchen)"></b>Kuzhina</a>
+      <a href="#furra"><b style="background:var(--r-oven)"></b>Furra</a>
+      <a href="#motorristi"><b style="background:var(--r-driver)"></b>Motorristi</a>
+      <a href="#klienti"><b style="background:var(--r-client)"></b>Klienti</a>
+      <a href="#skedat">Skedat</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero col">
+    <p class="kick">Fast Food &amp; Pizza · Durrës</p>
+    <h1>Si punon programi, profil për profil</h1>
+    <p class="lede">Një porosi kalon nëpër pesë duar para se të mbërrijë te dera.
+      Kjo faqe tregon të gjithë rrugën, dhe pastaj çfarë duhet të bëjë secili — pa lexuar
+      pjesën e tjetrit.</p>
+  </div>
+
+  <!-- ══════════════════ ZINXHIRI ══════════════════ -->
+  <section id="zinxhiri">
+    <div class="sec-head">
+      <h2>Udhëtimi i një porosie</h2>
+      <span class="note">gjashtë hapa · dy prej tyre ndodhin njëkohësisht</span>
+    </div>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 960 322" role="img"
+             aria-label="Porosia hyn nga faqja ose telefoni, banaku e pranon, rreshtat ndahen mes kuzhinës dhe furrës, bëhet gati vetëm kur të dy stacionet e japin, motorristi e merr dhe e dorëzon. Poshtë, katër hapat që sheh klienti.">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+            </marker>
+            <marker id="arh" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#C25E10"/>
+            </marker>
+          </defs>
+
+          <!-- vija kryesore -->
+          <g fill="none" stroke="currentColor" stroke-width="1.5" opacity=".75">
+            <line x1="136" y1="112" x2="196" y2="112" marker-end="url(#ar)"/>
+            <path d="M286 112 L306 112 L306 58 L336 58" marker-end="url(#ar)"/>
+            <path d="M286 112 L306 112 L306 166 L336 166" marker-end="url(#ar)"/>
+            <line x1="676" y1="112" x2="716" y2="112" marker-end="url(#ar)"/>
+            <line x1="806" y1="112" x2="846" y2="112" marker-end="url(#ar)"/>
+          </g>
+          <!-- bashkimi: hapi që vendos -->
+          <g fill="none" stroke="#C25E10" stroke-width="2">
+            <path d="M476 58 L506 58 L506 112 L526 112" marker-end="url(#arh)"/>
+            <path d="M476 166 L506 166 L506 112 L526 112" marker-end="url(#arh)"/>
+          </g>
+
+          <!-- kutitë -->
+          <g stroke="currentColor" stroke-width="1.3" fill="none" opacity=".95">
+            <rect x="16" y="89" width="120" height="46" rx="9"/>
+            <rect x="166" y="89" width="120" height="46" rx="9"/>
+            <rect x="336" y="35" width="140" height="46" rx="9"/>
+            <rect x="336" y="143" width="140" height="46" rx="9"/>
+            <rect x="716" y="89" width="90" height="46" rx="9"/>
+            <rect x="846" y="89" width="98" height="46" rx="9"/>
+          </g>
+          <rect x="526" y="89" width="150" height="46" rx="9" fill="none" stroke="#C25E10" stroke-width="2"/>
+
+          <!-- numrat -->
+          <g font-family="'IBM Plex Mono',monospace" font-size="10" font-weight="600"
+             fill="currentColor" opacity=".45">
+            <text x="24" y="83">1</text>
+            <text x="174" y="83">2</text>
+            <text x="344" y="29">3</text>
+            <text x="534" y="83">4</text>
+            <text x="724" y="83">5</text>
+            <text x="854" y="83">6</text>
+          </g>
+
+          <!-- emrat -->
+          <g font-family="Outfit,sans-serif" font-size="13" font-weight="600"
+             fill="currentColor" text-anchor="middle">
+            <text x="76" y="110">Porosia hyn</text>
+            <text x="226" y="110">Banaku pranon</text>
+            <text x="406" y="56">Kuzhina</text>
+            <text x="406" y="164">Furra e picës</text>
+            <text x="761" y="117">Në rrugë</text>
+            <text x="895" y="117">Dorëzuar</text>
+          </g>
+          <text x="601" y="110" font-family="Outfit,sans-serif" font-size="13"
+                font-weight="700" fill="#C25E10" text-anchor="middle">GATI</text>
+
+          <g font-family="Outfit,sans-serif" font-size="10.5" fill="currentColor"
+             opacity=".62" text-anchor="middle">
+            <text x="76" y="126">faqja ose telefoni</text>
+            <text x="226" y="126">jep kodin e gjurmimit</text>
+            <text x="406" y="72">tava, mishi, sallatat</text>
+            <text x="406" y="180">picat, sanduiçët</text>
+            <text x="601" y="126">motorristi e sheh</text>
+          </g>
+
+          <!-- etiketat e shigjetave -->
+          <g font-family="'IBM Plex Mono',monospace" font-size="10" fill="currentColor" opacity=".55">
+            <text x="311" y="127" text-anchor="middle">ndahet</text>
+            <text x="696" y="152" text-anchor="middle">merr 2–3</text>
+            <text x="826" y="152" text-anchor="middle">arka</text>
+          </g>
+          <text x="506" y="212" font-family="'IBM Plex Mono',monospace" font-size="10.5"
+                fill="#C25E10" text-anchor="middle" font-weight="500">
+            vetëm kur të dy stacionet e japin
+          </text>
+
+          <!-- shiriti i klientit -->
+          <line x1="16" y1="238" x2="944" y2="238" stroke="currentColor" stroke-width="1"
+                opacity=".18"/>
+          <text x="16" y="262" font-family="'IBM Plex Mono',monospace" font-size="10"
+                font-weight="600" fill="currentColor" opacity=".45"
+                letter-spacing="1.4">ÇFARË SHEH KLIENTI</text>
+          <g font-family="Outfit,sans-serif" font-size="12.5" fill="currentColor"
+             text-anchor="middle" opacity=".9">
+            <text x="151" y="296">E marrë</text>
+            <text x="406" y="296">Po përgatitet</text>
+            <text x="681" y="296">Nisi për te ti</text>
+            <text x="895" y="296">Dorëzuar</text>
+          </g>
+          <g fill="none" stroke="currentColor" stroke-width="1" opacity=".22">
+            <line x1="16" y1="278" x2="286" y2="278"/>
+            <line x1="336" y1="278" x2="476" y2="278"/>
+            <line x1="526" y1="278" x2="836" y2="278"/>
+            <line x1="846" y1="278" x2="944" y2="278"/>
+          </g>
+        </svg>
+      </div>
+      <figcaption>Hapi 4 është i vetmi që nuk varet nga një person i vetëm: porosia bëhet
+        <b>gati</b> vetëm kur kuzhina dhe furra kanë shtypur secila butonin e vet. Pa këtë,
+        pica do të ftohej duke pritur tavën. Klienti nuk i sheh gjashtë hapat — sheh katër,
+        me fjalët që zgjedh pronari.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ══════════════════ DYERT ══════════════════ -->
+  <section id="dyert">
+    <div class="sec-head">
+      <h2>Dy dyer, gjashtë profile</h2>
+      <span class="note">e njëjta adresë për gjithë stafin</span>
+    </div>
+    <div class="doors">
+      <div class="door">
+        <span class="url">/admin</span>
+        <h3>Paneli — me email dhe fjalëkalim</h3>
+        <p>Pronari dhe kushdo që ka nevojë për një ekran të panelit. Këtu bëhet gjithçka
+          që vendoset një herë: menuja, çmimet, stafi, zonat, magazina, raportet.</p>
+      </div>
+      <div class="door">
+        <span class="url">/staf</span>
+        <h3>Stafi — vetëm me kod</h3>
+        <p>Kuzhina, furra dhe motorristët. I njëjti link për të tre; ajo që hapet varet nga
+          roli. Kodi është 4–8 shifra, dhe pajisja e mban hyrjen 30 ditë.</p>
+      </div>
+    </div>
+    <div class="rule col" style="--hue:var(--accent);margin-top:1.1rem">
+      Kush sheh çfarë e vendos <b>vetëm pronari</b>, te <kbd>Stafi → Kush sheh çfarë</kbd>.
+      Pronari i sheh të gjitha gjithmonë dhe kjo nuk çaktivizohet — përndryshe një kuti e
+      hequr gabimisht do të mbyllte jashtë të vetmin person që i rregullon kutitë.
+    </div>
+  </section>
+
+  <!-- ══════════════════ PRONARI ══════════════════ -->
+  <section id="pronari">
+    <div class="sec-head">
+      <h2>Manuali sipas profilit</h2>
+      <span class="note">secili kapitull qëndron më vete</span>
+    </div>
+
+    <article class="role" data-r="owner">
+      <div class="role-head">
+        <h3>Pronari</h3>
+        <span class="where">/admin · email + fjalëkalim</span>
+      </div>
+      <p class="intro">Sheh të pesëmbëdhjetë skedat e panelit dhe të tre ekranet e stafit.
+        Është i vetmi që ndryshon çmimet, kodet dhe lejet.</p>
+
+      <p class="sub">Ditën e parë, me këtë radhë</p>
+      <ol class="steps">
+        <li><kbd>Publikimi</kbd> → <kbd>Dërgo tani</kbd>. Kjo mbush bazën me 122 pjatat.
+          Bëhet një herë.</li>
+        <li><kbd>Cilësimet</kbd>. Telefoni, adresa, orari, WhatsApp-i. Këto dalin te faqja
+          e klientit, ndaj duan të jenë të sakta.</li>
+        <li><kbd>Stafi</kbd> → <kbd>+ Shto person</kbd> për secilin, pastaj <kbd>Kod</kbd>.
+          Dy veta nuk mund të kenë të njëjtin kod — programi e refuzon.</li>
+        <li><kbd>Gatimi</kbd>. Kontrollo çfarë del nga kuzhina dhe çfarë nga furra.
+          Picat dhe fast food-i nisin te furra; pijet askund.</li>
+        <li><kbd>Zonat</kbd>. Shiko gjashtë zonat e Durrësit dhe fjalët e tyre. Shkruaj te
+          <kbd>Provoje</kbd> adresa të vërteta nga telefonatat e djeshme.</li>
+      </ol>
+
+      <p class="sub">Çdo ditë</p>
+      <ul class="plain">
+        <li><kbd>Porositë</kbd> — tabela e ditës. Këtu pranohen, anulohen dhe printohen.</li>
+        <li><kbd>Raportet</kbd> — në mbyllje: xhiroja, ndarja në dorë/kartë, sa dorëzoi
+          secili motorrist, çfarë u shit vërtet.</li>
+        <li><kbd>Magazina</kbd> — kur diçka po mbaron, rreshti i saj ndriçon vetë.</li>
+      </ul>
+
+      <div class="rule">
+        <b>Çmimet dhe menuja</b> nuk dalin te faqja derisa të shtypësh <kbd>Ruaj ndryshimet</kbd>
+        te shiriti poshtë. Deri atëherë janë skicë — mund të provosh pa frikë.
+      </div>
+    </article>
+
+    <!-- ══════════════════ BANAKU ══════════════════ -->
+    <article class="role" data-r="cash" id="banaku">
+      <div class="role-head">
+        <h3>Banaku — personi i telefonit</h3>
+        <span class="where">/admin · Porosi e re · Porositë · Rezervimet</span>
+      </div>
+      <p class="intro">Ky është ekrani që zëvendëson fletën dhe WhatsApp-in. Është ndërtuar
+        që një porosi të merret pa e ndërprerë telefonatën.</p>
+
+      <p class="sub">Një porosi me telefon</p>
+      <ol class="steps">
+        <li><b>Numri i telefonit i pari.</b> Nëse klienti ka porositur më parë, emri dhe
+          adresat e tij dalin vetë — nuk pyet dy herë të njëjtën gjë.</li>
+        <li>Zgjidh <kbd>Dërgesë</kbd> ose <kbd>Marr vetë</kbd>. Te dërgesa, adresa merret
+          nga lista e tij ose shkruhet e re.</li>
+        <li><b>Pjatat:</b> shkruaj dy shkronja te kërkimi dhe pjatat dalin. Shigjetat lart-poshtë,
+          <kbd>Enter</kbd> për ta shtuar. Duart nuk largohen nga tastiera.</li>
+        <li>Shënimi: «pa qepë», «kambana s'punon». Ky del me kornizë te fleta e kuzhinës.</li>
+        <li><kbd>Dërgo porosinë</kbd>. Ekrani të jep numrin dhe <b>kodin e gjurmimit</b> —
+          lexoja klientit para se të mbyllësh telefonin.</li>
+      </ol>
+
+      <p class="sub">Pastaj</p>
+      <ul class="plain">
+        <li>Porosia del menjëherë te <kbd>Porositë</kbd> dhe te ekranet e gatimit.</li>
+        <li>Butoni <kbd>WhatsApp klientit</kbd> hap një mesazh gati me kodin brenda.</li>
+        <li>Te çdo porosi ka katër butona printimi: fletë porosie, kuzhina, furra, fletë dorëzimi.</li>
+      </ul>
+
+      <div class="rule">
+        <b>Nëse adresa nuk njihet</b>, porosia prapë kalon — thjesht del pa zonë. Thuaj një
+        pikë referimi («pranë klinikës») dhe shkruaje: nëse ajo pikë është në libër, porosia
+        merr vetë vendndodhjen.
+      </div>
+    </article>
+
+    <!-- ══════════════════ KUZHINA ══════════════════ -->
+    <article class="role" data-r="kitchen" id="kuzhina">
+      <div class="role-head">
+        <h3>Kuzhina</h3>
+        <span class="where">/staf · kodi i kuzhinës</span>
+      </div>
+      <p class="intro">Një ekran i vetëm, karta të mëdha, pa emra dhe pa telefona. Tableti
+        rri i varur dhe nuk fiket sa je në punë.</p>
+
+      <p class="sub">Karta</p>
+      <ul class="plain">
+        <li><b>Numri i porosisë</b> lart majtas, ora që rrjedh lart djathtas.</li>
+        <li>Ora <b>zverdhet</b> kur i afrohet kohës së synuar dhe <b>skuqet</b> kur e kalon.</li>
+        <li>Prek një rresht kur ta kesh gatuar — vijëzohet. Kjo rri vetëm te ky tablet.</li>
+        <li>Poshtë, me shkronja të vogla: <i>edhe: 2× Pica Margarita</i>. Nuk është puna jote —
+          është aty që ta dish çfarë del bashkë me tënden.</li>
+      </ul>
+
+      <p class="sub">Butonat</p>
+      <ol class="steps">
+        <li><kbd>GATI</kbd> kur pjesa jote është gati. Kaq.</li>
+        <li>Nëse e shtype gabimisht, poshtë del <kbd>Kthe mbrapsht</kbd> për <b>7 sekonda</b>.</li>
+        <li><kbd>↺</kbd> e rinis orën, pa e ndryshuar gjendjen.</li>
+      </ol>
+
+      <div class="rule">
+        Pasi shtyp GATI, karta mund të thotë <b>«⏳ Pret furrën»</b>. Kjo është normale:
+        porosia niset vetëm kur edhe furra e ka dhënë të vetën.
+      </div>
+    </article>
+
+    <!-- ══════════════════ FURRA ══════════════════ -->
+    <article class="role" data-r="oven" id="furra">
+      <div class="role-head">
+        <h3>Furra e picës</h3>
+        <span class="where">/staf · kodi i furrës</span>
+      </div>
+      <p class="intro">I njëjti ekran si kuzhina, por me picat, fokaçet dhe sanduiçët me brumë
+        pice. Ajo që gatuan kuzhina nuk shfaqet këtu si punë.</p>
+
+      <ul class="plain">
+        <li>Punon saktësisht si kuzhina: <kbd>GATI</kbd>, kthim mbrapsht 7 sekonda, <kbd>↺</kbd>.</li>
+        <li>Kur furra jep e para, karta thotë <b>«⏳ Pret kuzhinën»</b>.</li>
+        <li>Çfarë del nga furra e vendos pronari te <kbd>Paneli → Gatimi</kbd>. Një pjatë e
+          vetme mund të bëjë përjashtim nga kategoria e vet.</li>
+      </ul>
+
+      <div class="rule">
+        <b>Zilja</b> bie kur mbërrin një porosi e re. Nëse tableti hesht, shtyp
+        <kbd>🔔</kbd> lart djathtas — atje shkruan cila mënyrë është e ndezur.
+      </div>
+    </article>
+
+    <!-- ══════════════════ MOTORRISTI ══════════════════ -->
+    <article class="role" data-r="driver" id="motorristi">
+      <div class="role-head">
+        <h3>Motorristi</h3>
+        <span class="where">/staf · kodi yt</span>
+      </div>
+      <p class="intro">Telefoni në xhep. Ekrani është ndërtuar për t'u prekur me një gisht,
+        me dorashka, në diell.</p>
+
+      <p class="sub">Nisja</p>
+      <ol class="steps">
+        <li>Ekrani tregon porositë <b>gati për t'u marrë</b>. Prek ato që merr — dy, tre,
+          sa të duash.</li>
+        <li><kbd>Nisu me N porosi</kbd>. Në atë çast ruhet vendndodhja jote një herë, që të
+          dihet sa zgjatën dorëzimet.</li>
+        <li>Ndalesat dalin <b>të numëruara</b>: grupuar sipas zonës, më e afërta e para.
+          Nuk je i detyruar ta ndjekësh — është propozim.</li>
+      </ol>
+
+      <p class="sub">Te çdo ndalesë</p>
+      <ul class="plain">
+        <li><kbd>🧭 Navigo</kbd> — hap hartën te adresa ose te pika e ruajtur.</li>
+        <li><kbd>📞 Telefono</kbd> — thërret klientin pa e kërkuar numrin.</li>
+        <li><kbd>U dorëzua</kbd> — shkruan sa para arkëtove dhe mbyll ndalesën.</li>
+        <li><kbd>Nuk u gjend</kbd> — porosia kthehet te lista, me arsyen.</li>
+      </ul>
+
+      <p class="sub">Pika e referimit — një prekje që vlen</p>
+      <ul class="plain">
+        <li>Te dritarja e dorëzimit ka një kuti: <kbd>Ruaj këtë vend si pikë referimi</kbd>.</li>
+        <li>Shkruaj emrin siç e thonë klientët: <i>Klinika shëndetësore Kënetë</i>.</li>
+        <li>Herën tjetër, çdo adresë që e përmend atë emër e di vetë ku është. Edhe për një
+          klient krejt të ri.</li>
+      </ul>
+
+      <div class="rule">
+        <b>Vendndodhja</b> ruhet vetëm në dy çaste: kur nisesh dhe kur dorëzon. Jo gjatë
+        rrugës, jo pas orarit. Kjo shkruhet edhe në fund të ekranit tënd.
+      </div>
+    </article>
+
+    <!-- ══════════════════ KLIENTI ══════════════════ -->
+    <article class="role" data-r="client" id="klienti">
+      <div class="role-head">
+        <h3>Klienti — faqja publike</h3>
+        <span class="where">adresa e faqes · pa llogari</span>
+      </div>
+      <p class="intro">Klienti nuk regjistrohet dhe nuk shkarkon asgjë. Hap faqen, porosit,
+        dhe ndjek porosinë me një kod.</p>
+
+      <p class="sub">Si porosit</p>
+      <ol class="steps">
+        <li>Zgjedh pjatat nga menuja — gjashtë kategori, 122 pjata, me çmimet e tua.</li>
+        <li>Te shporta zgjedh <b>Dërgesë</b> ose <b>Marr vetë</b>, shkruan emrin dhe telefonin.</li>
+        <li>Te dërgesa mund të <b>ndajë vendndodhjen</b>: pini vendoset vetë dhe tërhiqet me
+          gisht nëse GPS-i bie 50 metra larg. Kjo është adresa më e saktë që merr dot dyqani.</li>
+        <li>Zgjedh orën — sa më shpejt, ose një orë të caktuar.</li>
+        <li>Merr <b>numrin dhe kodin</b>, p.sh. <code>4FH8-PUVB</code>. Kodi mund të ruhet
+          ose të dërgohet me WhatsApp.</li>
+      </ol>
+
+      <p class="sub">Si e ndjek</p>
+      <ul class="plain">
+        <li>Te seksioni <b>«Ku ndodhet porosia jote»</b> shkruan kodin — ose thjesht numrin
+          e telefonit, nëse kodin e ka humbur.</li>
+        <li>Sheh katër hapa: <i>E marrë · Po përgatitet · Nisi për te ti · Dorëzuar</i>.
+          Emrat e këtyre hapave i ndryshon pronari te <kbd>Fazat</kbd>.</li>
+      </ul>
+
+      <p class="sub">Çfarë tjetër ka te faqja</p>
+      <ul class="plain">
+        <li><b>Rezervim tavoline</b> — datë, orë, sa veta, brenda apo jashtë.</li>
+        <li><b>Vlerësime</b> — vetëm të vërteta, të kopjuara nga Google ose Facebook.</li>
+        <li><b>Kontakt, orar, harta</b> dhe <b>salla e eventeve</b>.</li>
+        <li>Faqja punon shqip dhe anglisht.</li>
+      </ul>
+
+      <div class="rule">
+        Dy porosi nga i njëjti shfletues brenda <b>25 sekondash</b> nuk pranohen. Kjo ndalon
+        dërgimin dy herë pa dashje kur klienti shtyp butonin dy herë.
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════════════ SKEDAT ══════════════════ -->
+  <section id="skedat">
+    <div class="sec-head">
+      <h2>Të pesëmbëdhjetë skedat e panelit</h2>
+      <span class="note">radha si dalin në ekran</span>
+    </div>
+    <div class="tablebox">
+      <table>
+        <thead>
+          <tr><th>Skeda</th><th>Për çfarë</th><th>Kush e sheh</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="tab">📞 Porosi e re</td><td>Merr porosinë me telefon: numri sjell klientin, dy shkronja sjellin pjatën.</td><td class="who">Pronar · Menaxher · Banak</td></tr>
+          <tr><td class="tab">Porositë</td><td>Tabela e ditës. Prano, anulo, printo fletët, shiko kodin e klientit.</td><td class="who">Pronar · Menaxher · Banak</td></tr>
+          <tr><td class="tab">Rezervimet</td><td>Tavolinat e rezervuara nga faqja.</td><td class="who">Pronar · Menaxher · Banak</td></tr>
+          <tr><td class="tab">Menuja</td><td>Pjatat, çmimet, fotot, çfarë është jashtë stokut.</td><td class="who">Pronar · Menaxher</td></tr>
+          <tr><td class="tab">Kategoritë</td><td>Emrat dhe radha e tyre te faqja.</td><td class="who">Pronar · Menaxher</td></tr>
+          <tr><td class="tab">Gatimi</td><td>Çfarë del nga kuzhina, çfarë nga furra, çfarë nuk gatuhet.</td><td class="who">Pronar · Menaxher</td></tr>
+          <tr><td class="tab">Zonat</td><td>Zonat e Durrësit, fjalët e tyre, kufijtë mbi hartë dhe pikat e referimit.</td><td class="who">Pronar · Menaxher</td></tr>
+          <tr><td class="tab">Magazina</td><td>Gjendja, hyrjet, prishjet, numërimi. Furnitorët dhe recetat.</td><td class="who">Pronar · Menaxher</td></tr>
+          <tr><td class="tab">Blerjet</td><td>Fatura e furnitorit. Kur pranohet, gjendja rritet vetë.</td><td class="who">Pronar · Menaxher</td></tr>
+          <tr><td class="tab">Raportet</td><td>Xhiroja e ditës, java, motorristët, pjatat më të shitura.</td><td class="who">Pronar · Menaxher</td></tr>
+          <tr><td class="tab">Stafi</td><td>Personat, kodet, dhe tabela «Kush sheh çfarë».</td><td class="who">Vetëm pronari</td></tr>
+          <tr><td class="tab">Fazat</td><td>Emrat e hapave — brenda dyqanit dhe ata që sheh klienti.</td><td class="who">Vetëm pronari</td></tr>
+          <tr><td class="tab">Cilësimet</td><td>Telefoni, adresa, orari, tarifa, rrjetet sociale.</td><td class="who">Vetëm pronari</td></tr>
+          <tr><td class="tab">Vlerësimet</td><td>Vlerësime të vërteta nga Google ose Facebook.</td><td class="who">Vetëm pronari</td></tr>
+          <tr><td class="tab">Publikimi</td><td>Dërgo menunë te baza, kopje sigurie, rikthim.</td><td class="who">Vetëm pronari</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="sub" style="margin-top:1.8rem">Ekranet e stafit te <code>/staf</code></p>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Ekrani</th><th>Çfarë tregon</th><th>Roli</th></tr></thead>
+        <tbody>
+          <tr><td class="tab"><span class="dot" style="background:var(--r-kitchen)"></span>Kuzhina</td><td>Rreshtat e kuzhinës, pa asnjë të dhënë të klientit.</td><td class="who">Kuzhinë</td></tr>
+          <tr><td class="tab"><span class="dot" style="background:var(--r-oven)"></span>Furra e picës</td><td>Picat dhe sanduiçët, pa asnjë të dhënë të klientit.</td><td class="who">Furrë</td></tr>
+          <tr><td class="tab"><span class="dot" style="background:var(--r-driver)"></span>Motorristi</td><td>Porositë gati, nisja, ndalesat e renditura, fleta e ditës.</td><td class="who">Motorrist</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="col">
+    <p><b>Fletët e printuara</b> janë dokumente të brendshme. Nuk janë fatura tatimore dhe
+      e mbajnë këtë shënim në fund — fatura zyrtare lëshohet nga programi i certifikuar.</p>
+    <p>Njoftimet e vërteta te telefoni kërkojnë HTTPS. Mbi rrjetin lokal punon zilja e faqes,
+      me dridhje dhe ekran që nuk fiket.</p>
+  </footer>
+</main>
+
+</body>
+</html>

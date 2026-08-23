@@ -127,6 +127,13 @@ Këshillë: ruaje adresën si faqe fillestare te tableti, dhe në telefonat e
 motorristëve shtoje në ekranin bazë. Sesioni mbahet 30 ditë, ndaj kodi nuk
 shkruhet çdo turn.
 
+## Manuali për stafin
+
+`doc/manuali.html` — hape me dy klikime te çdo shfletues. Tregon zinxhirin e
+plotë të një porosie, pastaj një kapitull më vete për secilin profil: pronari,
+banaku, kuzhina, furra, motorristi dhe klienti. Printohet mirë, ndaj një
+kapitull mund të pritet dhe të ngjitet pranë tabletit.
+
 ## A ruhen vërtet veprimet?
 
 Po. Këtu është prova, e bërë mbi një klonim krejt të pastër: u dërgua menuja
