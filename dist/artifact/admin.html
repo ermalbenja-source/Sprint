@@ -1183,10 +1183,13 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         <h2 style="font-size:1.1rem;margin-bottom:.6rem">Si lidhet Supabase</h2>
         <ol class="steps-ol">
           <li>Krijo një projekt falas te <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a>.</li>
-          <li>SQL Editor → ngjit skedarin <code>supabase/schema.sql</code> nga repo-ja → Run.</li>
+          <li>SQL Editor → ngjit <code>supabase/schema.sql</code> → Run.</li>
+          <li>SQL Editor → ngjit <code>supabase/schema-2-biznes.sql</code> → Run.
+              Ky sjell stafin, zonat, magazinën, raportet dhe njoftimet.
+              Të dy skedarët mund të ekzekutohen sa herë të duash.</li>
           <li>Authentication → Users → Add user: email-i dhe fjalëkalimi me të cilin hyn këtu.</li>
           <li>Project Settings → Data API → kopjo <code>Project URL</code> dhe çelësin <code>anon</code>
-              te <code>shared/config.js</code>, pastaj ribëj publikimin.</li>
+              te <code>shared/config.js</code>, pastaj <code>node build.js</code> dhe ringarko.</li>
           <li>Kthehu këtu, hyr, dhe shtyp «Dërgo tani» më sipër.</li>
         </ol>
       </div>

@@ -129,6 +129,16 @@ function afterOrder(db, row) {
   });
 }
 
+/* Përkthen `select=a,b,c` në kolona të vërteta. Emrat e panjohur hidhen —
+   një kërkesë e gabuar nuk duhet të hapë rrugë drejt bazës. */
+function cols(db, table, sel) {
+  if (!sel || sel.trim() === '*' || sel.indexOf('(') >= 0) return '*';
+  const have = new Set(db.prepare(`pragma table_info("${table}")`).all().map((r) => r.name));
+  const want = sel.split(',').map((c) => c.trim().split(':').pop().trim())
+    .filter((c) => have.has(c));
+  return want.length ? want.map((c) => `"${c}"`).join(',') : '*';
+}
+
 function rest(db, method, table, params, body, headers) {
   if (TABLES.indexOf(table) < 0) throw httpErr(404, 'Tabelë e panjohur: ' + table);
   const prefer = String(headers['prefer'] || '');
@@ -137,8 +147,11 @@ function rest(db, method, table, params, body, headers) {
   if (method === 'GET') {
     const w = buildWhere(params);
     const lim = params.get('limit');
-    const sql = `select * from "${table}"${w.sql}${buildOrder(params)}`
-      + (lim ? ' limit ' + Number(lim) : '');
+    // PostgREST i kthen vetëm kolonat e kërkuara te `select`. Pa këtë, serveri
+    // lokal kthente gjithçka — dhe një ekran që mbështetet te ngushtimi do të
+    // sillej ndryshe online sesa këtu.
+    const sql = `select ${cols(db, table, params.get('select'))} from "${table}"`
+      + w.sql + buildOrder(params) + (lim ? ' limit ' + Number(lim) : '');
     return db.prepare(sql).all(...w.args).map((r) => decode(table, r));
   }
 

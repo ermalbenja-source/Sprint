@@ -127,6 +127,21 @@ Këshillë: ruaje adresën si faqe fillestare te tableti, dhe në telefonat e
 motorristëve shtoje në ekranin bazë. Sesioni mbahet 30 ditë, ndaj kodi nuk
 shkruhet çdo turn.
 
+## A ruhen vërtet veprimet?
+
+Po. Këtu është prova, e bërë mbi një klonim krejt të pastër: u dërgua menuja
+(122 pjata), u krijuan tre veta me kodet e tyre, u regjistrua një porosi me
+telefon, kuzhina dhe furra e dhanë secila pjesën e vet, motorristi e dorëzoi
+dhe ruajti një pikë referimi. Pastaj serveri u **ndal plotësisht** dhe u nis
+sërish.
+
+Pas rinisjes, gjithçka ishte aty: porosia me të gjitha orët e saj
+(kur hyri në kuzhinë, kur u bë gati, kur u mor, kur u dorëzua), arka e
+mbledhur, zona, stafi me kodet, menuja, zonat dhe pika e referimit.
+
+Kjo është ndryshimi kryesor nga parapamja te claude.ai: atje asgjë nuk ruhet,
+sepse nuk ka bazë të dhënash pas saj. Këtu ka.
+
 ## Ku janë të dhënat
 
 Gjithçka rri në një skedar të vetëm:
