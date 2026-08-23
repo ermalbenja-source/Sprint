@@ -171,6 +171,15 @@ p.count{white-space:normal}
   border:1px solid currentColor;border-radius:999px;padding:.15rem .45rem;white-space:nowrap}
 .zmark.has{color:var(--ok)}
 .zmark.no{color:var(--muted)}
+.lmrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.7rem;align-items:center;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.6rem .8rem;
+  cursor:pointer;transition:.15s}
+.lmrow:hover{border-color:rgba(255,194,68,.5)}
+.lmrow.on{border-color:var(--gold);background:var(--pan-2)}
+.lmrow input[type=text]{background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;
+  padding:.35rem .5rem;font-size:.86rem;width:100%;outline:none;color:var(--txt)}
+.lmrow input[type=text]:focus{border-color:var(--gold)}
+.lmuse{font-size:.68rem;color:var(--muted);white-space:nowrap}
 
 /* ─── magazina, blerjet, raportet ─── */
 .chk{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--muted);
@@ -864,6 +873,22 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
             <button class="btn btn-g btn-sm" id="zmClear">Fshi kufirin</button>
             <span class="count" id="zmCount"></span>
           </div>
+        </div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.7rem">
+        <h2 style="font-size:1.1rem">Pikat e referimit</h2>
+        <p class="count" style="margin:0">Në Durrës adresat nuk janë rrugë+numër,
+          janë pika referimi: «pranë klinikës shëndetësore», «te ura», «prapa shkollës».
+          Rruga nuk e gjen dot shtëpinë — klinika po. Kur adresa përmend njërën,
+          porosia merr menjëherë një pikë të përafërt mbi hartë.</p>
+        <p class="count" style="margin:0">Libri mbushet nga puna: motorristi, në
+          çastin që dorëzon, e ruan vendin me një prekje. Këtu i shikon dhe i rregullon.</p>
+        <div class="items" id="lmList"></div>
+        <div class="tools">
+          <button class="btn btn-g btn-sm" id="addLm">+ Pikë referimi</button>
+          <button class="btn btn-p btn-sm" id="saveLm">Ruaj pikat</button>
+          <span class="count" id="lmHint"></span>
         </div>
       </div>
 
@@ -3964,6 +3989,38 @@ ${S('drink', `
     return inside;
   }
 
+  /* ---------- përputhja e fjalëve në shqip ----------
+     «kënetë» dhe «këneta» janë e njëjta fjalë; e para është forma e pashquar,
+     e dyta ajo e shquar. Përputhja fjalë-për-fjalë i humb të gjitha adresat e
+     shkruara në formën e dytë — dhe ashtu shkruhen pothuajse gjithmonë.
+
+     Prandaj: hiqen theksat, teksti ndahet në fjalë, dhe krahasohet rrënja —
+     fjala pa zanoret e fundit. Vetëm zanoret e fundit, jo rrokje të tëra:
+     «kënetë» → «kenet», që kap «këneta», «kënetës», «Kenete», por jo më shumë.
+
+     Krahasimi bëhet nga fillimi i fjalës, jo kudo brenda saj. Kjo është edhe
+     arsyeja pse «port» nuk e kap më «raporti» ose «transporti». */
+
+  const normSq = (s2) => String(s2 == null ? '' : s2).toLowerCase()
+    .replace(/ë/g, 'e').replace(/ç/g, 'c')
+    .replace(/[^a-z0-9]+/g, ' ').trim();
+
+  function stemSq(k) {
+    const v = normSq(k).replace(/\s+/g, '');
+    const cut = v.replace(/[aeiou]+$/, '');
+    return cut.length >= 4 ? cut : v;
+  }
+
+  /** A e përmban kjo adresë këtë fjalë kyçe? Kthen fjalën e gjetur ose null —
+      që paneli të tregojë PSE ra te kjo zonë, dhe një fjalë e keqe të duket. */
+  function kwHit(address, keyword) {
+    const st = stemSq(keyword);
+    if (st.length < 4) return null;
+    const w = normSq(address).split(' ');
+    for (let i = 0; i < w.length; i++) if (w[i].startsWith(st)) return w[i];
+    return null;
+  }
+
   /** Cila zonë i takon kësaj adrese. Pika mbizotëron mbi fjalët. */
   function zoneOf(zones, address, lat, lng) {
     const zs = (zones || []).filter((z) => z.active !== false)
@@ -3973,15 +4030,107 @@ ${S('drink', `
         if (z.outline && pointInOutline(Number(lat), Number(lng), z.outline)) return z.name;
       }
     }
-    const a = String(address || '').toLowerCase();
-    if (a) {
+    if (address) {
       for (const z of zs) {
         for (const k of (z.keywords || [])) {
-          if (k && a.indexOf(String(k).toLowerCase()) >= 0) return z.name;
+          if (k && kwHit(address, k)) return z.name;
         }
       }
     }
     return null;
+  }
+
+  /** Si zoneOf, por thotë edhe pse: cila fjalë kyçe e kapi, ose se e vendosi pika. */
+  function zoneWhy(zones, address, lat, lng) {
+    const zs = (zones || []).filter((z) => z.active !== false)
+      .slice().sort((a, b) => (a.sort || 0) - (b.sort || 0));
+    if (lat != null && lng != null) {
+      for (const z of zs) {
+        if (z.outline && pointInOutline(Number(lat), Number(lng), z.outline)) {
+          return { zone: z.name, by: 'kufi' };
+        }
+      }
+    }
+    for (const z of zs) {
+      for (const k of (z.keywords || [])) {
+        const w = k && kwHit(address, k);
+        if (w) return { zone: z.name, by: 'fjalë', keyword: k, word: w };
+      }
+    }
+    return { zone: null, by: null };
+  }
+
+  /* ══════════════════ PIKAT E REFERIMIT ══════════════════
+     Në Durrës adresat nuk janë rrugë+numër, janë pika referimi. Rruga nuk e
+     gjen dot shtëpinë; klinika po. Libri mbushet nga puna: motorristi, në
+     çastin që dorëzon, e ruan vendin me një prekje. */
+
+  const LS_LMARK = 'sprint-landmarks';
+
+  /** Të gjitha fjalët e gjata të emrit duhet të gjenden te adresa —
+      përndryshe «Shkolla Kënetë» do të kapte çdo adresë që përmend Kënetën. */
+  function nameHit(address, name) {
+    const w = normSq(name).split(' ').filter((x) => x.length >= 4);
+    return w.length > 0 && w.every((x) => kwHit(address, x));
+  }
+
+  async function fetchLandmarks() {
+    if (!live) return readLS(LS_LMARK, []);
+    return st._req('/rest/v1/landmarks?select=*&order=uses.desc', { headers: st._headers() });
+  }
+
+  /** Cila pikë referimi përmendet te kjo adresë — ajo më e përdorura. */
+  function landmarkOf(list, address) {
+    if (!address) return null;
+    const rows = (list || []).filter((l) => l.active !== false)
+      .slice().sort((a, b) => (b.uses || 0) - (a.uses || 0)
+        || String(b.name).length - String(a.name).length);
+    for (const l of rows) {
+      if ((l.keywords || []).some((k) => k && kwHit(address, k))) return l;
+      if (nameHit(address, l.name)) return l;
+    }
+    return null;
+  }
+
+  /** Ruan vendin ku ndodhet motorristi si pikë referimi. */
+  async function landmarkSave(name, lat, lng, radius) {
+    if (!live) {
+      const all = readLS(LS_LMARK, []);
+      const hit = all.find((l) => normSq(l.name) === normSq(name));
+      if (hit) {
+        hit.lat = lat; hit.lng = lng; hit.uses = (hit.uses || 0) + 1;
+        writeLS(LS_LMARK, all);
+        return hit.id;
+      }
+      const row = { id: uid('p'), name: String(name).trim(), keywords: [],
+        lat, lng, radius: Number(radius) || 200, uses: 0, active: true,
+        created_at: new Date().toISOString() };
+      all.push(row); writeLS(LS_LMARK, all);
+      return row.id;
+    }
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
+    return st._rpc('landmark_save', { p_token: sess.token, p_name: name,
+      p_lat: lat, p_lng: lng, p_radius: Number(radius) || 200 });
+  }
+
+  async function saveLandmarks(list) {
+    const clean = (list || []).map((l) => ({
+      name: String(l.name || '').trim().slice(0, 90),
+      keywords: (l.keywords || []).map((k) => String(k).trim().toLowerCase()).filter(Boolean),
+      lat: Number(l.lat), lng: Number(l.lng),
+      radius: Number(l.radius) || 200,
+      zone: l.zone || null, note: l.note || null, active: l.active !== false,
+    })).filter((l) => l.name.length >= 3 && isFinite(l.lat) && isFinite(l.lng));
+
+    if (!live) { writeLS(LS_LMARK, clean.map((l, i) => Object.assign({ id: 'p' + i, uses: 0 }, l))); return clean; }
+    await st._ensureAuth();
+    await st._req('/rest/v1/landmarks?name=neq.__none__', {
+      method: 'DELETE', headers: st._headers({ Prefer: 'return=minimal' }) });
+    if (!clean.length) return [];
+    return st._req('/rest/v1/landmarks', {
+      method: 'POST', headers: st._headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(clean) });
   }
 
   /* ══════════════════ NJOFTIMET ══════════════════
@@ -4194,7 +4343,9 @@ ${S('drink', `
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
     staffLogin, staffSession, staffLogout,
     pushSubscribe, pushUnsubscribe,
-    DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, pointInOutline,
+    DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, zoneWhy, pointInOutline,
+    normSq, stemSq, kwHit, nameHit,
+    fetchLandmarks, landmarkOf, landmarkSave, saveLandmarks,
     getLocation, locationQuality, navLink,
   });
 })();
@@ -7528,7 +7679,7 @@ window.SPRINT_DURRES = {"emri":"Durrës","burimi":"geoBoundaries ADM3 (CC BY 4.0
     toast._t = setTimeout(() => { el.className = k || ''; }, 3800);
   };
 
-  const Z = { list: [], sel: null, map: null, loaded: false };
+  const Z = { list: [], sel: null, map: null, loaded: false, marks: [], msel: null };
 
   /* Kufiri i Durrësit, i marrë nga geoBoundaries (CC BY 4.0). Nuk e cakton
      zonën — vetëm ndihmon syrin të kuptojë ku është duke vizatuar. */
@@ -7539,13 +7690,16 @@ window.SPRINT_DURRES = {"emri":"Durrës","burimi":"geoBoundaries ADM3 (CC BY 4.0
   async function load(force) {
     if (Z.loaded && !force) return;
     try {
-      Z.list = (await store.fetchZones()) || [];
+      const [zs, lms] = await Promise.all([store.fetchZones(), store.fetchLandmarks()]);
+      Z.list = zs || [];
+      Z.marks = lms || [];
       if (!Z.list.length) Z.list = store.DEFAULT_ZONES.map((z, i) =>
         Object.assign({ id: 'z' + i, outline: null, active: true }, z,
                       { keywords: z.keywords.slice() }));
       Z.loaded = true;
       if (!Z.sel && Z.list.length) Z.sel = Z.list[0].id || Z.list[0].name;
       render();
+      renderMarks();
       ensureMap();
     } catch (e) {
       $('#zoneList').innerHTML = '<p class="count">Nuk u lexuan zonat: ' + esc(e.message) + '</p>';
@@ -7599,6 +7753,14 @@ window.SPRINT_DURRES = {"emri":"Durrës","burimi":"geoBoundaries ADM3 (CC BY 4.0
         render();
       },
       onClick: (p) => {
+        // Kur një pikë referimi është e zgjedhur, klikimi e zhvendos atë.
+        // Përndryshe klikimi shton një qoshe te kufiri i zonës.
+        if (Z.msel != null && Z.marks[Z.msel]) {
+          Z.marks[Z.msel].lat = p.lat;
+          Z.marks[Z.msel].lng = p.lng;
+          renderMarks();
+          return;
+        }
         const z = current();
         if (!z) { toast('Zgjidh një zonë së pari.', 'err'); return; }
         z.outline = (z.outline || []).concat([[p.lat, p.lng]]);
@@ -7626,6 +7788,12 @@ window.SPRINT_DURRES = {"emri":"Durrës","burimi":"geoBoundaries ADM3 (CC BY 4.0
         fill: hexA(z.color, on ? 0.3 : 0.12), stroke: z.color || '#DE7F1C',
         width: on ? 3 : 1.5, handles: on });
     });
+    Z.marks.forEach((m, i) => {
+      if (m.lat == null || m.lng == null) return;
+      shapes.push({ kind: 'dot', lat: Number(m.lat), lng: Number(m.lng),
+        r: i === Z.msel ? 8 : 5, fill: i === Z.msel ? '#E5544B' : '#9C9089',
+        label: i === Z.msel ? m.name : '' });
+    });
     const c = shop();
     shapes.push({ kind: 'dot', lat: c.lat, lng: c.lng, r: 7, fill: '#FFC244', label: 'dyqani' });
 
@@ -7645,14 +7813,56 @@ window.SPRINT_DURRES = {"emri":"Durrës","burimi":"geoBoundaries ADM3 (CC BY 4.0
     return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
   };
 
+  /* ---------- pikat e referimit ---------- */
+  function renderMarks() {
+    if (!Z.marks.length) {
+      $('#lmList').innerHTML = '<p class="count">Ende pa pika. Ato mbushen vetë kur '
+        + 'motorristi ruan një vend gjatë dorëzimit — ose shtoji ti këtu.</p>';
+    } else {
+      $('#lmList').innerHTML = Z.marks.map((m, i) => `
+        <div class="row lmrow${i === Z.msel ? ' on' : ''}" data-lm="${i}">
+          <span class="zdot" style="background:${i === Z.msel ? '#E5544B' : '#9C9089'}"></span>
+          <div class="nm">
+            <input type="text" data-lf="name" value="${esc(m.name || '')}" maxlength="90"
+                   aria-label="Emri i pikës">
+            <input type="text" data-lf="keywords" value="${esc((m.keywords || []).join(', '))}"
+                   placeholder="fjalë shtesë (jo e detyrueshme)" aria-label="Fjalë shtesë"
+                   style="margin-top:.3rem">
+          </div>
+          <span class="lmuse">${m.uses ? m.uses + '× përdorur' : 'e re'}<br>
+            ${m.lat != null ? Number(m.lat).toFixed(4) + ', ' + Number(m.lng).toFixed(4) : '—'}</span>
+        </div>`).join('');
+    }
+    $('#lmHint').textContent = Z.msel != null
+      ? 'Kliko mbi hartë për ta zhvendosur pikën e zgjedhur.'
+      : (Z.marks.length ? 'Kliko një pikë për ta parë dhe zhvendosur.' : '');
+    paintMap();
+  }
+
+  async function saveMarks() {
+    try {
+      const saved = await store.saveLandmarks(Z.marks);
+      if (saved && saved.length) Z.marks = saved;
+      Z.msel = null;
+      renderMarks();
+      toast('Pikat u ruajtën.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
   /* ---------- prova ---------- */
   function testAddress() {
     const v = $('#ztest').value.trim();
     if (!v) { $('#ztestOut').textContent = ''; return; }
-    const z = store.zoneOf(Z.list, v, null, null);
-    $('#ztestOut').innerHTML = z
-      ? `→ <b style="color:var(--ok)">${esc(z)}</b>`
-      : '→ <b style="color:var(--warn)">pa zonë</b> — shto një fjalë kyçe që e kap';
+    const lm = store.landmarkOf(Z.marks, v);
+    const r = store.zoneWhy(Z.list, v, lm ? lm.lat : null, lm ? lm.lng : null);
+    const pjeset = [];
+    pjeset.push(r.zone
+      ? `→ <b style="color:var(--ok)">${esc(r.zone)}</b>`
+        + (r.keyword ? ` <span style="opacity:.7">(nga «${esc(r.keyword)}» → ${esc(r.word)})</span>` : '')
+      : '→ <b style="color:var(--warn)">pa zonë</b>');
+    if (lm) pjeset.push(`🎯 <b style="color:var(--gold)">${esc(lm.name)}</b>`);
+    else pjeset.push('<span style="opacity:.7">pa pikë referimi</span>');
+    $('#ztestOut').innerHTML = pjeset.join(' &nbsp;·&nbsp; ');
   }
 
   /* ---------- ruajtja ---------- */
@@ -7717,6 +7927,22 @@ window.SPRINT_DURRES = {"emri":"Durrës","burimi":"geoBoundaries ADM3 (CC BY 4.0
       if (z) { z.outline = null; render(); }
       return;
     }
+    const lmRow = t.closest('[data-lm]');
+    if (lmRow && !t.closest('input')) {
+      const i = Number(lmRow.dataset.lm);
+      Z.msel = (Z.msel === i) ? null : i;
+      renderMarks();
+      return;
+    }
+    if (t.id === 'addLm') {
+      const c = Z.map ? Z.map.get() : shop();
+      Z.marks.push({ name: 'Pikë e re', keywords: [], lat: c.lat, lng: c.lng,
+        radius: 200, uses: 0, active: true });
+      Z.msel = Z.marks.length - 1;
+      renderMarks();
+      return;
+    }
+    if (t.id === 'saveLm') return saveMarks();
     if (t.id === 'saveZones') return save();
     if (t.id === 'resetZones') return reset();
   });
@@ -7732,10 +7958,19 @@ window.SPRINT_DURRES = {"emri":"Durrës","burimi":"geoBoundaries ADM3 (CC BY 4.0
       testAddress();
       return;
     }
+    const lmRow = e.target.closest('[data-lm]');
+    if (lmRow && e.target.dataset.lf) {
+      const m = Z.marks[Number(lmRow.dataset.lm)];
+      if (!m) return;
+      if (e.target.dataset.lf === 'name') m.name = e.target.value;
+      else m.keywords = e.target.value.split(',').map((k) => k.trim()).filter(Boolean);
+      testAddress();
+      return;
+    }
     if (e.target.id === 'ztest') testAddress();
   });
 
-  S.zonat = { load, list: () => Z.list };
+  S.zonat = { load, list: () => Z.list, marks: () => Z.marks };
 })();
 
 </script>

@@ -155,6 +155,7 @@
       <div class="s-bd">
         <span class="s-name">${esc(o.customer_name)}</span>
         <span class="s-addr">${esc(o.address || '')}</span>
+        ${o.landmark ? `<span class="s-near">🎯 afër: ${esc(o.landmark)}</span>` : ''}
         <span class="s-zone">${o.zone ? '📍 ' + esc(o.zone) : '📍 pa zonë'}${
           o._km != null && isFinite(o._km) ? ' · ' + o._km.toFixed(1) + ' km' : ''}${
           hasPin(o) ? '' : ' · pa pikë në hartë'}</span>
@@ -246,6 +247,11 @@
       : 'Kjo porosi është paguar me kartë — nuk arkëtohet gjë.';
     $('#dlvCashWrap').classList.toggle('hide', !cash);
     $('#dlvCash').value = cash ? String(Math.round(Number(o.total) || 0)) : '';
+    // Kutia e pikës nis e mbyllur; emri propozohet nga ai që e gjeti adresën.
+    $('#dlvLmOn').checked = false;
+    $('#dlvLmName').classList.add('hide');
+    $('#dlvLmHint').classList.add('hide');
+    $('#dlvLmName').value = o.landmark || '';
     $('#dlvModal').classList.add('on');
   }
   const closeDeliver = () => { $('#dlvModal').classList.remove('on'); R.target = null; };
@@ -257,7 +263,18 @@
       ? Number(String($('#dlvCash').value).replace(/\D/g, '')) : null;
     $('#dlvOk').disabled = true;
     try {
-      await store.drvDelivered(o.id, await here(), cash);
+      const pos = await here();
+      await store.drvDelivered(o.id, pos, cash);
+
+      // Pika e referimit ruhet pas dorëzimit, jo para: nëse dorëzimi dështon,
+      // libri nuk mbushet me një vend ku askush nuk shkoi.
+      if ($('#dlvLmOn').checked && pos && pos.lat != null) {
+        const emri = $('#dlvLmName').value.trim();
+        if (emri.length >= 3) {
+          try { await store.landmarkSave(emri, pos.lat, pos.lng, 200); }
+          catch (e2) { /* dorëzimi u krye; pika është shtesë */ }
+        }
+      }
       closeDeliver();
       await load(true);
     } catch (e) {
@@ -280,6 +297,17 @@
       await load(true);
     } catch (e) { alert(e.message); }
   }
+
+  /* Kutia e emrit shfaqet vetëm kur zgjidhet — që dritarja e dorëzimit të
+     mbetet sa më e shkurtër për atë që thjesht dorëzon dhe ikën. */
+  document.addEventListener('change', (e) => {
+    if (e.target.id === 'dlvLmOn') {
+      const on = e.target.checked;
+      $('#dlvLmName').classList.toggle('hide', !on);
+      $('#dlvLmHint').classList.toggle('hide', !on);
+      if (on) $('#dlvLmName').focus();
+    }
+  });
 
   /* ---------- lidhjet ---------- */
 

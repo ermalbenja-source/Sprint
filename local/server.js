@@ -125,8 +125,9 @@ const PUBLIC_RPC = ['track_order','find_orders_by_phone','public_phases',
                     'kds_orders','kds_bump',
                     'drv_ready','drv_start_run','drv_my_run','drv_delivered',
                     'drv_failed','drv_my_day',
-                    'push_subscribe','push_unsubscribe'];
-const PUBLIC_READ = ['menu_items','settings','order_phases','category_stations'];
+                    'push_subscribe','push_unsubscribe',
+                    'zone_for','landmark_for','landmark_save'];
+const PUBLIC_READ = ['menu_items','settings','order_phases','category_stations','zones','landmarks'];
 
 /* ---------- zbrazja e kutisë së njoftimeve ----------
    Thirret pas çdo kërkese, jo brenda saj: ekrani që sapo shtypi «GATI» nuk ka

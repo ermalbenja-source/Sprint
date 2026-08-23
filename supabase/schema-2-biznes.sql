@@ -1622,6 +1622,18 @@ drop policy if exists "zonat shkruhen vetem nga admini" on public.zones;
 create policy "zonat shkruhen vetem nga admini"
   on public.zones for all to authenticated using (true) with check (true);
 
+-- Ndarja fillestare e Durrësit. Emrat dhe fjalët janë pikënisje për t'i
+-- riemërtuar — pronari e di më mirë se çdo hartë se ku shkojnë porositë.
+-- Rreshtat nuk mbishkruhen më pas: zgjedhja e tij mbetet.
+insert into public.zones (name, sort, color, keywords) values
+  ('Qendra',  10, '#DE7F1C', array['qendër','qendra','taulantia','sheshi']),
+  ('Plazh',   20, '#3AA6C9', array['plazh','iliria','teuta','hekurudha']),
+  ('Kënetë',  30, '#E6B23C', array['kënetë','nishtulla']),
+  ('Currila', 40, '#8E6BC9', array['currila','kodra','vollga']),
+  ('Shkozet', 50, '#4CAF6D', array['shkozet','spitallë']),
+  ('Porti',   60, '#E5544B', array['porti','doganë'])
+on conflict do nothing;
+
 alter table public.orders add column if not exists zone text;
 
 -- Adresa e mësuar: kur motorristi shtyp «U dorëzua», telefoni i tij është te
@@ -1662,6 +1674,52 @@ begin
 end;
 $$;
 
+/* ---------- përputhja e fjalëve në shqip ----------
+   «kënetë» dhe «këneta» janë e njëjta fjalë: e para forma e pashquar, e dyta
+   ajo e shquar — dhe ashtu shkruhen adresat pothuajse gjithmonë. Përputhja
+   fjalë-për-fjalë i humbte të gjitha.
+
+   Prandaj hiqen theksat, teksti ndahet në fjalë, dhe krahasohet rrënja: fjala
+   pa zanoret e fundit, e matur nga fillimi. Vetëm zanoret e fundit — «kënetë»
+   → «kenet», që kap «këneta», «kënetës», «Kenete», dhe asgjë më shumë.
+   I njëjti rregull si te shfletuesi dhe te serveri lokal. */
+
+create or replace function public.norm_sq(p text)
+returns text
+language sql
+immutable
+as $$
+  select trim(regexp_replace(
+    translate(lower(coalesce(p, '')), 'ëçäöüáéíóúâêîôû', 'ecaouaeiouaeiou'),
+    '[^a-z0-9]+', ' ', 'g'));
+$$;
+
+create or replace function public.stem_sq(p text)
+returns text
+language sql
+immutable
+as $$
+  select case
+    when char_length(regexp_replace(replace(public.norm_sq(p), ' ', ''), '[aeiou]+$', '')) >= 4
+      then regexp_replace(replace(public.norm_sq(p), ' ', ''), '[aeiou]+$', '')
+    else replace(public.norm_sq(p), ' ', '')
+  end;
+$$;
+
+/* A e përmban kjo adresë këtë fjalë kyçe? */
+create or replace function public.kw_hit(p_address text, p_keyword text)
+returns boolean
+language sql
+immutable
+as $$
+  select case
+    when char_length(public.stem_sq(p_keyword)) < 4 then false
+    else exists (
+      select 1 from unnest(string_to_array(public.norm_sq(p_address), ' ')) w
+       where w like public.stem_sq(p_keyword) || '%')
+  end;
+$$;
+
 /* Cila zonë i takon kësaj porosie. Pika mbizotëron mbi fjalët: një adresë e
    shkruar «Plazh» por me pin te Currila është te Currila. */
 create or replace function public.zone_for(
@@ -1671,7 +1729,7 @@ language plpgsql
 stable
 set search_path = public
 as $$
-declare z record; a text;
+declare z record;
 begin
   if p_lat is not null and p_lng is not null then
     for z in select * from public.zones
@@ -1680,11 +1738,10 @@ begin
     end loop;
   end if;
 
-  a := lower(coalesce(p_address, ''));
-  if a <> '' then
+  if coalesce(p_address, '') <> '' then
     for z in select * from public.zones where active order by sort loop
       if exists (select 1 from unnest(z.keywords) k
-                  where k <> '' and position(lower(k) in a) > 0) then
+                  where k <> '' and public.kw_hit(p_address, k)) then
         return z.name;
       end if;
     end loop;
@@ -1718,3 +1775,165 @@ drop trigger if exists orders_zone on public.orders;
 create trigger orders_zone
   before insert on public.orders
   for each row execute function public.set_order_zone();
+
+
+-- ═══════════════════════ 26. PIKAT E REFERIMIT ═══════════════════════
+-- Në Durrës adresat nuk janë rrugë+numër, janë pika referimi:
+--   «Rruga Juba Isha, këneta, banesë private pranë klinikës shëndetësore»
+-- Rruga nuk e gjen dot shtëpinë. Klinika po.
+--
+-- Prandaj programi mban një libër pikash referimi. Kur adresa përmend njërën,
+-- porosia merr menjëherë një pikë të përafërt mbi hartë — jo derën, por lagjen
+-- e saktë, gjë që i mjafton motorristit për t'u nisur nga vendi i duhur.
+--
+-- Libri mbushet nga puna: motorristi, në çastin që dorëzon, e ruan vendin si
+-- pikë referimi me një prekje. Kështu e dyta, e treta dhe e dhjeta porosi
+-- «pranë klinikës» dinë ku të shkojnë, pa pyetur më askënd.
+
+create table if not exists public.landmarks (
+  id         uuid primary key default gen_random_uuid(),
+  name       text        not null,
+  keywords   text[]      not null default '{}',
+  lat        double precision not null,
+  lng        double precision not null,
+  radius     integer     not null default 200,   -- sa e përafërt është, në metra
+  zone       text,
+  note       text,
+  uses       integer     not null default 0,
+  active     boolean     not null default true,
+  created_by uuid references public.staff(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  constraint landmarks_name_ok check (char_length(name) between 3 and 90),
+  constraint landmarks_lat_ok  check (lat between -90 and 90),
+  constraint landmarks_lng_ok  check (lng between -180 and 180)
+);
+
+comment on table public.landmarks is
+  'Pikat e referimit të Durrësit: klinika, shkolla, ura, furra. Aty ku adresat mbarojnë, këto fillojnë.';
+
+create index if not exists landmarks_active_idx on public.landmarks (active, uses desc);
+
+alter table public.landmarks enable row level security;
+drop policy if exists "pikat lexohen nga stafi" on public.landmarks;
+create policy "pikat lexohen nga stafi"
+  on public.landmarks for select to anon, authenticated using (true);
+drop policy if exists "pikat shkruhen nga te identifikuarit" on public.landmarks;
+create policy "pikat shkruhen nga te identifikuarit"
+  on public.landmarks for all to authenticated using (true) with check (true);
+
+alter table public.orders add column if not exists landmark text;
+
+/* Emri i një pike referimi ka disa fjalë: «Klinika shëndetësore Kënetë».
+   Përputhja kërkon që TË GJITHA fjalët e gjata të emrit të gjenden te adresa —
+   përndryshe «Shkolla Kënetë» do të kapte çdo adresë që përmend Kënetën.
+   Fjalët kyçe të shtuara me dorë janë më të lira: mjafton njëra. */
+create or replace function public.name_hit(p_address text, p_name text)
+returns boolean
+language sql
+immutable
+as $$
+  select case
+    when coalesce(p_name, '') = '' then false
+    else not exists (
+      select 1 from unnest(string_to_array(public.norm_sq(p_name), ' ')) w
+       where char_length(w) >= 4 and not public.kw_hit(p_address, w))
+     and exists (
+      select 1 from unnest(string_to_array(public.norm_sq(p_name), ' ')) w
+       where char_length(w) >= 4)
+  end;
+$$;
+
+/* Cila pikë referimi përmendet në këtë adresë. Kthehet ajo më e përdorura,
+   që «shkolla» te një lagje me tri shkolla të japë atë ku shkohet më shpesh. */
+create or replace function public.landmark_for(p_address text)
+returns table (id uuid, name text, lat double precision, lng double precision,
+               radius integer, zone text)
+language sql
+stable
+set search_path = public
+as $$
+  select l.id, l.name, l.lat, l.lng, l.radius, l.zone
+    from public.landmarks l
+   where l.active
+     and (exists (select 1 from unnest(l.keywords) k
+                   where k <> '' and public.kw_hit(p_address, k))
+          or public.name_hit(p_address, l.name))
+   order by l.uses desc, char_length(l.name) desc
+   limit 1;
+$$;
+
+revoke all on function public.landmark_for(text) from public;
+grant execute on function public.landmark_for(text) to anon, authenticated;
+
+/* Motorristi e ruan vendin ku ndodhet si pikë referimi — një prekje, në çastin
+   që e ka gjetur shtëpinë. Kjo është e vetmja kohë kur e di me siguri ku është. */
+create or replace function public.landmark_save(
+  p_token uuid, p_name text, p_lat double precision, p_lng double precision,
+  p_radius integer default 200)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare s record; new_id uuid; hit record;
+begin
+  select st.staff_id into s from public.staff_by_token(p_token) st;
+  if s.staff_id is null then raise exception 'Hyr me kodin tënd.'; end if;
+  if char_length(coalesce(p_name, '')) < 3 then
+    raise exception 'Emri i pikës duhet të paktën 3 shkronja.';
+  end if;
+
+  -- E njëjta pikë nuk shtohet dy herë: nëse ekziston një me të njëjtin emër
+  -- brenda afërsisë, ajo përditësohet — libri nuk mbushet me dublikatë.
+  select l.* into hit from public.landmarks l
+   where l.active and public.norm_sq(l.name) = public.norm_sq(p_name)
+   limit 1;
+
+  if hit.id is not null then
+    update public.landmarks l
+       set lat = p_lat, lng = p_lng, uses = l.uses + 1, updated_at = now()
+     where l.id = hit.id;
+    return hit.id;
+  end if;
+
+  insert into public.landmarks (name, lat, lng, radius, zone, created_by)
+  values (trim(p_name), p_lat, p_lng, coalesce(p_radius, 200),
+          public.zone_for(p_name, p_lat, p_lng), s.staff_id)
+  returning public.landmarks.id into new_id;
+  return new_id;
+end;
+$$;
+
+revoke all on function public.landmark_save(uuid, text, double precision, double precision, integer) from public;
+grant execute on function public.landmark_save(uuid, text, double precision, double precision, integer)
+  to anon, authenticated;
+
+/* Porosia e re: nëse nuk ka pikë të vetën, e merr atë të referimit. Pika e
+   klientit nuk mbishkruhet kurrë — ajo është e saktë, kjo e përafërt. */
+create or replace function public.set_order_zone()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare lm record;
+begin
+  if new.lat is null or new.lng is null then
+    select * into lm from public.landmark_for(new.address);
+    if lm.id is not null then
+      new.lat := lm.lat;
+      new.lng := lm.lng;
+      new.accuracy := lm.radius;          -- e përafërt, dhe e thotë hapur
+      new.landmark := lm.name;
+      update public.landmarks set uses = uses + 1 where id = lm.id;
+    end if;
+  end if;
+
+  if new.zone is null then
+    new.zone := public.zone_for(new.address, new.lat, new.lng);
+  end if;
+  return new;
+end;
+$$;

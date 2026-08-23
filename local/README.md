@@ -82,6 +82,21 @@ Motorristi i sheh ndalesat të grupuara sipas zonës, zonat sipas afërsisë nga
 dyqani, dhe brenda zonës gjithmonë te më e afërta. Numri i madh te çdo ndalesë
 thotë nga t'ia nisë. Nuk është urdhër — vetëm propozim.
 
+**Pikat e referimit.** Në Durrës adresat nuk janë rrugë+numër, janë pika
+referimi: «pranë klinikës shëndetësore», «te ura», «prapa shkollës». Rruga nuk
+e gjen dot shtëpinë — klinika po. Kur adresa përmend një pikë të njohur,
+porosia merr menjëherë koordinatën e saj, e shënuar si e përafërt.
+
+Libri mbushet nga puna: te dritarja e dorëzimit, motorristi zgjedh «Ruaj këtë
+vend si pikë referimi», shkruan emrin, dhe kaq. Herën tjetër çdo adresë që e
+përmend atë emër e di vetë ku është.
+
+**Format e fjalëve.** «kënetë» dhe «këneta» janë e njëjta fjalë — e para e
+pashquar, e dyta e shquar, dhe adresat shkruhen pothuajse gjithmonë në formën e
+dytë. Programi krahason rrënjën, jo shkronjë për shkronjë, dhe nga fillimi i
+fjalës. Prandaj «kënetë» kap «Këneta», «kënetës» dhe «Kenete» — por «port» nuk
+kap më «raporti» ose «transporti».
+
 **Harta që mëson.** Në çastin që motorristi shtyp «U dorëzua», telefoni i tij
 është te dera. Ajo pikë i ngjitet adresës së klientit, dhe herën tjetër që i
 njëjti numër telefonon, e dimë saktësisht ku është. Pas dy-tri javësh adresat e

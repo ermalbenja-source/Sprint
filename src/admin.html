@@ -171,6 +171,15 @@ p.count{white-space:normal}
   border:1px solid currentColor;border-radius:999px;padding:.15rem .45rem;white-space:nowrap}
 .zmark.has{color:var(--ok)}
 .zmark.no{color:var(--muted)}
+.lmrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.7rem;align-items:center;
+  background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:.6rem .8rem;
+  cursor:pointer;transition:.15s}
+.lmrow:hover{border-color:rgba(255,194,68,.5)}
+.lmrow.on{border-color:var(--gold);background:var(--pan-2)}
+.lmrow input[type=text]{background:#0F0B0C;border:1.5px solid var(--line);border-radius:9px;
+  padding:.35rem .5rem;font-size:.86rem;width:100%;outline:none;color:var(--txt)}
+.lmrow input[type=text]:focus{border-color:var(--gold)}
+.lmuse{font-size:.68rem;color:var(--muted);white-space:nowrap}
 
 /* ─── magazina, blerjet, raportet ─── */
 .chk{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--muted);
@@ -775,6 +784,22 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
             <button class="btn btn-g btn-sm" id="zmClear">Fshi kufirin</button>
             <span class="count" id="zmCount"></span>
           </div>
+        </div>
+      </div>
+
+      <div class="card" style="display:grid;gap:.7rem">
+        <h2 style="font-size:1.1rem">Pikat e referimit</h2>
+        <p class="count" style="margin:0">Në Durrës adresat nuk janë rrugë+numër,
+          janë pika referimi: «pranë klinikës shëndetësore», «te ura», «prapa shkollës».
+          Rruga nuk e gjen dot shtëpinë — klinika po. Kur adresa përmend njërën,
+          porosia merr menjëherë një pikë të përafërt mbi hartë.</p>
+        <p class="count" style="margin:0">Libri mbushet nga puna: motorristi, në
+          çastin që dorëzon, e ruan vendin me një prekje. Këtu i shikon dhe i rregullon.</p>
+        <div class="items" id="lmList"></div>
+        <div class="tools">
+          <button class="btn btn-g btn-sm" id="addLm">+ Pikë referimi</button>
+          <button class="btn btn-p btn-sm" id="saveLm">Ruaj pikat</button>
+          <span class="count" id="lmHint"></span>
         </div>
       </div>
 

@@ -12,14 +12,14 @@ const D = require('./db');
 
 /* Kolonat që ruhen si JSON në SQLite por udhëtojnë si objekte. */
 const JSON_COLS = { menu_items: ['tags'], settings: ['data'], orders: ['items','station_ready'],
-                    zones: ['keywords','outline'],
+                    zones: ['keywords','outline'], landmarks: ['keywords'],
                     documents: ['data'] };
 
 const TABLES = ['menu_items','settings','order_phases','customers','customer_addresses',
                 'staff','role_screens','category_stations','runs','run_points','orders','bookings','suppliers',
                 'stock_levels',
                 'stock_items','stock_moves','purchases','purchase_lines','recipes','documents',
-                'push_subs','zones'];
+                'push_subs','zones','landmarks'];
 
 const BOOL_COLS = ['available','enabled','customer_visible','is_core','active','blocked','is_default','low'];
 
@@ -149,8 +149,17 @@ function rest(db, method, table, params, body, headers) {
     const out = [];
     for (const raw of rows) {
       check(table, raw);
-      if (table === 'orders' && raw.zone == null) {
-        raw.zone = zoneFor(db, raw.address, raw.lat, raw.lng);
+      if (table === 'orders') {
+        // Pika e klientit nuk mbishkruhet kurrë: ajo është e saktë, kjo e përafërt.
+        if (raw.lat == null || raw.lng == null) {
+          const lm = landmarkFor(db, raw.address);
+          if (lm) {
+            raw.lat = lm.lat; raw.lng = lm.lng;
+            raw.accuracy = lm.radius; raw.landmark = lm.name;
+            db.prepare('update landmarks set uses=uses+1 where id=?').run(lm.id);
+          }
+        }
+        if (raw.zone == null) raw.zone = zoneFor(db, raw.address, raw.lat, raw.lng);
       }
       const row = encode(table, withDefaults(db, table, raw));
       const cols = Object.keys(row);
@@ -258,6 +267,49 @@ function pointInOutline(lat, lng, outline) {
   return inside;
 }
 
+/* Përputhja e fjalëve në shqip. «kënetë» dhe «këneta» janë e njëjta fjalë:
+   e para e pashquar, e dyta e shquar — dhe ashtu shkruhen adresat pothuajse
+   gjithmonë. Prandaj krahasohet rrënja, dhe vetëm nga fillimi i fjalës.
+   I njëjti kod si te shfletuesi, që përgjigjja të mos ndryshojë. */
+const normSq = (s2) => String(s2 == null ? '' : s2).toLowerCase()
+  .replace(/ë/g, 'e').replace(/ç/g, 'c')
+  .replace(/[^a-z0-9]+/g, ' ').trim();
+
+function stemSq(k) {
+  const v = normSq(k).replace(/\s+/g, '');
+  const cut = v.replace(/[aeiou]+$/, '');
+  return cut.length >= 4 ? cut : v;
+}
+
+function kwHit(address, keyword) {
+  const st = stemSq(keyword);
+  if (st.length < 4) return null;
+  const w = normSq(address).split(' ');
+  for (let i = 0; i < w.length; i++) if (w[i].startsWith(st)) return w[i];
+  return null;
+}
+
+/* Emri i një pike referimi ka disa fjalë: «Klinika shëndetësore Kënetë».
+   Kërkohet që TË GJITHA fjalët e gjata të gjenden te adresa — përndryshe
+   «Shkolla Kënetë» do të kapte çdo adresë që përmend Kënetën. */
+function nameHit(address, name) {
+  const w = normSq(name).split(' ').filter((x) => x.length >= 4);
+  if (!w.length) return false;
+  return w.every((x) => kwHit(address, x));
+}
+
+/** Cila pikë referimi përmendet te kjo adresë — ajo më e përdorura. */
+function landmarkFor(db, address) {
+  if (!address) return null;
+  const rows = db.prepare('select * from landmarks where active=1 order by uses desc, length(name) desc')
+    .all().map((r) => decode('landmarks', r));
+  for (const l of rows) {
+    if ((l.keywords || []).some((k) => k && kwHit(address, k))) return l;
+    if (nameHit(address, l.name)) return l;
+  }
+  return null;
+}
+
 /** Pika mbizotëron mbi fjalët: adresa e shkruar gabim nuk e zhvendos zonën. */
 function zoneFor(db, address, lat, lng) {
   const zs = db.prepare('select * from zones where active=1 order by sort').all()
@@ -267,11 +319,10 @@ function zoneFor(db, address, lat, lng) {
       if (z.outline && pointInOutline(Number(lat), Number(lng), z.outline)) return z.name;
     }
   }
-  const a = String(address || '').toLowerCase();
-  if (a) {
+  if (address) {
     for (const z of zs) {
       for (const k of (z.keywords || [])) {
-        if (k && a.indexOf(String(k).toLowerCase()) >= 0) return z.name;
+        if (k && kwHit(address, k)) return z.name;
       }
     }
   }
@@ -694,6 +745,32 @@ const RPC = {
   },
 
   zone_for(db, a) { return zoneFor(db, a.p_address, a.p_lat, a.p_lng); },
+  landmark_for(db, a) {
+    const l = landmarkFor(db, a.p_address);
+    return l ? [{ id: l.id, name: l.name, lat: l.lat, lng: l.lng,
+                  radius: l.radius, zone: l.zone }] : [];
+  },
+  /* Motorristi e ruan vendin me një prekje, në çastin që e ka gjetur shtëpinë —
+     e vetmja kohë kur e di me siguri ku është. */
+  landmark_save(db, a) {
+    const me = staffByToken(db, a.p_token);
+    const name = String(a.p_name || '').trim();
+    if (name.length < 3) throw httpErr(400, 'Emri i pikës duhet të paktën 3 shkronja.');
+    const t = D.now();
+    const hit = db.prepare('select * from landmarks where active=1').all()
+      .find((l) => normSq(l.name) === normSq(name));
+    if (hit) {
+      db.prepare('update landmarks set lat=?, lng=?, uses=uses+1, updated_at=? where id=?')
+        .run(a.p_lat, a.p_lng, t, hit.id);
+      return hit.id;
+    }
+    const id = D.uuid();
+    db.prepare(`insert into landmarks (id,name,keywords,lat,lng,radius,zone,created_by,created_at,updated_at)
+                values (?,?,?,?,?,?,?,?,?,?)`)
+      .run(id, name, '[]', a.p_lat, a.p_lng, Number(a.p_radius) || 200,
+           zoneFor(db, name, a.p_lat, a.p_lng), me.staff_id, t, t);
+    return id;
+  },
 
   /* ---------- njoftimet push ---------- */
   push_subscribe(db, a) {
@@ -785,4 +862,5 @@ function httpErr(status, message) {
   return e;
 }
 
-module.exports = { rest, RPC, httpErr, decode, outbox, notify, zoneFor, pointInOutline };
+module.exports = { rest, RPC, httpErr, decode, outbox, notify, zoneFor, pointInOutline,
+                   normSq, stemSq, kwHit, nameHit, landmarkFor };

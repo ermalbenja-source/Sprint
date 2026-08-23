@@ -107,7 +107,7 @@ create table if not exists orders (
   lang text not null default 'sq', channel text not null default 'web',
   customer_id text, created_by text, driver_id text, run_id text,
   lat real, lng real, accuracy integer, cash_collected real,
-  station_ready text not null default '{}', zone text,
+  station_ready text not null default '{}', zone text, landmark text,
   created_at text not null, updated_at text not null);
 
 create table if not exists bookings (
@@ -149,6 +149,13 @@ create table if not exists purchases (
   status text not null default 'draft', subtotal real not null default 0,
   vat real not null default 0, total real not null default 0,
   doc_ref text, note text, staff_id text, created_at text not null, updated_at text not null);
+
+create table if not exists landmarks (
+  id text primary key, name text not null, keywords text not null default '[]',
+  lat real not null, lng real not null, radius integer not null default 200,
+  zone text, note text, uses integer not null default 0,
+  active integer not null default 1, created_by text,
+  created_at text not null, updated_at text not null);
 
 create table if not exists zones (
   id text primary key, name text not null, sort integer not null default 0,
@@ -210,6 +217,17 @@ const DEFAULT_ROLE_SCREENS = {
 
 // Ndarja fillestare e gatimit: picat dhe sanduiçët në furrë, pjesa tjetër në
 // kuzhinë, pijet askund. Pronari e ndryshon te paneli.
+// Ndarja fillestare e Durrësit. Pikënisje për t'i riemërtuar — pronari e di
+// më mirë se çdo hartë se ku shkojnë porositë.
+const DEFAULT_ZONES = [
+  ['Qendra',  10, '#DE7F1C', ['qendër','qendra','taulantia','sheshi']],
+  ['Plazh',   20, '#3AA6C9', ['plazh','iliria','teuta','hekurudha']],
+  ['Kënetë',  30, '#E6B23C', ['kënetë','nishtulla']],
+  ['Currila', 40, '#8E6BC9', ['currila','kodra','vollga']],
+  ['Shkozet', 50, '#4CAF6D', ['shkozet','spitallë']],
+  ['Porti',   60, '#E5544B', ['porti','doganë']],
+];
+
 const DEFAULT_STATIONS = {
   pizza: 'oven', fast: 'oven',
   rest: 'kitchen', trad: 'kitchen', starter: 'kitchen', pije: 'none',
@@ -226,6 +244,7 @@ function open(file) {
   [['menu_items', 'station text'],
    ['orders', "station_ready text not null default '{}'"],
    ['orders', 'zone text'],
+   ['orders', 'landmark text'],
    ['customer_addresses', 'confirmed_at text'],
    ['customer_addresses', 'confirmed_by text'],
   ].forEach(([tbl, col]) => {
@@ -245,6 +264,13 @@ function open(file) {
 
   const cs = db.prepare('insert or ignore into category_stations (category,station) values (?,?)');
   Object.keys(DEFAULT_STATIONS).forEach((c) => cs.run(c, DEFAULT_STATIONS[c]));
+
+  if (!db.prepare('select count(*) as n from zones').get().n) {
+    const zi = db.prepare(`insert into zones (id,name,sort,color,keywords,active,created_at,updated_at)
+                           values (?,?,?,?,?,1,?,?)`);
+    DEFAULT_ZONES.forEach(([name, sort, color, kw]) =>
+      zi.run(uuid(), name, sort, color, JSON.stringify(kw), t, t));
+  }
 
   db.prepare('insert or ignore into settings (id,data,updated_at) values (?,?,?)')
     .run('main', '{}', t);

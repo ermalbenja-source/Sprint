@@ -450,4 +450,77 @@ select public.zone_for('Rruga e Mësimit 5',
   (select lng from public.customer_addresses where customer_id = :'learn_cust')) as zona_e_mesuar;
 
 \echo ''
+\echo '=== 17. FORMAT E FJALËVE NË SHQIP ==='
+-- Adresa e vërtetë që nuk gjendej: fjala shkruhet «këneta», e shquar.
+\echo '-- rrënjët:'
+select public.stem_sq('kënetë') as kenete, public.stem_sq('qendra') as qendra,
+       public.stem_sq('Taulantia') as taulantia, public.stem_sq('port') as port;
+
+insert into public.zones (name, sort, keywords) values
+  ('Kënetë', 25, array['kënetë','nishtulla']) on conflict do nothing;
+
+\echo '-- adresa e vërtetë e klientit:'
+select public.kw_hit(
+  'Rruga Juba Isha këneta banes private pranë klinikës shëndetësore', 'kënetë') as e_kap;
+select public.zone_for(
+  'Rruga Juba Isha këneta banes private pranë klinikës shëndetësore') as zona;
+
+\echo '-- dhe porosia e re e merr vetvetiu:'
+insert into public.orders (customer_name, phone, address, items, total, kind)
+values ('Klienti i Kënetës','069 700 5555',
+        'Rruga Juba Isha këneta banes private pranë klinikës shëndetësore',
+        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700}]'::jsonb, 700, 'delivery')
+returning zone as zona_e_porosise \gset
+select :'zona_e_porosise' as zona_e_porosise;
+
+\echo '-- e njëjta fjalë në format e saj:'
+select public.kw_hit('Këneta, pallati 3','kënetë') as e_shquar,
+       public.kw_hit('te kënetës','kënetë')        as gjinore,
+       public.kw_hit('Kenete afër urës','kënetë')  as pa_theks,
+       public.kw_hit('Shkozetit, rruga 2','shkozet') as shkozetit;
+
+\echo '-- dhe nuk kap atë që s''duhet (dikur «port» kapte «raporti»):'
+select public.kw_hit('raporti i ditës','port') as raporti,
+       public.kw_hit('transporti','port')      as transporti,
+       public.kw_hit('sporti','port')          as sporti,
+       public.kw_hit('Porti i Durrësit','port') as porti;
+
+\echo ''
+\echo '=== 18. PIKAT E REFERIMIT ==='
+-- Adresa e vërtetë: rruga nuk e gjen shtëpinë, klinika po.
+\set adr 'Rruga Juba Isha këneta banes private pranë klinikës shëndetësore'
+
+\echo '-- para se libri të ketë ndonjë pikë:'
+select count(*) as gjetje from public.landmark_for(:'adr');
+
+\echo '-- motorristi e ruan vendin kur dorëzon (një prekje):'
+select token as lm_tok from public.staff_login('4822','moto-pika') \gset
+select public.landmark_save(:'lm_tok', 'Klinika shëndetësore Kënetë',
+                            41.31480, 19.46220, 180) as pika \gset
+
+\echo '-- tani adresa e njeh:'
+select name, lat, lng, radius from public.landmark_for(:'adr');
+
+\echo '-- dhe porosia e re merr pikë e zonë vetvetiu:'
+insert into public.orders (customer_name, phone, address, items, total, kind)
+values ('Klienti pa adresë','069 700 7777', :'adr',
+        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700}]'::jsonb, 700, 'delivery')
+returning id as lm_order \gset
+select number, zone, landmark, lat, lng, accuracy
+  from public.orders where id = :'lm_order';
+
+\echo '-- pika e klientit NUK mbishkruhet nga ajo e referimit:'
+insert into public.orders (customer_name, phone, address, items, total, kind, lat, lng, accuracy)
+values ('Klient me pin','069 700 8888', :'adr',
+        '[{"id":"test-pica","name":"Pica Test","qty":1,"price":700}]'::jsonb, 700, 'delivery',
+        41.32000, 19.45000, 12)
+returning lat, lng, accuracy, landmark;
+
+\echo '-- ruajtja e dytë me të njëjtin emër nuk krijon dublikatë:'
+select public.landmark_save(:'lm_tok', 'klinika shendetesore kenete', 41.31490, 19.46230, 180)
+  = :'pika' as e_njejta_pike;
+select count(*) as sa_pika from public.landmarks
+ where public.norm_sq(name) = public.norm_sq('Klinika shëndetësore Kënetë');
+
+\echo ''
 \echo '=== TË GJITHA KALUAN ==='

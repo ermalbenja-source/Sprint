@@ -23,7 +23,7 @@
     toast._t = setTimeout(() => { el.className = k || ''; }, 3800);
   };
 
-  const Z = { list: [], sel: null, map: null, loaded: false };
+  const Z = { list: [], sel: null, map: null, loaded: false, marks: [], msel: null };
 
   /* Kufiri i Durrësit, i marrë nga geoBoundaries (CC BY 4.0). Nuk e cakton
      zonën — vetëm ndihmon syrin të kuptojë ku është duke vizatuar. */
@@ -34,13 +34,16 @@
   async function load(force) {
     if (Z.loaded && !force) return;
     try {
-      Z.list = (await store.fetchZones()) || [];
+      const [zs, lms] = await Promise.all([store.fetchZones(), store.fetchLandmarks()]);
+      Z.list = zs || [];
+      Z.marks = lms || [];
       if (!Z.list.length) Z.list = store.DEFAULT_ZONES.map((z, i) =>
         Object.assign({ id: 'z' + i, outline: null, active: true }, z,
                       { keywords: z.keywords.slice() }));
       Z.loaded = true;
       if (!Z.sel && Z.list.length) Z.sel = Z.list[0].id || Z.list[0].name;
       render();
+      renderMarks();
       ensureMap();
     } catch (e) {
       $('#zoneList').innerHTML = '<p class="count">Nuk u lexuan zonat: ' + esc(e.message) + '</p>';
@@ -94,6 +97,14 @@
         render();
       },
       onClick: (p) => {
+        // Kur një pikë referimi është e zgjedhur, klikimi e zhvendos atë.
+        // Përndryshe klikimi shton një qoshe te kufiri i zonës.
+        if (Z.msel != null && Z.marks[Z.msel]) {
+          Z.marks[Z.msel].lat = p.lat;
+          Z.marks[Z.msel].lng = p.lng;
+          renderMarks();
+          return;
+        }
         const z = current();
         if (!z) { toast('Zgjidh një zonë së pari.', 'err'); return; }
         z.outline = (z.outline || []).concat([[p.lat, p.lng]]);
@@ -121,6 +132,12 @@
         fill: hexA(z.color, on ? 0.3 : 0.12), stroke: z.color || '#DE7F1C',
         width: on ? 3 : 1.5, handles: on });
     });
+    Z.marks.forEach((m, i) => {
+      if (m.lat == null || m.lng == null) return;
+      shapes.push({ kind: 'dot', lat: Number(m.lat), lng: Number(m.lng),
+        r: i === Z.msel ? 8 : 5, fill: i === Z.msel ? '#E5544B' : '#9C9089',
+        label: i === Z.msel ? m.name : '' });
+    });
     const c = shop();
     shapes.push({ kind: 'dot', lat: c.lat, lng: c.lng, r: 7, fill: '#FFC244', label: 'dyqani' });
 
@@ -140,14 +157,56 @@
     return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
   };
 
+  /* ---------- pikat e referimit ---------- */
+  function renderMarks() {
+    if (!Z.marks.length) {
+      $('#lmList').innerHTML = '<p class="count">Ende pa pika. Ato mbushen vetë kur '
+        + 'motorristi ruan një vend gjatë dorëzimit — ose shtoji ti këtu.</p>';
+    } else {
+      $('#lmList').innerHTML = Z.marks.map((m, i) => `
+        <div class="row lmrow${i === Z.msel ? ' on' : ''}" data-lm="${i}">
+          <span class="zdot" style="background:${i === Z.msel ? '#E5544B' : '#9C9089'}"></span>
+          <div class="nm">
+            <input type="text" data-lf="name" value="${esc(m.name || '')}" maxlength="90"
+                   aria-label="Emri i pikës">
+            <input type="text" data-lf="keywords" value="${esc((m.keywords || []).join(', '))}"
+                   placeholder="fjalë shtesë (jo e detyrueshme)" aria-label="Fjalë shtesë"
+                   style="margin-top:.3rem">
+          </div>
+          <span class="lmuse">${m.uses ? m.uses + '× përdorur' : 'e re'}<br>
+            ${m.lat != null ? Number(m.lat).toFixed(4) + ', ' + Number(m.lng).toFixed(4) : '—'}</span>
+        </div>`).join('');
+    }
+    $('#lmHint').textContent = Z.msel != null
+      ? 'Kliko mbi hartë për ta zhvendosur pikën e zgjedhur.'
+      : (Z.marks.length ? 'Kliko një pikë për ta parë dhe zhvendosur.' : '');
+    paintMap();
+  }
+
+  async function saveMarks() {
+    try {
+      const saved = await store.saveLandmarks(Z.marks);
+      if (saved && saved.length) Z.marks = saved;
+      Z.msel = null;
+      renderMarks();
+      toast('Pikat u ruajtën.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
   /* ---------- prova ---------- */
   function testAddress() {
     const v = $('#ztest').value.trim();
     if (!v) { $('#ztestOut').textContent = ''; return; }
-    const z = store.zoneOf(Z.list, v, null, null);
-    $('#ztestOut').innerHTML = z
-      ? `→ <b style="color:var(--ok)">${esc(z)}</b>`
-      : '→ <b style="color:var(--warn)">pa zonë</b> — shto një fjalë kyçe që e kap';
+    const lm = store.landmarkOf(Z.marks, v);
+    const r = store.zoneWhy(Z.list, v, lm ? lm.lat : null, lm ? lm.lng : null);
+    const pjeset = [];
+    pjeset.push(r.zone
+      ? `→ <b style="color:var(--ok)">${esc(r.zone)}</b>`
+        + (r.keyword ? ` <span style="opacity:.7">(nga «${esc(r.keyword)}» → ${esc(r.word)})</span>` : '')
+      : '→ <b style="color:var(--warn)">pa zonë</b>');
+    if (lm) pjeset.push(`🎯 <b style="color:var(--gold)">${esc(lm.name)}</b>`);
+    else pjeset.push('<span style="opacity:.7">pa pikë referimi</span>');
+    $('#ztestOut').innerHTML = pjeset.join(' &nbsp;·&nbsp; ');
   }
 
   /* ---------- ruajtja ---------- */
@@ -212,6 +271,22 @@
       if (z) { z.outline = null; render(); }
       return;
     }
+    const lmRow = t.closest('[data-lm]');
+    if (lmRow && !t.closest('input')) {
+      const i = Number(lmRow.dataset.lm);
+      Z.msel = (Z.msel === i) ? null : i;
+      renderMarks();
+      return;
+    }
+    if (t.id === 'addLm') {
+      const c = Z.map ? Z.map.get() : shop();
+      Z.marks.push({ name: 'Pikë e re', keywords: [], lat: c.lat, lng: c.lng,
+        radius: 200, uses: 0, active: true });
+      Z.msel = Z.marks.length - 1;
+      renderMarks();
+      return;
+    }
+    if (t.id === 'saveLm') return saveMarks();
     if (t.id === 'saveZones') return save();
     if (t.id === 'resetZones') return reset();
   });
@@ -227,8 +302,17 @@
       testAddress();
       return;
     }
+    const lmRow = e.target.closest('[data-lm]');
+    if (lmRow && e.target.dataset.lf) {
+      const m = Z.marks[Number(lmRow.dataset.lm)];
+      if (!m) return;
+      if (e.target.dataset.lf === 'name') m.name = e.target.value;
+      else m.keywords = e.target.value.split(',').map((k) => k.trim()).filter(Boolean);
+      testAddress();
+      return;
+    }
     if (e.target.id === 'ztest') testAddress();
   });
 
-  S.zonat = { load, list: () => Z.list };
+  S.zonat = { load, list: () => Z.list, marks: () => Z.marks };
 })();

@@ -151,6 +151,14 @@ header .logo{font-size:1.4rem}
 .s-seq{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
   background:var(--brand);color:#1B0D02;font-weight:700;font-size:.9rem;flex-shrink:0}
 .s-zone{font-size:.78rem;color:var(--gold);opacity:.9}
+.s-near{font-size:.82rem;color:var(--warn);font-weight:600}
+.lmchk{display:flex;align-items:center;gap:.5rem;font-size:.9rem;color:var(--muted);
+  cursor:pointer;margin:.6rem 0 .4rem}
+.lmchk input{width:20px;height:20px}
+#dlvLmName{width:100%;background:#0F0B0C;border:1.5px solid var(--line);border-radius:11px;
+  padding:.6rem .7rem;font-size:1rem;color:var(--txt);outline:none}
+#dlvLmName:focus{border-color:var(--brand)}
+.lmhint{margin:.35rem 0 0;font-size:.78rem;color:var(--muted);line-height:1.4}
 .s-note{background:rgba(230,178,60,.14);border-left:3px solid var(--warn);border-radius:0 8px 8px 0;
   padding:.4rem .55rem;font-size:.9rem;color:#f4dca6;margin:.1rem 0 0}
 .s-act{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:0 .9rem .9rem}
@@ -253,6 +261,17 @@ header .logo{font-size:1.4rem}
     <p id="dlvSub"></p>
     <div id="dlvCashWrap">
       <input id="dlvCash" inputmode="numeric" aria-label="Sa para arkëtove">
+    </div>
+    <!-- Pika e referimit ruhet pikërisht këtu, sepse ky është i vetmi çast kur
+         motorristi e di me siguri ku është: te dera, me telefonin në dorë. -->
+    <div id="dlvLmWrap">
+      <label class="lmchk"><input type="checkbox" id="dlvLmOn">
+        Ruaj këtë vend si pikë referimi</label>
+      <input id="dlvLmName" class="hide" maxlength="90"
+             placeholder="p.sh. Klinika shëndetësore Kënetë"
+             aria-label="Emri i pikës së referimit">
+      <p class="lmhint hide" id="dlvLmHint">Herën tjetër, çdo adresë që e përmend
+        këtë emër do ta dijë vetë ku është.</p>
     </div>
     <p class="gate-err" id="dlvErr"></p>
     <div class="modal-act">

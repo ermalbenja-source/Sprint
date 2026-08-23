@@ -1103,6 +1103,38 @@
     return inside;
   }
 
+  /* ---------- përputhja e fjalëve në shqip ----------
+     «kënetë» dhe «këneta» janë e njëjta fjalë; e para është forma e pashquar,
+     e dyta ajo e shquar. Përputhja fjalë-për-fjalë i humb të gjitha adresat e
+     shkruara në formën e dytë — dhe ashtu shkruhen pothuajse gjithmonë.
+
+     Prandaj: hiqen theksat, teksti ndahet në fjalë, dhe krahasohet rrënja —
+     fjala pa zanoret e fundit. Vetëm zanoret e fundit, jo rrokje të tëra:
+     «kënetë» → «kenet», që kap «këneta», «kënetës», «Kenete», por jo më shumë.
+
+     Krahasimi bëhet nga fillimi i fjalës, jo kudo brenda saj. Kjo është edhe
+     arsyeja pse «port» nuk e kap më «raporti» ose «transporti». */
+
+  const normSq = (s2) => String(s2 == null ? '' : s2).toLowerCase()
+    .replace(/ë/g, 'e').replace(/ç/g, 'c')
+    .replace(/[^a-z0-9]+/g, ' ').trim();
+
+  function stemSq(k) {
+    const v = normSq(k).replace(/\s+/g, '');
+    const cut = v.replace(/[aeiou]+$/, '');
+    return cut.length >= 4 ? cut : v;
+  }
+
+  /** A e përmban kjo adresë këtë fjalë kyçe? Kthen fjalën e gjetur ose null —
+      që paneli të tregojë PSE ra te kjo zonë, dhe një fjalë e keqe të duket. */
+  function kwHit(address, keyword) {
+    const st = stemSq(keyword);
+    if (st.length < 4) return null;
+    const w = normSq(address).split(' ');
+    for (let i = 0; i < w.length; i++) if (w[i].startsWith(st)) return w[i];
+    return null;
+  }
+
   /** Cila zonë i takon kësaj adrese. Pika mbizotëron mbi fjalët. */
   function zoneOf(zones, address, lat, lng) {
     const zs = (zones || []).filter((z) => z.active !== false)
@@ -1112,15 +1144,107 @@
         if (z.outline && pointInOutline(Number(lat), Number(lng), z.outline)) return z.name;
       }
     }
-    const a = String(address || '').toLowerCase();
-    if (a) {
+    if (address) {
       for (const z of zs) {
         for (const k of (z.keywords || [])) {
-          if (k && a.indexOf(String(k).toLowerCase()) >= 0) return z.name;
+          if (k && kwHit(address, k)) return z.name;
         }
       }
     }
     return null;
+  }
+
+  /** Si zoneOf, por thotë edhe pse: cila fjalë kyçe e kapi, ose se e vendosi pika. */
+  function zoneWhy(zones, address, lat, lng) {
+    const zs = (zones || []).filter((z) => z.active !== false)
+      .slice().sort((a, b) => (a.sort || 0) - (b.sort || 0));
+    if (lat != null && lng != null) {
+      for (const z of zs) {
+        if (z.outline && pointInOutline(Number(lat), Number(lng), z.outline)) {
+          return { zone: z.name, by: 'kufi' };
+        }
+      }
+    }
+    for (const z of zs) {
+      for (const k of (z.keywords || [])) {
+        const w = k && kwHit(address, k);
+        if (w) return { zone: z.name, by: 'fjalë', keyword: k, word: w };
+      }
+    }
+    return { zone: null, by: null };
+  }
+
+  /* ══════════════════ PIKAT E REFERIMIT ══════════════════
+     Në Durrës adresat nuk janë rrugë+numër, janë pika referimi. Rruga nuk e
+     gjen dot shtëpinë; klinika po. Libri mbushet nga puna: motorristi, në
+     çastin që dorëzon, e ruan vendin me një prekje. */
+
+  const LS_LMARK = 'sprint-landmarks';
+
+  /** Të gjitha fjalët e gjata të emrit duhet të gjenden te adresa —
+      përndryshe «Shkolla Kënetë» do të kapte çdo adresë që përmend Kënetën. */
+  function nameHit(address, name) {
+    const w = normSq(name).split(' ').filter((x) => x.length >= 4);
+    return w.length > 0 && w.every((x) => kwHit(address, x));
+  }
+
+  async function fetchLandmarks() {
+    if (!live) return readLS(LS_LMARK, []);
+    return st._req('/rest/v1/landmarks?select=*&order=uses.desc', { headers: st._headers() });
+  }
+
+  /** Cila pikë referimi përmendet te kjo adresë — ajo më e përdorura. */
+  function landmarkOf(list, address) {
+    if (!address) return null;
+    const rows = (list || []).filter((l) => l.active !== false)
+      .slice().sort((a, b) => (b.uses || 0) - (a.uses || 0)
+        || String(b.name).length - String(a.name).length);
+    for (const l of rows) {
+      if ((l.keywords || []).some((k) => k && kwHit(address, k))) return l;
+      if (nameHit(address, l.name)) return l;
+    }
+    return null;
+  }
+
+  /** Ruan vendin ku ndodhet motorristi si pikë referimi. */
+  async function landmarkSave(name, lat, lng, radius) {
+    if (!live) {
+      const all = readLS(LS_LMARK, []);
+      const hit = all.find((l) => normSq(l.name) === normSq(name));
+      if (hit) {
+        hit.lat = lat; hit.lng = lng; hit.uses = (hit.uses || 0) + 1;
+        writeLS(LS_LMARK, all);
+        return hit.id;
+      }
+      const row = { id: uid('p'), name: String(name).trim(), keywords: [],
+        lat, lng, radius: Number(radius) || 200, uses: 0, active: true,
+        created_at: new Date().toISOString() };
+      all.push(row); writeLS(LS_LMARK, all);
+      return row.id;
+    }
+    const sess = readLS(LS_DEVICE, null);
+    if (!sess || !sess.token) throw new Error('Hyr me kodin tënd.');
+    return st._rpc('landmark_save', { p_token: sess.token, p_name: name,
+      p_lat: lat, p_lng: lng, p_radius: Number(radius) || 200 });
+  }
+
+  async function saveLandmarks(list) {
+    const clean = (list || []).map((l) => ({
+      name: String(l.name || '').trim().slice(0, 90),
+      keywords: (l.keywords || []).map((k) => String(k).trim().toLowerCase()).filter(Boolean),
+      lat: Number(l.lat), lng: Number(l.lng),
+      radius: Number(l.radius) || 200,
+      zone: l.zone || null, note: l.note || null, active: l.active !== false,
+    })).filter((l) => l.name.length >= 3 && isFinite(l.lat) && isFinite(l.lng));
+
+    if (!live) { writeLS(LS_LMARK, clean.map((l, i) => Object.assign({ id: 'p' + i, uses: 0 }, l))); return clean; }
+    await st._ensureAuth();
+    await st._req('/rest/v1/landmarks?name=neq.__none__', {
+      method: 'DELETE', headers: st._headers({ Prefer: 'return=minimal' }) });
+    if (!clean.length) return [];
+    return st._req('/rest/v1/landmarks', {
+      method: 'POST', headers: st._headers({ Prefer: 'return=representation' }),
+      body: JSON.stringify(clean) });
   }
 
   /* ══════════════════ NJOFTIMET ══════════════════
@@ -1333,7 +1457,9 @@
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
     staffLogin, staffSession, staffLogout,
     pushSubscribe, pushUnsubscribe,
-    DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, pointInOutline,
+    DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, zoneWhy, pointInOutline,
+    normSq, stemSq, kwHit, nameHit,
+    fetchLandmarks, landmarkOf, landmarkSave, saveLandmarks,
     getLocation, locationQuality, navLink,
   });
 })();
