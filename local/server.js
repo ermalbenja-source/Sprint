@@ -271,6 +271,7 @@ function addresses() {
 server.listen(PORT, () => {
   const ips = addresses();
   console.log('\n  SPRINT — programi i dyqanit\n');
+  console.log('  Hape këtë adresë te SHFLETUESI (Safari/Chrome), jo këtu te terminali:');
   console.log('  Mbi këtë kompjuter:  http://localhost:' + PORT);
   ips.forEach((ip) => console.log('  Nga tableti/telefoni: http://' + ip + ':' + PORT));
   console.log('\n  Faqja      /            Paneli  /admin');
@@ -282,7 +283,8 @@ server.listen(PORT, () => {
     console.log('  Fjalëkalimi: ' + created.pass);
     console.log('  (ruajtur edhe te ' + path.join(DATA, 'hyrja.txt') + ')');
   }
-  console.log('\n  Për ta ndalur: Ctrl+C\n');
+  console.log('\n  Lëre këtë dritare hapur — programi punon këtu.');
+  console.log('  Për ta ndalur: Ctrl+C\n');
 });
 
 process.on('SIGINT', () => { console.log('\n  U ndal. Të dhënat janë të ruajtura.\n'); process.exit(0); });
