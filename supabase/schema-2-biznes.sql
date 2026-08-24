@@ -489,44 +489,122 @@ $$;
 revoke all on function public.set_staff_pin(uuid, text) from public, anon;
 grant execute on function public.set_staff_pin(uuid, text) to authenticated;
 
-create or replace function public.staff_login(p_pin text, p_device text default null)
-returns table (token uuid, staff_id uuid, name text, role text)
+-- Provat e gabuara numërohen sipas pajisjes, jo sipas personit. Hyrja bëhet
+-- vetëm me kod, pa emër, ndaj serveri nuk e di se kujt i takonte kodi i gabuar.
+-- Më parë numëroheshin te i gjithë stafi njëherësh, çka do të thoshte se pesë
+-- prekje të gabuara nga kushdo e mbyllnin derën për tërë ekipin — pikërisht në
+-- orën më të keqe. Tani mbyllet vetëm pajisja që gabon.
+create table if not exists public.pin_tries (
+  device       text primary key,
+  tries        integer     not null default 0,
+  locked_until timestamptz,
+  last_try     timestamptz not null default now()
+);
+
+alter table public.pin_tries enable row level security;
+
+-- Dështimi kthehet si rresht, jo si «raise exception». Arsyeja është e hollë
+-- por vendimtare: në PL/pgSQL një exception e kthen mbrapsht gjithçka që bëri
+-- funksioni, pra edhe shkrimin e provës së gabuar — numëruesi nuk mbahej dot
+-- mend dhe mbrojtja nga hamendësimi nuk punonte fare. Kur dështimi kthehet si
+-- rresht, shkrimi mbetet.
+drop function if exists public.staff_login(text, text);
+
+create function public.staff_login(p_pin text, p_device text default null)
+returns table (token uuid, staff_id uuid, name text, role text, problem text)
 language plpgsql
 security definer
 set search_path = public, extensions
 as $$
 declare
-  s record;
-  t uuid;
+  s     record;
+  t     uuid;
+  dev   text := left(coalesce(nullif(btrim(p_device), ''), 'pa-pajisje'), 120);
+  gjith integer;
 begin
+  -- Provat e vjetra nuk vlejnë më.
+  delete from public.pin_tries where last_try < now() - interval '1 day';
+
+  -- A është bllokuar kjo pajisje?
+  if exists (select 1 from public.pin_tries
+              where device = dev and locked_until is not null and locked_until > now()) then
+    return query select null::uuid, null::uuid, null::text, null::text,
+      'Kjo pajisje u bllokua për 15 minuta nga kodet e gabuara. Provo nga një tjetër ose prit.'::text;
+    return;
+  end if;
+
+  -- Mbrojtje nga hamendësimi me mijëra prova: dikush që ndërron emrin e
+  -- pajisjes në çdo provë do t'i shpëtonte bllokimit të mësipërm, ndaj matet
+  -- edhe sasia e përgjithshme. Kufiri është i lartë sa të mos e prekë kurrë
+  -- një gabim të zakonshëm të stafit.
+  select coalesce(sum(tries), 0) into gjith
+    from public.pin_tries where last_try > now() - interval '15 minutes';
+  if gjith >= 30 then
+    return query select null::uuid, null::uuid, null::text, null::text,
+      'Shumë kode të gabuara këtu për pak kohë. Prit 15 minuta.'::text;
+    return;
+  end if;
+
   select * into s
     from public.staff
    where active and pin_hash is not null
-     and (locked_until is null or locked_until < now())
      and pin_hash = crypt(p_pin, pin_hash)
    limit 1;
 
   if s.id is null then
-    update public.staff
-       set failed_tries = failed_tries + 1,
-           locked_until = case when failed_tries + 1 >= 5
-                               then now() + interval '15 minutes' else locked_until end
-     where active and pin_hash is not null;
-    raise exception 'Kod i gabuar.';
+    insert into public.pin_tries (device, tries, last_try)
+    values (dev, 1, now())
+    on conflict (device) do update
+       set tries        = public.pin_tries.tries + 1,
+           last_try     = now(),
+           locked_until = case when public.pin_tries.tries + 1 >= 5
+                               then now() + interval '15 minutes'
+                               else public.pin_tries.locked_until end;
+    return query select null::uuid, null::uuid, null::text, null::text, 'Kod i gabuar.'::text;
+    return;
   end if;
 
+  delete from public.pin_tries where device = dev;
   update public.staff set failed_tries = 0, locked_until = null where id = s.id;
 
   insert into public.staff_sessions (staff_id, device)
   values (s.id, left(coalesce(p_device, ''), 120))
   returning staff_sessions.token into t;
 
-  return query select t, s.id, s.name, s.role;
+  return query select t, s.id, s.name, s.role, null::text;
 end;
 $$;
 
 revoke all on function public.staff_login(text, text) from public;
 grant execute on function public.staff_login(text, text) to anon, authenticated;
+
+-- Pronari mund t'i hapë bllokimet pa pritur 15 minutat, kur e di se ishte
+-- thjesht dikush që gaboi kodin.
+create or replace function public.pin_unlock()
+returns void
+language sql
+security definer
+set search_path = public
+as $$ delete from public.pin_tries; $$;
+
+revoke all on function public.pin_unlock() from public, anon;
+grant execute on function public.pin_unlock() to authenticated;
+
+-- Sa pajisje janë të bllokuara tani — paneli e tregon që pronari ta dijë.
+create or replace function public.pin_locked()
+returns table (device text, tries integer, locked_until timestamptz)
+language sql
+security definer
+set search_path = public
+as $$
+  select device, tries, locked_until
+    from public.pin_tries
+   where locked_until is not null and locked_until > now()
+   order by locked_until desc;
+$$;
+
+revoke all on function public.pin_locked() from public, anon;
+grant execute on function public.pin_locked() to authenticated;
 
 -- Kthen stafin nëse tokeni është i vlefshëm; përndryshe gabim.
 create or replace function public.staff_by_token(p_token uuid)

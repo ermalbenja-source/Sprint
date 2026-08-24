@@ -31,6 +31,29 @@ const login = async (p, code) => {
   await p.fill('#em', EMAIL); await p.fill('#pw', PASS);
   await p.click('#loginBtn'); await p.waitForTimeout(2000);
 
+  /* Stafi krijohet nga vetë testi: përndryshe kalimi varej nga fakti që një
+     provë tjetër kishte rastisur të nisej më parë mbi të njëjtën bazë. */
+  await p.evaluate(async () => {
+    const s = SPRINT.store;
+    // Pa menunë te baza, asnjë pjatë nuk njihet dhe të gjitha bien te kuzhina —
+    // pikërisht ndarja që ky test do të provojë.
+    const nemenu = (await s.fetchAll()) || {};
+    if (!nemenu.menu || nemenu.menu.length < 100) {
+      await s.saveItems(SPRINT.menu.map((m, i) => Object.assign({ sort: i }, m)));
+    }
+    const want = [['Kuzhina', 'kitchen', '1199'], ['Furra', 'pizza', '1155'],
+                  ['Andrea', 'driver', '4821']];
+    for (const [name, role] of want) {
+      const all = await s.fetchStaff();
+      if (!all.find((x) => x.name === name)) await s.saveStaff({ name, role });
+    }
+    const all = await s.fetchStaff();
+    for (const [name, , pin] of want) {
+      const x = all.find((y) => y.name === name);
+      if (x && !x.pin_hash) await s.setStaffPin(x.id, pin);
+    }
+  });
+
   await p.click('[data-tab=cook]'); await p.waitForTimeout(1500);
   console.log('KATEGORITË', await p.evaluate(() => JSON.stringify(
     [...document.querySelectorAll('.ckrow')].map((r) => ({
@@ -53,7 +76,7 @@ const login = async (p, code) => {
   await p.fill('#cookSearch', 'Sufllaqe'); await p.waitForTimeout(500);
   console.log('KËRKIMI', await p.evaluate(() => document.querySelectorAll('#cookItems tbody tr').length));
   await p.screenshot({ path: out + 'ck-items.png', clip: { x: 0, y: 300, width: 1280, height: 500 } });
-  await p.click('#cookItems [data-itemsta=fs01][data-sta=""]'); await p.waitForTimeout(300);
+  await p.click('#cookItems [data-itemsta=ff01][data-sta=""]'); await p.waitForTimeout(300);
   console.log('PA PËRJASHTIM', await p.evaluate(() =>
     document.querySelector('#cookItems .stbtn.on').textContent.trim()));
 

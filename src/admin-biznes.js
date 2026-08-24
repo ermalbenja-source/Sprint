@@ -33,16 +33,39 @@
       staff = (await store.fetchStaff()) || [];
       staffLoaded = true;
       renderStaff();
+      loadLocks();
     } catch (e) {
       $('#staffList').innerHTML = '<p class="count">Nuk u lexua stafi: ' + esc(e.message) + '</p>';
     }
   }
 
+  /* Personi vetë nuk bllokohet më — bllokohet pajisja që gabon kodin, se hyrja
+     bëhet pa emër dhe serveri s'e di se kujt i takonte kodi i gabuar. Bllokimet
+     shfaqen te kartela më poshtë. */
   function pinState(s) {
-    if (s.locked_until && new Date(s.locked_until) > new Date()) {
-      return { cls: 'locked', txt: '🔒 bllokuar 15 min' };
-    }
     return s.pin_hash ? { cls: 'set', txt: '✓ ka kod' } : { cls: '', txt: 'pa kod' };
+  }
+
+  /* ---------- pajisjet e bllokuara ---------- */
+  async function loadLocks() {
+    const card = $('#lockCard');
+    if (!card) return;
+    let list = [];
+    try { list = (await store.pinLocked()) || []; } catch (e) { list = []; }
+    if (!list.length) { card.style.display = 'none'; return; }
+    card.style.display = 'grid';
+    $('#lockList').innerHTML = list.map((l) => {
+      const min = Math.max(1, Math.round((new Date(l.locked_until) - Date.now()) / 60000));
+      return '<div>' + esc(l.device) + ' — ' + l.tries + ' kode të gabuara, edhe ' + min + ' min</div>';
+    }).join('');
+  }
+
+  async function unlockPins() {
+    try {
+      await store.pinUnlock();
+      await loadLocks();
+      toast('U hapën.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
   }
 
   function renderStaff() {
@@ -415,6 +438,7 @@
     if (t.closest('[data-pin-close]')) return closePin();
     if (t.id === 'pinSave') return savePin();
     if (t.id === 'addStaff') return addStaff();
+    if (t.id === 'unlockPins') return unlockPins();
     if (t.id === 'savePerms') return savePerms();
     if (t.id === 'resetPerms') return resetPerms();
     if (t.id === 'saveCook') return saveCook();

@@ -182,6 +182,13 @@ function ok(cond, msg, extra) {
   ok(!(await rpc('kds_orders', { p_token: oTok, p_station: 'oven' })).some((o) => o.id === p3.id),
      'furra nuk e sheh më');
 
+  /* Pastrim edhe në dalje, jo vetëm në hyrje: kodet 1199/1155/4821 i përdorin
+     edhe prova të tjera, dhe dy veta nuk mbajnë dot të njëjtin kod. */
+  for (const n of ['Kuzhina Provë', 'Furra Provë', 'Andrea Provë']) {
+    await call('/rest/v1/staff?name=eq.' + encodeURIComponent(n),
+      { method: 'DELETE', headers: H() }).catch(() => {});
+  }
+
   console.log(fails ? `\n✗ ${fails} dështime\n` : '\n═══ TË GJITHA KALUAN ═══\n');
   process.exit(fails ? 1 : 0);
 })().catch((e) => { console.error('\nGABIM:', e.message); process.exit(1); });

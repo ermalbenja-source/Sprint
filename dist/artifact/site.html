@@ -2585,6 +2585,17 @@ ${S('drink', `
   // të krijuar brenda të njëjtit milisekond do të merrnin të njëjtin id.
   const uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
+  /* Emër i qëndrueshëm për këtë pajisje. Provat e gabuara të kodit numërohen
+     sipas tij: pa të, tableti i kuzhinës dhe telefoni i një kalimtari do të
+     dukeshin si e njëjta pajisje, dhe gabimi i njërit do të mbyllte tjetrin.
+     Shkruhet një herë dhe mbetet — shfletuesi i njëjtë kthen të njëjtin emër. */
+  const LS_DEVID = 'sprint-device-id';
+  function deviceId() {
+    let d = readLS(LS_DEVID, null);
+    if (!d) { d = uid('paj-'); writeLS(LS_DEVID, d); }
+    return d;
+  }
+
   /* ══════════════════ FAZAT ══════════════════
      Çelësat janë saktësisht vlerat e `orders.status`, që të mos ketë përkthim
      midis dy fjalorëve. Të fiksuar sepse kuzhina, motorristi dhe faqja e
@@ -2834,9 +2845,13 @@ ${S('drink', `
       writeLS(LS_DEVICE, sess);
       return sess;
     }
-    const r = await st._rpc('staff_login', { p_pin: String(pin), p_device: device || navigator.userAgent.slice(0, 120) });
+    const r = await st._rpc('staff_login', {
+      p_pin: String(pin),
+      p_device: (device ? device + ' ' : '') + deviceId() });
     const row = Array.isArray(r) ? r[0] : r;
-    if (!row || !row.token) throw new Error('Kod i gabuar.');
+    // Dështimi vjen si rresht me arsyen brenda, që numërimi te baza të mos
+    // kthehet mbrapsht. «Kod i gabuar» mbetet rezerva për baza të vjetra.
+    if (!row || !row.token) throw new Error((row && row.problem) || 'Kod i gabuar.');
     writeLS(LS_DEVICE, row);
     return row;
   }
@@ -2855,6 +2870,17 @@ ${S('drink', `
       writeLS(LS_DEVICE, null);
       return null;
     }
+  }
+
+  /* Pajisjet e bllokuara nga kodet e gabuara. Pa bazë të vërtetë nuk ka
+     bllokime fare, ndaj kthehet listë bosh. */
+  async function pinLocked() {
+    if (!live) return [];
+    return (await st._rpc('pin_locked', {})) || [];
+  }
+  async function pinUnlock() {
+    if (!live) return null;
+    return st._rpc('pin_unlock', {});
   }
 
   async function staffLogout() {
@@ -4005,7 +4031,7 @@ ${S('drink', `
     DEMO_STAFF, ensureLocalStaff, ensureLocalOrders,
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
-    staffLogin, staffSession, staffLogout,
+    staffLogin, staffSession, staffLogout, deviceId, pinLocked, pinUnlock,
     pushSubscribe, pushUnsubscribe,
     DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, zoneWhy, pointInOutline,
     normSq, stemSq, kwHit, nameHit,

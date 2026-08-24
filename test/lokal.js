@@ -69,7 +69,9 @@ const login = async (p, code) => {
 
   // ---------- 5. porosi me telefon ----------
   await p.click('[data-tab=new]'); await p.waitForTimeout(700);
-  await p.fill('#nSearch', 'mar'); await p.waitForTimeout(500);
+  // Pjatë që e gatuan kuzhina, jo furra: hapi 7 provon pikërisht ekranin e
+  // kuzhinës, dhe një picë do të shkonte te furra e do ta linte atë bosh.
+  await p.fill('#nSearch', 'tavë'); await p.waitForTimeout(500);
   await p.press('#nSearch', 'Enter'); await p.waitForTimeout(400);
   await p.fill('#nPhone', '069 777 8888'); await p.waitForTimeout(900);
   await p.fill('#nName', 'Ermal Benja');

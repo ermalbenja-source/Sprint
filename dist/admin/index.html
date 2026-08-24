@@ -1022,6 +1022,15 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
       <div class="items" id="staffList"></div>
       <button class="btn btn-g" id="addStaff" style="justify-self:start">+ Shto person</button>
 
+      <div class="card" id="lockCard" style="display:none;gap:.7rem">
+        <h2 style="font-size:1.1rem">Pajisje të bllokuara</h2>
+        <p class="count" style="margin:0">Pesë kode të gabuara nga e njëjta pajisje e mbyllin
+          atë për 15 minuta — vetëm atë, jo ekipin. Nëse e di se ishte thjesht dikush që
+          gaboi, hapi këtu pa pritur.</p>
+        <div id="lockList" class="count"></div>
+        <div class="tools"><button class="btn btn-p btn-sm" id="unlockPins">Hapi tani</button></div>
+      </div>
+
       <div class="card" style="display:grid;gap:.9rem">
         <h2 style="font-size:1.1rem">Kush sheh çfarë</h2>
         <p class="count" style="margin:0">Pronari sheh gjithçka dhe kjo nuk ndryshohet dot —
@@ -2924,6 +2933,17 @@ ${S('drink', `
   // të krijuar brenda të njëjtit milisekond do të merrnin të njëjtin id.
   const uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
+  /* Emër i qëndrueshëm për këtë pajisje. Provat e gabuara të kodit numërohen
+     sipas tij: pa të, tableti i kuzhinës dhe telefoni i një kalimtari do të
+     dukeshin si e njëjta pajisje, dhe gabimi i njërit do të mbyllte tjetrin.
+     Shkruhet një herë dhe mbetet — shfletuesi i njëjtë kthen të njëjtin emër. */
+  const LS_DEVID = 'sprint-device-id';
+  function deviceId() {
+    let d = readLS(LS_DEVID, null);
+    if (!d) { d = uid('paj-'); writeLS(LS_DEVID, d); }
+    return d;
+  }
+
   /* ══════════════════ FAZAT ══════════════════
      Çelësat janë saktësisht vlerat e `orders.status`, që të mos ketë përkthim
      midis dy fjalorëve. Të fiksuar sepse kuzhina, motorristi dhe faqja e
@@ -3173,9 +3193,13 @@ ${S('drink', `
       writeLS(LS_DEVICE, sess);
       return sess;
     }
-    const r = await st._rpc('staff_login', { p_pin: String(pin), p_device: device || navigator.userAgent.slice(0, 120) });
+    const r = await st._rpc('staff_login', {
+      p_pin: String(pin),
+      p_device: (device ? device + ' ' : '') + deviceId() });
     const row = Array.isArray(r) ? r[0] : r;
-    if (!row || !row.token) throw new Error('Kod i gabuar.');
+    // Dështimi vjen si rresht me arsyen brenda, që numërimi te baza të mos
+    // kthehet mbrapsht. «Kod i gabuar» mbetet rezerva për baza të vjetra.
+    if (!row || !row.token) throw new Error((row && row.problem) || 'Kod i gabuar.');
     writeLS(LS_DEVICE, row);
     return row;
   }
@@ -3194,6 +3218,17 @@ ${S('drink', `
       writeLS(LS_DEVICE, null);
       return null;
     }
+  }
+
+  /* Pajisjet e bllokuara nga kodet e gabuara. Pa bazë të vërtetë nuk ka
+     bllokime fare, ndaj kthehet listë bosh. */
+  async function pinLocked() {
+    if (!live) return [];
+    return (await st._rpc('pin_locked', {})) || [];
+  }
+  async function pinUnlock() {
+    if (!live) return null;
+    return st._rpc('pin_unlock', {});
   }
 
   async function staffLogout() {
@@ -4344,7 +4379,7 @@ ${S('drink', `
     DEMO_STAFF, ensureLocalStaff, ensureLocalOrders,
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
-    staffLogin, staffSession, staffLogout,
+    staffLogin, staffSession, staffLogout, deviceId, pinLocked, pinUnlock,
     pushSubscribe, pushUnsubscribe,
     DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, zoneWhy, pointInOutline,
     normSq, stemSq, kwHit, nameHit,
@@ -6027,16 +6062,39 @@ ${S('drink', `
       staff = (await store.fetchStaff()) || [];
       staffLoaded = true;
       renderStaff();
+      loadLocks();
     } catch (e) {
       $('#staffList').innerHTML = '<p class="count">Nuk u lexua stafi: ' + esc(e.message) + '</p>';
     }
   }
 
+  /* Personi vetë nuk bllokohet më — bllokohet pajisja që gabon kodin, se hyrja
+     bëhet pa emër dhe serveri s'e di se kujt i takonte kodi i gabuar. Bllokimet
+     shfaqen te kartela më poshtë. */
   function pinState(s) {
-    if (s.locked_until && new Date(s.locked_until) > new Date()) {
-      return { cls: 'locked', txt: '🔒 bllokuar 15 min' };
-    }
     return s.pin_hash ? { cls: 'set', txt: '✓ ka kod' } : { cls: '', txt: 'pa kod' };
+  }
+
+  /* ---------- pajisjet e bllokuara ---------- */
+  async function loadLocks() {
+    const card = $('#lockCard');
+    if (!card) return;
+    let list = [];
+    try { list = (await store.pinLocked()) || []; } catch (e) { list = []; }
+    if (!list.length) { card.style.display = 'none'; return; }
+    card.style.display = 'grid';
+    $('#lockList').innerHTML = list.map((l) => {
+      const min = Math.max(1, Math.round((new Date(l.locked_until) - Date.now()) / 60000));
+      return '<div>' + esc(l.device) + ' — ' + l.tries + ' kode të gabuara, edhe ' + min + ' min</div>';
+    }).join('');
+  }
+
+  async function unlockPins() {
+    try {
+      await store.pinUnlock();
+      await loadLocks();
+      toast('U hapën.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
   }
 
   function renderStaff() {
@@ -6409,6 +6467,7 @@ ${S('drink', `
     if (t.closest('[data-pin-close]')) return closePin();
     if (t.id === 'pinSave') return savePin();
     if (t.id === 'addStaff') return addStaff();
+    if (t.id === 'unlockPins') return unlockPins();
     if (t.id === 'savePerms') return savePerms();
     if (t.id === 'resetPerms') return resetPerms();
     if (t.id === 'saveCook') return saveCook();

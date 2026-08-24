@@ -933,6 +933,15 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
       <div class="items" id="staffList"></div>
       <button class="btn btn-g" id="addStaff" style="justify-self:start">+ Shto person</button>
 
+      <div class="card" id="lockCard" style="display:none;gap:.7rem">
+        <h2 style="font-size:1.1rem">Pajisje të bllokuara</h2>
+        <p class="count" style="margin:0">Pesë kode të gabuara nga e njëjta pajisje e mbyllin
+          atë për 15 minuta — vetëm atë, jo ekipin. Nëse e di se ishte thjesht dikush që
+          gaboi, hapi këtu pa pritur.</p>
+        <div id="lockList" class="count"></div>
+        <div class="tools"><button class="btn btn-p btn-sm" id="unlockPins">Hapi tani</button></div>
+      </div>
+
       <div class="card" style="display:grid;gap:.9rem">
         <h2 style="font-size:1.1rem">Kush sheh çfarë</h2>
         <p class="count" style="margin:0">Pronari sheh gjithçka dhe kjo nuk ndryshohet dot —

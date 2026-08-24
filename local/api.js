@@ -433,29 +433,64 @@ const RPC = {
       .run(D.hash(a.p_pin), D.now(), a.p_staff_id);
     return null;
   },
+  /* Provat e gabuara numërohen sipas pajisjes, jo sipas personit — hyrja bëhet
+     vetëm me kod, pa emër, ndaj serveri nuk e di se kujt i takonte kodi i
+     gabuar. Më parë numëroheshin te i gjithë stafi njëherësh, pra pesë prekje
+     të gabuara nga kushdo e mbyllnin derën për tërë ekipin. */
   staff_login(db, a) {
-    const list = db.prepare('select * from staff where active=1 and pin_hash is not null').all();
-    const hit = list.find((s) =>
-      (!s.locked_until || s.locked_until < D.now()) && D.verify(a.p_pin, s.pin_hash));
-    if (!hit) {
-      db.prepare(`update staff set failed_tries = failed_tries + 1,
-                    locked_until = case when failed_tries + 1 >= 5 then ? else locked_until end
-                  where active=1 and pin_hash is not null`)
-        .run(new Date(Date.now() + 15 * 60000).toISOString());
-      throw httpErr(401, 'Kod i gabuar.');
+    const dev = String(a.p_device || '').trim().slice(0, 120) || 'pa-pajisje';
+    const tani = D.now();
+    const para = (min) => new Date(Date.now() - min * 60000).toISOString();
+
+    db.prepare('delete from pin_tries where last_try < ?').run(para(24 * 60));
+
+    /* Dështimi kthehet si rresht me «problem», jo si gabim HTTP — njësoj si te
+       Postgres, ku një exception do ta kthente mbrapsht vetë numërimin. */
+    const jo = (m) => [{ token: null, staff_id: null, name: null, role: null, problem: m }];
+
+    const im = db.prepare('select * from pin_tries where device=?').get(dev);
+    if (im && im.locked_until && im.locked_until > tani) {
+      return jo('Kjo pajisje u bllokua për 15 minuta nga kodet e gabuara. Provo nga një tjetër ose prit.');
     }
+
+    /* Kush ndërron emrin e pajisjes në çdo provë do t'i shpëtonte bllokimit të
+       mësipërm, ndaj matet edhe sasia e përgjithshme. Kufiri është aq i lartë
+       sa të mos e prekë kurrë një gabim të zakonshëm të stafit. */
+    const gjith = db.prepare('select coalesce(sum(tries),0) as n from pin_tries where last_try > ?')
+      .get(para(15)).n;
+    if (gjith >= 30) return jo('Shumë kode të gabuara këtu për pak kohë. Prit 15 minuta.');
+
+    const list = db.prepare('select * from staff where active=1 and pin_hash is not null').all();
+    const hit = list.find((s) => D.verify(a.p_pin, s.pin_hash));
+    if (!hit) {
+      const tries = (im ? im.tries : 0) + 1;
+      const lock = tries >= 5 ? new Date(Date.now() + 15 * 60000).toISOString() : (im ? im.locked_until : null);
+      db.prepare(`insert into pin_tries (device,tries,locked_until,last_try) values (?,?,?,?)
+                  on conflict(device) do update set tries=?, locked_until=?, last_try=?`)
+        .run(dev, tries, lock, tani, tries, lock, tani);
+      return jo('Kod i gabuar.');
+    }
+    db.prepare('delete from pin_tries where device=?').run(dev);
     db.prepare('update staff set failed_tries=0, locked_until=null where id=?').run(hit.id);
     const token = D.uuid();
     db.prepare(`insert into staff_sessions (token,staff_id,device,created_at,expires_at,last_seen)
                 values (?,?,?,?,?,?)`)
       .run(token, hit.id, String(a.p_device || '').slice(0, 120), D.now(),
            new Date(Date.now() + 30 * 864e5).toISOString(), D.now());
-    return [{ token, staff_id: hit.id, name: hit.name, role: hit.role }];
+    return [{ token, staff_id: hit.id, name: hit.name, role: hit.role, problem: null }];
   },
   staff_by_token(db, a) { return [staffByToken(db, a.p_token)]; },
   staff_logout(db, a) {
     db.prepare('delete from staff_sessions where token=?').run(String(a.p_token || ''));
     return null;
+  },
+  /* Pronari i hap bllokimet pa pritur 15 minutat, kur e di se ishte thjesht
+     dikush që gaboi kodin. */
+  pin_unlock(db) { db.prepare('delete from pin_tries').run(); return null; },
+  pin_locked(db) {
+    return db.prepare(`select device, tries, locked_until from pin_tries
+                        where locked_until is not null and locked_until > ?
+                        order by locked_until desc`).all(D.now());
   },
   my_screens(db, a) {
     const me = staffByToken(db, a.p_token);

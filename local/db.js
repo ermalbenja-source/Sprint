@@ -82,6 +82,11 @@ create table if not exists staff_sessions (
   token text primary key, staff_id text not null references staff(id) on delete cascade,
   device text, created_at text not null, expires_at text not null, last_seen text not null);
 
+-- Provat e gabuara të kodit, sipas pajisjes. Shih shënimin te staff_login.
+create table if not exists pin_tries (
+  device text primary key, tries integer not null default 0,
+  locked_until text, last_try text not null);
+
 create table if not exists role_screens (role text not null, screen text not null,
   primary key (role, screen));
 

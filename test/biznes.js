@@ -31,13 +31,13 @@ const { chromium } = require('playwright');
 
   console.log('RUAJTJE + FIKJE', await p.evaluate(async () => {
     const ph = await SPRINT.store.fetchPhases();
-    ph.find(x => x.key === 'kitchen').label_sq = 'Në zjarr';
-    ph.find(x => x.key === 'confirmed').enabled = false;
+    ph.find(x => x.key === 'preparing').label_sq = 'Në zjarr';
+    ph.find(x => x.key === 'accepted').enabled = false;
     await SPRINT.store.savePhases(ph);
     const back = await SPRINT.store.fetchPhases();
     return JSON.stringify({
-      riemertuar: back.find(x => x.key === 'kitchen').label_sq,
-      fikur: back.find(x => x.key === 'confirmed').enabled,
+      riemertuar: back.find(x => x.key === 'preparing').label_sq,
+      fikur: back.find(x => x.key === 'accepted').enabled,
     });
   }));
 

@@ -27,13 +27,14 @@ select name, left(pin_hash, 7) as fillimi_i_hash from public.staff where name='M
 select s.name, s.role from public.staff_by_token(
   (select token from public.staff_sessions order by created_at desc limit 1)) s;
 
-\echo '-- kod i gabuar duhet të dështojë:'
-do $$ begin
-  perform public.staff_login('0000','x');
-  raise exception 'DËSHTIM: kodi i gabuar u pranua';
-exception when others then
-  if sqlerrm = 'DËSHTIM: kodi i gabuar u pranua' then raise; end if;
-  raise notice 'OK — u refuzua: %', sqlerrm;
+\echo '-- kod i gabuar duhet të dështojë (kthehet rresht pa token, shih seksionin 19):'
+do $$
+declare tk uuid; p text;
+begin
+  select token, problem into tk, p from public.staff_login('0000','x');
+  if tk is not null then raise exception 'DËSHTIM: kodi i gabuar u pranua'; end if;
+  raise notice 'OK — u refuzua: %', p;
+  delete from public.pin_tries;
 end $$;
 
 \echo '-- token i pavlefshëm duhet të dështojë:'
@@ -521,6 +522,86 @@ select public.landmark_save(:'lm_tok', 'klinika shendetesore kenete', 41.31490, 
   = :'pika' as e_njejta_pike;
 select count(*) as sa_pika from public.landmarks
  where public.norm_sq(name) = public.norm_sq('Klinika shëndetësore Kënetë');
+
+
+\echo ''
+\echo '=== 19. KODET E GABUARA NUK E MBYLLIN EKIPIN ==='
+
+-- Kuzhinieri me kodin e vet. Kodi zgjidhet larg atyre të provave të tjera.
+insert into public.staff (name, role) values ('Prova e bllokimit','kitchen')
+returning id as bl_staff \gset
+select public.set_staff_pin(:'bl_staff', '474747');
+
+delete from public.pin_tries;
+
+\echo '-- pesë kode të gabuara nga një pajisje e huaj:'
+do $$
+begin
+  for i in 1..5 loop
+    perform public.staff_login('999999', 'telefon i huaj');
+  end loop;
+  raise notice 'OK — u provuan 5 herë';
+end $$;
+
+\echo '-- kuzhinieri prapë hyn nga tableti i vet:'
+select problem is null as kuzhinieri_hyn
+  from public.staff_login('474747', 'tableti i kuzhines');
+
+\echo '-- por vetë pajisja që gaboi është e bllokuar:'
+select problem as arsyeja from public.staff_login('474747', 'telefon i huaj');
+
+\echo '-- kodi i saktë e rinis numërimin, që një gabim i rastit të mos mblidhet:'
+do $$
+declare p text;
+begin
+  for i in 1..4 loop perform public.staff_login('888888', 'tablet i dyte'); end loop;
+  select problem into p from public.staff_login('474747', 'tablet i dyte');
+  if p is not null then raise exception 'DËSHTIM: u bllokua pas 4 gabimeve — %', p; end if;
+  for i in 1..4 loop perform public.staff_login('888888', 'tablet i dyte'); end loop;
+  select problem into p from public.staff_login('474747', 'tablet i dyte');
+  if p is not null then raise exception 'DËSHTIM: numërimi nuk u rinis — %', p; end if;
+  raise notice 'OK — numërimi nisi nga zero pas kodit të saktë';
+end $$;
+
+\echo '-- ndërrimi i emrit të pajisjes në çdo provë nuk i shpëton kufirit të përgjithshëm:'
+do $$
+declare ndaloi integer := 0; p text;
+begin
+  delete from public.pin_tries;
+  for i in 1..60 loop
+    select problem into p from public.staff_login('777777', 'i huaj ' || i);
+    if p like 'Shumë kode%' then ndaloi := i; exit; end if;
+  end loop;
+  if ndaloi = 0 or ndaloi >= 40 then
+    raise exception 'DËSHTIM: hamendësimi nuk u ndal (ndaloi=%)', ndaloi;
+  end if;
+  raise notice 'OK — u ndal te prova %', ndaloi;
+end $$;
+
+\echo '-- pronari i sheh dhe i hap bllokimet:'
+do $$
+begin
+  delete from public.pin_tries;
+  for i in 1..5 loop perform public.staff_login('666666', 'tablet i bllokuar'); end loop;
+  if not exists (select 1 from public.pin_locked()) then
+    raise exception 'DËSHTIM: pajisja me 5 gabime nuk doli e bllokuar';
+  end if;
+  raise notice 'OK — paneli e sheh pajisjen e bllokuar';
+end $$;
+
+select device, tries from public.pin_locked();
+select public.pin_unlock();
+
+do $$
+declare p text;
+begin
+  select problem into p from public.staff_login('474747', 'tablet i bllokuar');
+  if p is not null then raise exception 'DËSHTIM: pas hapjes prapë nuk hyn — %', p; end if;
+  raise notice 'OK — pajisja e hapur hyn menjëherë';
+end $$;
+
+delete from public.staff where id = :'bl_staff';
+delete from public.pin_tries;
 
 \echo ''
 \echo '=== TË GJITHA KALUAN ==='
