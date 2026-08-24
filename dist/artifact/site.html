@@ -2883,6 +2883,21 @@ ${S('drink', `
     return st._rpc('pin_unlock', {});
   }
 
+  /* Fshirja e të dhënave. Pa bazë të vërtetë s'ka çfarë të fshihet përtej
+     kujtesës së shfletuesit, ndaj atje pastrohet ajo. */
+  async function wipeData(confirm, scope) {
+    if (confirm !== 'FSHIJ') throw new Error('Për të fshirë duhet shkruar FSHIJ me shkronja të mëdha.');
+    if (!live) {
+      for (const k of Object.keys(localStorage)) {
+        if (k.indexOf('sprint-') === 0 && k !== LS_DEVID) localStorage.removeItem(k);
+      }
+      for (const k of Object.keys(mem)) delete mem[k];
+      return { shkalla: scope || 'levizjet', prove: true };
+    }
+    const r = await st._rpc('wipe_data', { p_confirm: confirm, p_scope: scope || 'levizjet' });
+    return Array.isArray(r) ? r[0] : r;
+  }
+
   async function staffLogout() {
     const sess = readLS(LS_DEVICE, null);
     writeLS(LS_DEVICE, null);
@@ -4031,7 +4046,7 @@ ${S('drink', `
     DEMO_STAFF, ensureLocalStaff, ensureLocalOrders,
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
-    staffLogin, staffSession, staffLogout, deviceId, pinLocked, pinUnlock,
+    staffLogin, staffSession, staffLogout, deviceId, pinLocked, pinUnlock, wipeData,
     pushSubscribe, pushUnsubscribe,
     DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, zoneWhy, pointInOutline,
     normSq, stemSq, kwHit, nameHit,

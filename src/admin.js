@@ -1103,6 +1103,79 @@
     try { await store.deletePhoto(old); } catch (e) {}
   });
 
+  /* ══════════════════ FSHIRJA E TË DHËNAVE ══════════════════
+     Tri porta para se të ndodhë, sepse pas saj nuk ka kthim: fjala FSHIJ e
+     shkruar me dorë, butoni që rri i fikur derisa ajo të jetë e saktë, dhe një
+     pyetje e fundit që i thotë me emër ato që do të zhduken. */
+  const WIPE_EMRAT = {
+    porosi: 'porosi', rezervime: 'rezervime', 'klientë': 'klientë', nisje: 'nisje',
+    ndalesa: 'ndalesa', levizje_magazine: 'lëvizje magazine', blerje: 'blerje',
+    dokumente: 'fletë', pika_referimi: 'pika referimi', njoftime: 'abonime njoftimesh',
+    'pajisje_të_dala': 'pajisje të dala', pjata: 'pjata', artikuj_magazine: 'artikuj magazine',
+    'furnitorë': 'furnitorë', staf: 'veta staf',
+  };
+
+  const wipeScope = () => (document.querySelector('[name=wipeScope]:checked') || {}).value || 'levizjet';
+
+  function wipeCheck() {
+    const fjala = $('#wipeWord').value.trim();
+    $('#wipeGo').disabled = fjala !== 'FSHIJ';
+    if (fjala && fjala !== 'FSHIJ') {
+      $('#wipeMsg').className = 'count bad';
+      $('#wipeMsg').textContent = 'Duhet saktësisht FSHIJ, me shkronja të mëdha.';
+    } else if (!fjala) {
+      $('#wipeMsg').className = 'count';
+      $('#wipeMsg').textContent = '';
+    } else {
+      $('#wipeMsg').className = 'count';
+      $('#wipeMsg').textContent = 'Butoni u hap. Kliko vetëm nëse je i sigurt.';
+    }
+  }
+
+  $('#wipeWord').addEventListener('input', wipeCheck);
+  document.querySelectorAll('[name=wipeScope]').forEach((r) =>
+    r.addEventListener('change', wipeCheck));
+
+  $('#wipeGo').addEventListener('click', async () => {
+    const shkalla = wipeScope();
+    const pyetja = shkalla === 'gjithcka'
+      ? 'FSHIRJE E PLOTË\n\nDo të zhduken porositë, klientët, nisjet, magazina, '
+        + 'menuja dhe i gjithë stafi me kodet e tyre.\n\nNuk kthehet mbrapsht. Të vazhdohet?'
+      : 'FSHIRJE E LËVIZJEVE\n\nDo të zhduken porositë, rezervimet, klientët me adresat, '
+        + 'nisjet dhe lëvizjet e magazinës.\nMenuja, stafi dhe cilësimet mbeten.'
+        + '\n\nNuk kthehet mbrapsht. Të vazhdohet?';
+    if (!confirm(pyetja)) return;
+
+    const btn = $('#wipeGo');
+    btn.disabled = true; btn.textContent = 'Po fshihet…';
+    try {
+      const n = await store.wipeData('FSHIJ', shkalla);
+      const lista = Object.keys(WIPE_EMRAT)
+        .filter((k) => n && n[k])
+        .map((k) => n[k] + ' ' + WIPE_EMRAT[k]);
+      // Fjala pastrohet dhe butoni mbyllet sërish para se të shkruhet raporti:
+      // wipeCheck() e zbraz mesazhin kur fusha është bosh, dhe po ta thirrja
+      // pas tij do të fshinte pikërisht atë që duhet lexuar.
+      $('#wipeWord').value = '';
+      wipeCheck();
+      btn.textContent = 'Fshi tani';
+      $('#wipeMsg').className = 'count ok';
+      $('#wipeMsg').textContent = lista.length
+        ? 'U fshinë: ' + lista.join(', ') + '.'
+        : 'Nuk kishte çfarë të fshihej.';
+      toast('U fshi.', 'ok');
+      // Paneli mban në kujtesë ç'lexoi më parë; pa ringarkim do të tregonte
+      // porosi që nuk ekzistojnë më. Prita aq sa rreshti i mësipërm të lexohet.
+      setTimeout(() => location.reload(), 3200);
+    } catch (e) {
+      btn.textContent = 'Fshi tani';
+      wipeCheck();
+      $('#wipeMsg').className = 'count bad';
+      $('#wipeMsg').textContent = e.message;
+      toast(e.message, 'err');
+    }
+  });
+
   /* ══════════════════ VLERËSIMET ══════════════════ */
   function renderReviews() {
     $('#revList').innerHTML = draft.settings.reviews.map((r, i) => `

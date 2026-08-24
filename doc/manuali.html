@@ -150,6 +150,19 @@ figcaption{margin-top:.9rem;font-size:.86rem;color:var(--muted);max-width:44rem;
 .door h3{font-size:1rem;font-weight:600}
 .door p{font-size:.88rem;color:var(--muted);line-height:1.5}
 
+/* ---------- dy zgjedhjet e fshirjes ----------
+   Ngjyra e furrës i ndan nga çdo kuti tjetër e manualit: kjo është e vetmja
+   faqe ku një klikim fshin punën e javëve. */
+.grid2{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));margin:.9rem 0}
+.mini{
+  background:var(--surface-2);border:1px solid var(--line);
+  border-left:3px solid var(--r-oven);border-radius:4px 12px 12px 4px;
+  padding:.95rem 1.1rem;display:grid;gap:.4rem;
+}
+.mini h4{margin:0;font-size:.95rem;font-weight:600;color:var(--r-oven)}
+.mini p{font-size:.85rem;line-height:1.5;color:var(--muted)}
+.mini p.keep{color:var(--r-cash)}
+
 /* ---------- kapitujt e roleve ---------- */
 .role{
   --hue:var(--accent);
@@ -455,6 +468,9 @@ footer p + p{margin-top:.5rem}
         <li><kbd>Stafi</kbd> → <kbd>+ Shto person</kbd> për secilin, pastaj <kbd>Kod</kbd>.
           Dy veta nuk mund të kenë të njëjtin kod — programi e refuzon. Pa këtë hap
           <span class="url">/staf</span> nuk hapet nga askush: baza niset pa asnjë kod.</li>
+        <li>Kur të mbarosh provat dhe të nisësh punën e vërtetë:
+          <kbd>Cilësimet</kbd> → <kbd>Fshirja e të dhënave</kbd>, që baza të mos mbajë
+          porosi që s'kanë ndodhur. Shih më poshtë.</li>
         <li><kbd>Gatimi</kbd>. Kontrollo çfarë del nga kuzhina dhe çfarë nga furra.
           Picat dhe fast food-i nisin te furra; pijet askund.</li>
         <li><kbd>Zonat</kbd>. Shiko gjashtë zonat e Durrësit dhe fjalët e tyre. Shkruaj te
@@ -472,6 +488,32 @@ footer p + p{margin-top:.5rem}
       <div class="rule">
         <b>Çmimet dhe menuja</b> nuk dalin te faqja derisa të shtypësh <kbd>Ruaj ndryshimet</kbd>
         te shiriti poshtë. Deri atëherë janë skicë — mund të provosh pa frikë.
+      </div>
+
+      <p class="sub">Fshirja e të dhënave</p>
+      <p>Te fundi i <kbd>Cilësimeve</kbd>, në kartelën me kornizë të kuqe. Shërben për një gjë:
+        pas javësh prove, baza mban porosi që s'kanë ndodhur dhe klientë që s'ekzistojnë, dhe
+        raportet e para të vërteta do të dilnin të gabuara. <b>Nuk ka kthim mbrapsht</b> — as
+        «zhbëj», as kosh.</p>
+      <div class="grid2">
+        <div class="mini">
+          <h4>Fshi porositë dhe klientët</h4>
+          <p>Porositë, rezervimet, klientët me adresat, nisjet, lëvizjet e magazinës, blerjet,
+            fletët, pikat e referimit.</p>
+          <p class="keep">Mbeten: menuja, stafi me kodet, artikujt e magazinës, cilësimet, zonat.</p>
+        </div>
+        <div class="mini">
+          <h4>Fshi gjithçka</h4>
+          <p>Gjithë sa më sipër, plus menuja, artikujt e magazinës, furnitorët, recetat dhe
+            i gjithë stafi me kodet.</p>
+          <p class="keep">Mbeten: llogaria jote, zonat, fazat, lejet dhe cilësimet.</p>
+        </div>
+      </div>
+      <div class="rule" style="--hue:var(--r-oven)">
+        Duhet shkruar me dorë fjala <b>FSHIJ</b>, me shkronja të mëdha — butoni rri i fikur
+        deri atëherë — dhe pastaj përgjigjur edhe një pyetjeje të fundit. Llogaria jote e hyrjes
+        nuk fshihet kurrë: përndryshe një klikim do të të mbyllte jashtë programit tënd.
+        Numërimi i porosive nis sërish nga <b>1000</b>.
       </div>
     </article>
 
@@ -672,7 +714,7 @@ footer p + p{margin-top:.5rem}
           <tr><td class="tab">Raportet</td><td>Xhiroja e ditës, java, motorristët, pjatat më të shitura.</td><td class="who">Pronar · Menaxher</td></tr>
           <tr><td class="tab">Stafi</td><td>Personat, kodet, dhe tabela «Kush sheh çfarë».</td><td class="who">Vetëm pronari</td></tr>
           <tr><td class="tab">Fazat</td><td>Emrat e hapave — brenda dyqanit dhe ata që sheh klienti.</td><td class="who">Vetëm pronari</td></tr>
-          <tr><td class="tab">Cilësimet</td><td>Telefoni, adresa, orari, tarifa, rrjetet sociale.</td><td class="who">Vetëm pronari</td></tr>
+          <tr><td class="tab">Cilësimet</td><td>Telefoni, adresa, orari, tarifa, rrjetet sociale — dhe në fund, fshirja e të dhënave.</td><td class="who">Vetëm pronari</td></tr>
           <tr><td class="tab">Vlerësimet</td><td>Vlerësime të vërteta nga Google ose Facebook.</td><td class="who">Vetëm pronari</td></tr>
           <tr><td class="tab">Publikimi</td><td>Dërgo menunë te baza, kopje sigurie, rikthim.</td><td class="who">Vetëm pronari</td></tr>
         </tbody>

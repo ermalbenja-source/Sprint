@@ -487,6 +487,53 @@ const RPC = {
   /* Pronari i hap bllokimet pa pritur 15 minutat, kur e di se ishte thjesht
      dikush që gaboi kodin. */
   pin_unlock(db) { db.prepare('delete from pin_tries').run(); return null; },
+
+  /* ---------- fshirja e të dhënave ----------
+     Pas javësh prove, baza mbushet me porosi të rreme dhe klientë të sajuar.
+     Veprim që NUK kthehet, ndaj kërkon fjalën FSHIJ të shkruar saktësisht,
+     dhe hapet vetëm nga pronari i futur me email — jo me kod stafi.
+     Llogaria e hyrjes nuk preket kurrë: përndryshe një fshirje e vetme do ta
+     mbyllte pronarin jashtë programit të vet. */
+  wipe_data(db, a) {
+    if (a.p_confirm !== 'FSHIJ') {
+      throw httpErr(400, 'Për të fshirë duhet shkruar FSHIJ me shkronja të mëdha.');
+    }
+    const shkalla = a.p_scope || 'levizjet';
+    if (shkalla !== 'levizjet' && shkalla !== 'gjithcka') {
+      throw httpErr(400, 'Shkallë e panjohur fshirjeje: ' + shkalla);
+    }
+    const n = {};
+    // Fëmijët para prindërve, se disa lidhje janë me kufizim.
+    const fshi = (tabela, emri) => {
+      const r = db.prepare('delete from ' + tabela).run();
+      if (emri) n[emri] = r.changes;
+    };
+    fshi('run_points', 'ndalesa');
+    fshi('runs', 'nisje');
+    fshi('purchase_lines');
+    fshi('purchases', 'blerje');
+    fshi('stock_moves', 'levizje_magazine');
+    fshi('documents', 'dokumente');
+    fshi('customer_addresses');
+    fshi('customers', 'klientë');
+    fshi('bookings', 'rezervime');
+    fshi('orders', 'porosi');
+    fshi('landmarks', 'pika_referimi');
+    fshi('push_subs', 'njoftime');
+    fshi('pin_tries');
+    fshi('staff_sessions', 'pajisje_të_dala');
+
+    if (shkalla === 'gjithcka') {
+      fshi('recipes');
+      fshi('menu_items', 'pjata');
+      fshi('stock_items', 'artikuj_magazine');
+      fshi('suppliers', 'furnitorë');
+      fshi('staff', 'staf');
+    }
+    // Numrat rrjedhin nga max(number), ndaj nisin vetë nga e para.
+    n.shkalla = shkalla;
+    return n;
+  },
   pin_locked(db) {
     return db.prepare(`select device, tries, locked_until from pin_tries
                         where locked_until is not null and locked_until > ?

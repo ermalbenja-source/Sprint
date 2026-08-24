@@ -2015,3 +2015,76 @@ begin
   return new;
 end;
 $$;
+
+
+-- ═══════════════════════ 27. FSHIRJA E TË DHËNAVE ═══════════════════════
+-- Pas javësh prove, baza mbushet me porosi të rreme, klientë të sajuar dhe
+-- nisje që s'kanë ndodhur kurrë. Ky funksion e pastron atë, që dyqani të nisë
+-- punën e vërtetë nga e para.
+--
+-- Veprim që NUK kthehet. Mbrojtjet janë tri:
+--   · kërkon fjalën FSHIJ, të shkruar saktësisht, me shkronja të mëdha;
+--   · hapet vetëm nga pronari i futur me email e fjalëkalim, jo me kod stafi;
+--   · llogaria e hyrjes nuk preket kurrë — përndryshe një fshirje e vetme do
+--     ta mbyllte pronarin jashtë programit të vet përgjithmonë.
+--
+-- Dy shkallë, sepse janë dy nevoja të ndryshme:
+--   'levizjet' — porositë, klientët, nisjet. Menuja, stafi dhe cilësimet
+--                mbeten. Kjo është ajo që duhet para ditës së parë të vërtetë.
+--   'gjithcka' — edhe menuja, magazina, furnitorët, recetat dhe stafi.
+--                Zonat, fazat dhe lejet mbeten, se pa to programi nuk ecën.
+create or replace function public.wipe_data(p_confirm text, p_scope text default 'levizjet')
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  n     jsonb := '{}'::jsonb;
+  c     integer;
+  plote boolean := (p_scope = 'gjithcka');
+begin
+  if p_confirm is distinct from 'FSHIJ' then
+    raise exception 'Për të fshirë duhet shkruar FSHIJ me shkronja të mëdha.';
+  end if;
+  if p_scope not in ('levizjet','gjithcka') then
+    raise exception 'Shkallë e panjohur fshirjeje: %', p_scope;
+  end if;
+
+  -- Fëmijët para prindërve: disa lidhje janë «on delete restrict», dhe një
+  -- radhë e gabuar do ta ndalonte fshirjen në gjysmë.
+  delete from public.run_points;        get diagnostics c = row_count; n := n || jsonb_build_object('ndalesa', c);
+  delete from public.runs;              get diagnostics c = row_count; n := n || jsonb_build_object('nisje', c);
+  delete from public.purchase_lines;
+  delete from public.purchases;         get diagnostics c = row_count; n := n || jsonb_build_object('blerje', c);
+  delete from public.stock_moves;       get diagnostics c = row_count; n := n || jsonb_build_object('levizje_magazine', c);
+  delete from public.documents;         get diagnostics c = row_count; n := n || jsonb_build_object('dokumente', c);
+  delete from public.customer_addresses;
+  delete from public.customers;         get diagnostics c = row_count; n := n || jsonb_build_object('klientë', c);
+  delete from public.bookings;          get diagnostics c = row_count; n := n || jsonb_build_object('rezervime', c);
+  delete from public.orders;            get diagnostics c = row_count; n := n || jsonb_build_object('porosi', c);
+  delete from public.landmarks;         get diagnostics c = row_count; n := n || jsonb_build_object('pika_referimi', c);
+  delete from public.push_subs;         get diagnostics c = row_count; n := n || jsonb_build_object('njoftime', c);
+  delete from public.pin_tries;
+  delete from public.staff_sessions;    get diagnostics c = row_count; n := n || jsonb_build_object('pajisje_të_dala', c);
+
+  if plote then
+    delete from public.recipes;
+    delete from public.menu_items;      get diagnostics c = row_count; n := n || jsonb_build_object('pjata', c);
+    delete from public.stock_items;     get diagnostics c = row_count; n := n || jsonb_build_object('artikuj_magazine', c);
+    delete from public.suppliers;       get diagnostics c = row_count; n := n || jsonb_build_object('furnitorë', c);
+    delete from public.staff;           get diagnostics c = row_count; n := n || jsonb_build_object('staf', c);
+  end if;
+
+  -- Numërimi nis nga e para, që porosia e parë e vërtetë të mos jetë #1147.
+  alter table public.orders   alter column number restart with 1000;
+  alter table public.bookings alter column number restart with 100;
+  perform setval('public.purchase_number_seq', 1, false);
+  perform setval('public.document_number_seq', 1, false);
+
+  return n || jsonb_build_object('shkalla', p_scope);
+end;
+$$;
+
+revoke all on function public.wipe_data(text, text) from public, anon;
+grant execute on function public.wipe_data(text, text) to authenticated;

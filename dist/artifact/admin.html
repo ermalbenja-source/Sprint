@@ -269,6 +269,26 @@ p.count{white-space:normal}
 
 /* ---------- kush sheh çfarë ---------- */
 .permwrap{overflow-x:auto;min-width:0;border:1px solid var(--line);border-radius:12px}
+
+/* ---------- fshirja e të dhënave ----------
+   Kartela mban ngjyrën e rrezikut që të mos ngatërrohet me ato rreth saj:
+   këtu shtypja e gabuar e një butoni kushton javë pune. */
+.card.danger{border-color:rgba(229,84,75,.42);background:linear-gradient(var(--pan),var(--pan)) padding-box,
+  linear-gradient(160deg,rgba(229,84,75,.22),transparent 55%) border-box}
+.card.danger h2{color:#ff9a92}
+.wipe-opts{display:grid;gap:.7rem}
+.wipe-opt{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.7rem;align-items:start;
+  border:1.5px solid var(--line);border-radius:14px;padding:.85rem 1rem;cursor:pointer;transition:.18s}
+.wipe-opt:hover{border-color:var(--line)}
+.wipe-opt:has(input:checked){border-color:var(--bad);background:rgba(229,84,75,.07)}
+.wipe-opt input{margin-top:.35rem;accent-color:var(--bad);width:1.05rem;height:1.05rem}
+.wipe-opt span{display:grid;gap:.28rem;min-width:0}
+.wipe-opt b{font-size:.95rem}
+.wipe-opt i,.wipe-opt em{font-style:normal;font-size:.82rem;line-height:1.45;color:var(--muted)}
+.wipe-opt em{color:var(--ok)}
+#wipeWord{text-transform:uppercase;letter-spacing:.18em;font-weight:700}
+#wipeMsg.bad{color:#ff9a92}
+#wipeMsg.ok{color:var(--ok)}
 .perm{border-collapse:collapse;width:100%;min-width:520px;font-size:.86rem}
 .perm th,.perm td{padding:.55rem .7rem;border-bottom:1px solid var(--line);text-align:center}
 .perm tr:last-child td{border-bottom:none}
@@ -1150,6 +1170,44 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
         </div>
         <input type="file" id="evFile" accept="image/*">
         <input type="file" id="evCam" accept="image/*" capture="environment">
+      </div>
+
+      <!-- ─────── FSHIRJA E TË DHËNAVE ─────── -->
+      <div class="card danger" style="display:grid;gap:.9rem">
+        <h2 style="font-size:1.1rem">⚠️ Fshirja e të dhënave</h2>
+        <p class="count" style="margin:0">Pas provave, baza mbetet me porosi që s'kanë
+          ndodhur dhe klientë që s'ekzistojnë. Këtu pastrohet. <b>Nuk kthehet mbrapsht</b> —
+          nuk ka «zhbëj», dhe as kosh. Llogaria jote e hyrjes nuk preket kurrë.</p>
+
+        <div class="wipe-opts">
+          <label class="wipe-opt">
+            <input type="radio" name="wipeScope" value="levizjet" checked>
+            <span>
+              <b>Fshi porositë dhe klientët</b>
+              <i>Porositë, rezervimet, klientët me adresat, nisjet e motorristëve,
+                 lëvizjet e magazinës, blerjet, fletët, pikat e referimit dhe hyrjet
+                 e hapura të stafit.</i>
+              <em>Mbeten: menuja, stafi me kodet, artikujt e magazinës, cilësimet, zonat.</em>
+            </span>
+          </label>
+          <label class="wipe-opt">
+            <input type="radio" name="wipeScope" value="gjithcka">
+            <span>
+              <b>Fshi gjithçka</b>
+              <i>Gjithë sa më sipër, plus menuja, artikujt e magazinës, furnitorët,
+                 recetat dhe i gjithë stafi me kodet e tyre.</i>
+              <em>Mbeten: llogaria jote, zonat, fazat, lejet dhe cilësimet — pa to
+                  programi nuk ecën dot.</em>
+            </span>
+          </label>
+        </div>
+
+        <div class="f" style="max-width:22rem">
+          <label for="wipeWord">Shkruaj <b>FSHIJ</b> për ta lejuar</label>
+          <input id="wipeWord" autocomplete="off" spellcheck="false" placeholder="FSHIJ">
+        </div>
+        <p class="count" id="wipeMsg" style="margin:0;min-height:1.3em"></p>
+        <button class="btn btn-d" id="wipeGo" style="justify-self:start" disabled>Fshi tani</button>
       </div>
     </section>
 
@@ -3225,6 +3283,21 @@ ${S('drink', `
     return st._rpc('pin_unlock', {});
   }
 
+  /* Fshirja e të dhënave. Pa bazë të vërtetë s'ka çfarë të fshihet përtej
+     kujtesës së shfletuesit, ndaj atje pastrohet ajo. */
+  async function wipeData(confirm, scope) {
+    if (confirm !== 'FSHIJ') throw new Error('Për të fshirë duhet shkruar FSHIJ me shkronja të mëdha.');
+    if (!live) {
+      for (const k of Object.keys(localStorage)) {
+        if (k.indexOf('sprint-') === 0 && k !== LS_DEVID) localStorage.removeItem(k);
+      }
+      for (const k of Object.keys(mem)) delete mem[k];
+      return { shkalla: scope || 'levizjet', prove: true };
+    }
+    const r = await st._rpc('wipe_data', { p_confirm: confirm, p_scope: scope || 'levizjet' });
+    return Array.isArray(r) ? r[0] : r;
+  }
+
   async function staffLogout() {
     const sess = readLS(LS_DEVICE, null);
     writeLS(LS_DEVICE, null);
@@ -4373,7 +4446,7 @@ ${S('drink', `
     DEMO_STAFF, ensureLocalStaff, ensureLocalOrders,
     SCREENS, ALL_SCREENS, DEFAULT_ROLE_SCREENS, fetchRoleScreens, saveRoleScreens, myScreens,
     drvReady, drvStartRun, drvMyRun, drvDelivered, drvFailed, drvMyDay,
-    staffLogin, staffSession, staffLogout, deviceId, pinLocked, pinUnlock,
+    staffLogin, staffSession, staffLogout, deviceId, pinLocked, pinUnlock, wipeData,
     pushSubscribe, pushUnsubscribe,
     DEFAULT_ZONES, fetchZones, saveZones, resetZones, zoneOf, zoneWhy, pointInOutline,
     normSq, stemSq, kwHit, nameHit,
@@ -5891,6 +5964,79 @@ ${S('drink', `
     const old = c.eventsPhoto;
     delete c.eventsPhoto; renderSettings(); markDirty();
     try { await store.deletePhoto(old); } catch (e) {}
+  });
+
+  /* ══════════════════ FSHIRJA E TË DHËNAVE ══════════════════
+     Tri porta para se të ndodhë, sepse pas saj nuk ka kthim: fjala FSHIJ e
+     shkruar me dorë, butoni që rri i fikur derisa ajo të jetë e saktë, dhe një
+     pyetje e fundit që i thotë me emër ato që do të zhduken. */
+  const WIPE_EMRAT = {
+    porosi: 'porosi', rezervime: 'rezervime', 'klientë': 'klientë', nisje: 'nisje',
+    ndalesa: 'ndalesa', levizje_magazine: 'lëvizje magazine', blerje: 'blerje',
+    dokumente: 'fletë', pika_referimi: 'pika referimi', njoftime: 'abonime njoftimesh',
+    'pajisje_të_dala': 'pajisje të dala', pjata: 'pjata', artikuj_magazine: 'artikuj magazine',
+    'furnitorë': 'furnitorë', staf: 'veta staf',
+  };
+
+  const wipeScope = () => (document.querySelector('[name=wipeScope]:checked') || {}).value || 'levizjet';
+
+  function wipeCheck() {
+    const fjala = $('#wipeWord').value.trim();
+    $('#wipeGo').disabled = fjala !== 'FSHIJ';
+    if (fjala && fjala !== 'FSHIJ') {
+      $('#wipeMsg').className = 'count bad';
+      $('#wipeMsg').textContent = 'Duhet saktësisht FSHIJ, me shkronja të mëdha.';
+    } else if (!fjala) {
+      $('#wipeMsg').className = 'count';
+      $('#wipeMsg').textContent = '';
+    } else {
+      $('#wipeMsg').className = 'count';
+      $('#wipeMsg').textContent = 'Butoni u hap. Kliko vetëm nëse je i sigurt.';
+    }
+  }
+
+  $('#wipeWord').addEventListener('input', wipeCheck);
+  document.querySelectorAll('[name=wipeScope]').forEach((r) =>
+    r.addEventListener('change', wipeCheck));
+
+  $('#wipeGo').addEventListener('click', async () => {
+    const shkalla = wipeScope();
+    const pyetja = shkalla === 'gjithcka'
+      ? 'FSHIRJE E PLOTË\n\nDo të zhduken porositë, klientët, nisjet, magazina, '
+        + 'menuja dhe i gjithë stafi me kodet e tyre.\n\nNuk kthehet mbrapsht. Të vazhdohet?'
+      : 'FSHIRJE E LËVIZJEVE\n\nDo të zhduken porositë, rezervimet, klientët me adresat, '
+        + 'nisjet dhe lëvizjet e magazinës.\nMenuja, stafi dhe cilësimet mbeten.'
+        + '\n\nNuk kthehet mbrapsht. Të vazhdohet?';
+    if (!confirm(pyetja)) return;
+
+    const btn = $('#wipeGo');
+    btn.disabled = true; btn.textContent = 'Po fshihet…';
+    try {
+      const n = await store.wipeData('FSHIJ', shkalla);
+      const lista = Object.keys(WIPE_EMRAT)
+        .filter((k) => n && n[k])
+        .map((k) => n[k] + ' ' + WIPE_EMRAT[k]);
+      // Fjala pastrohet dhe butoni mbyllet sërish para se të shkruhet raporti:
+      // wipeCheck() e zbraz mesazhin kur fusha është bosh, dhe po ta thirrja
+      // pas tij do të fshinte pikërisht atë që duhet lexuar.
+      $('#wipeWord').value = '';
+      wipeCheck();
+      btn.textContent = 'Fshi tani';
+      $('#wipeMsg').className = 'count ok';
+      $('#wipeMsg').textContent = lista.length
+        ? 'U fshinë: ' + lista.join(', ') + '.'
+        : 'Nuk kishte çfarë të fshihej.';
+      toast('U fshi.', 'ok');
+      // Paneli mban në kujtesë ç'lexoi më parë; pa ringarkim do të tregonte
+      // porosi që nuk ekzistojnë më. Prita aq sa rreshti i mësipërm të lexohet.
+      setTimeout(() => location.reload(), 3200);
+    } catch (e) {
+      btn.textContent = 'Fshi tani';
+      wipeCheck();
+      $('#wipeMsg').className = 'count bad';
+      $('#wipeMsg').textContent = e.message;
+      toast(e.message, 'err');
+    }
   });
 
   /* ══════════════════ VLERËSIMET ══════════════════ */

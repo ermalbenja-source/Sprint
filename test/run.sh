@@ -64,6 +64,13 @@ for t in stacionet magazina njoftime zonat adresa kodet \
          stacionet-ekrani magazina-ekrani dokumente; do
   prove "$t"
 done
+
+# Fshirja e zbraz bazën, ndaj shkon e fundit dhe mbi një dosje të vetën.
+echo "  — fshirja, mbi bazë të vetën —"
+ndal_server
+nis_server "$TMP/fshirja" || exit 1
+prove fshirja "$TMP/fshirja"
+prove fshirja-ekrani "$TMP/fshirja"
 ndal_server
 
 # Ecja e plotë nga instalimi i pastër do bazë të paprekur.
