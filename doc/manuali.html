@@ -255,14 +255,44 @@ footer p + p{margin-top:.5rem}
   .jump{margin-left:0;width:100%}
 }
 
+/* ---------- printimi dhe PDF-ja ----------
+   Manuali shtypet e ndahet: secili profil e merr fletën e vet, që kuzhinieri
+   të mbajë vetëm faqen e tij te muri dhe motorristi vetëm të vetën. Ngjyrat e
+   roleve mbeten, se pikërisht ato e bëjnë të gjendet faqja me një shikim. */
 @media print{
-  body{background:#fff;color:#000;font-size:11pt}
-  .bar{display:none}
-  section{page-break-inside:avoid;border-top:1px solid #ccc}
-  .role{page-break-inside:avoid;box-shadow:none;border-color:#ccc}
-  .figbox{box-shadow:none;border-color:#ccc}
-  a{color:#000;text-decoration:none}
+  :root{
+    --ground:#FFFFFF; --surface:#FFFFFF; --surface-2:#F6F1EE;
+    --ink:#1A1412; --muted:#4E443F; --line:#CFC4BE; --line-2:#B8A9A2;
+  }
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff;font-size:10.5pt;line-height:1.5}
+  .bar,.jump{display:none}
+  .wrap{width:100%}
+  .col{max-width:100%}
+  .hero{padding:0 0 1rem}
+
+  section,.role,.figbox,.door,.mini,.rule{box-shadow:none}
+  section{border-top:1px solid var(--line);padding:1.1rem 0}
+  .role{break-inside:avoid;page-break-inside:avoid;margin-bottom:.8rem}
+
+  /* Secili profil nis në fletë të re. */
+  .role{break-before:page;page-break-before:always}
+  .role:first-of-type{break-before:auto;page-break-before:auto}
+
+  h2,h3,h4,.sub{break-after:avoid;page-break-after:avoid}
+  ol,ul,table,.grid2,.doors{break-inside:avoid;page-break-inside:avoid}
+  tr{break-inside:avoid;page-break-inside:avoid}
+  thead{display:table-header-group}
+
+  /* Skema është 760 px e gjerë; fleta A4 me këto anë mban rreth 694 px, ndaj
+     pa këtë rresht ajo pritet djathtas dhe hapi i fundit humbet krejt. */
+  .figbox{break-inside:avoid;page-break-inside:avoid;overflow:visible;padding:1rem}
+  .figbox svg{min-width:0;width:100%;max-height:15cm}
+
+  a{color:var(--ink);text-decoration:none}
+  kbd{border-color:var(--line-2)}
 }
+@page{size:A4;margin:14mm 13mm 15mm}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
